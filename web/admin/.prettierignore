@@ -1,0 +1,8 @@
+.next/
+out/
+build/
+storybook-static/
+node_modules/
+src/types/models/
+public/
+*.md

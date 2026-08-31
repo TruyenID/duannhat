@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#0a0a0a" />
+    <!--
+      Content Security Policy. CLAUDE.md states "strict CSP" is the
+      mitigation that makes localStorage acceptable for device_token —
+      this meta tag fulfils that promise.
+
+      - default-src 'self': everything else must explicitly opt-in
+      - script-src 'self': only our bundled JS, no inline scripts
+      - worker-src 'self': Vite PWA registers a Workbox service worker;
+        without this directive Chrome falls back to default-src but warns
+      - manifest-src 'self': /manifest.webmanifest from VitePWA
+      - style-src 'self' 'unsafe-inline' + fonts.googleapis: Tailwind v4
+        compiles CSS to a static file but Radix/shadcn occasionally inject
+        style attributes; Google Fonts injects CSS at runtime
+      - font-src + connect-src include the Google Fonts CDN + http/https
+        for the LAN workstation API (mDNS-discovered IPs change) and
+        ws/wss for Pusher/Reverb realtime + Sentry ingest (covered by
+        https:). connect-src http:/ws: is intentionally loose for now —
+        tighter RFC1918 wildcards are tracked as a follow-up
+      - frame-ancestors 'none': frame-ancestors only works via HTTP
+        header but meta tag still hints intent; the deploy nginx/Caddy
+        should set the matching header at the edge
+      - object-src 'none' + base-uri 'self': defensive baseline
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; worker-src 'self'; manifest-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' http: https: ws: wss:; img-src 'self' data: blob: https:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+    />
+    <!--
+      Referrer-Policy: don't leak the workstation/path to off-origin
+      requests (Google Fonts CSS, external images). strict-origin-when-
+      cross-origin keeps the referrer empty for cross-origin requests
+      while still letting same-origin debug correlation work.
+    -->
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <!--
+      Permissions-Policy: KDS is a kitchen display, not a media/sensor
+      app. Deny every powerful feature so a compromised dep can't
+      activate the tablet's camera or geolocation.
+    -->
+    <meta
+      http-equiv="Permissions-Policy"
+      content="camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=(), accelerometer=(), gyroscope=()"
+    />
+    <title>godx-tempo-kds-staging</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=M+PLUS+2:wght@400;500;600;700&display=swap"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

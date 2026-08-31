@@ -1,0 +1,33 @@
+# ==============================================================================
+# Stock Alert Type Enum (在庫アラートタイプ / Loại cảnh báo tồn kho)
+# ==============================================================================
+#
+# Type of stock alert based on quantity vs threshold.
+#
+# Values:
+#   - low_stock: 0 < quantity <= min_stock (在庫不足)
+#   - out_of_stock: quantity <= 0 (在庫切れ)
+#
+# Used in:
+#   - StockAlert.alert_type
+#
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: 在庫アラートタイプ
+  en: Stock Alert Type
+  vi: Loại cảnh báo tồn kho
+
+values:
+  - value: low_stock
+    label:
+      ja: 在庫不足
+      en: Low Stock
+      vi: Sắp hết hàng
+  - value: out_of_stock
+    label:
+      ja: 在庫切れ
+      en: Out of Stock
+      vi: Hết hàng

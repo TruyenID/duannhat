@@ -1,0 +1,262 @@
+# =============================================================================
+# Notification (通知コンテンツ / Nội dung thông báo)
+# =============================================================================
+#
+# Shared content row — one per event. Fans out to N recipients via
+# `notification_recipients` (see NotificationRecipient.yaml).
+#
+# Written by:
+#   - `NotificationService::dispatch(...)` (emitter services + admin broadcast
+#     composer — Phase D)
+#
+# Read by:
+#   - `/api/v1/me/notifications/*` — own-inbox API (all users)
+#   - `/api/v1/hq/{brand}/notifications` — admin audit (HQ admins)
+#
+# Relationship to AuditLog:
+#   - AuditLog = append-only compliance log, no recipient concept.
+#   - Notification = user-facing inbox with per-recipient seen/read/dismissed.
+#   Both coexist. `notifications.type` reuses AuditLog's dot-namespaced idiom
+#   (e.g. `recipe.approved`) so the same taxonomy is used across systems.
+#
+# Polymorphic edges (all resolve through `Relation::enforceMorphMap` in
+# `AppServiceProvider::boot` — T1.6):
+#   - `actor_type` + `actor_id`   — morph aliases (`user` / `device`). Both
+#                                    null together for system/service events.
+#   - `subject_type` + `subject_id` — morph alias of the entity the event is
+#                                      about (`recipe`, `customer_order`,
+#                                      `stock_alert`, …). Both null together.
+#
+# Retention (via `Prunable` trait on the model sibling): 7 days low, 30 days
+# normal/high, 90 days urgent. Recipient rows cascade on parent delete.
+#
+# Idempotency: `idempotency_key` is unique. Emitters SHOULD pass a stable key
+# for retry-safe events (see docs/contributing/emitting-notifications.md).
+#
+# Scheduled broadcasts (Phase D): rows with `scheduled_for IS NOT NULL AND
+# is_dispatched = false` are picked up by a cron-driven job every minute and
+# dispatched at `scheduled_for`.
+#
+# Audience trace (Phase A): `audience_id` points to `notification_audiences`
+# when dispatch came from a saved audience; null otherwise. Foreign key
+# established when T12.1 creates the audiences table. Until then, the column
+# exists but has no DB-level FK constraint.
+# =============================================================================
+
+displayName:
+  en: Notification
+  ja: 通知
+  vi: Thông báo
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: false
+  id: Uuid
+  indexes:
+    # Admin audit / inbox ordering — primary read pattern
+    - columns: [organization_id, created_at]
+    # Type filter dropdown on admin audit screen
+    - columns: [type, created_at]
+    # "All events by this actor" (future admin view)
+    - columns: [actor_type, actor_id]
+    # "All events about this subject" (future audit view)
+    - columns: [subject_type, subject_id]
+    # Future aggregation grouping — persisted but unused in v1
+    - columns: [aggregation_key]
+    # Phase D delayed-dispatch scanner — cron picks due rows efficiently
+    - columns: [scheduled_for, is_dispatched]
+    # Queue-retry de-dup — unique when non-null (enforced app-side)
+    - columns: [idempotency_key]
+      unique: true
+
+properties:
+  # Tenancy boundary — every query filters by this.
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+    description:
+      en: Organization that owns this notification. Every inbox query filters by this.
+      ja: この通知を所有する組織。受信箱クエリは常にこれでフィルタ。
+      vi: Tổ chức sở hữu thông báo này. Mọi query inbox đều filter theo cột này.
+
+  # Polymorphic actor — who triggered the event. Null for system/service events.
+  actor_type:
+    type: String
+    length: 60
+    nullable: true
+    displayName:
+      en: Actor Type
+      ja: アクタータイプ
+      vi: Loại chủ thể
+    description:
+      en: "Morph alias (e.g. 'user', 'device') — NOT a class path. Null for system events."
+      ja: "morph エイリアス（例：'user'、'device'）。クラスパスではない。システムイベントは null。"
+      vi: "Morph alias (VD: 'user', 'device') — KHÔNG phải class path. Null cho sự kiện hệ thống."
+
+  actor_id:
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Actor ID
+      ja: アクターID
+      vi: ID chủ thể
+    description:
+      en: PK of the actor record. Null iff `actor_type` is null (validated in service).
+      ja: アクターレコードの主キー。`actor_type` が null の場合のみ null（サービスで検証）。
+      vi: PK của record chủ thể. Null khi và chỉ khi `actor_type` null (validate trong service).
+
+  # Event identifier — free-form dot-namespaced string (same idiom as AuditLog.action).
+  type:
+    type: String
+    length: 100
+    filterable: true
+    displayName:
+      en: Type
+      ja: タイプ
+      vi: Loại
+    description:
+      en: "Dot-namespaced event name. Examples: `recipe.approved`, `stock.alert.low`, `system.broadcast`. Null actor + `system.*` type distinguishes system events."
+      ja: "ドット区切りのイベント名。例：`recipe.approved`、`stock.alert.low`、`system.broadcast`。null アクター + `system.*` タイプでシステムイベントを区別。"
+      vi: "Tên sự kiện phân cách bằng dấu chấm. VD: `recipe.approved`, `stock.alert.low`, `system.broadcast`. Actor null + type `system.*` = sự kiện hệ thống."
+
+  # FE i18n lookup (Phase A) → soft FK to notification_templates.key (Phase B).
+  template_key:
+    type: String
+    length: 100
+    displayName:
+      en: Template Key
+      ja: テンプレートキー
+      vi: Khóa template
+    description:
+      en: Template lookup key. In Phase A matches the FE i18n bundle key. In Phase B becomes a soft FK into `notification_templates.key` (no DB FK — lookup via service). Usually identical to `type` but allowed to diverge.
+      ja: テンプレート参照キー。フェーズAではFE i18n バンドルのキーと一致。フェーズBでは `notification_templates.key` へのソフトFKになる（DB FK なし — サービス経由で参照）。通常 `type` と同じだが異なっても許容。
+      vi: Khóa lookup template. Phase A trùng với key của FE i18n bundle. Phase B trở thành soft FK vào `notification_templates.key` (không FK DB — lookup qua service). Thường trùng `type` nhưng cho phép khác.
+
+  # Template parameters — JSON substituted at response-time render.
+  params:
+    type: Json
+    nullable: true
+    displayName:
+      en: Params
+      ja: パラメータ
+      vi: Tham số
+    description:
+      en: "Template parameters as JSON. E.g. {\"recipe_name\":\"Gyoza\",\"approver\":\"Tanaka\"}. Substituted into template `{{param}}` tokens at response time."
+      ja: "テンプレートパラメータの JSON。例：{\"recipe_name\":\"餃子\",\"approver\":\"田中\"}。応答時にテンプレートの `{{param}}` トークンへ埋め込む。"
+      vi: "Tham số template dạng JSON. VD: {\"recipe_name\":\"Gyoza\",\"approver\":\"Tanaka\"}. Substitute vào token `{{param}}` của template lúc render."
+
+  # Polymorphic subject — what the event is "about".
+  subject_type:
+    type: String
+    length: 60
+    nullable: true
+    displayName:
+      en: Subject Type
+      ja: サブジェクトタイプ
+      vi: Loại đối tượng
+    description:
+      en: "Morph alias of the related entity (e.g. 'recipe', 'customer_order', 'stock_alert'). Null iff `subject_id` is null."
+      ja: "関連エンティティの morph エイリアス（例：'recipe'、'customer_order'、'stock_alert'）。`subject_id` が null の場合のみ null。"
+      vi: "Morph alias của entity liên quan (VD: 'recipe', 'customer_order', 'stock_alert'). Null khi và chỉ khi `subject_id` null."
+
+  subject_id:
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Subject ID
+      ja: サブジェクトID
+      vi: ID đối tượng
+    description:
+      en: PK of the subject record. Null-together with `subject_type` (app-level CHECK in dispatch service).
+      ja: サブジェクトレコードの主キー。`subject_type` と null を揃える（ディスパッチサービスでアプリレベル CHECK）。
+      vi: PK record đối tượng. Null cùng với `subject_type` (CHECK app-level trong dispatch service).
+
+  # Priority — consumed by bell badge, inbox filter, Prunable retention, and
+  # (Phase C) master-mute / quiet-hours bypass logic.
+  priority:
+    type: EnumRef
+    enum: NotificationPriority
+    default: normal
+    filterable: true
+    displayName:
+      en: Priority
+      ja: 優先度
+      vi: Độ ưu tiên
+    description:
+      en: "`low` / `normal` / `high` / `urgent`. Default `normal`. `urgent` bypasses master mute + quiet hours (Decision 10) but not type-specific opt-out."
+      ja: "`low` / `normal` / `high` / `urgent`。デフォルト `normal`。`urgent` はマスターミュート + クワイエットアワーをバイパス（決定10）だが、タイプ固有のオプトアウトは尊重。"
+      vi: "`low` / `normal` / `high` / `urgent`. Mặc định `normal`. `urgent` bypass master mute + quiet hours (Decision 10) nhưng vẫn tôn trọng type-specific opt-out."
+
+  # Future grouping — persisted but not rendered in v1.
+  aggregation_key:
+    type: String
+    length: 120
+    nullable: true
+    displayName:
+      en: Aggregation Key
+      ja: 集約キー
+      vi: Khóa gộp
+    description:
+      en: "Future-use grouping key for inbox collapse (e.g. `order.new:{shop_id}`). Persisted since Phase A but not rendered in v1; forward-compatible."
+      ja: "受信箱の折りたたみ用グルーピングキー（例：`order.new:{shop_id}`）。フェーズAから保存するが v1 ではレンダリングしない。前方互換性のため。"
+      vi: "Khóa gộp cho collapse inbox sau này (VD: `order.new:{shop_id}`). Lưu từ Phase A nhưng v1 không render; forward-compatible."
+
+  # Queue-retry dedup — unique when present.
+  idempotency_key:
+    type: String
+    length: 120
+    nullable: true
+    displayName:
+      en: Idempotency Key
+      ja: 冪等性キー
+      vi: Khóa idempotency
+    description:
+      en: "Stable key to prevent duplicate dispatches on queue retry. Unique when non-null (enforced by unique index). Emitters MUST pass this for retry-safe events."
+      ja: "キューリトライ時の重複ディスパッチ防止用の安定キー。非nullのとき一意（ユニークインデックスで強制）。リトライ安全なイベントではエミッターで必ず指定。"
+      vi: "Khóa ổn định để tránh dispatch trùng khi queue retry. Unique khi non-null (unique index). Emitter PHẢI pass cho sự kiện retry-safe."
+
+  # Phase A audience trace — set when dispatch used a saved audience.
+  audience_id:
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Audience ID
+      ja: オーディエンスID
+      vi: ID audience
+    description:
+      en: FK to `notification_audiences.id` when dispatch came from a saved audience. Null when dispatch used an inline/code rule. FK constraint added when T12.1 creates the audiences table.
+      ja: 保存されたオーディエンスからのディスパッチ時は `notification_audiences.id` への FK。インライン / コードルール使用時は null。FK 制約は T12.1 でオーディエンステーブル作成時に追加。
+      vi: FK tới `notification_audiences.id` khi dispatch từ audience đã lưu. Null khi dispatch dùng inline/code rule. Constraint FK được thêm khi T12.1 tạo bảng audiences.
+
+  # Phase D scheduled dispatch — null means "send now".
+  scheduled_for:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Scheduled For
+      ja: 予約送信日時
+      vi: Thời điểm gửi
+    description:
+      en: "Future dispatch time. Null means 'send now'. When set, paired with `is_dispatched=false`; cron scans due rows every minute and fires dispatch at `scheduled_for`."
+      ja: "予約送信日時。null は「即送信」。設定時は `is_dispatched=false` とセット。cron が1分毎に期限到来の行をスキャンし `scheduled_for` でディスパッチ。"
+      vi: "Thời điểm gửi trong tương lai. Null = gửi ngay. Khi set, đi kèm `is_dispatched=false`; cron scan row due mỗi phút và fire dispatch tại `scheduled_for`."
+
+  is_dispatched:
+    type: Boolean
+    default: true
+    displayName:
+      en: Is Dispatched
+      ja: 送信済み
+      vi: Đã gửi
+    description:
+      en: "Default `true` for now-send rows. Phase D composer sets `false` alongside `scheduled_for`; cron flips to `true` after dispatching at due time."
+      ja: "即送信行はデフォルト `true`。フェーズDコンポーザーは `scheduled_for` と合わせて `false` を設定。cron は期限到来時のディスパッチ後に `true` へフリップ。"
+      vi: "Default `true` cho row gửi ngay. Phase D composer set `false` kèm `scheduled_for`; cron flip thành `true` sau khi dispatch tại due time."

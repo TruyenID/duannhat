@@ -1,0 +1,20 @@
+kind: enum
+
+displayName:
+  ja: 在庫移動ステータス
+  en: Stock Transfer Status
+  vi: Trạng thái chuyển kho
+
+values:
+  - value: draft
+    label: { ja: 下書き, en: Draft, vi: Bản nháp }
+  - value: pending
+    label: { ja: 承認待ち, en: Pending, vi: Chờ duyệt }
+  - value: approved
+    label: { ja: 承認済み, en: Approved, vi: Đã duyệt }
+  - value: in_transit
+    label: { ja: 輸送中, en: In Transit, vi: Đang vận chuyển }
+  - value: completed
+    label: { ja: 完了, en: Completed, vi: Hoàn thành }
+  - value: cancelled
+    label: { ja: キャンセル, en: Cancelled, vi: Đã hủy }

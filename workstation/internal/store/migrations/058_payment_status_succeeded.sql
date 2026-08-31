@@ -1,0 +1,11 @@
+-- #1120 — canonicalize the captured payment status to 'succeeded'.
+--
+-- Pre-#1120 builds wrote 'confirmed' for captured money (POS/kiosk
+-- auto-confirm, kiosk manual confirm, card-terminal + cash-changer
+-- recorders); Cloud tolerates it only through PaymentStatusCompatibility,
+-- which cannot be deleted (#1087) while any fleet device still mints the
+-- legacy value. Rewrite existing rows so local reads need the alias only
+-- for defense in depth, never for correctness. Sync state is untouched:
+-- the payment.create payload carries no status and the UP body is built
+-- at send time.
+UPDATE payments SET status = 'succeeded' WHERE status = 'confirmed';

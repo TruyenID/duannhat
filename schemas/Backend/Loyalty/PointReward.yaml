@@ -1,0 +1,240 @@
+# =============================================================================
+# PointReward (ポイント交換商品 / Phần thưởng đổi điểm)
+# =============================================================================
+#
+# Một mục trong catalog "đổi điểm". Khách bỏ `cost_points` điểm, hệ thống
+# MINT một Coupon cá nhân theo đúng thông số giảm giá mô tả ở đây.
+#
+# Vì sao mint Coupon thay vì đẻ một loại voucher riêng: đường áp giảm giá lúc
+# thanh toán (`CouponService::apply`) đã tồn tại, đã có test, đã cắm vào cả
+# POS / kiosk / customer-web và đã in được lên hoá đơn. Một cơ chế giảm giá
+# thứ hai nghĩa là phải sửa lại đường tiền — đắt và rủi ro hơn nhiều so với
+# việc tái dùng cái đang chạy.
+#
+# Coupon mint ra được đánh dấu bằng `coupons.point_reward_id` (nullable), nhờ
+# vậy danh sách coupon của HQ lọc bỏ được chúng — nếu không, mỗi lượt đổi
+# điểm lại đẻ một dòng rác trong màn quản trị.
+#
+# Mục catalog là do admin TỰ ĐẶT — tên, ảnh, mô tả không link tới Product hay
+# SKU nào cả. "Bia" ở đây chỉ là nhãn của một coupon giảm giá; hệ thống không
+# phát ra một ly bia. Muốn đổi điểm lấy MÓN thật thì phải sửa đường áp vào
+# đơn, không phải sửa file này.
+#
+# Written by:  HQ admin qua `/hq/{brand}/point-rewards` (#1514). Shop KHÔNG
+#              ghi bảng này — shop chỉ bật/tắt cho chi nhánh mình qua pivot
+#              `PointRewardBranch`.
+# Read by:     customer-web `/account/points` (catalog), CustomerPointService
+#              lúc redeem.
+# Lifecycle:   soft-delete. Đã có lượt đổi thì đừng sửa thông số — coupon đã
+#              mint giữ giá trị riêng của nó nên lịch sử không bị viết lại,
+#              nhưng catalog đổi thông số vẫn làm khách khó hiểu.
+#
+# Business Rules:
+#   - BR-PR01: brand NOT NULL. Coupon mint ra bắt buộc có brand (xem
+#              Coupon.yaml — `brand` không nullable), nên phần thưởng phải
+#              biết mình thuộc brand nào.
+#   - BR-PR02: `valid_days` = số ngày coupon mint ra còn hiệu lực kể từ lúc
+#              đổi. Tính theo business time của brand, không theo giờ máy chủ.
+#   - BR-PR03: is_active=false ⇒ ẩn khỏi catalog và từ chối đổi. Coupon đã
+#              mint trước đó KHÔNG bị ảnh hưởng.
+#   - BR-PR04: `discount_type=percent` ⇒ `max_discount_cap` có nghĩa;
+#              `fixed` ⇒ phải null (cùng luật với Coupon, BR-COUP05).
+#   - BR-PR05: `stock_quantity` NULL = không giới hạn. Non-null thì tồn còn
+#              lại = `stock_quantity - redeemed_count`; ≤ 0 ⇒ VẪN nằm trong
+#              catalog nhưng khoá nút đổi ("Out of stock"). Ẩn hẳn thì khách
+#              tưởng phần thưởng biến mất và đi hỏi tổng đài.
+#   - BR-PR06: `redeemed_count` chỉ được bump bởi `CustomerPointService::
+#              redeem()` TRONG transaction có `lockForUpdate` của BR-PT03 —
+#              cùng một khoá đã tuần tự hoá số dư điểm thì phải tuần tự hoá
+#              luôn tồn kho, nếu không hai khách cuối cùng cùng lấy được món
+#              cuối cùng. KHÔNG suy tồn bằng `count()` trên sổ cái điểm: bút
+#              toán `redeem` không bị xoá khi HQ hoàn điểm cho khách.
+#   - BR-PR07: `service_condition` CHỈ ĐỂ HIỂN THỊ ở v1 — xem header của
+#              `PointRewardServiceCondition.yaml`. Không tầng nào cưỡng chế.
+# =============================================================================
+
+displayName:
+  en: Point Reward
+  ja: ポイント交換商品
+  vi: Phần thưởng đổi điểm
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  audit:
+    createdBy: true
+    updatedBy: true
+  indexes:
+    # Catalog khách nhìn thấy: theo brand, còn bật, theo thứ tự hiển thị.
+    - columns: [brand_id, is_active, sort_order]
+    - columns: [organization_id]
+
+properties:
+  name:
+    # Hiển thị cho khách — 3 ngôn ngữ qua Astrotomic (point_reward_translations).
+    type: String
+    length: 255
+    translatable: true
+    searchable: true
+    displayName:
+      en: Name
+      ja: 名称
+      vi: Tên
+
+  description:
+    type: Text
+    nullable: true
+    translatable: true
+    displayName:
+      en: Description
+      ja: 説明
+      vi: Mô tả
+
+  cost_points:
+    # Số điểm phải bỏ ra. > 0 (validate ở service).
+    type: Int
+    sortable: true
+    displayName:
+      en: Cost (points)
+      ja: 必要ポイント
+      vi: Điểm cần
+
+  discount_type:
+    # Dùng chung enum với Coupon — phần thưởng chính là bản mẫu của coupon.
+    type: EnumRef
+    enum: CouponDiscountType
+    filterable: true
+    displayName:
+      en: Discount Type
+      ja: 割引種別
+      vi: Loại giảm giá
+
+  discount_value:
+    type: Decimal
+    precision: 12
+    scale: 2
+    displayName:
+      en: Discount Value
+      ja: 割引額
+      vi: Giá trị giảm
+
+  max_discount_cap:
+    # BR-PR04 — chỉ có nghĩa khi discount_type=percent.
+    type: Decimal
+    precision: 12
+    scale: 2
+    nullable: true
+    displayName:
+      en: Max Discount Cap
+      ja: 最大割引額
+      vi: Giảm tối đa
+
+  min_order_subtotal:
+    type: Decimal
+    precision: 12
+    scale: 2
+    default: 0
+    displayName:
+      en: Minimum Order Subtotal
+      ja: 最低注文金額
+      vi: Hóa đơn tối thiểu
+
+  valid_days:
+    # BR-PR02 — hạn của coupon mint ra, tính từ lúc đổi.
+    type: Int
+    default: 30
+    displayName:
+      en: Coupon Valid Days
+      ja: クーポン有効日数
+      vi: Số ngày hiệu lực
+
+  stock_quantity:
+    # BR-PR05 — NULL = không giới hạn. Đây là TỔNG số lượt phát ra, không
+    # phải số còn lại; số còn lại suy ra cùng `redeemed_count` để sửa tồn
+    # không làm mất dấu đã đổi bao nhiêu.
+    type: Int
+    nullable: true
+    displayName:
+      en: Stock Quantity
+      ja: 在庫数
+      vi: Số lượng
+
+  redeemed_count:
+    # BR-PR06 — bump trong transaction của redeem(), không bao giờ giảm.
+    type: Int
+    default: 0
+    sortable: true
+    displayName:
+      en: Redeemed Count
+      ja: 交換済み数
+      vi: Đã đổi
+
+  service_condition:
+    # BR-PR07 — hiển thị thôi, không cưỡng chế.
+    type: EnumRef
+    enum: PointRewardServiceCondition
+    default: both
+    filterable: true
+    displayName:
+      en: Service Condition
+      ja: 提供条件
+      vi: Điều kiện phục vụ
+
+  image:
+    # Ảnh thẻ trong lưới catalog. Cùng luồng temp→permanent như
+    # `Product.thumbnail` — upload qua FileService rồi mới lưu, đọc qua trait
+    # HasFiles. Không bắt buộc: thẻ không ảnh vẫn render (placeholder).
+    type: File
+    collection: reward
+    accept: [jpg, jpeg, png, webp]
+    maxSize: 5120
+    displayName:
+      en: Image
+      ja: 画像
+      vi: Ảnh
+
+  is_active:
+    type: Boolean
+    default: true
+    filterable: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Đang bật
+
+  sort_order:
+    type: Int
+    default: 0
+    sortable: true
+    displayName:
+      en: Sort Order
+      ja: 表示順
+      vi: Thứ tự
+
+  # === Relationships ===
+
+  brand:
+    # BR-PR01 — NOT NULL.
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: CASCADE
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu
+
+  organization:
+    # Denormalized từ brand.organization, cùng lý do như Coupon.organization:
+    # policy check không phải join.
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức

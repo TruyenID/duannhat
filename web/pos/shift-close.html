@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kết ca — POS</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=M+PLUS+2:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f5f5f4;
+        --surface: #ffffff;
+        --surface-2: #fafaf9;
+        --border: #e7e5e4;
+        --border-strong: #d6d3d1;
+        --text: #1c1917;
+        --text-muted: #57534e;
+        --text-faint: #a8a29e;
+        --primary: #1e40af;
+        --primary-hover: #1e3a8a;
+        --primary-soft: #eff6ff;
+        --success: #15803d;
+        --success-soft: #f0fdf4;
+        --danger: #b91c1c;
+        --danger-soft: #fef2f2;
+        --warning: #b45309;
+        --warning-soft: #fffbeb;
+        --radius: 8px;
+        --radius-lg: 12px;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        font-family: "M PLUS 2", system-ui, -apple-system, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .topbar {
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        padding: 12px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .topbar-left { display: flex; align-items: center; gap: 16px; }
+      .logo { font-weight: 700; font-size: 16px; color: var(--primary); }
+      .breadcrumb { color: var(--text-muted); font-size: 13px; }
+      .breadcrumb strong { color: var(--text); }
+      .topbar-right { display: flex; align-items: center; gap: 16px; font-size: 13px; color: var(--text-muted); }
+      .user { display: flex; align-items: center; gap: 8px; }
+      .avatar {
+        width: 28px; height: 28px; border-radius: 50%;
+        background: var(--primary-soft); color: var(--primary);
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 600; font-size: 12px;
+      }
+      .device-pill {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 4px 10px; background: var(--bg);
+        border: 1px solid var(--border); border-radius: 999px;
+        font-size: 12px; color: var(--text-muted);
+      }
+      .dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; }
+
+      .page {
+        max-width: 1180px; margin: 24px auto; padding: 0 20px;
+      }
+
+      .page-header {
+        display: flex; align-items: flex-start; justify-content: space-between;
+        margin-bottom: 20px; gap: 24px;
+      }
+      .page-header h1 { margin: 0 0 4px; font-size: 22px; font-weight: 600; }
+      .page-header .sub { color: var(--text-muted); font-size: 13px; }
+      .shift-meta {
+        display: flex; gap: 24px; font-size: 12px; color: var(--text-muted);
+        background: var(--surface); border: 1px solid var(--border);
+        border-radius: var(--radius); padding: 10px 14px;
+      }
+      .shift-meta div strong { color: var(--text); font-weight: 600; display: block; }
+
+      /* Layout 2 cột */
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 360px;
+        gap: 20px;
+        align-items: start;
+      }
+
+      .col-main { display: flex; flex-direction: column; gap: 16px; }
+      .col-side { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 16px; }
+
+      /* Opening report card */
+      .opening-card {
+        background: var(--primary-soft);
+        border: 1px solid #c7d2fe;
+        border-radius: var(--radius-lg);
+        padding: 16px 18px;
+      }
+      .opening-card .label {
+        font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+        color: var(--primary); font-weight: 600; margin-bottom: 8px;
+      }
+      .opening-card .meta-row {
+        display: flex; justify-content: space-between;
+        font-size: 13px; color: var(--text-muted); margin-bottom: 4px;
+      }
+      .opening-card .meta-row span:last-child { color: var(--text); font-weight: 500; }
+      .opening-card .balance {
+        margin-top: 10px; padding-top: 10px; border-top: 1px dashed #c7d2fe;
+        display: flex; justify-content: space-between; align-items: baseline;
+      }
+      .opening-card .balance .name { font-size: 13px; color: var(--text-muted); }
+      .opening-card .balance .amount {
+        font-size: 20px; font-weight: 700;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+      }
+      .card-header {
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--border);
+        display: flex; align-items: center; justify-content: space-between;
+      }
+      .card-title { font-weight: 600; font-size: 15px; }
+      .card-title .jp { color: var(--text-faint); font-weight: 400; font-size: 13px; margin-left: 6px; }
+      .card-body { padding: 16px 18px; }
+
+      .badge {
+        font-size: 11px; padding: 3px 8px; border-radius: 999px; font-weight: 500;
+      }
+      .badge-pos { background: #f1f5f9; color: #334155; }
+      .badge-manual { background: var(--warning-soft); color: var(--warning); }
+
+      /* POS summary card */
+      .pos-summary { display: grid; gap: 10px; }
+      .pos-line {
+        display: flex; justify-content: space-between; align-items: baseline;
+        padding: 8px 0;
+      }
+      .pos-line + .pos-line { border-top: 1px dashed var(--border); }
+      .pos-line .name { font-size: 13px; color: var(--text-muted); }
+      .pos-line .name .jp { color: var(--text-faint); margin-left: 4px; }
+      .pos-line .amount {
+        font-variant-numeric: tabular-nums; font-weight: 600; font-size: 15px;
+      }
+      .pos-line.total {
+        background: var(--surface-2); margin: 0 -18px; padding: 12px 18px;
+        border-top: 1px solid var(--border) !important;
+      }
+      .pos-line.total .amount { font-size: 18px; }
+
+      .pct {
+        font-size: 11px; color: var(--text-faint); margin-left: 6px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* Reconcile section (B/C) */
+      .reconcile-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+        align-items: end;
+      }
+      .reconcile-grid .col-label { font-size: 11px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+
+      .row {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr 1fr 1fr;
+        gap: 12px;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px dashed var(--border);
+      }
+      .row:last-child { border-bottom: none; }
+      .row .name {
+        font-size: 13px; color: var(--text);
+      }
+      .row .name .jp { color: var(--text-faint); margin-left: 4px; font-size: 12px; }
+      .row .readonly {
+        font-variant-numeric: tabular-nums; text-align: right;
+        font-weight: 500; color: var(--text);
+      }
+      .row .readonly small { color: var(--text-faint); font-weight: 400; margin-left: 2px; }
+
+      .header-row {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr 1fr 1fr;
+        gap: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border);
+        font-size: 11px; color: var(--text-faint);
+        text-transform: uppercase; letter-spacing: 0.04em;
+      }
+      .header-row > div:not(:first-child) { text-align: right; }
+
+      .input {
+        width: 100%; height: 36px; padding: 0 10px;
+        border: 1px solid var(--border-strong);
+        border-radius: var(--radius); font: inherit; font-size: 14px;
+        background: var(--surface); color: var(--text); outline: none;
+        text-align: right; font-variant-numeric: tabular-nums; font-weight: 500;
+      }
+      .input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.12);
+      }
+
+      .diff {
+        text-align: right; font-variant-numeric: tabular-nums; font-weight: 600;
+        padding: 6px 10px; border-radius: 6px;
+      }
+      .diff-zero { color: var(--success); background: var(--success-soft); }
+      .diff-neg { color: var(--danger); background: var(--danger-soft); }
+      .diff-pos { color: var(--warning); background: var(--warning-soft); }
+
+      .section-subhead {
+        font-size: 12px; color: var(--text-muted); margin: 8px 0 4px;
+      }
+
+      /* Cash section special row */
+      .cash-summary {
+        background: var(--surface-2);
+        border-radius: var(--radius);
+        padding: 12px 14px;
+        margin-top: 8px;
+      }
+      .cash-summary .line {
+        display: flex; justify-content: space-between;
+        font-size: 13px; padding: 4px 0;
+      }
+      .cash-summary .line.total {
+        border-top: 1px solid var(--border);
+        margin-top: 6px; padding-top: 8px;
+        font-weight: 600; font-size: 14px;
+      }
+
+      /* E-money grid */
+      .emoney-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+      .emoney-grid .field label {
+        display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;
+      }
+
+      /* Sticky summary */
+      .summary-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 16px 18px;
+      }
+      .summary-card h3 {
+        margin: 0 0 12px; font-size: 14px; font-weight: 600;
+      }
+      .summary-line {
+        display: flex; justify-content: space-between;
+        font-size: 13px; padding: 6px 0;
+      }
+      .summary-line.diff-line {
+        padding: 8px 10px; margin: 4px -6px; border-radius: 6px;
+      }
+      .summary-line.total {
+        border-top: 1px solid var(--border); margin-top: 8px;
+        padding-top: 10px; font-weight: 600; font-size: 14px;
+      }
+      .summary-line .v { font-variant-numeric: tabular-nums; font-weight: 500; }
+
+      .actions {
+        display: flex; flex-direction: column; gap: 8px; margin-top: 12px;
+      }
+      .btn {
+        height: 40px; padding: 0 16px; border-radius: var(--radius);
+        font: inherit; font-weight: 500; cursor: pointer;
+        border: 1px solid transparent;
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        width: 100%;
+      }
+      .btn-primary { background: var(--primary); color: white; }
+      .btn-primary:hover { background: var(--primary-hover); }
+      .btn-ghost { background: transparent; color: var(--text-muted); border-color: var(--border-strong); }
+      .btn-ghost:hover { background: var(--bg); }
+
+      .alert {
+        display: flex; gap: 10px; padding: 12px 14px;
+        border-radius: var(--radius); font-size: 13px;
+      }
+      .alert-warn {
+        background: var(--warning-soft); border: 1px solid #fde68a; color: var(--warning);
+      }
+      .alert-icon { font-weight: 700; flex: 0 0 auto; }
+
+      .note-field { margin-top: 12px; }
+      .note-field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+      .note-field textarea {
+        width: 100%; min-height: 64px; padding: 10px 12px;
+        border: 1px solid var(--border-strong);
+        border-radius: var(--radius); font: inherit; font-size: 13px;
+        resize: vertical;
+      }
+      .note-field textarea:focus { outline: none; border-color: var(--primary); }
+
+      @media (max-width: 980px) {
+        .layout { grid-template-columns: 1fr; }
+        .col-side { position: static; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="logo">TempoFast POS</div>
+        <div class="breadcrumb">Quầy thu ngân ・ <strong>Kết ca / Đối chiếu doanh thu</strong></div>
+      </div>
+      <div class="topbar-right">
+        <span class="device-pill"><span class="dot"></span>POS-01 ・ LAN</span>
+        <span>2026/06/05 ・ 22:18</span>
+        <div class="user">
+          <div class="avatar">H</div>
+          <span>Hai</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="page">
+      <div class="page-header">
+        <div>
+          <h1>Kết ca <span style="color: var(--text-faint); font-weight: 400; font-size: 15px;">／ 閉店レポート</span></h1>
+          <div class="sub">Đối chiếu doanh thu POS, Stera và tiền mặt thực đếm trước khi đóng ca.</div>
+        </div>
+        <div class="shift-meta">
+          <div><strong>SHIFT-20260605-01</strong>Mã ca</div>
+          <div><strong>Hai</strong>Người mở</div>
+          <div><strong>10:43 → 22:18</strong>Thời gian</div>
+          <div><strong>11 giờ 35 phút</strong>Tổng thời lượng</div>
+        </div>
+      </div>
+
+      <div class="layout">
+        <!-- ========== CỘT CHÍNH ========== -->
+        <div class="col-main">
+
+          <!-- A. Báo cáo mở quầy -->
+          <div class="opening-card">
+            <div class="label">Báo cáo mở quầy ／ 開店レポート</div>
+            <div class="meta-row"><span>Người viết ／ 開店者</span><span>Hai</span></div>
+            <div class="meta-row"><span>Lúc ／ 開店時刻</span><span>2026/06/05 10:43</span></div>
+            <div class="balance">
+              <span class="name">Số dư tiền mặt đầu ca ／ 開始現金残高</span>
+              <span class="amount">¥ 171,206</span>
+            </div>
+          </div>
+
+          <!-- B. POS summary -->
+          <section class="card">
+            <div class="card-header">
+              <div class="card-title">Dữ liệu POS <span class="jp">／ POSデータ (2026/06/05)</span></div>
+              <span class="badge badge-pos">Tự tính từ đơn hàng</span>
+            </div>
+            <div class="card-body">
+              <div class="pos-summary">
+                <div class="pos-line">
+                  <span class="name">売上高（税込）<span class="jp">／ Doanh thu (đã gồm thuế)</span></span>
+                  <span class="amount">¥ 24,790</span>
+                </div>
+                <div class="pos-line">
+                  <span class="name">売上高（税抜）<span class="jp">／ Doanh thu (chưa thuế)</span></span>
+                  <span class="amount">¥ 22,615</span>
+                </div>
+                <div class="pos-line">
+                  <span class="name">消費税 <span class="jp">／ Thuế tiêu thụ</span></span>
+                  <span class="amount">¥ 2,175</span>
+                </div>
+                <div class="pos-line">
+                  <span class="name">割引金額 <span class="jp">／ Tổng giảm giá</span></span>
+                  <span class="amount">¥ 0</span>
+                </div>
+                <div class="pos-line">
+                  <span class="name">現金 <span class="jp">／ Tiền mặt</span><span class="pct">6%</span></span>
+                  <span class="amount">¥ 1,390</span>
+                </div>
+                <div class="pos-line">
+                  <span class="name">Stera <span class="jp">／ Stera (thẻ + QR + e-money)</span></span>
+                  <span class="amount">¥ 7,100</span>
+                </div>
+                <div class="pos-line total">
+                  <span class="name">レジ合計 <span class="jp">／ Tổng quầy (現金 + Stera)</span><span class="pct">34%</span></span>
+                  <span class="amount">¥ 8,490</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- C. Đối chiếu tiền mặt -->
+          <section class="card">
+            <div class="card-header">
+              <div class="card-title">Thông tin tiền mặt <span class="jp">／ 現金情報</span></div>
+              <span class="badge badge-manual">Nhập tay</span>
+            </div>
+            <div class="card-body">
+              <div class="cash-summary">
+                <div class="line"><span>Số dư đầu ca ／ 開始残高</span><span>¥ 171,206</span></div>
+                <div class="line"><span>+ Doanh thu tiền mặt POS ／ POS現金売上</span><span>¥ 1,390</span></div>
+                <div class="line"><span>− Chi ra giữa ca ／ 出金</span><span>¥ 0</span></div>
+                <div class="line"><span>+ Bù vào két giữa ca ／ 入金</span><span>¥ 0</span></div>
+                <div class="line total"><span>Tiền mặt kỳ vọng ／ 期待現金残高</span><span>¥ 172,596</span></div>
+              </div>
+
+              <div style="height: 14px;"></div>
+
+              <div class="header-row">
+                <div>Khoản mục</div>
+                <div>Kỳ vọng (POS)</div>
+                <div>Thực đếm</div>
+                <div>Chênh lệch</div>
+              </div>
+
+              <div class="row">
+                <div class="name">Tiền mặt trong két <span class="jp">／ レジ内現金</span></div>
+                <div class="readonly">¥ 172,596</div>
+                <div><input class="input" type="text" inputmode="numeric" value="172,596" /></div>
+                <div class="diff diff-zero">¥ 0</div>
+              </div>
+
+              <div class="note-field">
+                <label>Ghi chú đối chiếu tiền mặt <span style="color: var(--text-faint); font-weight: 400;">／ 備考</span></label>
+                <textarea placeholder="VD: két thiếu 200円 do trả lại nhầm khách lúc 18:30…"></textarea>
+              </div>
+            </div>
+          </section>
+
+          <!-- D. Đối chiếu Stera -->
+          <section class="card">
+            <div class="card-header">
+              <div class="card-title">Đối chiếu Stera <span class="jp">／ Stera 照合</span></div>
+              <span class="badge badge-manual">Nhập từ báo cáo máy Stera</span>
+            </div>
+            <div class="card-body">
+              <div class="header-row">
+                <div>Khoản mục</div>
+                <div>POS ghi nhận</div>
+                <div>Stera thực tế</div>
+                <div>Chênh lệch</div>
+              </div>
+
+              <div class="row">
+                <div class="name">Thẻ tín dụng <span class="jp">／ クレジットカード</span></div>
+                <div class="readonly">¥ 4,500</div>
+                <div><input class="input" type="text" inputmode="numeric" value="0" /></div>
+                <div class="diff diff-neg">− ¥ 4,500</div>
+              </div>
+              <div class="row">
+                <div class="name">QR code <span class="jp">／ QRコード決済</span></div>
+                <div class="readonly">¥ 1,400</div>
+                <div><input class="input" type="text" inputmode="numeric" value="0" /></div>
+                <div class="diff diff-neg">− ¥ 1,400</div>
+              </div>
+              <div class="row">
+                <div class="name">Tiền điện tử (Stera) <span class="jp">／ 電子マネー</span></div>
+                <div class="readonly">¥ 0</div>
+                <div><input class="input" type="text" inputmode="numeric" value="0" /></div>
+                <div class="diff diff-zero">¥ 0</div>
+              </div>
+
+              <div class="cash-summary">
+                <div class="line"><span>Tổng POS Stera</span><span>¥ 5,900</span></div>
+                <div class="line"><span>Tổng thực tế Stera</span><span>¥ 0</span></div>
+                <div class="line total" style="color: var(--danger);">
+                  <span>Chênh lệch Stera ／ Stera差額</span><span>− ¥ 5,900</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- E. Doanh thu e-money khác -->
+          <section class="card">
+            <div class="card-header">
+              <div class="card-title">Doanh thu tiền điện tử <span class="jp">／ 電子マネー売上</span></div>
+              <span class="badge badge-manual">Nhập tay</span>
+            </div>
+            <div class="card-body">
+              <div class="emoney-grid">
+                <div class="field">
+                  <label>iD <span class="jp">／ アイディ</span></label>
+                  <input class="input" type="text" inputmode="numeric" value="0" />
+                </div>
+                <div class="field">
+                  <label>IC (Suica/PASMO) <span class="jp">／ 交通系IC</span></label>
+                  <input class="input" type="text" inputmode="numeric" value="0" />
+                </div>
+                <div class="field">
+                  <label>Edy <span class="jp">／ 楽天Edy</span></label>
+                  <input class="input" type="text" inputmode="numeric" value="0" />
+                </div>
+                <div class="field">
+                  <label>WAON <span class="jp">／ ワオン</span></label>
+                  <input class="input" type="text" inputmode="numeric" value="0" />
+                </div>
+                <div class="field">
+                  <label>nanaco <span class="jp">／ ナナコ</span></label>
+                  <input class="input" type="text" inputmode="numeric" value="0" />
+                </div>
+                <div class="field">
+                  <label>QUICPay <span class="jp">／ クイックペイ</span></label>
+                  <input class="input" type="text" inputmode="numeric" value="0" />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- F. Ghi chú chung -->
+          <section class="card">
+            <div class="card-header">
+              <div class="card-title">Ghi chú kết ca <span class="jp">／ 閉店メモ</span></div>
+            </div>
+            <div class="card-body">
+              <textarea
+                style="width: 100%; min-height: 80px; padding: 10px 12px;
+                       border: 1px solid var(--border-strong);
+                       border-radius: var(--radius); font: inherit; font-size: 13px; resize: vertical;"
+                placeholder="VD: máy Stera bị restart lúc 19:00, có 1 giao dịch QR ¥1,400 không in được biên lai…"
+              ></textarea>
+            </div>
+          </section>
+        </div>
+
+        <!-- ========== CỘT BÊN ========== -->
+        <aside class="col-side">
+          <div class="summary-card">
+            <h3>Tổng kết đối chiếu ／ 照合サマリー</h3>
+
+            <div class="summary-line"><span>POS 売上（税込）</span><span class="v">¥ 24,790</span></div>
+            <div class="summary-line"><span>POS 売上（税抜）</span><span class="v">¥ 22,615</span></div>
+            <div class="summary-line"><span>POS 消費税</span><span class="v">¥ 2,175</span></div>
+
+            <div class="summary-line total"><span>Chênh lệch tiền mặt</span><span class="v" style="color: var(--success);">¥ 0</span></div>
+            <div class="summary-line diff-line diff-neg">
+              <span>Chênh lệch Stera</span><span class="v">− ¥ 5,900</span>
+            </div>
+
+            <div class="alert alert-warn" style="margin-top: 12px;">
+              <span class="alert-icon">!</span>
+              <div>
+                Còn chênh lệch <strong>Stera ¥ 5,900</strong>. Hãy kiểm tra lại báo cáo máy Stera trước khi xác nhận.
+              </div>
+            </div>
+
+            <div class="actions">
+              <button type="button" class="btn btn-primary">
+                Xác nhận kết ca & In báo cáo
+              </button>
+              <button type="button" class="btn btn-ghost">Lưu nháp ／ 下書き保存</button>
+              <button type="button" class="btn btn-ghost">In thử ／ プレビュー印刷</button>
+            </div>
+
+            <div style="font-size: 11px; color: var(--text-faint); margin-top: 12px; text-align: center;">
+              Sau khi xác nhận, ca sẽ bị khoá. <br />
+              Mọi giao dịch mới cần mở ca khác.
+            </div>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </body>
+</html>

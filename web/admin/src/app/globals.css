@@ -1,0 +1,807 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@source "../../node_modules/@godxjp/ui/dist/**/*.{js,mjs}";
+
+/*
+ * Omnify UI design system tokens — inlined from
+ * src/components/ui/internal/theme.css because Tailwind v4 + turbopack's
+ * PostCSS resolver can't follow relative `@import` from src/app/ in dev
+ * mode (production build resolves fine, but dev breaks). Inlining is the
+ * portable fix that works in every tool.
+ *
+ * Source of truth for ALL Tailwind class tokens used by `src/components/ui/*`
+ * (h-element-*, bg-input-background, semantic success/warning/info/error,
+ * gray/blue palettes, sidebar/header layout sizes, etc.). Originally copied
+ * from ~/dev/omnify/omnify-ui/packages/ui/src/styles/theme.css.
+ *
+ * Touching this block will visually shift the whole app — coordinate before
+ * editing.
+ */
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* ===================================
+   * TYPOGRAPHY TOKENS
+   *
+   * Phase B + Phase C bugfix:
+   * - `--font-size` is the ROOT rem unit. MUST stay at 16 px (browser default)
+   *   so every rem-based token (spacing, density, type scale) lands on the
+   *   4 px integer grid that the foundation doc requires. The earlier Phase B
+   *   revision set this to 14 px, which scaled the entire system down 12.5%
+   *   and pushed every rem token off-grid (spacing-4 became 14 px instead of
+   *   16, density-element became 28 px instead of 32, text-base resolved to
+   *   12.25 px instead of 14). Restored to 16.
+   * - JP enterprise body density (14 px) is now applied explicitly on `body`
+   *   in @layer base via `font-size: var(--text-base)`. Headings, labels,
+   *   inputs, and components that read --text-* tokens stay correct.
+   * - Line-height 1.7 body — JMDC convergent across SmartHR/freee/Ameba.
+   *   The 間 (ma) principle: kanji are info-dense and need vertical breathing.
+   * - 3 weights only per 簡素 (kanso) — normal/medium/bold.
+   * - Font stack starts with Hiragino Sans (Ameba Spindle convergent).
+   * =================================== */
+  --font-size: 16px;
+  /* Root rem = 16 px (browser default, 4 px grid) */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  /* Heading default per freee vibes */
+  --font-weight-semibold: 600;
+  /* Kept for backward compat — prefer 700 */
+  --font-weight-bold: 700;
+  /* Emphasis only */
+
+  /* Japanese-first font stack — Ameba Spindle convergent ordering.
+     OS-installed Japanese fonts first, web fallbacks last. */
+  --font-sans-jp:
+    "Hiragino Sans", "ヒラギノ角ゴシック", "Hiragino Kaku Gothic ProN", "Yu Gothic Medium",
+    "游ゴシック Medium", YuGothic, "Noto Sans JP", Meiryo, メイリオ, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+
+  /* Font sizes — line-heights now ABSOLUTE (px) not unitless multipliers
+     so CJK glyphs never clip on diacritics or kanji descenders. */
+  --text-2xs: 0.6875rem;
+  /* 11 px — fine print */
+  --text-xs: 0.75rem;
+  /* 12 px — caption / label */
+  --text-sm: 0.8125rem;
+  /* 13 px — dense table cells (was 14 — moved up) */
+  --text-base: 0.875rem;
+  /* 14 px — DEFAULT body (was 16 — JP dense override) */
+  --text-md: 1rem;
+  /* 16 px — content-heavy body (NEW) */
+  --text-lg: 1.125rem;
+  /* 18 px — subheading */
+  --text-xl: 1.25rem;
+  /* 20 px — h3 */
+  --text-2xl: 1.5rem;
+  /* 24 px — h2 (SmartHR XL, Ameba headline-4) */
+  --text-3xl: 1.875rem;
+  /* 30 px — kept for backward compat */
+  --text-4xl: 2rem;
+  /* 32 px — h1 cap (SmartHR XXL); was 2.25/36 */
+
+  /* Line heights — JMDC convergent: 1.7 body, 1.25 headings, 1.5 dense */
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  /* Headings */
+  --leading-normal: 1.5;
+  /* Dense / single-line UI */
+  --leading-body: 1.7;
+  /* JP body default (NEW; 間 principle) */
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
+  /* Long-form reading */
+
+  /* ===================================
+   * COLOR TOKENS
+   *
+   * Phase B values applied (design-foundations-japanese.md):
+   * - All colors in OKLCH for perceptual uniformity (Tailwind v4 native).
+   * - Primary chroma ≤ 0.18 per 渋み (shibumi — restrained elegance).
+   * - Off-black text in warm hue 60 (SmartHR TEXT_BLACK #23221e ≈ neutral-12).
+   * - Destructive = 茜 (akane) NOT pure red — cited cultural rule:
+   *   「新しめのデザインを採用しているサービスほど赤は避けるか、控えめに」
+   * =================================== */
+  --background: oklch(99% 0.002 60);
+  /* warm off-white */
+  --foreground: oklch(20% 0.006 60);
+  /* off-black, warm — SmartHR TEXT_BLACK */
+  --card: oklch(99% 0.002 60);
+  --card-foreground: oklch(20% 0.006 60);
+  --popover: oklch(99% 0.002 60);
+  --popover-foreground: oklch(20% 0.006 60);
+
+  /* Primary — SmartHR MAIN #0077c7 in OKLCH (chroma ≤ 0.15, 渋み) */
+  --primary: oklch(56% 0.15 240);
+  --primary-foreground: oklch(99% 0.002 60);
+
+  --secondary: oklch(96% 0.004 60);
+  /* subtle bg, neutral-3 */
+  --secondary-foreground: oklch(20% 0.006 60);
+  --muted: oklch(96% 0.004 60);
+  --muted-foreground: oklch(48% 0.008 60);
+  /* SmartHR TEXT_GREY #706d65 */
+  --accent: oklch(93% 0.005 60);
+  /* hover bg */
+  --accent-foreground: oklch(20% 0.006 60);
+
+  /* Destructive — 茜 #b7282e (cited: zenn/Manalink — "赤は控えめに") */
+  --destructive: oklch(52% 0.18 25);
+  --destructive-foreground: oklch(99% 0.002 60);
+
+  --border: oklch(86% 0.006 60);
+  /* SmartHR BORDER #d6d3d0 */
+  --input: oklch(86% 0.006 60);
+  --input-background: oklch(99% 0.002 60);
+  /* was transparent — SmartHR uses solid */
+  --switch-background: oklch(80% 0.007 60);
+  --ring: oklch(56% 0.15 240);
+  /* matches primary */
+
+  /* Chart colors */
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+
+  /* Sidebar colors */
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: #030213;
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+
+  /* Semantic colors — 和色 (traditional Japanese) hue centers in OKLCH.
+     Cited rationale in plans/design-foundations-japanese.md. */
+  --success: oklch(72% 0.13 155);
+  /* 若竹 #68be8d */
+  --success-foreground: oklch(99% 0.002 60);
+  --warning: oklch(80% 0.17 85);
+  /* 山吹 #f8b500 */
+  --warning-foreground: oklch(20% 0.006 60);
+  /* warm off-black on yellow */
+  --info: oklch(55% 0.12 265);
+  /* 群青 #4c6cb3 */
+  --info-foreground: oklch(99% 0.002 60);
+  --error: oklch(52% 0.18 25);
+  /* 茜 #b7282e — same hue as destructive */
+  --error-foreground: oklch(99% 0.002 60);
+
+  /* Attention — non-critical alert per freee/Manalink pattern: 朱 (shu) #eb6101.
+     Use this when red would be too aggressive (required-field reminders, etc). */
+  --attention: oklch(66% 0.19 45);
+  --attention-foreground: oklch(99% 0.002 60);
+
+  /* ===================================
+   * 和色 (traditional Japanese accent palette)
+   * For chart colors, tag colors, decorative accents.
+   * NEVER use these as semantic role colors — those are above.
+   * Source: colordic.org/w + irocore.com (Japanese traditional color references)
+   * =================================== */
+  --color-wa-ai: #165e83;
+  /* 藍 — info dark */
+  --color-wa-gunjo: #4c6cb3;
+  /* 群青 — info */
+  --color-wa-ruri: #1e50a2;
+  /* 瑠璃 — primary saturated */
+  --color-wa-kon: #223a70;
+  /* 紺 — text emphasis */
+  --color-wa-wakatake: #68be8d;
+  /* 若竹 — success */
+  --color-wa-moegi: #006e54;
+  /* 萌葱 — success dark */
+  --color-wa-yamabuki: #f8b500;
+  /* 山吹 — warning */
+  --color-wa-shu: #eb6101;
+  /* 朱 — attention */
+  --color-wa-akane: #b7282e;
+  /* 茜 — danger */
+  --color-wa-enji: #b94047;
+  /* 臙脂 — destructive confirmed */
+  --color-wa-sakura: #fef4f4;
+  /* 桜 — soft info background */
+  --color-wa-sumi: #595857;
+  /* 墨 — text primary warm */
+  --color-wa-nezu: #949495;
+  /* 鼠 — text muted */
+
+  /* Gray scale palette */
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+
+  /* Blue palette (for active states) */
+  --blue-50: #eff6ff;
+  --blue-100: #dbeafe;
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb;
+  --blue-700: #1d4ed8;
+
+  /* ===================================
+   * SPACING TOKENS
+   * =================================== */
+  --spacing-0: 0;
+  --spacing-1: 0.25rem;
+  /* 4px */
+  --spacing-2: 0.5rem;
+  /* 8px */
+  --spacing-3: 0.75rem;
+  /* 12px */
+  --spacing-4: 1rem;
+  /* 16px */
+  --spacing-5: 1.25rem;
+  /* 20px */
+  --spacing-6: 1.5rem;
+  /* 24px */
+  --spacing-8: 2rem;
+  /* 32px */
+  --spacing-10: 2.5rem;
+  /* 40px */
+  --spacing-12: 3rem;
+  /* 48px */
+  --spacing-16: 4rem;
+  /* 64px */
+  --spacing-20: 5rem;
+  /* 80px */
+  --spacing-24: 6rem;
+  /* 96px */
+
+  /* ===================================
+   * DENSITY TOKENS — Change these to adjust UI density globally
+   * =================================== */
+
+  /* Headings (used in @layer base) */
+  --heading-h1: var(--text-xl);
+  /* was --text-2xl */
+  --heading-h2: var(--text-lg);
+  /* was --text-xl */
+  --heading-h3: var(--text-base);
+  /* was --text-lg */
+  --heading-h4: var(--text-sm);
+  /* was --text-base */
+
+  /* Page layout */
+  --density-page: 1rem;
+  /* 16px — page content padding */
+  --density-section: 1rem;
+  /* 16px — gap between sections */
+  --density-page-title: 1.25rem;
+  /* 20px — page title font-size */
+
+  /* Standard element height (btn, input, select, tabs) */
+  --density-element-xs: 1.5rem;
+  /* 24px — extra small */
+  --density-element-sm: 1.75rem;
+  /* 28px — small */
+  --density-element: 2rem;
+  /* 32px — default */
+  --density-element-lg: 2.25rem;
+  /* 36px — large */
+  --density-element-xl: 2.75rem;
+  /* 44px — extra large (login forms) */
+
+  /* Card padding */
+  --density-card: 1rem;
+  /* 16px — was 1.5rem/24px */
+
+  /* Dialog */
+  --density-dialog: 1.25rem;
+  /* 20px — was 1.5rem/24px */
+
+  /* Table */
+  --density-table-head: 2rem;
+  /* 32px — was 2.5rem/40px */
+
+  /* Single-component tokens (used via var() directly) */
+  --density-popover: 0.75rem;
+  /* 12px */
+  --density-sheet: 0.75rem;
+  /* 12px */
+  --density-accordion: 0.625rem;
+  /* 10px */
+  --density-menu-item-py: 0.25rem;
+  /* 4px */
+
+  /* Touch target floor — Digital Agency hard rule (44 CSS px), enforces
+     WCAG 2.1 SC 2.5.5. Interactive elements smaller than this MUST have
+     a transparent ::before pseudo-element padding to reach 44×44. */
+  --touch-target-min: 44px;
+
+  /* ===================================
+   * ASPECT RATIOS — Decorative only (NOT for type/spacing — see plan).
+   * Reject golden ratio 1.618 as a scale ratio; use it ONLY for media.
+   * =================================== */
+  --aspect-square: 1 / 1;
+  /* gallery tile */
+  --aspect-photo: 4 / 3;
+  /* photo card */
+  --aspect-photo-3-2: 3 / 2;
+  /* DSLR */
+  --aspect-video: 16 / 9;
+  /* hero banner */
+  --aspect-cinematic: 21 / 9;
+  /* cinematic banner */
+  --aspect-silver: 1.4142;
+  /* 白銀比 (hakuginhi) — A4, manga, Horyuji temple */
+  --aspect-golden: 1.618;
+  /* 黄金比 — Western art convention */
+
+  /* ===================================
+   * LAYOUT TOKENS
+   * =================================== */
+  --header-height: 3rem;
+  /* 48px — was 4rem/64px */
+  --sidebar-width: 16rem;
+  /* 256px */
+  --sidebar-collapsed-width: 4rem;
+  /* 64px */
+  --sidebar-transition: 300ms;
+  --content-sidebar-width: 20rem;
+  /* 320px - for PageContainer sidebar */
+  --container-max-width: 1280px;
+
+  /* ===================================
+   * BORDER & RADIUS TOKENS
+   * =================================== */
+  --radius: 0.375rem;
+  /* 6px */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-full: 9999px;
+
+  /* Border widths */
+  --border-width: 1px;
+  --border-width-2: 2px;
+  --border-width-4: 4px;
+
+  /* ===================================
+   * SHADOW TOKENS
+   * =================================== */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+
+  /* ===================================
+   * Z-INDEX TOKENS
+   * =================================== */
+  --z-0: 0;
+  --z-10: 10;
+  --z-20: 20;
+  --z-30: 30;
+  --z-40: 40;
+  --z-50: 50;
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+
+  /* ===================================
+   * TRANSITION & ANIMATION TOKENS
+   * =================================== */
+  --transition-fast: 150ms;
+  --transition-base: 200ms;
+  --transition-slow: 300ms;
+  --transition-slower: 500ms;
+
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ===================================
+   * OPACITY TOKENS
+   * =================================== */
+  --opacity-0: 0;
+  --opacity-5: 0.05;
+  --opacity-10: 0.1;
+  --opacity-20: 0.2;
+  --opacity-30: 0.3;
+  --opacity-40: 0.4;
+  --opacity-50: 0.5;
+  --opacity-60: 0.6;
+  --opacity-70: 0.7;
+  --opacity-80: 0.8;
+  --opacity-90: 0.9;
+  --opacity-100: 1;
+}
+
+/* ============================================================================
+ * TENANT THEMES — Phase C extension
+ *
+ * Per-tenant brand overrides applied via `data-tenant="<slug>"` attribute on
+ * <html>, <body>, or any subtree. Framework defaults stay neutral (SmartHR
+ * MAIN blue) so the canonical Omnify UI library is brand-agnostic — tenants
+ * opt in by setting the attribute.
+ *
+ * To add a new tenant: copy a block, replace the slug + the OKLCH values.
+ * Every brand color must satisfy 渋み (chroma ≤ 0.18 for primaries) per the
+ * design foundation; verify with `python -c "..."` from the convergent doc.
+ * ============================================================================ */
+
+/* Betoya / ベト屋 — Vietnamese restaurant brand
+ * Source: https://betoya.jp Elementor global colors
+ *   --e-global-color-primary  = #009444 → oklch(58% 0.159 150)  Vietnam green
+ *   --e-global-color-secondary= #FFC20E → oklch(85% 0.172 85)   golden yellow
+ *   --e-global-color-text     = #171614 → oklch(20% 0.004 85)   warm off-black
+ * Brand identity: Vietnam flag green + star yellow — culturally appropriate
+ * for a Vietnamese restaurant in Tokyo (Jimbocho, Kanda branches).
+ */
+[data-tenant="betoya"] {
+  /* Semantic primary → Vietnam green (chroma 0.159 ≤ 渋み limit 0.18 ✓) */
+  --primary: oklch(58% 0.159 150);
+  --primary-foreground: oklch(99% 0.002 60);
+  --ring: oklch(58% 0.159 150);
+
+  /* Brand text is a light-surface preference. The semantic foreground tokens
+     below consume it only while the document is not in dark mode. */
+  --tenant-foreground: oklch(20% 0.004 85);
+
+  /* Brand-specific tokens — accessible directly via bg-brand-* / text-brand-* */
+  --color-brand-betoya-primary: #009444;
+  /* Vietnam green */
+  --color-brand-betoya-secondary: #ffc20e;
+  /* golden yellow */
+  --color-brand-betoya-accent: #00b856;
+  /* brighter green */
+  --color-brand-betoya-attention: #f95c39;
+  /* orange-red highlight (chroma 0.199, used sparingly) */
+  --color-brand-betoya-text: #171614;
+  /* warm off-black */
+}
+
+/* A brand-provided text color is authored for the brand's light surfaces.
+ * Keep it separate from semantic foreground tokens so it cannot override the
+ * contrast-safe dark palette through custom-property inheritance on <body>.
+ */
+:root:not(.dark)[data-tenant],
+:root:not(.dark) [data-tenant] {
+  --foreground: var(--tenant-foreground, oklch(20% 0.006 60));
+  --card-foreground: var(--tenant-foreground, oklch(20% 0.006 60));
+  --popover-foreground: var(--tenant-foreground, oklch(20% 0.006 60));
+}
+
+/* ============================================================================
+ * DENSITY MODES — Phase C
+ *
+ * Three runtime-switchable density modes attached to <html> or <body> via
+ * `data-density="<mode>"`. Default (no attribute) keeps the historical 32 px
+ * control + 16 px card padding scale that the codebase ships with today.
+ *
+ * Compact: kintone-style data-dense list views, mobile master-detail
+ * Comfortable: public marketing surfaces, accessibility-first comply with
+ *              the Digital Agency 44 px touch target without per-element
+ *              padding hacks.
+ *
+ * Source: design-foundations-japanese.md §"Density modes"
+ * ============================================================================ */
+
+/* Compact — kintone / dense table style */
+[data-density="compact"] {
+  /* Control heights shift down one step */
+  --density-element-xs: 1.25rem;
+  /* 20px */
+  --density-element-sm: 1.5rem;
+  /* 24px */
+  --density-element: 1.75rem;
+  /* 28px — was 32 */
+  --density-element-lg: 2rem;
+  /* 32px — was 36 */
+  --density-element-xl: 2.25rem;
+  /* 36px — was 44 */
+
+  /* Card / dialog padding tightens */
+  --density-card: 0.75rem;
+  /* 12px — was 16 */
+  --density-dialog: 1rem;
+  /* 16px — was 20 */
+
+  /* Page chrome tightens */
+  --density-page: 0.75rem;
+  /* 12px — was 16 */
+  --density-section: 0.75rem;
+  /* 12px — was 16 */
+  --header-height: 2.5rem;
+  /* 40px — was 48 */
+  --density-table-head: 1.75rem;
+  /* 28px — was 32 */
+}
+
+/* Comfortable — public-facing, Digital Agency 44 px touch target */
+[data-density="comfortable"] {
+  /* Control heights shift up one step */
+  --density-element-xs: 2rem;
+  /* 32px */
+  --density-element-sm: 2.25rem;
+  /* 36px */
+  --density-element: 2.75rem;
+  /* 44px — was 32, hits Digital Agency floor */
+  --density-element-lg: 3rem;
+  /* 48px */
+  --density-element-xl: 3.5rem;
+  /* 56px — login forms */
+
+  /* Card / dialog padding loosens */
+  --density-card: 1.5rem;
+  /* 24px — was 16 */
+  --density-dialog: 2rem;
+  /* 32px — was 20 */
+
+  /* Page chrome loosens */
+  --density-page: 1.5rem;
+  /* 24px — was 16 */
+  --density-section: 1.5rem;
+  /* 24px — was 16 */
+  --header-height: 3.5rem;
+  /* 56px — was 48 */
+  --density-table-head: 2.5rem;
+  /* 40px — was 32 */
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.185 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.185 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.68 0.13 240);
+  --primary-foreground: oklch(0.145 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.76 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.637 0.237 25.331);
+  --border: oklch(0.32 0 0);
+  --input: oklch(0.32 0 0);
+  --ring: oklch(0.68 0.13 240);
+
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.32 0 0);
+  --sidebar-ring: oklch(0.68 0.13 240);
+
+  /* Semantic colors (dark mode) */
+  --success: #34d399;
+  --success-foreground: #022c22;
+  --warning: #fbbf24;
+  --warning-foreground: #422006;
+  --info: #60a5fa;
+  --info-foreground: #172554;
+  --error: #f87171;
+  --error-foreground: #450a0a;
+
+  /* Dark mode gray scale */
+  --gray-50: #1f2937;
+  --gray-100: #374151;
+  --gray-200: #4b5563;
+  --gray-300: #6b7280;
+  --gray-400: #9ca3af;
+  --gray-500: #d1d5db;
+  --gray-600: #e5e7eb;
+  --gray-700: #f3f4f6;
+  --gray-800: #f9fafb;
+  --gray-900: #ffffff;
+
+  /* Dark mode blue palette */
+  --blue-50: #1e3a8a;
+  --blue-100: #1d4ed8;
+  --blue-500: #3b82f6;
+  --blue-600: #60a5fa;
+  --blue-700: #93c5fd;
+}
+
+/* ===================================
+ * TAILWIND V4 THEME MAPPING
+ * Map CSS variables to Tailwind classes
+ * =================================== */
+@theme inline {
+  /* Colors */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Sidebar colors */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Semantic colors */
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-error: var(--error);
+  --color-error-foreground: var(--error-foreground);
+
+  /* Gray palette - making available as Tailwind classes */
+  --color-gray-50: var(--gray-50);
+  --color-gray-100: var(--gray-100);
+  --color-gray-200: var(--gray-200);
+  --color-gray-300: var(--gray-300);
+  --color-gray-400: var(--gray-400);
+  --color-gray-500: var(--gray-500);
+  --color-gray-600: var(--gray-600);
+  --color-gray-700: var(--gray-700);
+  --color-gray-800: var(--gray-800);
+  --color-gray-900: var(--gray-900);
+
+  /* Blue palette */
+  --color-blue-50: var(--blue-50);
+  --color-blue-100: var(--blue-100);
+  --color-blue-500: var(--blue-500);
+  --color-blue-600: var(--blue-600);
+  --color-blue-700: var(--blue-700);
+
+  /* Density spacing — creates p-page, h-element, gap-section, etc. */
+  --spacing-page: var(--density-page);
+  --spacing-section: var(--density-section);
+  --spacing-element-xs: var(--density-element-xs);
+  --spacing-element-sm: var(--density-element-sm);
+  --spacing-element: var(--density-element);
+  --spacing-element-lg: var(--density-element-lg);
+  --spacing-element-xl: var(--density-element-xl);
+  --spacing-card: var(--density-card);
+  --spacing-dialog: var(--density-dialog);
+  --spacing-header: var(--header-height);
+  --spacing-table-head: var(--density-table-head);
+
+  /* Density font sizes — creates text-page-title */
+  --font-size-page-title: var(--density-page-title);
+
+  /* Border radius */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* ===================================
+ * BASE STYLES
+ * Default typography and element styles
+ * =================================== */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    /* Japanese-first font stack — Ameba Spindle convergent ordering. */
+    font-family: var(--font-sans-jp);
+    /* JP enterprise body density: 14 px / 1.7 line-height. Applied here on
+       <body> instead of via the rem unit so the root rem stays at 16 px and
+       all rem-based spacing/density tokens stay aligned to the 4 px grid.
+       See the typography token block at the top of this file for the bugfix
+       history. */
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+  }
+
+  /**
+  * Default typography styles for HTML elements (h1-h4, p, label, button, input).
+  * These are in @layer base, so Tailwind utility classes (like text-sm, text-lg) automatically override them.
+  *
+  * Phase B: line-height-tight (1.25) on headings per JMDC convention; body
+  * inherits leading-body (1.7) from <body>. Headings keep medium weight (500)
+  * per freee vibes — 700 reserved for explicit emphasis.
+  */
+
+  html {
+    font-size: var(--font-size);
+  }
+
+  h1 {
+    font-size: var(--heading-h1);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--leading-tight);
+  }
+
+  h2 {
+    font-size: var(--heading-h2);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--leading-tight);
+  }
+
+  h3 {
+    font-size: var(--heading-h3);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--leading-tight);
+  }
+
+  h4 {
+    font-size: var(--heading-h4);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--leading-tight);
+  }
+
+  label {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--leading-normal);
+  }
+
+  button {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--leading-normal);
+  }
+
+  input {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-normal);
+    line-height: var(--leading-normal);
+  }
+}
+
+/*
+ * Font tokens — wired to the self-hosted @fontsource faces in
+ * src/app/fonts.css (#2699; it was next/font/google until that build-time
+ * fetch broke a production deploy), applied via the `.font-vars` class which sets
+ * `--font-sans` on <html>. Tailwind v4 needs this @theme mapping so that
+ * `font-sans` utility resolves to the loaded variable font.
+ */
+@theme inline {
+  --font-sans: var(--font-sans);
+  --font-heading: var(--font-sans);
+}

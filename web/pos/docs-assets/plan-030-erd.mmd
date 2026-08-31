@@ -1,0 +1,77 @@
+erDiagram
+    BRANCH ||--o{ TILL : "co"
+    TILL ||--o{ TILL_SESSION : "tao nhieu ca"
+    TILL ||--o| TILL_SESSION : "current_session (1 ca mo)"
+    TILL_SESSION ||--o{ TILL_CASH_DENOMINATION_COUNT : "dem tien (opening/closing)"
+    TILL_SESSION ||--o{ TILL_SETTLEMENT_TENDER_DETAIL : "doi soat tender"
+    TILL_SESSION ||--o{ TILL_CASH_EVENT : "nop/rut ket"
+    TILL_SESSION ||--o{ ORDER_PAYMENT : "doanh thu thuoc ca"
+    DENOMINATION ||--o{ TILL_CASH_DENOMINATION_COUNT : "menh gia"
+    TILL_TENDER_TYPE ||--o{ TILL_SETTLEMENT_TENDER_DETAIL : "loai tender"
+    PAYMENT_METHOD ||--o{ ORDER_PAYMENT : "phuong thuc"
+    TILL_TENDER_TYPE }o--o| PAYMENT_METHOD : "map payment_method_code"
+
+    TILL {
+        uuid id PK
+        string till_code
+        uuid branch_id FK
+        uuid current_session_id FK "nullable - khoa ca"
+        string default_currency_code
+        decimal variance_tolerance_amount
+    }
+    TILL_SESSION {
+        uuid id PK
+        string session_code
+        uuid till_id FK
+        string status "open|closing|settled|abandoned"
+        uuid opened_by_id
+        string opener_name "nullable"
+        decimal opening_float_amount
+        decimal expected_cash_amount
+        decimal counted_cash_amount
+        decimal cash_variance_amount
+    }
+    DENOMINATION {
+        uuid id PK
+        string currency_code
+        decimal value
+        string kind "note|coin"
+    }
+    TILL_CASH_DENOMINATION_COUNT {
+        uuid id PK
+        uuid till_session_id FK
+        string count_phase "opening|closing"
+        uuid denomination_id FK
+        int quantity
+        decimal subtotal_amount
+    }
+    TILL_TENDER_TYPE {
+        uuid id PK
+        string tender_key
+        string category "cash|card|qr|emoney"
+        string parent_tender_key "nullable"
+        string payment_method_code "nullable"
+    }
+    TILL_SETTLEMENT_TENDER_DETAIL {
+        uuid id PK
+        uuid till_session_id FK
+        uuid till_tender_type_id FK
+        decimal expected_amount "nullable"
+        decimal declared_gross_amount "uriage"
+        decimal declared_cancel_amount "torikeshi"
+        decimal declared_amount "net"
+        decimal variance_amount "nullable"
+    }
+    TILL_CASH_EVENT {
+        uuid id PK
+        uuid till_session_id FK
+        string event_type "paid_in|paid_out|..."
+        decimal amount
+        string reason
+    }
+    ORDER_PAYMENT {
+        uuid id PK
+        uuid till_session_id FK "nullable - dong dau ca"
+        decimal amount
+        string status
+    }

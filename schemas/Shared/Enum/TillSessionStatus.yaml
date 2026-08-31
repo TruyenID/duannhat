@@ -1,0 +1,72 @@
+# ==============================================================================
+# Till Session Status Enum (レジ締めセッションのステータス / Trạng thái ca thu ngân)
+# ==============================================================================
+#
+# Plan 030 — Cashier Shift (ARTS ODM 7.3 alignment).
+#
+# Workflow trạng thái của một "ca" (TillSession):
+#
+#   open ──► closing ──► settled
+#     │         │           ▲
+#     │         │           │ manual-settle (plan-032 manager)
+#     │         │           │
+#     ├─────────┴──────► abandoned (cashier-driven hoặc manager force — plan-032)
+#     │         │
+#     └─────────┴──────► expired (system-driven, plan-032 scheduler)
+#
+# Values:
+#   - open: Ca đang mở. Cashier đang ghi nhận đơn / thanh toán.
+#           Mỗi OrderPayment tạo trong khoảng này được dán till_session_id.
+#           Backend từ chối POST /pos/orders + /pos/payments nếu KHÔNG có
+#           session ở trạng thái này (409 NO_OPEN_SHIFT — ResolveOpenTillSession).
+#
+#   - closing: Cashier đã bắt đầu kết ca (lưu nháp PATCH …/draft) nhưng chưa
+#              chốt. Tiếp tục cho phép `save draft` (overwrite) và `close`.
+#              KHÔNG cho phép tạo cash-event / order mới.
+#
+#   - settled: Ca đã chốt thành công (POST …/close hoặc plan-032 …/manual-settle).
+#              Bất biến — không reopen. Counts (closing) + SettlementTenderDetail
+#              đã được persist; Till.current_session_id đã được clear.
+#
+#   - abandoned: Ca mở nhầm / sai operator / chuyển ca / manager force-abandon
+#                (plan-032). Cashier-driven path chỉ cho phép khi CHƯA có
+#                OrderPayment (409 SHIFT_HAS_PAYMENTS). Manager force-abandon
+#                (plan-032) bỏ qua check này và bổ sung `force_abandoned=true` +
+#                `force_abandoned_by_id` cho audit. Opening counts giữ lại;
+#                payments giữ till_session_id (revenue reports vẫn aggregate).
+#
+#   - expired: NEW (plan-032) — system-driven terminal status. Scheduler
+#              `tills:expire-stale-shifts` flip open/closing → expired khi
+#              opened_at quá ngưỡng (default 48h) VÀ không có payment trong
+#              activity window (default 6h). closed_by_id stays NULL (no human).
+#              Manager có thể chuyển expired → settled qua manual-settle để
+#              reconcile sau khi có paper count. Till.current_session_id được
+#              release ngay khi expire (unblock cashier kế tiếp + plan-031
+#              currency guard).
+#
+# Used in:
+#   - TillSession.status
+#   - Authorization & state-machine guards trong TillSessionService.
+#   - Reconciliation query: WHERE status IN ('open','closing','settled')
+#   - Plan-032 scheduler query: WHERE status IN ('open','closing') AND
+#     opened_at < threshold AND NOT EXISTS recent_payments
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: レジセッションステータス
+  en: Till Session Status
+  vi: Trạng thái ca thu ngân
+
+values:
+  - value: open
+    label: { ja: 営業中, en: Open, vi: Đang mở }
+  - value: closing
+    label: { ja: 締め作業中, en: Closing, vi: Đang kết ca }
+  - value: settled
+    label: { ja: 締め済み, en: Settled, vi: Đã kết ca }
+  - value: abandoned
+    label: { ja: 取消, en: Abandoned, vi: Đã huỷ }
+  - value: expired
+    label: { ja: 期限切れ, en: Expired, vi: Hết hạn }

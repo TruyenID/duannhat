@@ -1,0 +1,4 @@
+POST /materials/bulk-delete
+HTTP=200 (exp 200)
+--- body(head) ---
+{"message":"2 items deleted.","deleted":2,"errors":[]}

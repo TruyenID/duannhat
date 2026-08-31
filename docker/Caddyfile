@@ -1,0 +1,204 @@
+# Caddy reverse proxy for the Mac mini local server.
+#
+# Two access patterns:
+#  1. LAN (same wifi as the Mac mini)
+#     - Resolve via mDNS: the Mac mini broadcasts itself as `tempo.local`.
+#     - Subdomains use the same .local TLD so any device on the LAN can hit
+#       http://api.tempo.local without DNS config.
+#     - HTTP only (no cert hassle on internal traffic).
+#  2. Remote (Cloudflare Tunnel)
+#     - Tunnel terminates HTTPS at the edge; this Caddy only sees plain HTTP
+#       coming in over the cloudflared connection. Configure the tunnel to
+#       forward each public hostname → http://caddy:80.
+#
+# NOTE: Caddyfile uses NEWLINES as separators, NOT semicolons.
+# Adjust hostnames below if your local mDNS name differs (see scripts/
+# server-setup-mac.sh which sets it to `tempo`).
+
+{
+	# Auto HTTPS is disabled because internal traffic is HTTP and external is
+	# already HTTPS at the Cloudflare edge.
+	auto_https off
+	admin off
+	log {
+		output stdout
+		level INFO
+	}
+}
+
+# ---- API (Laravel) ----------------------------------------------------------
+http://api.tempo.local, http://api.localhost {
+	reverse_proxy app:8000
+}
+
+# ---- admin-web (Next.js) ----------------------------------------------------
+http://admin.tempo.local, http://admin.localhost {
+	reverse_proxy admin-web:5430
+}
+
+# ---- customer-web (Next.js) -------------------------------------------------
+http://shop.tempo.local, http://shop.localhost {
+	reverse_proxy customer-web:5450
+}
+
+# ---- pos-web (Vite SPA) -----------------------------------------------------
+http://pos.tempo.local, http://pos.localhost {
+	reverse_proxy pos-web:5440
+}
+
+# ---- godx-kds (PWA bếp) -----------------------------------------------------
+http://kds.tempo.local, http://kds.localhost {
+	reverse_proxy kds-web:5460
+}
+
+# ---- godx-kiosk (Expo web export) -------------------------------------------
+http://kiosk.tempo.local, http://kiosk.localhost {
+	reverse_proxy kiosk-web:5480
+}
+
+# ---- Reverb WebSocket (broadcast) -------------------------------------------
+http://ws.tempo.local, http://ws.localhost {
+	reverse_proxy reverb:8080
+}
+
+# ---- MinIO (file storage, dev access) ---------------------------------------
+http://files.tempo.local, http://files.localhost {
+	reverse_proxy minio:9000
+}
+
+# ---- Mailpit (mail catcher UI) ----------------------------------------------
+http://mail.tempo.local, http://mail.localhost {
+	reverse_proxy mailpit:8025
+}
+
+# ---- admin-web BFF origin (:5430) -------------------------------------------
+# admin-web's apiFetch is SAME-ORIGIN only: it calls /api/v1/* on whatever host
+# the browser loaded, and expects the edge to rewrite those to Laravel. On
+# Amplify that's a custom rewrite rule; next.config.ts deliberately returns no
+# rewrites when NODE_ENV=production, so a standalone build on this box has no
+# proxy at all and every /api/* 404s (skeletons spin forever on /select-context).
+#
+# Caddy plays Amplify here: it owns :5430 — the port the admin cloudflared
+# tunnel points at, so the public URL survives — and the Next standalone server
+# moved to :5432 (see ~/Library/LaunchAgents/com.godx.admin-web.plist).
+# Requests stay same-origin, so no CORS is involved on this path.
+:5430 {
+	@backend path /api/* /auth/* /broadcasting/* /sanctum/* /storage/* /up
+	handle @backend {
+		reverse_proxy app:8000
+	}
+
+	# Mirror next.config.ts's `/s3/:path*` → MinIO bucket "tempo" rewrite.
+	handle /s3/* {
+		uri replace /s3/ /tempo/
+		reverse_proxy minio:9000
+	}
+
+	# Reverb (Pusher protocol) — reverse_proxy upgrades WebSockets on its own.
+	handle /app/* {
+		reverse_proxy reverb:8080
+	}
+	handle /apps/* {
+		reverse_proxy reverb:8080
+	}
+
+	handle {
+		reverse_proxy host.docker.internal:5432
+	}
+}
+
+# ---- Portal index (link directory) ------------------------------------------
+# IMPORTANT: do NOT add `http://localhost` here — that would short-circuit the
+# `:80` catch-all below for ANY localhost test (curl from Mac mini → would hit
+# portal even for /api/*, /tempo/* etc.). Bare-localhost requests fall through
+# to `:80` where path-based routing applies.
+http://tempo.local {
+	reverse_proxy portal:80
+}
+
+# ---- Fallback: catch-all on :80 for Cloudflare Tunnel + bare-IP access ------
+# When Cloudflare Tunnel forwards traffic from random trycloudflare URLs,
+# Host header is the tunnel URL (not in our matchers). We do PATH-based
+# routing here + add explicit CORS headers because cloudflared occasionally
+# strips them from Laravel's PHP-built-in-server HTTP/1.0 responses.
+#
+# SECURITY: Origin is matched against an explicit allowlist sourced from the
+# CORS_ALLOWED_ORIGINS env var (via `{$CADDY_CORS_ALLOWED_ORIGINS}` substitution).
+# We DO NOT reflect arbitrary Origins back — only origins on the allowlist
+# receive `Access-Control-Allow-Origin` + `Allow-Credentials`. This prevents
+# CSRF from random sites + same-TLD attackers (e.g. another trycloudflare app).
+(cors_allow) {
+	# `defer` so these headers are set even when reverse_proxy generates the
+	# response, and added BEFORE any downstream Vary header.
+	header {
+		Access-Control-Allow-Origin "{http.request.header.Origin}"
+		Access-Control-Allow-Credentials "true"
+		Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+		Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, X-CSRF-TOKEN, Accept, Accept-Language, X-Inertia, Idempotency-Key, X-Idempotency-Key, X-Shop-Slug, X-Brand-Slug, X-Device-Token, X-Device-Id"
+		Access-Control-Max-Age "86400"
+		Vary "Origin"
+		defer
+	}
+}
+
+:80 {
+	# Caddy auto-orders `handle` blocks by declaration order. Bare `handle` (no
+	# matcher) at the end acts as the catch-all fallback. The other `handle`s
+	# with matchers preempt the fallback for matching requests.
+
+	# 1. MinIO files — bucket name "tempo" served at /tempo/*.
+	handle /tempo/* {
+		reverse_proxy minio:9000
+	}
+
+	# 2. CORS preflight with allowed Origin → 204 + ACAO header.
+	@preflight_ok {
+		method OPTIONS
+		path /api/* /up /sanctum/* /broadcasting/* /storage/*
+		header_regexp Origin {$CADDY_CORS_ORIGIN_REGEX:^https?://([a-z0-9-]+\.)?tempo\.local(:[0-9]+)?$}
+	}
+	handle @preflight_ok {
+		import cors_allow
+		respond 204
+	}
+
+	# 3. CORS preflight without allowed Origin → 204 without ACAO (browser blocks).
+	@preflight_any {
+		method OPTIONS
+		path /api/* /up /sanctum/* /broadcasting/* /storage/*
+	}
+	handle @preflight_any {
+		respond 204
+	}
+
+	# 4. API requests with allowed Origin → backend + ACAO header.
+	@cors_ok {
+		path /api/* /up /sanctum/* /broadcasting/* /storage/*
+		header_regexp Origin {$CADDY_CORS_ORIGIN_REGEX:^https?://([a-z0-9-]+\.)?tempo\.local(:[0-9]+)?$}
+	}
+	handle @cors_ok {
+		import cors_allow
+		reverse_proxy app:8000
+	}
+
+	# 5. API requests without (or with non-allowed) Origin → backend, no ACAO.
+	@api_paths path /api/* /up /sanctum/* /broadcasting/* /storage/*
+	handle @api_paths {
+		reverse_proxy app:8000
+	}
+
+	# 6. Reverb WebSocket (Pusher protocol) + management API. Browser hits
+	#    wss://tunnel/app/<app-key> for the WS upgrade; Caddy's reverse_proxy
+	#    handles `Upgrade: websocket` automatically.
+	handle /app/* {
+		reverse_proxy reverb:8080
+	}
+	handle /apps/* {
+		reverse_proxy reverb:8080
+	}
+
+	# 7. Everything else → portal (link directory).
+	handle {
+		reverse_proxy portal:80
+	}
+}

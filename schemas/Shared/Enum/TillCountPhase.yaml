@@ -1,0 +1,34 @@
+# ==============================================================================
+# Till Count Phase Enum (現金カウント段階 / Giai đoạn đếm tiền)
+# ==============================================================================
+#
+# Plan 030 — Cashier Shift.
+#
+# Phân biệt 2 lần đếm tiền vật lý trong vòng đời một TillSession:
+#
+#   opening: Lần đếm khi MỞ ca — float đầu ca (tiền lẻ để trả).
+#            Ghi nhận tại POST /pos/till/sessions (mở ca).
+#            Σ(value × quantity) = TillSession.opening_float_amount.
+#
+#   closing: Lần đếm khi KẾT ca — tổng tiền mặt trong két lúc đóng ca.
+#            Ghi nhận tại POST /pos/till/sessions/{id}/close.
+#            Σ(value × quantity) = TillSession.counted_cash_amount,
+#            so với expected_cash → cash_variance_amount.
+#
+# Used in:
+#   - TillCashDenominationCount.count_phase (unique chỉ số: (session_id, count_phase, denomination_id))
+#   - UI label trên màn hình mở/kết ca.
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: 現金カウント段階
+  en: Till Count Phase
+  vi: Giai đoạn đếm tiền
+
+values:
+  - value: opening
+    label: { ja: 開始時, en: Opening, vi: Đầu ca }
+  - value: closing
+    label: { ja: 締め時, en: Closing, vi: Cuối ca }

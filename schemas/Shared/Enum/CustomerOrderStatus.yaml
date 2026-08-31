@@ -1,0 +1,37 @@
+kind: enum
+
+displayName:
+  ja: 注文ステータス
+  en: Order Status
+  vi: Trạng thái đơn hàng
+
+values:
+  - value: pending
+    label: { ja: 承認待ち, en: Pending, vi: Chờ duyệt }
+  # plan-037 — takeaway counter-pay review step: the order waits for the
+  # customer to confirm before it proceeds. Used across CustomerOrderController,
+  # CustomerOrderService and the ExpireAwaitingConfirmationOrders command; the
+  # value was missing from this YAML (regen would have dropped it and broken
+  # those call sites).
+  - value: awaiting_confirmation
+    label: { ja: 確認待ち, en: Awaiting confirmation, vi: Chờ xác nhận }
+  - value: confirmed
+    label: { ja: 確認済み, en: Confirmed, vi: Đã xác nhận }
+  - value: open
+    label: { ja: 受付中, en: Open, vi: Đang mở }
+  - value: dining
+    label: { ja: 食事中, en: Dining, vi: Đang ăn }
+  - value: checkout
+    label: { ja: 会計待ち, en: Checkout, vi: Chờ thanh toán }
+  - value: paying
+    label: { ja: 支払い中, en: Paying, vi: Đang trả tiền }
+  - value: closed
+    label: { ja: 完了, en: Completed, vi: Hoàn thành }
+  - value: voided
+    label: { ja: 無効, en: Voided, vi: Đã hủy }
+  # issue #512 — takeaway counter-pay order whose payment window elapsed. The
+  # CancelOverdueTakeawayOrders job stamps this (distinct from `voided`, which
+  # is a manual cancel) so admins can tell an auto-lapsed order from a
+  # staff-voided one. Consistent with plan-032 till-session `expired`.
+  - value: expired
+    label: { ja: 期限切れ, en: Expired, vi: Hết hạn }

@@ -1,0 +1,48 @@
+# Gán vai trò cho người dùng, có phạm vi tuỳ chọn theo tổ chức hoặc chi nhánh.
+# Không phải pivot thuần: nó mang thêm cột phạm vi nên cần khoá chính riêng, và
+# cùng một (user, role) có thể xuất hiện nhiều lần ở các phạm vi khác nhau.
+kind: object
+
+options:
+  timestamps: true
+  indexes:
+    - columns: [user_id, role_id]
+    - columns: [user_id, organization_id]
+    - columns: [user_id, branch_id]
+
+properties:
+  role:
+    type: Association
+    relation: ManyToOne
+    target: Role
+    onDelete: CASCADE
+    displayName:
+      ja: ロール
+      en: Role
+      vi: Vai trò
+
+  user:
+    type: Association
+    relation: ManyToOne
+    target: User
+    onDelete: CASCADE
+    displayName:
+      ja: ユーザー
+      en: User
+      vi: Người dùng
+
+  organization_id:
+    type: Uuid
+    nullable: true
+    displayName:
+      ja: 組織ID
+      en: Organization ID
+      vi: ID tổ chức
+
+  branch_id:
+    type: Uuid
+    nullable: true
+    displayName:
+      ja: 支店ID
+      en: Branch ID
+      vi: ID chi nhánh

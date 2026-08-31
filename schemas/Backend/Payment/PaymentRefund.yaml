@@ -1,0 +1,166 @@
+# =============================================================================
+# PaymentRefund — append-only independent refund operation
+# =============================================================================
+#
+# Each row owns one positive requested amount and stable provider identity. The
+# captured attempt remains succeeded; refundable balance is enforced under lock.
+# =============================================================================
+
+displayName: { en: Payment Refund, ja: 返金, vi: Hoàn tiền }
+kind: object
+
+options:
+  id: Uuid
+  timestamps: true
+  softDelete: false
+  indexes:
+    - columns: [connection_id, idempotency_key]
+      unique: true
+      name: payment_refunds_connection_idempotency_unique
+    - columns: [connection_id, environment, provider_refund_id]
+      unique: true
+      name: payment_refunds_provider_identity_unique
+    - columns: [payment_attempt_id, state, created_at]
+      name: payment_refunds_attempt_state
+    - columns: [state, next_reconciliation_at]
+      name: payment_refunds_reconciliation_due
+    - columns: [organization_id, branch_id, created_at]
+
+properties:
+  organization:
+    # Immutable Tempo tenant snapshot.
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: RESTRICT
+    displayName: { en: Organization, ja: 組織, vi: Tổ chức }
+  branch:
+    # Shop scope of the original captured attempt.
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    onDelete: RESTRICT
+    displayName: { en: Shop, ja: 店舗, vi: Cửa hàng }
+  payment_attempt:
+    # Original captured/succeeded operation; never mutated by refund state changes.
+    type: Association
+    relation: ManyToOne
+    target: PaymentAttempt
+    onDelete: RESTRICT
+    displayName: { en: Payment Attempt, ja: 決済試行, vi: Lần thử thanh toán }
+  connection:
+    # Same immutable merchant connection as the original attempt.
+    type: Association
+    relation: ManyToOne
+    target: PaymentGatewayConnection
+    onDelete: RESTRICT
+    displayName: { en: Connection, ja: 接続, vi: Kết nối }
+  state:
+    # Normalized append-only refund lifecycle.
+    type: EnumRef
+    enum: PaymentRefundState
+    default: prepared
+    filterable: true
+    displayName: { en: State, ja: 状態, vi: Trạng thái }
+  provider:
+    # Immutable adapter snapshot from the original attempt.
+    type: EnumRef
+    enum: PaymentGatewayProviderCode
+    displayName: { en: Provider, ja: プロバイダー, vi: Nhà cung cấp }
+  environment:
+    # Immutable provider environment from the original attempt.
+    type: EnumRef
+    enum: PaymentGatewayEnvironment
+    displayName: { en: Environment, ja: 環境, vi: Môi trường }
+  currency:
+    # Exact captured currency; refund cannot convert currencies.
+    type: String
+    length: 3
+    rules: { uppercase: true, alpha: true }
+    displayName: { en: Currency, ja: 通貨, vi: Tiền tệ }
+  amount_minor:
+    # Positive refund reservation in captured currency minor units.
+    type: BigInt
+    unsigned: true
+    rules: { min: 1 }
+    displayName: { en: Amount Minor, ja: 最小通貨単位金額, vi: Số tiền đơn vị nhỏ }
+  idempotency_key:
+    # Stable caller command identity; payload mismatch is rejected.
+    type: String
+    length: 191
+    displayName: { en: Idempotency Key, ja: 冪等キー, vi: Khoá idempotency }
+  request_fingerprint:
+    # SHA-256 hex of original attempt, amount, reason, and immutable command data.
+    type: String
+    length: 64
+    rules: { alphaNum: true, lowercase: true }
+    displayName: { en: Request Fingerprint, ja: リクエストフィンガープリント, vi: Dấu vân tay request }
+  provider_request_key:
+    # Stable provider refund request identity reused for safe retry.
+    type: String
+    length: 191
+    unique: true
+    displayName: { en: Provider Request Key, ja: プロバイダーリクエストキー, vi: Khoá request nhà cung cấp }
+  provider_refund_id:
+    # Safe provider refund identity; null until provider acceptance is known.
+    type: String
+    length: 191
+    nullable: true
+    displayName: { en: Provider Refund ID, ja: プロバイダー返金ID, vi: ID hoàn tiền nhà cung cấp }
+  provider_status:
+    # Raw status code/name only; no provider response or exception text.
+    type: String
+    length: 100
+    nullable: true
+    displayName: { en: Provider Status, ja: プロバイダー状態, vi: Trạng thái nhà cung cấp }
+  reason_code:
+    # Stable safe refund reason category for audit/reporting.
+    type: String
+    length: 100
+    nullable: true
+    displayName: { en: Reason Code, ja: 理由コード, vi: Mã lý do }
+  redacted_summary:
+    # Allowlisted provider result summary after redaction; never raw payload.
+    type: Json
+    nullable: true
+    hidden: true
+    displayName: { en: Redacted Summary, ja: 編集済みサマリー, vi: Tóm tắt đã che }
+  error_code:
+    # Stable typed error code only.
+    type: String
+    length: 100
+    nullable: true
+    displayName: { en: Error Code, ja: エラーコード, vi: Mã lỗi }
+  retry_count:
+    # Recovery attempts using the same provider refund identity/key.
+    type: Int
+    unsigned: true
+    default: 0
+    displayName: { en: Retry Count, ja: 再試行回数, vi: Số lần thử lại }
+  next_reconciliation_at:
+    # Due retrieve/reconciliation time for ambiguous/pending outcomes.
+    type: Timestamp
+    nullable: true
+    displayName: { en: Next Reconciliation At, ja: 次回照合日時, vi: Đối soát tiếp theo }
+  version:
+    # Optimistic transition version incremented under lock.
+    type: BigInt
+    unsigned: true
+    default: 1
+    rules: { min: 1 }
+    displayName: { en: Version, ja: バージョン, vi: Phiên bản }
+  prepared_at:
+    # Reservation/prepare commit timestamp.
+    type: Timestamp
+    useCurrent: true
+    displayName: { en: Prepared At, ja: 準備日時, vi: Chuẩn bị lúc }
+  submitted_at:
+    # First provider dispatch timestamp.
+    type: Timestamp
+    nullable: true
+    displayName: { en: Submitted At, ja: 送信日時, vi: Gửi lúc }
+  finalized_at:
+    # Terminal local finalize timestamp.
+    type: Timestamp
+    nullable: true
+    displayName: { en: Finalized At, ja: 確定日時, vi: Hoàn tất lúc }

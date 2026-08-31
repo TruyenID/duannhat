@@ -1,0 +1,1262 @@
+[
+    {
+        "id": "019f408b-2b81-729f-bcb5-f91300228aa1",
+        "name": "🔥 おすすめ",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-08 07:04:50",
+        "updated_at": "2026-07-08 07:04:50",
+        "deleted_at": null
+    },
+    {
+        "id": "019f408b-2b85-7289-86ec-0ceb772ec4cb",
+        "name": "🍜 メイン",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-08 07:04:50",
+        "updated_at": "2026-07-08 07:04:50",
+        "deleted_at": null
+    },
+    {
+        "id": "019f408b-2b88-70d2-81b0-516f4abcf6ef",
+        "name": "🥗 サイド",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-08 07:04:50",
+        "updated_at": "2026-07-08 07:04:50",
+        "deleted_at": null
+    },
+    {
+        "id": "019f408b-2b8b-725f-a6aa-a114c6bb8a2f",
+        "name": "🥤 ドリンク",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-08 07:04:50",
+        "updated_at": "2026-07-08 07:04:50",
+        "deleted_at": null
+    },
+    {
+        "id": "019f408b-2b8e-7281-af44-33574c269c30",
+        "name": "💰 ランチセット",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-08 07:04:50",
+        "updated_at": "2026-07-08 07:04:50",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6efa-2fb7-73c7-92f3-d24ac20603dd",
+        "name": "フォー",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 07:28:37",
+        "updated_at": "2026-07-17 07:28:37",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6efa-30b5-723e-a72b-fc65dc1b5b60",
+        "name": "お持ち帰りソースつき",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 07:28:38",
+        "updated_at": "2026-07-17 07:28:38",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6efa-30e9-72c9-812b-f34242d2b57b",
+        "name": "30円容器必要",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 07:28:38",
+        "updated_at": "2026-07-17 07:28:38",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6efa-312a-7051-be78-08235d8b2f7f",
+        "name": "バインミー",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 07:28:38",
+        "updated_at": "2026-07-17 07:28:38",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6efa-313e-715c-9a75-533b8626a374",
+        "name": "デザート・飲み物",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 07:28:38",
+        "updated_at": "2026-07-17 07:28:38",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6efa-3179-7363-a5b6-50b4f1cccd8f",
+        "name": "小皿料理・春巻き",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 07:28:38",
+        "updated_at": "2026-07-17 07:28:38",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6efa-322f-730e-b0e2-b99d6adec69a",
+        "name": "オプション用",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 07:28:38",
+        "updated_at": "2026-07-17 07:28:38",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6efa-3266-72b6-91f6-9b6fb938d5fe",
+        "name": "ブン",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 07:28:38",
+        "updated_at": "2026-07-17 07:28:38",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6efa-3465-7116-aa29-441043d485ec",
+        "name": "ホームページ おすすめ",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 07:28:39",
+        "updated_at": "2026-07-17 07:28:39",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6efa-349a-7332-8766-75bef623e8b4",
+        "name": "サラダ・野菜",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 07:28:39",
+        "updated_at": "2026-07-17 07:28:39",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6efa-34b4-714f-8fd6-4e1521e1e12c",
+        "name": "小皿料理",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 07:28:39",
+        "updated_at": "2026-07-17 07:28:39",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6efa-3520-730e-976a-342bc067a633",
+        "name": "アルコール",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 07:28:39",
+        "updated_at": "2026-07-17 07:28:39",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6efa-3625-7214-a060-d25e8049f435",
+        "name": "お持ち帰りドーム",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 07:28:39",
+        "updated_at": "2026-07-17 07:28:39",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6efa-362b-71e9-add9-fc41417d91c4",
+        "name": "お持ち帰り-朝",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 07:28:39",
+        "updated_at": "2026-07-17 07:28:39",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6efa-3660-71a1-a716-288370885866",
+        "name": "春巻き",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 07:28:39",
+        "updated_at": "2026-07-17 07:28:39",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6efa-3736-702b-b6f6-09d5815fa0b1",
+        "name": "お持ち帰り",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 07:28:39",
+        "updated_at": "2026-07-17 07:28:39",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6efa-38a8-7107-8147-c90a3dd95c2d",
+        "name": "オリジナル・グッズ",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 07:28:40",
+        "updated_at": "2026-07-17 07:28:40",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6efa-38db-737e-80d6-fb2e1ecfaa58",
+        "name": "おすすめ",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 07:28:40",
+        "updated_at": "2026-07-17 07:28:40",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6efa-3980-73d7-a72e-ebd7c1ab2987",
+        "name": "その他",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 07:28:40",
+        "updated_at": "2026-07-17 07:28:40",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6efa-39c7-73b8-be63-674de5316eea",
+        "name": "ランチセット",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 07:28:40",
+        "updated_at": "2026-07-17 07:28:40",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6efa-3de9-735b-9486-18da770d12e4",
+        "name": "コーヒー",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 07:28:41",
+        "updated_at": "2026-07-17 07:28:41",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6efa-3fb3-70c6-80fe-247f9d30ebaf",
+        "name": "キッチンカー",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 07:28:41",
+        "updated_at": "2026-07-17 07:28:41",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6efa-3fca-72be-8e44-3e32aaadd2cc",
+        "name": "店内",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 07:28:41",
+        "updated_at": "2026-07-17 07:28:41",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6efa-3fdf-72ea-87cc-30e5184b7301",
+        "name": "事前予約",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 07:28:41",
+        "updated_at": "2026-07-17 07:28:41",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6efa-4088-7348-96e2-84bd370925ef",
+        "name": "PE 店内",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 07:28:42",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6efa-40b0-739e-b0ef-0a23347c7324",
+        "name": "PE 持ち帰り",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 07:28:42",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6efa-4101-7028-8634-3c0ccb3e005c",
+        "name": "無料サービス",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 07:28:42",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6efa-4123-72f1-8471-dcae1857f210",
+        "name": "期間限定",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 07:28:42",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6efa-416f-7060-b4d1-ff5023b564eb",
+        "name": "店内-ディナー",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 07:28:42",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6f3d-2557-7397-bbc7-c60755d4ebef",
+        "name": "追加",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 08:41:46",
+        "updated_at": "2026-07-17 08:41:46",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6f3d-2561-73fc-b29a-f0da8418feda",
+        "name": "店内-ランチ",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 08:41:46",
+        "updated_at": "2026-07-17 08:41:46",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6f8f-75ac-7351-b885-58a2c971dff6",
+        "name": "デフォルト",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 10:11:40",
+        "updated_at": "2026-07-17 10:11:40",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6f9c-74cd-711a-9ffa-55fa6128e1d4",
+        "name": "セット",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 10:25:52",
+        "updated_at": "2026-07-17 10:25:52",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6fb7-cdb3-7138-a268-cf074a435b2e",
+        "name": "フォー",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 10:55:44",
+        "updated_at": "2026-07-17 10:55:44",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6fb7-cdbb-7283-b369-fd30d244b8ea",
+        "name": "ブン",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 10:55:44",
+        "updated_at": "2026-07-17 10:55:44",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6fb7-cdbc-727b-8fbd-737c18e72696",
+        "name": "デザート・飲み物",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 10:55:44",
+        "updated_at": "2026-07-17 10:55:44",
+        "deleted_at": null
+    },
+    {
+        "id": "019f6fb7-cdbc-727b-8fbd-737c192d1e02",
+        "name": "アルコル",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-17 10:55:44",
+        "updated_at": "2026-07-17 10:55:44",
+        "deleted_at": null
+    },
+    {
+        "id": "019f7412-132d-715a-9f1d-a740ea2bfbf8",
+        "name": "期間限定",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-18 07:12:49",
+        "updated_at": "2026-07-18 07:12:49",
+        "deleted_at": null
+    },
+    {
+        "id": "019f7412-1331-70ff-8005-fc1143edf35c",
+        "name": "ランチセット",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-18 07:12:49",
+        "updated_at": "2026-07-18 07:12:49",
+        "deleted_at": null
+    },
+    {
+        "id": "019f7412-1331-70ff-8005-fc1144a6dd80",
+        "name": "小皿料理・春巻き",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-18 07:12:49",
+        "updated_at": "2026-07-18 07:12:49",
+        "deleted_at": null
+    },
+    {
+        "id": "019f7412-1332-715b-98b3-72de34d2df01",
+        "name": "追加",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-18 07:12:49",
+        "updated_at": "2026-07-18 07:12:49",
+        "deleted_at": null
+    },
+    {
+        "id": "019f7412-1332-715b-98b3-72de35cce2b6",
+        "name": "無料サービス",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-18 07:12:49",
+        "updated_at": "2026-07-18 07:12:49",
+        "deleted_at": null
+    },
+    {
+        "id": "019f7e8e-0bb7-736f-8e62-fe70c1b184fc",
+        "name": "期間限定",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-20 08:04:26",
+        "updated_at": "2026-07-20 08:04:26",
+        "deleted_at": null
+    },
+    {
+        "id": "019f7e8e-0bc5-73e4-aab3-f57177c190c2",
+        "name": "おすすめ",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-20 08:04:26",
+        "updated_at": "2026-07-20 08:04:26",
+        "deleted_at": null
+    },
+    {
+        "id": "019f7e8e-0bc5-73e4-aab3-f571780226b8",
+        "name": "サラダ・野菜",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-20 08:04:26",
+        "updated_at": "2026-07-20 08:04:26",
+        "deleted_at": null
+    },
+    {
+        "id": "019f7e8e-0bc5-73e4-aab3-f57178f740af",
+        "name": "春巻き",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-20 08:04:26",
+        "updated_at": "2026-07-20 08:04:26",
+        "deleted_at": null
+    },
+    {
+        "id": "019f7e8e-0bc6-70e9-9339-47244baa5402",
+        "name": "小皿料理",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-20 08:04:26",
+        "updated_at": "2026-07-20 08:04:26",
+        "deleted_at": null
+    },
+    {
+        "id": "019f7e8e-0bc6-70e9-9339-47244c66f2f3",
+        "name": "デザート・飲み物",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-20 08:04:26",
+        "updated_at": "2026-07-20 08:04:26",
+        "deleted_at": null
+    },
+    {
+        "id": "019f7e8e-0bc6-70e9-9339-47244d5773ec",
+        "name": "アルコール",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-20 08:04:26",
+        "updated_at": "2026-07-20 08:04:26",
+        "deleted_at": null
+    },
+    {
+        "id": "019f7e8e-0bc6-70e9-9339-47244e0fddb5",
+        "name": "バインミー",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-20 08:04:26",
+        "updated_at": "2026-07-20 08:04:26",
+        "deleted_at": null
+    },
+    {
+        "id": "019f7e8e-0bc7-7202-864a-5a53eef212c4",
+        "name": "フォー",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-20 08:04:26",
+        "updated_at": "2026-07-20 08:04:26",
+        "deleted_at": null
+    },
+    {
+        "id": "019f7e8e-0bc7-7202-864a-5a53efc35018",
+        "name": "ブン",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-20 08:04:26",
+        "updated_at": "2026-07-20 08:04:26",
+        "deleted_at": null
+    },
+    {
+        "id": "019f7e8e-0bc7-7202-864a-5a53f097d58c",
+        "name": "無料サービス",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-20 08:04:26",
+        "updated_at": "2026-07-20 08:04:26",
+        "deleted_at": null
+    },
+    {
+        "id": "019f7ee3-ade2-72e3-b2c1-8a94e0bd2f16",
+        "name": "フォー",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-20 09:37:58",
+        "updated_at": "2026-07-20 09:37:58",
+        "deleted_at": null
+    },
+    {
+        "id": "019f7ee3-ade4-72b2-a12c-5892f19aeb7c",
+        "name": "ブン",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-20 09:37:58",
+        "updated_at": "2026-07-20 09:37:58",
+        "deleted_at": null
+    },
+    {
+        "id": "019f7ee3-ade4-72b2-a12c-5892f220edb4",
+        "name": "バインミー",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-20 09:37:58",
+        "updated_at": "2026-07-20 09:37:58",
+        "deleted_at": null
+    },
+    {
+        "id": "019f7ee3-ade4-72b2-a12c-5892f2c111dc",
+        "name": "春巻き",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-20 09:37:58",
+        "updated_at": "2026-07-20 09:37:58",
+        "deleted_at": null
+    },
+    {
+        "id": "019f7ee3-ade4-72b2-a12c-5892f387c78d",
+        "name": "サラダ・野菜",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-20 09:37:58",
+        "updated_at": "2026-07-20 09:37:58",
+        "deleted_at": null
+    },
+    {
+        "id": "019f7ee3-ade5-7318-a149-26bdea34c28f",
+        "name": "小皿料理・春巻き",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-20 09:37:58",
+        "updated_at": "2026-07-20 09:37:58",
+        "deleted_at": null
+    },
+    {
+        "id": "019f7ee3-ade5-7318-a149-26bdeb188d28",
+        "name": "デザート・飲み物",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-20 09:37:58",
+        "updated_at": "2026-07-20 09:37:58",
+        "deleted_at": null
+    },
+    {
+        "id": "019f7ee3-ade5-7318-a149-26bdebf91efc",
+        "name": "オリジナル・グッズ",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-20 09:37:58",
+        "updated_at": "2026-07-20 09:37:58",
+        "deleted_at": null
+    },
+    {
+        "id": "019f82a6-0758-7101-ba11-73f5335dad69",
+        "name": "Mặc định",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-21 03:09:06",
+        "updated_at": "2026-07-21 03:09:06",
+        "deleted_at": null
+    },
+    {
+        "id": "019f88d4-df8e-7217-865d-50931d071807",
+        "name": "コーヒーターム",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-22 07:58:00",
+        "updated_at": "2026-07-22 07:58:00",
+        "deleted_at": null
+    },
+    {
+        "id": "019f88da-6666-72f6-9fe2-99f6c8ecc7d3",
+        "name": "コーヒーターム",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-07-22 08:04:02",
+        "updated_at": "2026-07-22 08:04:02",
+        "deleted_at": null
+    },
+    {
+        "id": "019fda95-aa59-71c2-843d-c08e0b5becdd",
+        "name": "期間限定",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-07 04:57:49",
+        "updated_at": "2026-08-07 04:57:49",
+        "deleted_at": null
+    },
+    {
+        "id": "019fda95-aa5c-73de-acda-75471d2a0cb5",
+        "name": "おすすめ",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-07 04:57:49",
+        "updated_at": "2026-08-07 04:57:49",
+        "deleted_at": null
+    },
+    {
+        "id": "019fda95-aa5d-71ba-af0f-78c70f4647d1",
+        "name": "サラダ・野菜",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-07 04:57:49",
+        "updated_at": "2026-08-07 04:57:49",
+        "deleted_at": null
+    },
+    {
+        "id": "019fda95-aa5e-7337-ac2e-05b3bd4b7b72",
+        "name": "春巻き",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-07 04:57:49",
+        "updated_at": "2026-08-07 04:57:49",
+        "deleted_at": null
+    },
+    {
+        "id": "019fda95-aa5f-7330-94e5-98c28c39c0ff",
+        "name": "小皿料理",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-07 04:57:49",
+        "updated_at": "2026-08-07 04:57:49",
+        "deleted_at": null
+    },
+    {
+        "id": "019fda95-aa63-7290-a51a-f32779fd9318",
+        "name": "デザート・飲み物",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-07 04:57:49",
+        "updated_at": "2026-08-07 04:57:49",
+        "deleted_at": null
+    },
+    {
+        "id": "019fda95-aa64-726b-a1bf-3eb9f7896858",
+        "name": "アルコール",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-07 04:57:49",
+        "updated_at": "2026-08-07 04:57:49",
+        "deleted_at": null
+    },
+    {
+        "id": "019fda95-aa65-7350-a409-7f187e70238e",
+        "name": "バインミー",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-07 04:57:49",
+        "updated_at": "2026-08-07 04:57:49",
+        "deleted_at": null
+    },
+    {
+        "id": "019fda95-aa66-71da-9b8e-71f7061a5aca",
+        "name": "フォー",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-07 04:57:49",
+        "updated_at": "2026-08-07 04:57:49",
+        "deleted_at": null
+    },
+    {
+        "id": "019fda95-aa68-72ea-959e-e43992baf3cd",
+        "name": "ブン",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-07 04:57:49",
+        "updated_at": "2026-08-07 04:57:49",
+        "deleted_at": null
+    },
+    {
+        "id": "019fda95-aa69-718d-808d-6be0f6ce3f25",
+        "name": "無料サービス",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-07 04:57:49",
+        "updated_at": "2026-08-07 04:57:49",
+        "deleted_at": null
+    },
+    {
+        "id": "019fdb27-5f84-70c4-911f-6bc855a7ea53",
+        "name": "期間限定",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-07 07:36:58",
+        "updated_at": "2026-08-07 07:36:58",
+        "deleted_at": null
+    },
+    {
+        "id": "019fdb27-5f8a-7361-8171-08dad11d62be",
+        "name": "おすすめ",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-07 07:36:58",
+        "updated_at": "2026-08-07 07:36:58",
+        "deleted_at": null
+    },
+    {
+        "id": "019fdb27-5f8c-7183-8e57-fbba2f34f76a",
+        "name": "サラダ・野菜",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-07 07:36:58",
+        "updated_at": "2026-08-07 07:36:58",
+        "deleted_at": null
+    },
+    {
+        "id": "019fdb27-5f8d-70f0-b072-1df1d0e3f7fd",
+        "name": "春巻き",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-07 07:36:58",
+        "updated_at": "2026-08-07 07:36:58",
+        "deleted_at": null
+    },
+    {
+        "id": "019fdb27-5f8e-7198-ad00-e437795d9379",
+        "name": "小皿料理",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-07 07:36:58",
+        "updated_at": "2026-08-07 07:36:58",
+        "deleted_at": null
+    },
+    {
+        "id": "019fdb27-5f8f-700f-9624-0a61abb6466b",
+        "name": "デザート・飲み物",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-07 07:36:58",
+        "updated_at": "2026-08-07 07:36:58",
+        "deleted_at": null
+    },
+    {
+        "id": "019fdb27-5f90-73b7-b08c-82569be1e923",
+        "name": "アルコール",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-07 07:36:58",
+        "updated_at": "2026-08-07 07:36:58",
+        "deleted_at": null
+    },
+    {
+        "id": "019fdb27-5f92-7392-ac5f-37037a370706",
+        "name": "バインミー",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-07 07:36:58",
+        "updated_at": "2026-08-07 07:36:58",
+        "deleted_at": null
+    },
+    {
+        "id": "019fdb27-5f93-7385-a98f-e67bc91bf91a",
+        "name": "フォー",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-07 07:36:58",
+        "updated_at": "2026-08-07 07:36:58",
+        "deleted_at": null
+    },
+    {
+        "id": "019fdb27-5f94-7061-a32d-77836fe40959",
+        "name": "ブン",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-07 07:36:58",
+        "updated_at": "2026-08-07 07:36:58",
+        "deleted_at": null
+    },
+    {
+        "id": "019fdb27-5f95-7361-b69f-82ec523374c8",
+        "name": "無料サービス",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-07 07:36:58",
+        "updated_at": "2026-08-07 07:36:58",
+        "deleted_at": null
+    },
+    {
+        "id": "019fdb2c-497b-7194-a9c6-c5249a29cae9",
+        "name": "ちょい飲み",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-07 07:42:20",
+        "updated_at": "2026-08-07 07:42:20",
+        "deleted_at": null
+    },
+    {
+        "id": "019fdb2c-497e-7194-929c-54d22239754a",
+        "name": "チャーハン",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-07 07:42:20",
+        "updated_at": "2026-08-07 07:42:20",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee91-63ad-70f0-b6cc-39d5ee417ddb",
+        "name": "期間限定",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:05:33",
+        "updated_at": "2026-08-11 02:05:33",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee91-63af-701a-a1a3-bb71b48f1d04",
+        "name": "おすすめ",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:05:33",
+        "updated_at": "2026-08-11 02:05:33",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee91-63b1-73a8-8505-779162507a2f",
+        "name": "サラダ・野菜",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:05:33",
+        "updated_at": "2026-08-11 02:05:33",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee91-63b2-70b6-8a10-c6f1cd1b7180",
+        "name": "春巻き",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:05:33",
+        "updated_at": "2026-08-11 02:05:33",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee91-63b5-717c-88e9-3ec6e8c06482",
+        "name": "小皿料理",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:05:33",
+        "updated_at": "2026-08-11 02:05:33",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee91-63b7-71f2-b605-9e25b46e77c5",
+        "name": "デザート・飲み物",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:05:33",
+        "updated_at": "2026-08-11 02:05:33",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee91-63b8-73cc-9e40-53b94b33f6c8",
+        "name": "アルコール",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:05:33",
+        "updated_at": "2026-08-11 02:05:33",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee91-63b9-7035-950e-e7d0de01a3a9",
+        "name": "バインミー",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:05:33",
+        "updated_at": "2026-08-11 02:05:33",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee91-63bb-7274-8184-ae3b8d093731",
+        "name": "フォー",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:05:33",
+        "updated_at": "2026-08-11 02:05:33",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee91-63bc-7306-ba8b-15da15da403e",
+        "name": "ブン",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:05:33",
+        "updated_at": "2026-08-11 02:05:33",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee91-63bd-71b7-a74b-8c7f923ae4f3",
+        "name": "無料サービス",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:05:33",
+        "updated_at": "2026-08-11 02:05:33",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee91-e217-715d-bde1-d529fe4797f8",
+        "name": "期間限定",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:06:05",
+        "updated_at": "2026-08-11 02:06:05",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee91-e21a-7175-92c7-d739adc753fb",
+        "name": "おすすめ",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:06:05",
+        "updated_at": "2026-08-11 02:06:05",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee91-e21b-70a3-958b-25871a12a2a0",
+        "name": "サラダ・野菜",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:06:05",
+        "updated_at": "2026-08-11 02:06:05",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee91-e21c-726c-b896-055e34c3069d",
+        "name": "春巻き",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:06:05",
+        "updated_at": "2026-08-11 02:06:05",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee91-e21d-714a-b613-76ee756b2f8b",
+        "name": "小皿料理",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:06:05",
+        "updated_at": "2026-08-11 02:06:05",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee91-e21e-72d7-9af0-3a5117138bca",
+        "name": "デザート・飲み物",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:06:05",
+        "updated_at": "2026-08-11 02:06:05",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee91-e220-73d5-b29e-a75a83ecc478",
+        "name": "アルコール",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:06:05",
+        "updated_at": "2026-08-11 02:06:05",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee91-e221-724c-9ffb-342d97053c7f",
+        "name": "バインミー",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:06:05",
+        "updated_at": "2026-08-11 02:06:05",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee91-e222-7178-b02e-6e8144395d45",
+        "name": "フォー",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:06:05",
+        "updated_at": "2026-08-11 02:06:05",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee91-e223-73d8-b79b-34d50e303f76",
+        "name": "ブン",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:06:05",
+        "updated_at": "2026-08-11 02:06:05",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee91-e225-724c-abbd-64acada81649",
+        "name": "無料サービス",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:06:05",
+        "updated_at": "2026-08-11 02:06:05",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee95-15bb-706c-a278-c8602befea94",
+        "name": "期間限定",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:09:35",
+        "updated_at": "2026-08-11 02:09:35",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee95-15be-712f-ae23-5b0a7c079c92",
+        "name": "おすすめ",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:09:35",
+        "updated_at": "2026-08-11 02:09:35",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee95-15bf-72b8-8ae4-a457ed607017",
+        "name": "サラダ・野菜",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:09:35",
+        "updated_at": "2026-08-11 02:09:35",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee95-15c0-725a-8572-42935a731769",
+        "name": "春巻き",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:09:35",
+        "updated_at": "2026-08-11 02:09:35",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee95-15c2-7339-b0f8-678566cd7903",
+        "name": "小皿料理",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:09:35",
+        "updated_at": "2026-08-11 02:09:35",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee95-15c3-73b2-82ec-70612db988c0",
+        "name": "バインミー",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:09:35",
+        "updated_at": "2026-08-11 02:09:35",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee95-15c4-72e3-af12-43c441d8e595",
+        "name": "フォー",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:09:35",
+        "updated_at": "2026-08-11 02:09:35",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee95-15c5-72f9-9ffe-ad908d1a3500",
+        "name": "ブン",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:09:35",
+        "updated_at": "2026-08-11 02:09:35",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee95-15c6-7230-9f0f-2720018f9f18",
+        "name": "デザート・飲み物",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:09:35",
+        "updated_at": "2026-08-11 02:09:35",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee95-15c7-7235-a5fd-9f4feef3ec2b",
+        "name": "アルコール",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:09:35",
+        "updated_at": "2026-08-11 02:09:35",
+        "deleted_at": null
+    },
+    {
+        "id": "019fee95-15c9-7129-97e6-bb6c12fef64e",
+        "name": "無料サービス",
+        "is_featured": 0,
+        "organization_id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "brand_id": "019fcffa-3287-73bf-92a8-896bf3918bf3",
+        "created_at": "2026-08-11 02:09:35",
+        "updated_at": "2026-08-11 02:09:35",
+        "deleted_at": null
+    }
+]

@@ -1,0 +1,173 @@
+# =============================================================================
+# ProductReview (商品レビュー / Đánh giá sản phẩm)
+# =============================================================================
+#
+# A binary (thumbs up/down) review of a Product, submitted by a customer
+# after their order is closed (paid). One review per order item enforced
+# by unique index on customer_order_item_id.
+#
+# Written by: customer via POST /api/v1/customer/orders/{id}/reviews
+# Read by:    aggregate columns on Product (incremental update on write),
+#             GET /api/v1/customer/orders/{id}/reviewable (already_reviewed flag)
+#
+# Lifecycle: write-once (no edit/delete in v1)
+#
+#   [submitted] — final (immutable after creation)
+#
+# Multi-tenancy: scoped by organization_id + brand_id + branch_id
+# (inherited from the parent CustomerOrder at write time).
+#
+# =============================================================================
+
+displayName:
+  en: Product Review
+  ja: 商品レビュー
+  vi: Đánh giá sản phẩm
+
+kind: object
+
+options:
+  service: false
+  id: Uuid
+  timestamps: true
+  indexes:
+    # Fast lookup: "has this order item been reviewed?"
+    - columns: [customer_order_item_id]
+      unique: true
+    # Aggregate queries per product (reconcile job, admin reports)
+    - columns: [product_id]
+    # Scope queries by branch (shop-level reports)
+    - columns: [branch_id]
+    # Scope queries by brand (HQ reports)
+    - columns: [brand_id]
+
+properties:
+  # ===========================================================================
+  # Core review data
+  # ===========================================================================
+
+  # The product being reviewed. Rating aggregates at Product level (not SKU).
+  # RESTRICT delete — cannot delete a product that has reviews (preserve history).
+  product:
+    type: Association
+    relation: ManyToOne
+    target: Product
+    onDelete: RESTRICT
+    displayName:
+      en: Product
+      ja: 商品
+      vi: Sản phẩm
+
+  # The order that proves the customer actually purchased this product.
+  # CASCADE — if order is hard-deleted (rare), reviews go with it.
+  customerOrder:
+    type: Association
+    relation: ManyToOne
+    target: CustomerOrder
+    onDelete: CASCADE
+    displayName:
+      en: Order
+      ja: 注文
+      vi: Đơn hàng
+
+  # The specific order item being reviewed. UNIQUE index prevents double-vote.
+  # RESTRICT — cannot remove an item that has a review attached.
+  customerOrderItem:
+    type: Association
+    relation: ManyToOne
+    target: CustomerOrderItem
+    onDelete: RESTRICT
+    displayName:
+      en: Order Item
+      ja: 注文明細
+      vi: Chi tiết đơn hàng
+
+  # Optional: logged-in customer identity. NULL for anonymous dine-in (QR).
+  # SET NULL on customer delete — review stays for aggregate, just loses identity.
+  customer:
+    type: Association
+    relation: ManyToOne
+    target: Customer
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Customer
+      ja: 顧客
+      vi: Khách hàng
+
+  # Binary verdict derived from `rating` (rating >= 3 => up, else down).
+  # Kept for backward-compat with the up/total recommend aggregate.
+  # Nullable now that `rating` is the primary signal.
+  sentiment:
+    type: EnumRef
+    enum: ReviewSentiment
+    nullable: true
+    displayName:
+      en: Sentiment
+      ja: 評価
+      vi: Đánh giá
+
+  # Star rating 1-5 (plan-026). Primary per-dish signal. Service derives
+  # `sentiment` + maintains Product.review_rating_sum from this.
+  # Nullable to tolerate legacy binary rows. Validation (1..5) at FormRequest.
+  rating:
+    type: TinyInt
+    nullable: true
+    displayName:
+      en: Rating
+      ja: 評価（星）
+      vi: Số sao
+
+  # Quick-tags chosen by the customer (e.g. "Còn nóng", "Tươi ngon").
+  # JSON array of strings. Null/empty = no tags.
+  tags:
+    type: Json
+    nullable: true
+    displayName:
+      en: Tags
+      ja: タグ
+      vi: Thẻ nhanh
+
+  # Free-text comment. Nullable, hidden from menu in v1 (stored for future use).
+  # Max 1000 chars enforced at FormRequest level, not DB (TEXT type).
+  comment:
+    type: Text
+    nullable: true
+    displayName:
+      en: Comment
+      ja: コメント
+      vi: Bình luận
+
+  # ===========================================================================
+  # Multi-tenancy scope (inherited from CustomerOrder at write time)
+  # ===========================================================================
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: CASCADE
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu
+
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    onDelete: CASCADE
+    displayName:
+      en: Branch
+      ja: 店舗
+      vi: Chi nhánh

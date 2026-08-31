@@ -1,0 +1,100 @@
+{
+    "message": "Resource not found in this brand.",
+    "exception": "Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException",
+    "file": "/var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php",
+    "line": 1437,
+    "trace": [
+        {
+            "file": "/var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/helpers.php",
+            "line": 67,
+            "function": "abort",
+            "class": "Illuminate\\Foundation\\Application",
+            "type": "->"
+        },
+        {
+            "file": "/var/www/html/app/Http/Controllers/Traits/HasOrganizationContext.php",
+            "line": 88,
+            "function": "abort"
+        },
+        {
+            "file": "/var/www/html/app/Http/Controllers/Api/V1/HQ/MaterialController.php",
+            "line": 221,
+            "function": "authorizeBrand",
+            "class": "App\\Http\\Controllers\\Api\\V1\\HQ\\MaterialController",
+            "type": "->"
+        },
+        {
+            "file": "/var/www/html/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php",
+            "line": 46,
+            "function": "show",
+            "class": "App\\Http\\Controllers\\Api\\V1\\HQ\\MaterialController",
+            "type": "->"
+        },
+        {
+            "file": "/var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Route.php",
+            "line": 275,
+            "function": "dispatch",
+            "class": "Illuminate\\Routing\\ControllerDispatcher",
+            "type": "->"
+        },
+        {
+            "file": "/var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Route.php",
+            "line": 215,
+            "function": "runController",
+            "class": "Illuminate\\Routing\\Route",
+            "type": "->"
+        },
+        {
+            "file": "/var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php",
+            "line": 822,
+            "function": "run",
+            "class": "Illuminate\\Routing\\Route",
+            "type": "->"
+        },
+        {
+            "file": "/var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php",
+            "line": 180,
+            "function": "{closure:Illuminate\\Routing\\Router::runRouteWithinStack():821}",
+            "class": "Illuminate\\Routing\\Router",
+            "type": "->"
+        },
+        {
+            "file": "/var/www/html/app/Http/Middleware/ResolveBrandFromSlug.php",
+            "line": 66,
+            "function": "{closure:Illuminate\\Pipeline\\Pipeline::prepareDestination():178}",
+            "class": "Illuminate\\Pipeline\\Pipeline",
+            "type": "->"
+        },
+        {
+            "file": "/var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php",
+            "line": 219,
+            "function": "handle",
+            "class": "App\\Http\\Middleware\\ResolveBrandFromSlug",
+            "type": "->"
+        },
+        {
+            "file": "/var/www/html/app/Http/Middleware/SetTimezone.php",
+            "line": 35,
+            "function": "{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}",
+            "class": "Illuminate\\Pipeline\\Pipeline",
+            "type": "->"
+        },
+        {
+            "file": "/var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php",
+            "line": 219,
+            "function": "handle",
+            "class": "App\\Http\\Middleware\\SetTimezone",
+            "type": "->"
+        },
+        {
+            "file": "/var/www/html/app/Http/Middleware/SetLocale.php",
+            "line": 24,
+            "function": "{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}",
+            "class": "Illuminate\\Pipeline\\Pipeline",
+            "type": "->"
+        },
+        {
+            "file": "/var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php",
+            "line": 219,
+            "function": "handle",
+            "class": "App\\Http\\Middleware\\Se

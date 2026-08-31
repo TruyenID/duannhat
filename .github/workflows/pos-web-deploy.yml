@@ -1,0 +1,164 @@
+# Deploy pos-web lên AWS Amplify (monorepo web/pos).
+name: Deploy pos-web to Amplify
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "web/pos/**"
+      - ".github/workflows/pos-web-deploy.yml"
+      - ".github/amplify/pos-buildspec.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-amplify-pos
+  cancel-in-progress: false
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AMPLIFY_AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AMPLIFY_AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: ap-northeast-1
+  APP_ID: d3nuz12zp9crpd
+
+jobs:
+  deploy:
+    name: Amplify release (pos)
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Apply versioned reverse-proxy rules
+        working-directory: web/pos
+        run: |
+          aws amplify update-app \
+            --app-id "$APP_ID" \
+            --custom-rules file://amplify-rewrites.json \
+            --no-cli-pager >/dev/null
+
+      # #3229 — NẠP buildspec từ repo lên Amplify.
+      #
+      # `.github/amplify/pos-buildspec.yml` nằm trong `paths:` nên nó TRÔNG như
+      # nguồn chân lý, nhưng trước bước này không có gì nạp nó: Amplify chỉ đọc
+      # `amplify.yml` ở gốc app hoặc bản lưu trong console, và repo không có
+      # `amplify.yml` nào. Sửa file đó không đổi một byte nào của lượt build.
+      #
+      # Đo được ở admin hôm nay: sửa buildspec → CI xanh → deploy xanh → trang
+      # vẫn 500, vì lệnh mới chưa bao giờ chạy. Mất ba vòng mới nhận ra.
+      # #3233 — NẠP header tuỳ chỉnh lên Amplify.
+      #
+      # `web/pos/customHttp.yml` khai `frame-ancestors 'none'` từ lâu, nhưng đo
+      # trên đường thật thì header đó KHÔNG TỒN TẠI: file nằm ở `web/pos/`, còn
+      # artifact deploy là `dist/`, và nó không ở trong `public/` để Vite copy
+      # sang. POS là màn hình tiền mà nhúng được vào iframe của site bất kỳ.
+      #
+      # Phần độc không phải là thiếu header — mà là repo NÓI RẰNG đã có. Ai đọc
+      # repo để trả lời "POS có chống clickjacking không" sẽ trả lời CÓ.
+      # Cùng hình dạng file chết ở #3229.
+      - name: Push custom headers to Amplify
+        run: |
+          set +e
+          out=$(aws amplify update-app --app-id "$APP_ID" \
+            --custom-headers "$(cat web/pos/customHttp.yml)" 2>&1)
+          code=$?
+          set -e
+
+          if [ "$code" -eq 0 ]; then
+            echo "OK — header tuỳ chỉnh đã nạp"
+          elif printf '%s' "$out" | grep -q 'AccessDeniedException'; then
+            echo "::warning title=Không nạp được header::CI thiếu quyền amplify:UpdateApp — POS đang chạy KHÔNG có frame-ancestors."
+            printf '%s\n' "$out"
+          else
+            echo "::error::update-app --custom-headers thất bại vì lý do KHÁC thiếu quyền"
+            printf '%s\n' "$out"
+            exit 1
+          fi
+
+      - name: Push buildspec to Amplify
+        run: |
+          set +e
+          out=$(aws amplify update-app --app-id "$APP_ID" \
+            --build-spec "$(cat .github/amplify/pos-buildspec.yml)" 2>&1)
+          code=$?
+          set -e
+
+          if [ "$code" -eq 0 ]; then
+            echo "OK — buildspec đã nạp lên Amplify"
+          elif printf '%s' "$out" | grep -q 'AccessDeniedException'; then
+            echo "::warning title=Không nạp được buildspec::CI thiếu quyền amplify:UpdateApp — Amplify dùng bản trong console, mọi sửa đổi trong repo KHÔNG có tác dụng."
+            printf '%s\n' "$out"
+          else
+            echo "::error::update-app --build-spec thất bại vì lý do KHÁC thiếu quyền"
+            printf '%s\n' "$out"
+            exit 1
+          fi
+
+      - name: Start Amplify build and wait
+        run: |
+          set +e
+          task_start_output=$(aws amplify start-job --app-id "$APP_ID" --branch-name main --job-type RELEASE --query 'jobSummary.jobId' --output text 2>&1)
+          task_start_code=$?
+          set -e
+
+          if [ "$task_start_code" -eq 0 ]; then
+            task_job_id="$task_start_output"
+            echo "==> job $task_job_id started"
+          elif echo "$task_start_output" | grep -q 'LimitExceededException'; then
+            task_job_id=$(aws amplify list-jobs --app-id "$APP_ID" --branch-name main --max-results 10 --query "jobSummaries[?status=='PENDING' || status=='RUNNING'] | [0].jobId" --output text)
+            if [ -z "$task_job_id" ] || [ "$task_job_id" = "None" ]; then
+              echo "::error::Amplify reported an active job, but no active job could be found"
+              exit 1
+            fi
+            echo "==> following existing job $task_job_id"
+          else
+            echo "::error::$task_start_output"
+            exit "$task_start_code"
+          fi
+
+          while true; do
+            task_job_state=$(aws amplify get-job --app-id "$APP_ID" --branch-name main --job-id "$task_job_id" --query 'job.summary.status' --output text)
+            case "$task_job_state" in
+              SUCCEED) echo "==> deployed: https://main.$APP_ID.amplifyapp.com"; exit 0 ;;
+              FAILED|CANCELLED) echo "::error::Amplify job $task_job_state"; exit 1 ;;
+              *) echo "  $task_job_state…"; sleep 30 ;;
+            esac
+          done
+
+      - name: Smoke test
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "https://main.$APP_ID.amplifyapp.com/" || echo 000)
+          echo "smoke: HTTP $code"
+          case "$code" in 200|30*) echo OK;; *) echo "::error::smoke $code"; exit 1;; esac
+
+          # #3233 — header phải CÓ MẶT, không phải "lệnh nạp đã chạy không báo lỗi".
+          # Chính khoảng cách giữa hai câu đó để `customHttp.yml` chết nhiều tháng.
+          csp=$(curl -sI --max-time 30 "https://main.$APP_ID.amplifyapp.com/" | tr -d '\r' | grep -i '^content-security-policy:' || true)
+          echo "CSP: ${csp:-<không có>}"
+          case "$csp" in
+            *frame-ancestors*) echo "OK — frame-ancestors đang có hiệu lực";;
+            *) echo "::error::POS không phát frame-ancestors. web/pos/customHttp.yml khai nó, nhưng đường thật không có — đúng lỗi #3233, đừng đọc deploy xanh thành 'đã bảo vệ'."; exit 1;;
+          esac
+
+          # #3231 — mã HTTP nói "server còn thở"; dấu vân tay nói "bundle vừa
+          # build đang được phục vụ". HAI CÂU KHÁC NHAU, cả hai đều phải hỏi.
+          # Thay cái trên bằng cái dưới là đổi một lỗ mù lấy một lỗ mù khác.
+          info=$(curl -s --max-time 30 "https://main.$APP_ID.amplifyapp.com/build-info.json" || echo '')
+          served=$(printf '%s' "$info" | node -e "let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{try{process.stdout.write(JSON.parse(d).commit||'')}catch{process.stdout.write('')}})")
+          echo "bundle đang phục vụ dựng từ: ${served:-<không đọc được>}"
+
+          if [ -z "$served" ]; then
+            echo "::error::/build-info.json không đọc được. Hoặc bước nướng dấu vân tay trong buildspec chưa chạy (buildspec trong repo là FILE CHẾT nếu không ai nạp — #3229), hoặc lượt build này chưa tới người dùng."
+            exit 1
+          fi
+
+          # Chấp nhận commit MỚI HƠN: hai PR merge sát nhau thì Amplify dựng cái
+          # sau, và cái sau CHỨA cái này — deploy vẫn tới nơi. Đỏ chỉ khi bundle
+          # đang phục vụ KHÔNG chứa commit vừa merge. Không có vế này thì rào kêu
+          # oan mỗi lượt merge kép, và một rào kêu oan không bị tranh luận, nó bị TẮT.
+          git fetch --quiet origin "$served" 2>/dev/null || true
+          if git merge-base --is-ancestor "${GITHUB_SHA}" "$served" 2>/dev/null; then
+            echo "OK — bundle chứa ${GITHUB_SHA}"
+          else
+            echo "::error::Bundle đang phục vụ dựng từ $served, KHÔNG chứa ${GITHUB_SHA}. Lượt deploy này chưa tới người dùng — đừng đọc bảng checks xanh thành 'đã lên'."
+            exit 1
+          fi

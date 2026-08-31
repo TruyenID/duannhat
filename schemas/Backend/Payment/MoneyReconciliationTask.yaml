@@ -1,0 +1,183 @@
+# =============================================================================
+# MoneyReconciliationTask (#1204 + #1206 — transactional outbox for money work
+# that could not be completed inside the transaction that decided it)
+# =============================================================================
+#
+# Three money paths compute a correct amount INSIDE a transaction and then fail
+# to record the intent, so the work is lost with only a log line:
+#
+#   return_invoice      — the reversal succeeded but the 適格返還請求書 did not
+#                         issue (#1204). Fail-open is right: a document error
+#                         must never block refunding a customer.
+#   stranded_charge     — money is held at the gateway with no automatic path
+#                         back to the customer (#1206).
+#   overpayment_rejected— the ledger refused an overpayment
+#                         (OverpaymentRejectedException).
+#
+# Four comments in the codebase already refer to a "reconciliation queue" that
+# had never been built. This is it, shared, because option B (stash the number
+# on the reversal row) rescues only the first case.
+#
+# WHY A ROW AND NOT A RECOMPUTE. The blocker recorded on #1204 is that the
+# amount cannot be reconstructed afterwards: the sale/refund split and "how much
+# was already reversed" depend on the live state at the moment of reversal, and
+# a later sweep would compute a DIFFERENT number. Issuing a tax document for the
+# wrong amount is worse than not issuing one. So `payload` carries the figures
+# already settled by the transaction that enqueued the row, and the redrive
+# never recalculates them.
+#
+# This is the transactional-outbox pattern, and it follows the one already in
+# this repo (VnEinvoiceTransmission, #1153) rather than inventing a second
+# shape: enqueue in the SAME transaction as the business write, a separate
+# relay claims and executes, retries are idempotent, and a row that cannot
+# progress is parked for a human instead of retried forever.
+#
+# State machine:
+#   pending    → enqueued by the business transaction; the redrive may claim it
+#   claimed    → an atomic pending→claimed update holds it; a row stuck here
+#                past the claim timeout is a crashed worker and returns to
+#                pending (same recovery as #1153)
+#   resolved   → the work completed; `resolution` records what was done
+#   failed     → PERMANENTLY not completable by machine (the document was
+#                refused, the charge needs a merchant-portal action). Needs a
+#                human; the reaper alerts on age rather than retrying.
+#
+# Transient failures stay `pending` with attempts++ and next_retry_at backoff.
+#
+# The UNIQUE (task_type, subject_type, subject_id) index is the
+# no-double-work guarantee: a retry of the enqueuing request re-drives the SAME
+# row and can never mint a second reversal document or a second refund for one
+# subject.
+# =============================================================================
+
+displayName:
+  en: Money Reconciliation Task
+  ja: 入金差異調整タスク
+  vi: Tác vụ đối soát tiền
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    - columns: [task_type, subject_type, subject_id]
+      unique: true
+    - columns: [status, next_retry_at]
+    - columns: [organization_id, status]
+    - columns: [branch_id, created_at]
+
+properties:
+  # return_invoice | stranded_charge | overpayment_rejected.
+  task_type:
+    type: String
+    length: 40
+    displayName:
+      en: Task Type
+      ja: タスク種別
+      vi: Loại tác vụ
+
+  # The table the work concerns — order_payment | customer_order.
+  subject_type:
+    type: String
+    length: 40
+    displayName:
+      en: Subject Type
+      ja: 対象種別
+      vi: Loại đối tượng
+
+  subject_id:
+    type: Uuid
+    displayName:
+      en: Subject ID
+      ja: 対象ID
+      vi: ID đối tượng
+
+  # Branch the money belongs to (plain UUID — no FK, matching #1153).
+  branch_id:
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Branch ID
+      ja: 店舗ID
+      vi: ID chi nhánh
+
+  organization_id:
+    type: Uuid
+    displayName:
+      en: Organization ID
+      ja: 組織ID
+      vi: ID tổ chức
+
+  # The figures the enqueuing transaction had already settled. The redrive
+  # READS these and never recomputes — see the note above.
+  payload:
+    type: Json
+    displayName:
+      en: Settled Payload
+      ja: 確定ペイロード
+      vi: Dữ liệu đã chốt
+
+  # pending | claimed | resolved | failed.
+  status:
+    type: String
+    length: 20
+    default: pending
+    displayName:
+      en: Status
+      ja: 状態
+      vi: Trạng thái
+
+  attempts:
+    type: Int
+    default: 0
+    displayName:
+      en: Attempts
+      ja: 試行回数
+      vi: Số lần thử
+
+  last_error:
+    type: String
+    length: 1000
+    nullable: true
+    displayName:
+      en: Last Error
+      ja: 最終エラー
+      vi: Lỗi gần nhất
+
+  # What the successful redrive actually did (document id, refund id, or the
+  # operator action recorded when a human closed it out).
+  resolution:
+    type: String
+    length: 1000
+    nullable: true
+    displayName:
+      en: Resolution
+      ja: 解決内容
+      vi: Cách xử lý
+
+  claimed_at:
+    type: DateTime
+    nullable: true
+    displayName:
+      en: Claimed At
+      ja: 取得日時
+      vi: Thời điểm nhận xử lý
+
+  resolved_at:
+    type: DateTime
+    nullable: true
+    displayName:
+      en: Resolved At
+      ja: 解決日時
+      vi: Thời điểm xử lý xong
+
+  # Earliest time the redrive may re-dispatch a pending row.
+  next_retry_at:
+    type: DateTime
+    nullable: true
+    displayName:
+      en: Next Retry At
+      ja: 次回再試行
+      vi: Lần thử tiếp theo

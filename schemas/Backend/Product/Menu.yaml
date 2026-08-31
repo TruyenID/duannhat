@@ -1,0 +1,336 @@
+# ==============================================================================
+# Menu Schema (メニュー / Menu)
+# ==============================================================================
+#
+# Menu là danh sách các món có thể bán tại một chi nhánh (branch).
+# Menu được phân cấp theo Branch (mỗi branch có menu riêng).
+#
+# Key Features:
+#   - Priority: Thứ tự ưu tiên trong branch (UNIQUE per branch, NULL for master)
+#   - Valid period: Thời gian hiệu lực (valid_from - valid_to)
+#   - Status workflow: Draft → Pending → Approved → Active/Inactive
+#
+# Master Menu Feature:
+#   - Master menu (is_master=true): Template menu tại organization level
+#   - Master menu có branch_id = NULL
+#   - Branch menu clone từ master có master_menu_id trỏ về master
+#   - Sync chỉ ADD items mới, KHÔNG sửa items đã có
+#
+# Current Menu Logic:
+#   - Lấy menu có priority cao nhất (số nhỏ hơn = ưu tiên cao hơn)
+#   - Trong thời gian valid (valid_from <= now <= valid_to hoặc null)
+#   - Status = Active
+#
+# ==============================================================================
+
+displayName:
+  en: Menu
+  ja: メニュー
+  vi: Menu
+
+kind: object
+
+options:
+  service: false
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    - columns: [organization_id]
+    - columns: [brand_id]
+    - columns: [branch_id]
+    - columns: [branch_id, priority]
+      unique: true
+    - columns: [branch_id, status]
+    - columns: [valid_from, valid_to]
+    - columns: [organization_id, is_master]
+    - columns: [brand_id, is_master]
+    - columns: [master_menu_id]
+
+properties:
+  name:
+    type: String
+    length: 255
+    translatable: true
+    displayName:
+      en: Menu Name
+      ja: メニュー名
+      vi: Tên Menu
+    description:
+      en: Display name for the menu
+      ja: メニューの表示名
+      vi: Tên hiển thị của menu
+
+  description:
+    type: Text
+    nullable: true
+    translatable: true
+    displayName:
+      en: Description
+      ja: 説明
+      vi: Mô tả
+    description:
+      en: Optional description or notes
+      ja: オプションの説明やメモ
+      vi: Mô tả hoặc ghi chú
+
+  valid_from:
+    type: DateTime
+    nullable: true
+    displayName:
+      en: Valid From
+      ja: 有効開始日
+      vi: Hiệu lực từ
+    description:
+      en: Start date of menu validity (null = no start limit)
+      ja: メニュー有効期間の開始日（null = 制限なし）
+      vi: Ngày bắt đầu hiệu lực (null = không giới hạn)
+
+  valid_to:
+    type: DateTime
+    nullable: true
+    displayName:
+      en: Valid To
+      ja: 有効終了日
+      vi: Hiệu lực đến
+    description:
+      en: End date of menu validity (null = no end limit)
+      ja: メニュー有効期間の終了日（null = 制限なし）
+      vi: Ngày kết thúc hiệu lực (null = không giới hạn)
+
+  priority:
+    type: Int
+    default: 10
+    displayName:
+      en: Priority
+      ja: 優先度
+      vi: Độ ưu tiên
+    description:
+      en: Priority in branch (lower number = higher priority). MUST be unique per branch.
+      ja: 店舗内の優先度（小さいほど優先）。店舗内でユニークでなければなりません。
+      vi: Độ ưu tiên trong branch (số nhỏ = ưu tiên cao). PHẢI duy nhất trong branch.
+
+  cart_timeout_minutes:
+    type: Int
+    unsigned: true
+    nullable: true
+    displayName:
+      en: Cart Timeout (minutes)
+      ja: カートタイムアウト（分）
+      vi: Timeout giỏ hàng (phút)
+    description:
+      en: Override cart timeout in minutes. Null = inherit from branch or brand default.
+      ja: カートタイムアウトを分単位で上書き。Null = 支店またはブランドのデフォルトを継承。
+      vi: Ghi đè timeout giỏ hàng theo phút. Null = kế thừa từ branch hoặc brand mặc định.
+
+  status:
+    type: Enum
+    enum: [Draft, Pending, Approved, Active, Inactive, Rejected]
+    default: Draft
+    displayName:
+      en: Status
+      ja: ステータス
+      vi: Trạng thái
+    description:
+      en: Current status in approval workflow
+      ja: 承認ワークフローの現在のステータス
+      vi: Trạng thái hiện tại trong quy trình duyệt
+
+  rejection_reason:
+    type: Text
+    nullable: true
+    displayName:
+      en: Rejection Reason
+      ja: 却下理由
+      vi: Lý do từ chối
+    description:
+      en: Reason for rejection (when status = Rejected)
+      ja: 却下の理由（ステータス = 却下の場合）
+      vi: Lý do từ chối (khi status = Rejected)
+
+  service_type:
+    type: Enum
+    enum: [Takeaway, DineIn, Both]
+    default: Both
+    nullable: true
+    displayName:
+      en: Service Type
+      ja: 提供形態
+      vi: Thể thức phục vụ
+    description:
+      en: Which ordering flow shows this menu. Both = takeaway + dine-in. NULL on a branch menu = inherit the master (HQ) menu's service type.
+      ja: このメニューを表示する注文フロー。Both = テイクアウト + イートイン。支店メニューで NULL の場合はマスター（本部）メニューの提供形態を継承。
+      vi: Menu hiển thị ở luồng đặt hàng nào. Both = takeaway + dine-in. NULL ở menu chi nhánh = kế thừa thể thức của menu gốc (HQ).
+
+  # Audit fields
+  created_by_id:
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Created By
+      ja: 作成者
+      vi: Người tạo
+
+  approved_by_id:
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Approved By
+      ja: 承認者
+      vi: Người duyệt
+
+  approved_at:
+    type: DateTime
+    nullable: true
+    displayName:
+      en: Approved At
+      ja: 承認日時
+      vi: Thời gian duyệt
+
+  rejected_by_id:
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Rejected By
+      ja: 却下者
+      vi: Người từ chối
+
+  rejected_at:
+    type: DateTime
+    nullable: true
+    displayName:
+      en: Rejected At
+      ja: 却下日時
+      vi: Thời gian từ chối
+
+  # Master Menu Fields
+  is_master:
+    type: Boolean
+    default: false
+    displayName:
+      en: Is Master Menu
+      ja: マスターメニュー
+      vi: Menu gốc
+    description:
+      en: Whether this is a master/template menu
+      ja: マスター/テンプレートメニューかどうか
+      vi: Đây có phải menu gốc/mẫu không
+
+  last_synced_at:
+    type: DateTime
+    nullable: true
+    displayName:
+      en: Last Synced At
+      ja: 最終同期日時
+      vi: Đồng bộ lần cuối
+    description:
+      en: Last time this menu was synced with master
+      ja: 最後にマスターと同期した時間
+      vi: Thời gian đồng bộ với master gần nhất
+
+  # Relations
+  menuProducts:
+    type: Association
+    relation: OneToMany
+    target: MenuProduct
+    mappedBy: menu
+    displayName:
+      en: Menu Products
+      ja: メニュー商品
+      vi: Các sản phẩm trong menu
+
+  # N:N with MenuSection (owning side)
+  menuSections:
+    type: Association
+    relation: ManyToMany
+    target: MenuSection
+    joinTable: menu_menu_sections
+    owning: true
+    displayName:
+      en: Menu Sections
+      ja: メニューセクション
+      vi: Các nhóm danh mục
+    description:
+      en: Sections/categories grouping products within this menu
+      ja: このメニュー内の商品をグループ化するセクション/カテゴリー
+      vi: Các nhóm danh mục phân loại sản phẩm trong menu này
+
+  masterMenu:
+    type: Association
+    relation: ManyToOne
+    target: Menu
+    nullable: true
+    displayName:
+      en: Master Menu
+      ja: マスターメニュー
+      vi: Menu gốc
+    description:
+      en: The master menu this was cloned from
+      ja: クローン元のマスターメニュー
+      vi: Menu gốc đã clone từ
+
+  clonedMenus:
+    type: Association
+    relation: OneToMany
+    target: Menu
+    mappedBy: masterMenu
+    displayName:
+      en: Cloned Menus
+      ja: クローンメニュー
+      vi: Các menu đã clone
+    description:
+      en: Branch menus cloned from this master menu
+      ja: このマスターメニューからクローンされた店舗メニュー
+      vi: Các menu chi nhánh đã clone từ master này
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: CASCADE
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu
+
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    nullable: true
+    onDelete: CASCADE
+    displayName:
+      en: Branch
+      ja: 店舗
+      vi: Chi nhánh
+
+  taxType:
+    # #1218 tier 3 — one tax type for the WHOLE menu (the 持ち帰り menu is 8%).
+    # Null = fall through to the product. This sits ABOVE Product.tax_type_id by
+    # ruling: the menu always wins, and an item set wrongly is a human error, not
+    # something the resolver second-guesses. There is deliberately no 非課税/0%
+    # exception — to keep a product tax-exempt inside a taxed menu, give that
+    # menu line its own override (tier 1, which still beats this).
+    type: Association
+    relation: ManyToOne
+    target: TaxType
+    nullable: true
+    onDelete: RESTRICT
+    displayName:
+      en: Tax Type (whole menu)
+      ja: 税区分（メニュー全体）
+      vi: Loại thuế (cả menu)
+    description:
+      en: Tax type for every line of this menu. Null = inherit from the product (resolver tier 3).
+      ja: このメニュー全体の税区分。Null = 商品から継承（税区分解決 tier 3）。
+      vi: Loại thuế cho toàn bộ món trong menu này. Null = kế thừa từ sản phẩm (tầng 3).

@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": false,
+    "noImplicitAny": false,
+    "noFallthroughCasesInSwitch": true
+  },
+  /*
+   * #3133 — `vitest.setup.ts` PHẢI nằm trong `include`, không phải cho vui.
+   *
+   * `import "@testing-library/jest-dom/vitest"` trong file đó là thứ nới
+   * `Assertion` của vitest ra để có `toBeInTheDocument`/`toBeDisabled`. Bỏ file
+   * ra khỏi `include` thì vitest vẫn chạy xanh (nó nạp setup lúc chạy), nhưng
+   * `tsc` — bước ĐẦU của `npm run build`, tức đường phát hành — đỏ với 9 lỗi
+   * TS2339. Test xanh mà bản phát hành không dựng được là cách tệ nhất để phát
+   * hiện chuyện này.
+   */
+  "include": ["src", "bindings", "vitest.config.ts", "vitest.setup.ts"],
+}

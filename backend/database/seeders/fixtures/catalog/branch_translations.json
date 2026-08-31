@@ -1,0 +1,236 @@
+[
+    {
+        "id": 1,
+        "branch_id": "019fcffa-328b-71e1-8079-ba0a9ed09d45",
+        "locale": "ja",
+        "name": "本社"
+    },
+    {
+        "id": 2,
+        "branch_id": "019fcffa-328b-71e1-8079-ba0a9ed09d45",
+        "locale": "en",
+        "name": "Head Office"
+    },
+    {
+        "id": 3,
+        "branch_id": "019fcffa-328b-71e1-8079-ba0a9ed09d45",
+        "locale": "vi",
+        "name": "Trụ sở chính"
+    },
+    {
+        "id": 4,
+        "branch_id": "019fcffa-328e-72d8-9db4-4ed084e13afe",
+        "locale": "ja",
+        "name": "築地店"
+    },
+    {
+        "id": 5,
+        "branch_id": "019fcffa-328e-72d8-9db4-4ed084e13afe",
+        "locale": "en",
+        "name": "Tsukiji Store"
+    },
+    {
+        "id": 6,
+        "branch_id": "019fcffa-328e-72d8-9db4-4ed084e13afe",
+        "locale": "vi",
+        "name": "Cửa hàng Tsukiji"
+    },
+    {
+        "id": 7,
+        "branch_id": "019fcffa-3290-73dd-a997-9f3ff40829af",
+        "locale": "ja",
+        "name": "本郷店"
+    },
+    {
+        "id": 8,
+        "branch_id": "019fcffa-3290-73dd-a997-9f3ff40829af",
+        "locale": "en",
+        "name": "Hongo Store"
+    },
+    {
+        "id": 9,
+        "branch_id": "019fcffa-3290-73dd-a997-9f3ff40829af",
+        "locale": "vi",
+        "name": "Cửa hàng Hongo"
+    },
+    {
+        "id": 10,
+        "branch_id": "019fcffa-3292-7179-9dec-4a313b23143a",
+        "locale": "ja",
+        "name": "溜池山王店"
+    },
+    {
+        "id": 11,
+        "branch_id": "019fcffa-3292-7179-9dec-4a313b23143a",
+        "locale": "en",
+        "name": "Tameike-sanno Store"
+    },
+    {
+        "id": 12,
+        "branch_id": "019fcffa-3292-7179-9dec-4a313b23143a",
+        "locale": "vi",
+        "name": "Cửa hàng Tameike-sanno"
+    },
+    {
+        "id": 13,
+        "branch_id": "019fcffa-3295-7129-8573-32ffdc3759c7",
+        "locale": "ja",
+        "name": "神保町店"
+    },
+    {
+        "id": 14,
+        "branch_id": "019fcffa-3295-7129-8573-32ffdc3759c7",
+        "locale": "en",
+        "name": "Jimbocho Store"
+    },
+    {
+        "id": 15,
+        "branch_id": "019fcffa-3295-7129-8573-32ffdc3759c7",
+        "locale": "vi",
+        "name": "Cửa hàng Jimbocho"
+    },
+    {
+        "id": 16,
+        "branch_id": "019fcffa-3297-72d3-a17b-7f7d935ba538",
+        "locale": "ja",
+        "name": "人形町店"
+    },
+    {
+        "id": 17,
+        "branch_id": "019fcffa-3297-72d3-a17b-7f7d935ba538",
+        "locale": "en",
+        "name": "Ningyocho Store"
+    },
+    {
+        "id": 18,
+        "branch_id": "019fcffa-3297-72d3-a17b-7f7d935ba538",
+        "locale": "vi",
+        "name": "Cửa hàng Ningyocho"
+    },
+    {
+        "id": 19,
+        "branch_id": "019fcffa-3298-71b9-9a45-58611a1c54c4",
+        "locale": "ja",
+        "name": "ラクーアDD店"
+    },
+    {
+        "id": 20,
+        "branch_id": "019fcffa-3298-71b9-9a45-58611a1c54c4",
+        "locale": "en",
+        "name": "Tokyo Dome Store"
+    },
+    {
+        "id": 21,
+        "branch_id": "019fcffa-3298-71b9-9a45-58611a1c54c4",
+        "locale": "vi",
+        "name": "Cửa hàng Tokyo Dome"
+    },
+    {
+        "id": 22,
+        "branch_id": "019fcffa-329b-7008-8149-7dffa3440f20",
+        "locale": "ja",
+        "name": "イベント出店"
+    },
+    {
+        "id": 23,
+        "branch_id": "019fcffa-329b-7008-8149-7dffa3440f20",
+        "locale": "en",
+        "name": "Food Truck No. 1"
+    },
+    {
+        "id": 24,
+        "branch_id": "019fcffa-329b-7008-8149-7dffa3440f20",
+        "locale": "vi",
+        "name": "Xe bán đồ ăn số 1"
+    },
+    {
+        "id": 25,
+        "branch_id": "019fcffa-329f-730d-aec5-8758ede30228",
+        "locale": "ja",
+        "name": "門前仲町店"
+    },
+    {
+        "id": 26,
+        "branch_id": "019fcffa-329f-730d-aec5-8758ede30228",
+        "locale": "en",
+        "name": "Monzen-nakacho Store"
+    },
+    {
+        "id": 27,
+        "branch_id": "019fcffa-329f-730d-aec5-8758ede30228",
+        "locale": "vi",
+        "name": "Cửa hàng Monzen-nakacho"
+    },
+    {
+        "id": 28,
+        "branch_id": "019fcffa-32a0-72d9-a1a8-b817a5aed29f",
+        "locale": "ja",
+        "name": "イオンモール津田沼店"
+    },
+    {
+        "id": 29,
+        "branch_id": "019fcffa-32a0-72d9-a1a8-b817a5aed29f",
+        "locale": "en",
+        "name": "PHO EXPRESS AEON Mall Tsudanuma"
+    },
+    {
+        "id": 30,
+        "branch_id": "019fcffa-32a0-72d9-a1a8-b817a5aed29f",
+        "locale": "vi",
+        "name": "PHO EXPRESS AEON Mall Tsudanuma"
+    },
+    {
+        "id": 31,
+        "branch_id": "019fcffa-32a2-7008-8433-30da586fea8b",
+        "locale": "ja",
+        "name": "ヒカリエのれん街店"
+    },
+    {
+        "id": 32,
+        "branch_id": "019fcffa-32a2-7008-8433-30da586fea8b",
+        "locale": "en",
+        "name": "Shibuya Store"
+    },
+    {
+        "id": 33,
+        "branch_id": "019fcffa-32a2-7008-8433-30da586fea8b",
+        "locale": "vi",
+        "name": "Cửa hàng Shibuya"
+    },
+    {
+        "id": 34,
+        "branch_id": "019fcffa-328d-7284-8fa0-6d3407f45621",
+        "locale": "ja",
+        "name": "住吉キッチン"
+    },
+    {
+        "id": 35,
+        "branch_id": "019fcffa-3293-73eb-bf1e-ea9a8a964103",
+        "locale": "ja",
+        "name": "白井工場"
+    },
+    {
+        "id": 36,
+        "branch_id": "019fcffa-329a-7278-b4ad-fa531f364894",
+        "locale": "ja",
+        "name": "人形町惣菜部"
+    },
+    {
+        "id": 37,
+        "branch_id": "019fcffa-329d-7132-af6d-127204bc0317",
+        "locale": "ja",
+        "name": "東急吉祥寺-Event"
+    },
+    {
+        "id": 38,
+        "branch_id": "019fcffa-32a3-70af-b526-932bd005bac6",
+        "locale": "ja",
+        "name": "SOGO千葉店"
+    },
+    {
+        "id": 39,
+        "branch_id": "019fcffa-32a5-73de-8b16-77045b3b75d5",
+        "locale": "ja",
+        "name": "マルイ錦糸町-Event"
+    }
+]

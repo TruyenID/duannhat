@@ -1,0 +1,18 @@
+# Immutable operation selected at prepare time. Refunds have their own append-only aggregate
+# and state machine, so refund is intentionally not an attempt operation.
+kind: enum
+
+displayName:
+  en: Payment Attempt Operation
+  ja: 決済試行オペレーション
+  vi: Thao tác lần thử thanh toán
+
+values:
+  - value: sale
+    label: { en: Sale, ja: 売上, vi: Bán hàng }
+  - value: authorize
+    label: { en: Authorize, ja: オーソリ, vi: Uỷ quyền }
+  - value: capture
+    label: { en: Capture, ja: 売上確定, vi: Thu tiền }
+  - value: cancel
+    label: { en: Cancel or Void, ja: 取消, vi: Huỷ }

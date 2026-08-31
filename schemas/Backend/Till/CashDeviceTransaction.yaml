@@ -1,0 +1,244 @@
+# ==============================================================================
+# CashDeviceTransaction — Một lượt thu tiền ở máy 釣銭機 (Glory)
+# ==============================================================================
+#
+# T1 của #2876 (issue #2878).
+#
+# Một row = MỘT LƯỢT THU Ở MÁY, kể cả lượt hỏng. Đây là chỗ khác biệt với
+# `order_payments`: bảng kia chỉ có hàng khi thu ĐƯỢC tiền, nên `timeout`
+# (máy giữ tiền của khách) và `abort` (mất điện giữa chừng) trước T1 không để
+# lại dấu vết nào trên Cloud.
+#
+# Trước bảng này, toàn bộ hiểu biết của Cloud về máy thu tiền nằm trong
+# `order_payments.metadata` (JSON, không index):
+#   grep -rn "glory" backend/app backend/routes backend/database
+#     → 2 dòng, cả hai là COMMENT trong seeder.
+#
+# ĐÂY LÀ SỔ QUAN SÁT, KHÔNG PHẢI SỔ TIỀN.
+#   - `order_payments` vẫn là sự thật về tiền khách đã trả (AR, ADR #1151).
+#   - Bảng này trả lời "cái máy đã làm gì" — chân giữa của đối soát 3 chân
+#     (sổ ↔ máy ↔ người đếm) mà T2 (#2879) dựng lên trên.
+#   - Nó KHÔNG ghi đè, KHÔNG sửa, KHÔNG chặn gì bên `order_payments`.
+#
+# `order_payments.metadata.glory_transaction_id` + `reference_no` GIỮ NGUYÊN —
+# đó là snapshot bất biến, KHÔNG phải legacy. Ruling #2188 không áp. Hai chỗ
+# trả lời hai câu hỏi khác nhau (dòng tiền vs lượt máy); gỡ một cái đi là mất
+# một câu hỏi, không phải dọn trùng lặp.
+#
+# Business Rules:
+#   - BR-CDT01: UNIQUE (peripheral_device_id, glory_transaction_id). Đây là
+#               khoá idempotent của đường sync-UP — KHÔNG phải `id`. Cùng một
+#               máy không bao giờ phát lại một mã giao dịch.
+#   - BR-CDT02: `order_payment_id` chỉ có giá trị khi outcome = finish. Bốn
+#               kết cục còn lại KHÔNG sinh dòng tiền, nên NULL ở đó là ngữ
+#               nghĩa vĩnh viễn (#2618), không phải nhánh dữ liệu cũ.
+#   - BR-CDT03: `machine_seq_no` quyết định hàng nào mới hơn khi gửi lại
+#               (adapter phát UNIX-ms, lớn hơn = mới hơn). Seq cũ hơn ⇒ BỎ QUA,
+#               không ghi đè. Đồng hồ máy trạm không tham gia phép so này.
+#   - BR-CDT04: NO soft delete — sổ audit (PCI DSS v4.0 Req. 10).
+#   - BR-CDT05: Mọi số tiền là minor units (JPY: yên). Không Decimal — máy
+#               đếm tờ và đồng xu, không có phần thập phân.
+#
+# Written by: POST /api/v1/workstation/cash-device-transactions (device token,
+#             theo lô, idempotent, FAIL-OPEN — hỏng không được chặn vòng sync).
+# Read by:   đối soát 3 chân của T2 (#2879), màn tra cứu giao dịch T3 (#2880),
+#            báo cáo sự cố thiết bị T5 (#2882).
+# ==============================================================================
+
+displayName:
+  en: Cash Device Transaction
+  ja: 釣銭機取引
+  vi: Lượt thu tiền mặt
+
+kind: object
+
+options:
+  timestamps: true
+  id: Uuid
+  softDelete: false
+  indexes:
+    # BR-CDT01 — khoá idempotent của đường sync-UP.
+    - columns: [peripheral_device_id, glory_transaction_id]
+      unique: true
+      name: cash_device_txn_device_glory_id_unique
+    # "Máy này hôm qua làm gì" — trục vận hành chính.
+    - columns: [peripheral_device_id, started_at]
+    # Đối soát theo ca (T2): lọc outcome=finish để dựng vế kỳ vọng_máy.
+    - columns: [till_session_id, outcome]
+    # Báo cáo sự cố theo thời gian (T5).
+    - columns: [outcome, started_at]
+    # Đi ngược từ một dòng tiền về lượt máy đã sinh ra nó (T3).
+    - columns: [order_payment_id]
+
+properties:
+  # ---------------------------------------------------------------------------
+  # Máy nào, lượt nào
+  # ---------------------------------------------------------------------------
+  peripheralDevice:
+    # Máy 釣銭機 đã thực hiện lượt thu. RESTRICT: sổ audit không được mất chủ
+    # khi ai đó gỡ thiết bị khỏi registry.
+    #
+    # Đây cũng là chỗ T4 (#2881) bám vào: "sync transaction giữa các máy Glory"
+    # nghĩa là hợp nhất Ở ĐÂY theo device, KHÔNG phải máy nói chuyện với máy.
+    type: Association
+    relation: ManyToOne
+    target: PeripheralDevice
+    onDelete: RESTRICT
+    displayName: { en: Cash Device, ja: 釣銭機, vi: Máy thu tiền }
+
+  glory_transaction_id:
+    # Mã giao dịch do chính máy phát (`Transaction.transactionId`).
+    #
+    # Đây là END-TO-END REFERENCE theo tinh thần ISO 20022: một mã bất biến đi
+    # suốt mọi chặng. Cùng giá trị này đã nằm ở `order_payments.reference_no`
+    # và trong `idempotency_key` dạng `glory:<id>` — nay có thêm một cột THẬT,
+    # index được, thay vì chỉ sống trong JSON.
+    type: String
+    length: 100
+    filterable: true
+    displayName: { en: Glory Transaction ID, ja: 取引ID, vi: Mã giao dịch máy }
+
+  outcome:
+    # finish / cancel / abort / timeout / failure — xem CashDeviceOutcome enum.
+    type: EnumRef
+    enum: CashDeviceOutcome
+    filterable: true
+    displayName: { en: Outcome, ja: 取引結果, vi: Kết cục }
+
+  # ---------------------------------------------------------------------------
+  # Tiền — tất cả minor units, tất cả đến TỪ MÁY
+  # ---------------------------------------------------------------------------
+  requested_minor:
+    # Số tiền POS yêu cầu thu (`StartRequest.total`).
+    type: BigInt
+    default: 0
+    displayName: { en: Requested (minor), ja: 請求額, vi: Yêu cầu thu }
+
+  deposited_minor:
+    # Khách đã bỏ vào máy (`Transaction.deposit`).
+    #
+    # Với outcome=timeout thì đây chính là SỐ TIỀN MÁY ĐANG GIỮ mà không có
+    # dòng `order_payments` nào — thứ trước T1 không ai đếm được.
+    type: BigInt
+    default: 0
+    displayName: { en: Deposited (minor), ja: 投入額, vi: Khách đã bỏ vào }
+
+  change_minor:
+    # Tiền thối PHẢI trả (`Transaction.change`, chốt khi fixDeposit=true).
+    type: BigInt
+    default: 0
+    displayName: { en: Change Due (minor), ja: 釣銭額, vi: Tiền thối phải trả }
+
+  dispensed_minor:
+    # Tiền máy THẬT SỰ nhả ra (`Transaction.dispensedCash`).
+    #
+    # Tách khỏi `change_minor` là có chủ đích: lệch giữa hai cột này là bằng
+    # chứng máy không nhả đủ. Gộp thành một cột là mất đúng phép đo đó.
+    # Với outcome=cancel, đây là tiền TRẢ LẠI khách, không phải tiền thối.
+    type: BigInt
+    default: 0
+    displayName: { en: Dispensed (minor), ja: 出金額, vi: Máy đã nhả }
+
+  # ---------------------------------------------------------------------------
+  # Gắn vào nghiệp vụ — cả ba đều NULLABLE, và mỗi cái vì một lý do khác nhau
+  # ---------------------------------------------------------------------------
+  orderPayment:
+    # NULL với MỌI outcome ≠ finish (BR-CDT02). Lượt hỏng không sinh dòng tiền,
+    # nên NULL ở đây là ngữ nghĩa vĩnh viễn — đừng "sửa" thành NOT NULL (#2618).
+    #
+    # RESTRICT chứ không CASCADE: xoá một dòng tiền không được làm bay hàng sổ
+    # audit của máy.
+    type: Association
+    relation: ManyToOne
+    target: OrderPayment
+    nullable: true
+    onDelete: RESTRICT
+    displayName: { en: Order Payment, ja: 決済, vi: Khoản thanh toán }
+
+  customerOrder:
+    # NULL khi lượt thu hỏng TRƯỚC lúc đơn được chốt, hoặc khi máy trạm bán
+    # offline và đơn chưa lên Cloud. Giữ riêng khỏi `orderPayment` vì đơn tồn
+    # tại trước khoản thanh toán — mất dòng tiền không có nghĩa là mất đơn.
+    type: Association
+    relation: ManyToOne
+    target: CustomerOrder
+    nullable: true
+    onDelete: RESTRICT
+    displayName: { en: Order, ja: 注文, vi: Đơn hàng }
+
+  tillSession:
+    # Ca thu ngân. Nền của đối soát 3 chân (T2 #2879).
+    #
+    # NULL khi máy trạm chưa mở ca (bán ngoài ca là chuyện có thật) hoặc ca
+    # chưa kịp sync lên. KHÔNG suy ra ca theo thời gian ở phía Cloud — ranh ca
+    # là business time của chi nhánh (#1091), máy trạm biết, Cloud đoán sẽ sai.
+    type: Association
+    relation: ManyToOne
+    target: TillSession
+    nullable: true
+    onDelete: RESTRICT
+    displayName: { en: Till Session, ja: レジ精算, vi: Ca thu ngân }
+
+  # ---------------------------------------------------------------------------
+  # Chẩn đoán
+  # ---------------------------------------------------------------------------
+  error_title:
+    # Từ vựng NGUYÊN VĂN của adapter (`glory/errors.go` Error.Title): "empty",
+    # "busy", "needPullOut", "billRejectFull", "ifError", "notReady"…
+    #
+    # CỐ Ý là String chứ không EnumRef: đây là chuỗi của BÊN THỨ BA. Adapter
+    # thêm một title mới ⇒ enum sẽ từ chối hàng và làm MẤT chính cái sự cố cần
+    # ghi. Phân nhóm (IsChangeShortage / NeedsOperator / IsConnectivity) là
+    # việc của tầng đọc, không phải ràng buộc của tầng ghi.
+    type: String
+    length: 50
+    nullable: true
+    filterable: true
+    displayName: { en: Error Title, ja: エラー種別, vi: Loại lỗi }
+
+  machine_seq_no:
+    # `Transaction.seqNo` — UNIX-ms do ADAPTER phát. Lớn hơn = mới hơn.
+    #
+    # BR-CDT03: đây là trọng tài khi cùng một lượt được gửi lên nhiều lần.
+    # Dùng đồng hồ máy trạm thay chỗ này là sai — máy trạm chạy offline dài
+    # ngày, đồng hồ trôi, và một hàng cũ sẽ ghi đè hàng mới.
+    type: BigInt
+    nullable: true
+    displayName: { en: Machine Seq No, ja: 機器連番, vi: Số thứ tự máy }
+
+  # ---------------------------------------------------------------------------
+  # Thời gian — giờ MÁY, không phải giờ Cloud
+  # ---------------------------------------------------------------------------
+  started_at:
+    # `Transaction.startDate` (ISO-8601 từ adapter), lưu UTC.
+    #
+    # Đây là giờ của THIẾT BỊ, cùng họ với `provider_settled_at` của
+    # `payment_settlements` vốn theo lịch của cổng chứ không theo business time
+    # (#1091). Tầng trình bày đổi sang timezone chi nhánh; đừng đổi lúc ghi.
+    type: Timestamp
+    filterable: true
+    displayName: { en: Started At, ja: 開始日時, vi: Bắt đầu }
+
+  finished_at:
+    # `Transaction.endDate`. NULL khi lượt bị `abort` — mất điện thì máy không
+    # kịp đóng dấu giờ kết thúc. Đó chính là dấu hiệu nhận ra abort thật.
+    type: Timestamp
+    nullable: true
+    displayName: { en: Finished At, ja: 終了日時, vi: Kết thúc }
+
+  # ---------------------------------------------------------------------------
+  # Phạm vi (scope) — đi cùng mọi bảng tiền để lọc theo quyền
+  # ---------------------------------------------------------------------------
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    onDelete: RESTRICT
+    displayName: { en: Branch, ja: 店舗, vi: Chi nhánh }
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: RESTRICT
+    displayName: { en: Organization, ja: 組織, vi: Tổ chức }

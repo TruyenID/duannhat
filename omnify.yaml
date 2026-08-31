@@ -1,0 +1,126 @@
+# yaml-language-server: $schema=https://cdn.jsdelivr.net/npm/@omnifyjp/omnify@latest/omnify-config-schema.json
+#
+# TempoFast Monorepo — Omnify Workspace Config
+# ============================================================================
+#
+# Multi-project workspace (omnify v3.17.0+, issue #67).
+# Each project has its own schema set + codegen targets.
+# Shared enums/types live in schemas/Shared/ and are included by all projects.
+#
+# CLI:
+#   npm run omnify:gen                           # Generate ALL projects
+#   npm run omnify:gen -- --project api          # Backend + admin-web + tms only
+#   npm run omnify:gen -- --project workstation  # Go workstation only
+#   npm run omnify:gen -- --force                # Force regen
+#
+# Glossary:
+#   workspace = this monorepo root
+#   project   = one app needing codegen (api, workstation)
+#   schema    = YAML file defining an entity
+#   target    = codegen output (laravel, typescript, go)
+#   shared    = schemas used by multiple projects (enums, common types)
+
+lockFilePath: .omnify/lock.json
+
+workspace:
+  # ─── Schema Sets ──────────────────────────────────────────────────────
+  # Each schema set is a directory of YAML files. Projects reference them
+  # by key. `includes` lets a schema set import shared schemas.
+  schemas:
+    shared:
+      path: schemas/Shared
+
+    backend:
+      path: schemas/Backend
+      includes: [shared]
+
+    workstation:
+      path: schemas/Workstation
+      includes: [shared]
+
+  # ─── Projects ─────────────────────────────────────────────────────────
+  # Each project maps a schema set → codegen targets.
+  projects:
+    # Backend API + consumers (Next.js admin-web + Expo TMS mobile)
+    api:
+      schemas: backend
+      targets:
+        laravel:
+          - name: api
+            enable: true
+            structure: modular
+            rootPath: ./backend
+            model:
+              namespace: App\Models
+            # Domain/application services are manual. Omnify 5.9.3+ must not recreate them.
+            service:
+              enable: false
+            request:
+              namespace: App\Http\Requests
+            resource:
+              namespace: App\Http\Resources
+            migrations:
+              outputPath: database/migrations/omnify
+              # rootPath is ./backend, while the committed state file belongs
+              # to the workspace root (the drift guard reads it there).
+              schemasPath: ../.omnify/schemas.json
+
+        typescript:
+          - name: admin-web
+            enable: true
+            modelsPath: ./web/admin/src/types/models
+
+          - name: tms-app
+            enable: true
+            modelsPath: ./app/tms/src/types/models
+            platform: expo
+            auth: secureStore
+
+          # #1202 — godx-kiosk was NOT a target here, so `omnify:gen` never
+          # touched it and its generated types stood still while the generator
+          # moved on: they reference Branch / Organization / Brand without
+          # importing them (tms-app, generated from the SAME schemas, does
+          # import them). 33 typecheck errors, invisible to the test suite
+          # because vitest transpiles rather than typechecks.
+          #
+          # Registering it here is what stops the drift returning — the kiosk is
+          # regenerated on every run, exactly like admin-web and tms-app.
+          - name: godx-kiosk
+            enable: true
+            modelsPath: ./app/kiosk/src/types/models
+            platform: expo
+            auth: secureStore
+
+    # Workstation desktop app (Go + SQLite) — JP-only deployment
+    workstation:
+      schemas: workstation
+      locale:
+        locales: [ja]
+        defaultLocale: ja
+      targets:
+        go:
+          - name: workstation
+            enable: true
+            rootPath: ./workstation
+            database: sqlite
+            domain:
+              packageName: domain
+              outputPath: internal/domain/generated
+            enums:
+              packageName: enums
+              outputPath: internal/domain/generated/enums
+            migrations:
+              outputPath: migrations/omnify
+            sqlc:
+              outputPath: internal/store/queries/generated
+              packageName: store
+
+# ─── Global Settings ────────────────────────────────────────────────────
+
+locale:
+  locales: [ja, en, vi]
+  defaultLocale: ja
+  fallbackLocale: en
+
+compoundTypes:
+  - japan

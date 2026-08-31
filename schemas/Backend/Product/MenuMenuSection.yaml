@@ -1,0 +1,57 @@
+# ==============================================================================
+# MenuMenuSection Pivot (メニュー×セクション / Pivot Menu - Section)
+# ==============================================================================
+#
+# Pivot table cho quan he N:N giua Menu va MenuSection.
+# Luu display_order rieng cho moi menu (cung 1 section co the hien thi
+# o vi tri khac nhau trong cac menu khac nhau).
+#
+# ==============================================================================
+
+displayName:
+  en: Menu Menu Section
+  ja: メニューセクション関連
+  vi: Pivot Menu - Section
+
+kind: pivot
+pivotFor: [Menu, MenuSection]
+
+options:
+  id: false
+  timestamps: true
+  indexes:
+    - columns: [menu_id, display_order]
+
+properties:
+  display_order:
+    type: Int
+    default: 0
+    displayName:
+      en: Display Order
+      ja: 表示順序
+      vi: Thứ tự hiển thị
+    description:
+      en: Order of this section within the menu (lower = first)
+      ja: メニュー内のセクション表示順序（小さいほど先）
+      vi: Thứ tự hiển thị của section trong menu (nhỏ = trước)
+
+  taxType:
+    # #1218 tier 2 — tax type for THIS section IN THIS MENU. It lives on the
+    # pivot, not on menu_sections, because a section is N:N with menus and is
+    # heavily reused: at the time of writing, 139 pivot rows share just 15
+    # distinct sections across 29 menus, so a column on the section itself would
+    # leak a takeaway 8% into ~9 unrelated menus. Same reason display_order lives
+    # here. Null = fall through to the menu, then the product.
+    type: Association
+    relation: ManyToOne
+    target: TaxType
+    nullable: true
+    onDelete: RESTRICT
+    displayName:
+      en: Tax Type (section in this menu)
+      ja: 税区分（このメニューのセクション）
+      vi: Loại thuế (section trong menu này)
+    description:
+      en: Tax type for this section within this menu. Null = inherit from the menu (resolver tier 2).
+      ja: このメニュー内のこのセクションの税区分。Null = メニューから継承（税区分解決 tier 2）。
+      vi: Loại thuế cho section này trong menu này. Null = kế thừa từ menu (tầng 2).

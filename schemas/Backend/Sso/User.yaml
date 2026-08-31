@@ -1,0 +1,152 @@
+# Người dùng downstream, được provision từ SSO. Mật khẩu nullable vì đăng nhập
+# đi qua Platform — cột chỉ tồn tại cho các luồng cục bộ hiếm hoi.
+#
+# `console_*` là bản sao phiên SSO. Token lưu ở đây để service gọi lại Platform
+# thay mặt người dùng; không dùng cho việc xác thực request đến.
+kind: object
+
+options:
+  id: Uuid
+  timestamps: true
+  softDelete: true
+  indexes:
+    - columns: [console_organization_id]
+    - columns: [console_branch_id]
+    - columns: [email, console_organization_id]
+      unique: true
+    - columns: [console_user_id, console_organization_id]
+      unique: true
+
+properties:
+  name:
+    type: String
+    displayName:
+      ja: 氏名
+      en: Name
+      vi: Tên
+
+  email:
+    type: String
+    displayName:
+      ja: メールアドレス
+      en: Email
+      vi: Email
+
+  password:
+    type: String
+    nullable: true
+    displayName:
+      ja: パスワード
+      en: Password
+      vi: Mật khẩu
+
+  remember_token:
+    type: String
+    length: 100
+    nullable: true
+    displayName:
+      ja: リメンバートークン
+      en: Remember Token
+      vi: Remember token
+
+  email_verified_at:
+    type: DateTime
+    nullable: true
+    displayName:
+      ja: メール確認日時
+      en: Email Verified At
+      vi: Thời điểm xác thực email
+
+  is_active:
+    type: Boolean
+    default: true
+    displayName:
+      ja: 有効
+      en: Active
+      vi: Hoạt động
+
+  avatar_url:
+    type: String
+    length: 500
+    nullable: true
+    displayName:
+      ja: アバターURL
+      en: Avatar URL
+      vi: URL ảnh đại diện
+
+  locale:
+    type: String
+    length: 10
+    nullable: true
+    displayName:
+      ja: 言語設定
+      en: Locale Preference
+      vi: Ngôn ngữ
+
+  timezone:
+    type: String
+    nullable: true
+    displayName:
+      ja: タイムゾーン
+      en: Timezone
+      vi: Múi giờ
+
+  console_user_id:
+    type: String
+    length: 64
+    nullable: true
+    displayName:
+      ja: コンソールユーザーID
+      en: Console User ID
+      vi: ID người dùng trên Console
+
+  console_organization_id:
+    type: Uuid
+    nullable: true
+    displayName:
+      ja: 組織ID
+      en: Organization ID
+      vi: ID tổ chức
+
+  console_access_token:
+    type: Text
+    nullable: true
+    displayName:
+      ja: コンソールアクセストークン
+      en: Console Access Token
+      vi: Access token Console
+
+  console_refresh_token:
+    type: Text
+    nullable: true
+    displayName:
+      ja: コンソールリフレッシュトークン
+      en: Console Refresh Token
+      vi: Refresh token Console
+
+  console_token_expires_at:
+    type: DateTime
+    nullable: true
+    displayName:
+      ja: トークン有効期限
+      en: Console Token Expiry
+      vi: Hạn token Console
+
+  # --- Cột riêng của dxs-product (thêm sau khi publish) ---
+
+  console_branch_id:
+    type: Uuid
+    nullable: true
+    displayName:
+      ja: コンソール支店ID
+      en: Console Branch ID
+      vi: ID chi nhánh trên Console
+
+  # Mốc đồng bộ tổ chức gần nhất từ Platform.
+  last_org_sync_at:
+    type: DateTime
+    nullable: true
+    displayName:
+      ja: 組織同期日時
+      en: Last Platform Organization Sync
+      vi: Lần đồng bộ tổ chức gần nhất

@@ -1,0 +1,47 @@
+# godx-kiosk standalone omnify config — consumer mode.
+#
+# NOT the canonical runner. #1202 registered the kiosk as a typescript target in
+# the UMBRELLA's omnify.yaml, and that is what regenerates these types:
+#
+#   cd <umbrella> && npm run omnify:gen
+#
+# The kiosk was absent from the umbrella config for a long time, so nothing ever
+# regenerated it: its types stood still while the generator moved on and ended up
+# referencing Branch / Organization / Brand without importing them — 33 typecheck
+# errors that the test suite could not see, because vitest transpiles instead of
+# typechecking. This file stayed behind as a copy of tms-app's (it still carried
+# tms-app's name), which is how the drift went unnoticed.
+#
+# Kept for a standalone run, which also needs `@omnifyjp/omnify` installed here —
+# it is not, so `npx omnify generate` in this directory reports
+# "omnify-ts not found" and writes nothing.
+
+lockFilePath: .omnify/lock.json
+
+workspace:
+  schemas:
+    shared:
+      path: ../schemas/Shared
+    backend:
+      path: ../schemas/Backend
+      includes: [shared]
+
+  projects:
+    godx-kiosk:
+      schemas: backend
+      targets:
+        typescript:
+          - name: godx-kiosk
+            enable: true
+            modelsPath: ./src/types/models
+            platform: expo
+            auth: secureStore
+
+connections:
+  default:
+    driver: mysql
+
+locale:
+  locales: [ja, en, vi]
+  defaultLocale: ja
+  fallbackLocale: en

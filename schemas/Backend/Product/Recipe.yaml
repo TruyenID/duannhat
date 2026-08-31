@@ -1,0 +1,323 @@
+# =============================================================================
+# Recipe (レシピ / Công thức)
+# =============================================================================
+#
+# User-friendly wrapper around Material for menu-facing recipes. Holds the
+# ingredient list, output (yield + unit), preparation time, instructions, and
+# — as of plan-003 — a formal approval workflow and a denormalized allergen
+# rollup computed from upstream Materials.
+#
+# Written by:  HQ editor (CRUD, submit-for-approval) + HQ approver (approve /
+#              reject). Immediate MaterialService update can auto-trigger
+#              allergen rollup recomputation on this Recipe.
+# Read by:     Menu / ProductSku link, customer-facing storefront (future),
+#              operations / printers (via workstation-app sync).
+#
+# Approval workflow (HasApprovalWorkflow trait):
+#
+#   [draft] --submit--> [pending] --approve--> [approved]
+#                          |
+#                          └--reject--> [rejected] --resubmit--> [pending]
+#
+#   Auto-repend: [approved] → [pending] fires on any structural change —
+#   `ingredients`, `material_id`, `output_quantity`, `output_unit`, OR any
+#   upstream Material allergen change whose rollup delta is non-empty.
+#   Non-structural fields (description, instructions, preparation_time,
+#   is_active) do NOT trigger re-approval.
+#
+# Allergen rollup:
+#   `allergen_rollup` is a JSON array of Allergen IDs aggregated from every
+#   upstream Material's allergens. Cache-on-write — recomputed synchronously
+#   inside the same DB transaction as any triggering change (Material
+#   allergen sync, or this Recipe's ingredients / material_id change).
+#   Soft-deleted allergens are filtered out of subsequent recomputes.
+#
+# i18n:
+#   - `name`, `description`, `instructions`, `rejection_reason` translatable
+#     (all user-visible). Stored in recipe_translations via Astrotomic.
+# =============================================================================
+
+displayName:
+  en: Recipe
+  ja: レシピ
+  vi: Công thức
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+
+  # plan-003 audit high — record the submitter so the "cannot approve your own
+  # submission" segregation-of-duties guard in RecipeService::approve() reads a
+  # real created_by_id column (previously the check compared null and was dead
+  # code). Omnify auto-populates it from Auth::user() via the generated
+  # base-model creating hook + createdBy() relationship (mirrors Product).
+  audit:
+    createdBy: true
+
+  indexes:
+    - columns: [organization_id]
+    - columns: [organization_id, sku]
+      unique: true
+    - columns: [brand_id]
+    - columns: [brand_id, sku]
+
+properties:
+  sku:
+    type: String
+    length: 50
+    nullable: true
+    displayName:
+      en: Recipe SKU
+      ja: レシピSKU
+      vi: Mã công thức
+    placeholder:
+      en: "e.g., R-001"
+      vi: "VD: R-001"
+      ja: "例：R-001"
+    description:
+      en: Unique SKU with prefix R-
+      ja: プレフィックスR-を持つ一意のSKU
+      vi: SKU duy nhất với tiền tố R-
+
+  name:
+    type: String
+    length: 255
+    searchable: true
+    translatable: true
+    displayName:
+      en: Recipe Name
+      ja: レシピ名
+      vi: Tên công thức
+
+  description:
+    type: Text
+    nullable: true
+    translatable: true
+    displayName:
+      en: Description
+      ja: 説明
+      vi: Mô tả
+
+  material:
+    type: Association
+    relation: ManyToOne
+    target: Material
+    onDelete: CASCADE
+    nullable: true
+    displayName:
+      en: Material
+      ja: 材料
+      vi: Nguyên liệu
+
+  output_quantity:
+    type: Decimal
+    precision: 10
+    scale: 4
+    default: 1
+    displayName:
+      en: Output Quantity
+      ja: 出力数量
+      vi: Số lượng đầu ra
+
+  output_unit:
+    type: String
+    length: 50
+    nullable: true
+    displayName:
+      en: Output Unit
+      ja: 出力単位
+      vi: Đơn vị đầu ra
+
+  ingredients:
+    type: Json
+    nullable: true
+    displayName:
+      en: Ingredients
+      ja: 材料リスト
+      vi: Danh sách nguyên liệu
+
+  preparation_time:
+    type: Int
+    nullable: true
+    displayName:
+      en: Preparation Time
+      ja: 調理時間
+      vi: Thời gian chuẩn bị
+    description:
+      en: Time in minutes
+      ja: 分単位
+      vi: Tính bằng phút
+
+  # Plan-022 (yield variance) — % tolerance between actual_yield and
+  # planned_yield on MaterialBatch::complete. When |actual - planned| / planned
+  # * 100 > this value, the shop must supply yield_variance_reason. Default 0
+  # = any drift requires a reason; HQ raises it (e.g. 5 = ±5%) to skip the
+  # reason prompt for small spoilage.
+  yield_variance_tolerance_pct:
+    type: Decimal
+    precision: 5
+    scale: 2
+    nullable: true
+    default: 0
+    displayName:
+      en: Yield Variance Tolerance (%)
+      ja: 歩留まり許容差（%）
+      vi: Sai số cho phép (%)
+    description:
+      en: "Allowed % drift between actual and planned yield before a reason is required. 0 = any drift requires a reason."
+      ja: "実際生産量と計画生産量の許容差（%）。0 = 差異が出るたびに理由が必要。"
+      vi: "Sai số % cho phép giữa sản lượng thực và kế hoạch trước khi cần lý do. 0 = mọi chênh lệch đều cần lý do."
+
+  instructions:
+    type: Text
+    nullable: true
+    translatable: true
+    displayName:
+      en: Instructions
+      ja: 調理手順
+      vi: Hướng dẫn
+
+  is_active:
+    type: Boolean
+    default: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+
+  # =========================================================================
+  # Approval workflow (HasApprovalWorkflow trait) — plan-003
+  # =========================================================================
+
+  # Current state in the 4-state approval machine. Mutations ONLY via the
+  # HasApprovalWorkflow trait methods — direct writes bypass audit logging
+  # and the "cannot approve own submission" service-level guard.
+  approval_status:
+    type: EnumRef
+    enum: ApprovalStatus
+    default: draft
+    nullable: true
+    filterable: true
+    sortable: true
+    displayName:
+      en: Approval Status
+      ja: 承認ステータス
+      vi: Trạng thái duyệt
+
+  # Approver identity for the most recent `approved` transition. Cleared on
+  # repend? No — kept for audit. The "cannot approve own submission" rule
+  # reads the previous submitter from the audit log, not this column.
+  approved_by:
+    type: Association
+    relation: ManyToOne
+    target: User
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Approved By
+      ja: 承認者
+      vi: Người duyệt
+
+  approved_at:
+    type: DateTime
+    nullable: true
+    displayName:
+      en: Approved At
+      ja: 承認日時
+      vi: Thời điểm duyệt
+
+  # Reviewer identity for the most recent `rejected` transition.
+  rejected_by:
+    type: Association
+    relation: ManyToOne
+    target: User
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Rejected By
+      ja: 却下者
+      vi: Người từ chối
+
+  rejected_at:
+    type: DateTime
+    nullable: true
+    displayName:
+      en: Rejected At
+      ja: 却下日時
+      vi: Thời điểm từ chối
+
+  # Free-text reason for the most recent `rejected` transition. Kept across
+  # a subsequent `pending → approved` transition for history; cleared only
+  # on explicit edit. Translatable so approvers can leave locale-appropriate
+  # feedback.
+  rejection_reason:
+    type: Text
+    nullable: true
+    translatable: true
+    displayName:
+      en: Rejection Reason
+      ja: 却下理由
+      vi: Lý do từ chối
+
+  # =========================================================================
+  # Allergen rollup (AllergenRollupService) — plan-003
+  # =========================================================================
+
+  # JSON array of Allergen IDs aggregated from every upstream Material's
+  # allergens. Denormalized cache — source of truth is the M2M pivot on
+  # each ingredient Material. NEVER hand-edit; recompute via the service.
+  # Default `[]` so list queries don't need null-safe checks.
+  # MySQL pre-8.0.13 forbids defaults on JSON; we leave it nullable and let
+  # AllergenRollupService::recomputeForRecipe seed the value on Recipe::create.
+  # Reads should treat NULL as equivalent to [] (the rollup service does).
+  allergen_rollup:
+    type: Json
+    nullable: true
+    displayName:
+      en: Allergen Rollup
+      ja: アレルゲン集約
+      vi: Tổng hợp dị ứng
+
+  # Last time the rollup was recomputed. Used to surface "re-approval needed"
+  # banners when compared with approved_at.
+  allergen_rollup_updated_at:
+    type: DateTime
+    nullable: true
+    displayName:
+      en: Allergen Rollup Updated At
+      ja: アレルゲン集約更新日時
+      vi: Thời điểm cập nhật tổng hợp dị ứng
+
+  # SKUs using this recipe
+  skus:
+    type: Association
+    relation: OneToMany
+    target: ProductSku
+    mappedBy: recipe
+    displayName:
+      en: SKUs
+      ja: SKU一覧
+      vi: SKU
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: CASCADE
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu

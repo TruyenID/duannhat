@@ -1,0 +1,98 @@
+# CatalogRevision schema (#1092/#1095 — offline-order evidence, step 2 of the infra)
+#
+# An immutable, per-branch version stamp of the PRICE-RELEVANT catalog. Bumped
+# whenever a menu mutation changes what an offline device would charge, and
+# pulled DOWN by the workstation so an order created offline can name the
+# catalog it was sold from (OfflineOrderEvidence.catalog_revision).
+#
+# WHY A FULL SNAPSHOT, not just a hash (deviation from the #1095 sketch):
+#   The verifier (#1096) must answer "was ¥1,000 a legitimate price for this
+#   SKU at revision 41?" — an order synced UP days later cannot be re-priced
+#   from TODAY's menu, because the customer already paid the old price. A hash
+#   only proves "the device saw the same catalog"; it cannot validate a single
+#   line's money. So each revision stores the compact price map it hashes.
+#   Cost is small: menus are hundreds of rows and revisions bump only on menu
+#   edits, never per order.
+#
+# Business rules:
+#   - BR-CR01: `revision` is a per-branch monotonic integer starting at 1.
+#   - BR-CR02: a mutation that leaves the price map byte-identical does NOT
+#     create a new revision (no-op edits must not inflate the sequence, or the
+#     grace window for offline devices shrinks for no reason).
+#   - BR-CR03: rows are immutable once written — a revision is a historical
+#     fact. Corrections happen by bumping a NEW revision.
+#   - BR-CR04: retention is bounded by the offline evidence window: a revision
+#     older than the longest evidence expiry (72h) plus a safety margin can be
+#     pruned once no unsynced order references it. No pruning ships in #1095.
+
+displayName:
+  en: Catalog Revision
+  ja: カタログ版
+  vi: Phiên bản catalog
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: false
+  id: Uuid
+  indexes:
+    - columns: [branch_id, revision]
+      unique: true
+    - columns: [branch_id, created_at]
+    - columns: [organization_id]
+
+properties:
+  revision:
+    type: Int
+    displayName:
+      en: Revision
+      ja: 版番号
+      vi: Số phiên bản
+    description:
+      en: "Per-branch monotonic counter starting at 1 (BR-CR01)."
+      ja: "店舗ごとの単調増加カウンタ（1から、BR-CR01）。"
+      vi: "Bộ đếm tăng dần theo chi nhánh, bắt đầu từ 1 (BR-CR01)."
+
+  snapshot_hash:
+    type: String
+    length: 64
+    displayName:
+      en: Snapshot Hash
+      ja: スナップショットハッシュ
+      vi: Hash ảnh chụp
+    description:
+      en: "sha256 of the canonical price map. Equal hash = no new revision (BR-CR02)."
+      ja: "価格マップのsha256。同一ハッシュなら新版を作らない（BR-CR02）。"
+      vi: "sha256 của bảng giá canonical. Hash giống nhau = không tạo version mới (BR-CR02)."
+
+  snapshot:
+    type: Json
+    displayName:
+      en: Price Snapshot
+      ja: 価格スナップショット
+      vi: Ảnh chụp giá
+    description:
+      en: "Compact price/tax map the verifier re-prices historical offline orders against: menu_product_sku_id → [product_sku_id, price, tax_type_id]."
+      ja: "検証器が過去のオフライン注文を再計算するための価格・税マップ。"
+      vi: "Bảng giá/thuế gọn để verifier tính lại đơn offline lịch sử."
+
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    onDelete: CASCADE
+    displayName:
+      en: Branch
+      ja: 店舗
+      vi: Chi nhánh
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức

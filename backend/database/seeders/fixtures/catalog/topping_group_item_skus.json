@@ -1,0 +1,674 @@
+[
+    {
+        "id": "019f6efc-c8be-7372-914d-0f2e6a1d4626",
+        "topping_group_item_id": "019f6efc-c8bc-7080-be97-0a1c5ca501fb",
+        "product_sku_id": "019f6ed5-4ad4-723e-993f-7ea7878edef3",
+        "extra_price": "550.00"
+    },
+    {
+        "id": "019f6efc-c8c3-704f-963f-1f2e137f6906",
+        "topping_group_item_id": "019f6efc-c8c1-7194-b66e-409801b0ab09",
+        "product_sku_id": "019f6ed5-524a-7141-b668-792572eab323",
+        "extra_price": "120.00"
+    },
+    {
+        "id": "019f6efc-c8c7-70b2-90b9-075e440ab835",
+        "topping_group_item_id": "019f6efc-c8c5-724c-9c8d-e27161d3e2f0",
+        "product_sku_id": "019f6ed5-53d3-73f0-a47b-8b4566b8fc15",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-c91b-7318-b760-b6d4c0f18e45",
+        "topping_group_item_id": "019f6efc-c91b-7318-b760-b6d4c07e368a",
+        "product_sku_id": "019f6ed5-526d-728f-9c9d-6539af6ad168",
+        "extra_price": "120.00"
+    },
+    {
+        "id": "019f6efc-c91d-73de-bf9b-10ecd9bee38f",
+        "topping_group_item_id": "019f6efc-c91c-73df-b988-2a5d30ce9ff3",
+        "product_sku_id": "019f6ed5-528d-71cf-936e-a35b6e44d606",
+        "extra_price": "150.00"
+    },
+    {
+        "id": "019f6efc-c920-719f-9928-b017f0af5873",
+        "topping_group_item_id": "019f6efc-c91d-73de-bf9b-10ecdab24e84",
+        "product_sku_id": "019f6ed5-53d1-7015-8a22-f1783e93f9e4",
+        "extra_price": "300.00"
+    },
+    {
+        "id": "019f6efc-c921-7186-8d35-e566892bc1e5",
+        "topping_group_item_id": "019f6efc-c921-7186-8d35-e56688f931c0",
+        "product_sku_id": "019f6ed5-561b-73bc-8163-6d65f3aa5ec3",
+        "extra_price": "150.00"
+    },
+    {
+        "id": "019f6efc-c934-705e-99c9-be3748b8baa7",
+        "topping_group_item_id": "019f6efc-c933-730c-bed9-eee9aabc11b1",
+        "product_sku_id": "019f6ed5-53d1-7015-8a22-f1783e93f9e4",
+        "extra_price": "300.00"
+    },
+    {
+        "id": "019f6efc-c935-701b-859e-e5dbcf63b4cc",
+        "topping_group_item_id": "019f6efc-c935-701b-859e-e5dbcf535114",
+        "product_sku_id": "019f6ed5-561b-73bc-8163-6d65f3aa5ec3",
+        "extra_price": "150.00"
+    },
+    {
+        "id": "019f6efc-c956-7365-b823-2bc8254e3663",
+        "topping_group_item_id": "019f6efc-c955-7318-be68-22bb26cc31f2",
+        "product_sku_id": "019f6ed5-526d-728f-9c9d-6539af6ad168",
+        "extra_price": "120.00"
+    },
+    {
+        "id": "019f6efc-c95b-7328-926e-ca36c79a0b10",
+        "topping_group_item_id": "019f6efc-c95a-723e-99ac-0add754a0a3a",
+        "product_sku_id": "019f6ed5-53d1-7015-8a22-f1783e93f9e4",
+        "extra_price": "300.00"
+    },
+    {
+        "id": "019f6efc-c95c-737e-bbba-bf4a353ee7a5",
+        "topping_group_item_id": "019f6efc-c95c-737e-bbba-bf4a34b263fa",
+        "product_sku_id": "019f6ed5-561b-73bc-8163-6d65f3aa5ec3",
+        "extra_price": "150.00"
+    },
+    {
+        "id": "019f6efc-c972-7028-b27c-1492e64d45ed",
+        "topping_group_item_id": "019f6efc-c971-73e7-b806-e750603e1e70",
+        "product_sku_id": "019f6ed5-53d3-73f0-a47b-8b4566b8fc15",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-c973-7162-912b-3701b2fcc619",
+        "topping_group_item_id": "019f6efc-c973-7162-912b-3701b2c772a7",
+        "product_sku_id": "019f6ed5-5d12-72d4-8314-47e1a65915fe",
+        "extra_price": "150.00"
+    },
+    {
+        "id": "019f6efc-c987-713f-8365-113dc02ed1e9",
+        "topping_group_item_id": "019f6efc-c986-72ed-9682-685591e2aed9",
+        "product_sku_id": "019f6ed5-53e7-70a6-9652-1183bb0e0a42",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-c98b-717d-a98b-72f409cd58d6",
+        "topping_group_item_id": "019f6efc-c98a-71f5-b6cd-be136ddae5aa",
+        "product_sku_id": "019f6ed5-5402-7325-97f6-fceba0532997",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-c9a1-70c6-a713-e4315baac132",
+        "topping_group_item_id": "019f6efc-c9a1-70c6-a713-e4315ade47cc",
+        "product_sku_id": "019f6ed5-53ef-720a-b70f-49b07e70af8f",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-c9a2-7388-8d2c-40d9ea001f1c",
+        "topping_group_item_id": "019f6efc-c9a2-7388-8d2c-40d9e9b6c665",
+        "product_sku_id": "019f6ed5-5402-7325-97f6-fceba0532997",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-c9a4-737b-aecc-6f038ad491c7",
+        "topping_group_item_id": "019f6efc-c9a3-7153-b6fe-35e8df162386",
+        "product_sku_id": "019f6ed5-5701-7127-a0b9-48df0fb929ee",
+        "extra_price": "50.00"
+    },
+    {
+        "id": "019f6efc-c9a8-7307-9d05-cd34558b1b57",
+        "topping_group_item_id": "019f6efc-c9a7-7153-a311-f92514594595",
+        "product_sku_id": "019f6ed5-549a-7017-9a53-494d38a4e4e1",
+        "extra_price": "150.00"
+    },
+    {
+        "id": "019f6efc-c9a9-70fa-a586-f516f7ef5de5",
+        "topping_group_item_id": "019f6efc-c9a9-70fa-a586-f516f7ba4b21",
+        "product_sku_id": "019f6ed5-54b4-72a6-8ebc-09fab47f350a",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-c9ab-71d5-b223-189ab3f3df3b",
+        "topping_group_item_id": "019f6efc-c9aa-71f4-ba0c-591b5542bf20",
+        "product_sku_id": "019f6ed5-58c5-70a6-baba-53982ff981c7",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-c9ac-70ce-92d3-1d1e182d3e9f",
+        "topping_group_item_id": "019f6efc-c9ab-71d5-b223-189ab43e66d4",
+        "product_sku_id": "019f6ed5-5918-73cc-9b3e-ddf9c8298116",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-c9ae-7316-bd22-bff57db20a7f",
+        "topping_group_item_id": "019f6efc-c9ad-72c2-9470-1f4cfd941260",
+        "product_sku_id": "019f6ed5-549a-7017-9a53-494d38a4e4e1",
+        "extra_price": "150.00"
+    },
+    {
+        "id": "019f6efc-c9af-73b0-8fc1-9b586ddf8a7b",
+        "topping_group_item_id": "019f6efc-c9af-73b0-8fc1-9b586db75519",
+        "product_sku_id": "019f6ed5-54d6-71ab-9125-c4cea75e5b6c",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-c9b0-704d-aea5-ff6b72d2a004",
+        "topping_group_item_id": "019f6efc-c9b0-704d-aea5-ff6b727af3ea",
+        "product_sku_id": "019f6ed5-591f-7269-8a48-417f80be04b6",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-c9b1-7054-99f8-cb9778d65bbc",
+        "topping_group_item_id": "019f6efc-c9b1-7054-99f8-cb9777dca3a6",
+        "product_sku_id": "019f6ed5-5c24-73db-a861-b1d02da8453a",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-c9b3-7397-bb89-29f23ae3cb67",
+        "topping_group_item_id": "019f6efc-c9b2-710c-8f1f-d9f435115b79",
+        "product_sku_id": "019f6ed5-54b4-72a6-8ebc-09fab47f350a",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-c9b4-7244-8aef-b996f5ee12d5",
+        "topping_group_item_id": "019f6efc-c9b4-7244-8aef-b996f5be084f",
+        "product_sku_id": "019f6ed5-54d6-71ab-9125-c4cea75e5b6c",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-c9b5-72ed-bcbe-83c8165d0081",
+        "topping_group_item_id": "019f6efc-c9b5-72ed-bcbe-83c8161c21cb",
+        "product_sku_id": "019f6ed5-5952-73ed-926f-fbf229ff0a3f",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-c9b6-730e-baec-7e52d35503d9",
+        "topping_group_item_id": "019f6efc-c9b6-730e-baec-7e52d26827ff",
+        "product_sku_id": "019f6ed5-595c-70c2-b852-8547d91613b3",
+        "extra_price": "100.00"
+    },
+    {
+        "id": "019f6efc-c9b8-72a1-b021-10787d89049e",
+        "topping_group_item_id": "019f6efc-c9b7-731a-862a-998ff1103369",
+        "product_sku_id": "019f6ed5-54b4-72a6-8ebc-09fab47f350a",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-c9b9-70d8-8c7e-d1759ad48030",
+        "topping_group_item_id": "019f6efc-c9b8-72a1-b021-10787e2db030",
+        "product_sku_id": "019f6ed5-54d6-71ab-9125-c4cea75e5b6c",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-c9ba-72b1-a8be-fe52ba02ec2a",
+        "topping_group_item_id": "019f6efc-c9ba-72b1-a8be-fe52b917b1da",
+        "product_sku_id": "019f6ed5-5952-73ed-926f-fbf229ff0a3f",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-c9bb-739d-89cc-d4920b641648",
+        "topping_group_item_id": "019f6efc-c9bb-739d-89cc-d4920a9227c3",
+        "product_sku_id": "019f6ed5-595c-70c2-b852-8547d91613b3",
+        "extra_price": "100.00"
+    },
+    {
+        "id": "019f6efc-c9bd-700c-96f2-a94727a5125b",
+        "topping_group_item_id": "019f6efc-c9bd-700c-96f2-a947279e231c",
+        "product_sku_id": "019f6ed5-54d6-71ab-9125-c4cea75e5b6c",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-c9be-71f8-8ca7-1f14839b5481",
+        "topping_group_item_id": "019f6efc-c9be-71f8-8ca7-1f1482b6bb6e",
+        "product_sku_id": "019f6ed5-5952-73ed-926f-fbf229ff0a3f",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-c9c1-70ce-a30c-bbc7cf61d432",
+        "topping_group_item_id": "019f6efc-c9c0-7348-837b-bab1c3f9bc0c",
+        "product_sku_id": "019f6ed5-5509-706e-8bc3-82dd1e70297c",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-c9c2-71c0-8418-32bc20aaf56a",
+        "topping_group_item_id": "019f6efc-c9c1-70ce-a30c-bbc7d01b09ea",
+        "product_sku_id": "019f6ed5-5569-7015-bf9a-ad2437ff4553",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-c9c4-7001-b1a8-4511a6d8417b",
+        "topping_group_item_id": "019f6efc-c9c4-7001-b1a8-4511a6590cee",
+        "product_sku_id": "019f6ed5-556d-716f-9672-738ddcbb5b8c",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-c9c5-73ab-8636-b8ce0b225676",
+        "topping_group_item_id": "019f6efc-c9c5-73ab-8636-b8ce0b12988a",
+        "product_sku_id": "019f6ed5-55a1-714b-ba30-c2fee44c78f1",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-c9c7-7328-8a4a-e9a08e0088c0",
+        "topping_group_item_id": "019f6efc-c9c7-7328-8a4a-e9a08da93d38",
+        "product_sku_id": "019f6ed5-55a1-714b-ba30-c2fee44c78f1",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-c9c8-73ee-ad20-209d65d40782",
+        "topping_group_item_id": "019f6efc-c9c8-73ee-ad20-209d657f72c6",
+        "product_sku_id": "019f6ed5-5998-73e0-acc7-0d4785a2d583",
+        "extra_price": "50.00"
+    },
+    {
+        "id": "019f6efc-c9d1-7111-b958-6aca8053e183",
+        "topping_group_item_id": "019f6efc-c9d1-7111-b958-6aca8004c77a",
+        "product_sku_id": "019f6ed5-565c-7209-bf6c-c43d28de43f8",
+        "extra_price": "300.00"
+    },
+    {
+        "id": "019f6efc-c9d7-716a-904a-edda53132433",
+        "topping_group_item_id": "019f6efc-c9d6-73ab-8dc2-55bc036d4f2c",
+        "product_sku_id": "019f6ed5-5719-710b-a6df-412fc92da2fe",
+        "extra_price": "70.00"
+    },
+    {
+        "id": "019f6efc-c9d8-70d4-a6c6-705feefcadee",
+        "topping_group_item_id": "019f6efc-c9d8-70d4-a6c6-705fee1cf894",
+        "product_sku_id": "019f6ed5-572b-7217-9342-98bfa094793a",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-c9dd-703a-a49f-32e5884996f2",
+        "topping_group_item_id": "019f6efc-c9dc-71df-b054-67c128831d26",
+        "product_sku_id": "019f6ed5-574f-723d-91ff-583f92339d45",
+        "extra_price": "50.00"
+    },
+    {
+        "id": "019f6efc-c9e2-739e-b0e7-6699f3287aa1",
+        "topping_group_item_id": "019f6efc-c9e2-739e-b0e7-6699f2e572e2",
+        "product_sku_id": "019f6ed5-5776-7038-b952-739cdfb80988",
+        "extra_price": "70.00"
+    },
+    {
+        "id": "019f6efc-c9e4-7341-9aba-0c3ea977613c",
+        "topping_group_item_id": "019f6efc-c9e3-7064-b1fa-9e888e3ab0c0",
+        "product_sku_id": "019f6ed5-577c-714a-96f6-205c591aa7f3",
+        "extra_price": "270.00"
+    },
+    {
+        "id": "019f6efc-c9e6-7266-b2f0-efa07fb865d2",
+        "topping_group_item_id": "019f6efc-c9e6-7266-b2f0-efa07f28b7b3",
+        "product_sku_id": "019f6ed5-5780-7211-a0a1-551560fdf7a5",
+        "extra_price": "310.00"
+    },
+    {
+        "id": "019f6efc-c9e8-701b-8342-bdb1244fc591",
+        "topping_group_item_id": "019f6efc-c9e8-701b-8342-bdb123e97b92",
+        "product_sku_id": "019f6ed5-5792-70d3-ae03-d6c2e8408660",
+        "extra_price": "100.00"
+    },
+    {
+        "id": "019f6efc-c9ea-701a-9347-112533b7e3d1",
+        "topping_group_item_id": "019f6efc-c9e9-70fc-a6aa-bceb5c0647b2",
+        "product_sku_id": "019f6ed5-5798-7339-953f-004b03912a15",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-c9ee-7323-a8b2-377e85077247",
+        "topping_group_item_id": "019f6efc-c9ee-7323-a8b2-377e848fd7c3",
+        "product_sku_id": "019f6ed5-57b4-721d-8fa2-36e4ad3c3115",
+        "extra_price": "50.00"
+    },
+    {
+        "id": "019f6efc-c9f3-709e-ab65-73dc6938678a",
+        "topping_group_item_id": "019f6efc-c9f2-73d5-a410-e806c97b80e6",
+        "product_sku_id": "019f6ed5-57be-72fa-9afc-4c3824fce9ae",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-c9f4-7323-bbde-8a2186e198f9",
+        "topping_group_item_id": "019f6efc-c9f3-709e-ab65-73dc695ea750",
+        "product_sku_id": "019f6ed5-57c1-733d-8f00-e8799878183a",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-c9f6-7353-bffe-7c4477e9d11d",
+        "topping_group_item_id": "019f6efc-c9f5-7244-ae59-cf5e9d77b4fd",
+        "product_sku_id": "019f6ed5-57ed-738c-ae61-81159086d87b",
+        "extra_price": "100.00"
+    },
+    {
+        "id": "019f6efc-c9f8-7159-9984-db99a5e28fe1",
+        "topping_group_item_id": "019f6efc-c9f7-7129-992b-836731e9f537",
+        "product_sku_id": "019f6ed5-5926-72b8-8b41-97ae13fce2b4",
+        "extra_price": "50.00"
+    },
+    {
+        "id": "019f6efc-ca07-70d2-a4c5-e4058ab81dd1",
+        "topping_group_item_id": "019f6efc-ca06-705f-81ef-b78143f0af26",
+        "product_sku_id": "019f6ed5-59af-73d6-af01-ba1af60e9072",
+        "extra_price": "650.00"
+    },
+    {
+        "id": "019f6efc-ca0a-7167-9bac-828f997cb6e6",
+        "topping_group_item_id": "019f6efc-ca09-712e-936c-cf8e76b924de",
+        "product_sku_id": "019f6ed5-5a58-7189-916a-2d7c7ee3c04b",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-ca0c-7327-a3b6-734d4a48b016",
+        "topping_group_item_id": "019f6efc-ca0b-72e2-aecf-20d01669523d",
+        "product_sku_id": "019f6ed5-5a5c-72b8-a845-91325f822246",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f6efc-ca13-7207-9348-5783a3201e72",
+        "topping_group_item_id": "019f6efc-ca12-72ab-bbd3-15e5cb36d7d7",
+        "product_sku_id": "019f6ed5-5c1f-728e-80eb-921adafebf14",
+        "extra_price": "450.00"
+    },
+    {
+        "id": "019f749d-07d3-73a0-96bc-285221719a21",
+        "topping_group_item_id": "019f749d-07ce-70ea-969a-baebeda1f480",
+        "product_sku_id": "019f6ed5-4282-7383-a4f6-5bad4e911b75",
+        "extra_price": "150.00"
+    },
+    {
+        "id": "019f749d-17f1-7079-b589-2576a6bdd311",
+        "topping_group_item_id": "019f749d-17ef-7287-979d-b12b06f2279e",
+        "product_sku_id": "019f6ed5-42c8-7362-9200-369ea3a3bde0",
+        "extra_price": "350.00"
+    },
+    {
+        "id": "019f749d-51af-7138-a6aa-75bd462cde43",
+        "topping_group_item_id": "019f749d-51ae-73fd-8302-d1e53b5001c0",
+        "product_sku_id": "019f6ed5-4d7d-7112-b8df-15e36fcdf49b",
+        "extra_price": "50.00"
+    },
+    {
+        "id": "019f74c2-4ed8-723e-bf7e-2ae678250448",
+        "topping_group_item_id": "019f74c2-4ec9-73dd-a570-e125ad477884",
+        "product_sku_id": "019f6ed5-5b8c-71e2-a40d-9e5b0674d528",
+        "extra_price": "180.00"
+    },
+    {
+        "id": "019f74c3-5d06-7191-abe8-2ec81e433e70",
+        "topping_group_item_id": "019f74c3-5cff-737b-b403-fd44d572e6d2",
+        "product_sku_id": "019f6ed5-546e-73ca-a47e-cfd53c2da12d",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f74c4-32ee-71b9-8257-9d0cd2594e0f",
+        "topping_group_item_id": "019f74c4-32ec-73f4-a659-5dff1c2c4684",
+        "product_sku_id": "019f6ed5-546e-73ca-a47e-cfd53c2da12d",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f74c4-3a60-73fc-9847-d1201b85c03b",
+        "topping_group_item_id": "019f74c4-3a5d-7337-8330-cb27f0bbdb17",
+        "product_sku_id": "019f6ed5-5b8c-71e2-a40d-9e5b0674d528",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f74c5-780c-7044-bf6b-ccb2ef33297d",
+        "topping_group_item_id": "019f74c5-7808-725e-95c6-8cb472a1df49",
+        "product_sku_id": "019f6ed5-5a67-71f5-a22f-9cfb28263fb8",
+        "extra_price": "50.00"
+    },
+    {
+        "id": "019f74c5-7ec5-705b-866f-2c5589d29815",
+        "topping_group_item_id": "019f74c5-7ec3-7366-ac19-89ed261e5d6d",
+        "product_sku_id": "019f6ed5-5d42-72db-b8b2-fc29a443cc93",
+        "extra_price": "50.00"
+    },
+    {
+        "id": "019f74c5-8aa3-71f6-b148-732f4c48c69c",
+        "topping_group_item_id": "019f74c5-8a9a-72ec-b839-368b5d82234a",
+        "product_sku_id": "019f6ed5-5b33-7073-97ba-b4b49670fc5b",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f74c5-96ab-707d-800d-9550e6e88061",
+        "topping_group_item_id": "019f74c5-96a9-7029-b39f-6082d60f94ba",
+        "product_sku_id": "019f6ed5-5b3b-72b0-b388-0841004ae6f7",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f74c9-dbe3-710a-9d5f-9e8f2252d355",
+        "topping_group_item_id": "019f6efc-c943-7029-84da-7da3a19f660b",
+        "product_sku_id": "019f6ed5-56c4-719a-b9a6-840d25edd200",
+        "extra_price": "100.00"
+    },
+    {
+        "id": "019f74ca-019c-7109-9529-063827381192",
+        "topping_group_item_id": "019f6efc-c944-70a0-a532-f7fc266306f8",
+        "product_sku_id": "019f6ed5-56cb-7362-93ed-52c257d7e0ea",
+        "extra_price": "200.00"
+    },
+    {
+        "id": "019f74ca-2f27-73f3-8538-0eb8291f54fb",
+        "topping_group_item_id": "019f74ca-2f26-70d4-8583-eaabc340eb66",
+        "product_sku_id": "019f6ed5-546e-73ca-a47e-cfd53c2da12d",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f74ca-35b5-719f-9815-fb7fd5470d12",
+        "topping_group_item_id": "019f74ca-35b4-70a5-ad44-f4528a8d70b7",
+        "product_sku_id": "019f6ed5-5b8c-71e2-a40d-9e5b0674d528",
+        "extra_price": "180.00"
+    },
+    {
+        "id": "019f7e7d-1f22-72e5-9e9f-6fb1566a26ed",
+        "topping_group_item_id": "019f7e7d-1f20-7333-992e-7be650d57176",
+        "product_sku_id": "019f6ed5-5b58-72fd-8ca4-11fb846d8ac1",
+        "extra_price": "300.00"
+    },
+    {
+        "id": "019f7e7d-241a-73c1-b1b4-da0ab47e6da7",
+        "topping_group_item_id": "019f7e7d-2417-714a-932d-dc4b19853d9e",
+        "product_sku_id": "019f6ed5-5b5f-7123-8c5b-1946ffe7b94d",
+        "extra_price": "250.00"
+    },
+    {
+        "id": "019f7e7d-2999-72bc-a1c9-d2e84bbb712e",
+        "topping_group_item_id": "019f7e7d-2998-7104-9c78-a45c63cc84cb",
+        "product_sku_id": "019f6ed5-5b65-729f-9a67-ea7365c1db43",
+        "extra_price": "250.00"
+    },
+    {
+        "id": "019f7e7d-31cd-7351-a3c6-4b87edc9e2b6",
+        "topping_group_item_id": "019f7e7d-31b3-73ac-864a-74ff80fa965b",
+        "product_sku_id": "019f6ed5-5b67-72fe-a907-798f4fc6b2f1",
+        "extra_price": "250.00"
+    },
+    {
+        "id": "019f7e7d-c8da-7108-81b3-d16dfc468206",
+        "topping_group_item_id": "019f7e7d-c8d7-7085-b55b-5aee1ba566f6",
+        "product_sku_id": "019f6ed5-5d66-727f-a827-34fc5a88cf92",
+        "extra_price": "250.00"
+    },
+    {
+        "id": "019f7e7d-f6ca-7338-97fc-dd65dcb8bba8",
+        "topping_group_item_id": "019f7e7d-f6c9-732d-a9ee-92d2a5016d82",
+        "product_sku_id": "019f6ed5-58f2-729b-ae7f-ba05159f4da6",
+        "extra_price": "250.00"
+    },
+    {
+        "id": "019f7e83-a82e-717f-8d1e-87a50a640ddf",
+        "topping_group_item_id": "019f7e83-a80b-71f9-9afa-711fe445d3de",
+        "product_sku_id": "019f6ed5-57be-72fa-9afc-4c3824fce9ae",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f7e83-b3fc-7096-8722-f7ee991cb293",
+        "topping_group_item_id": "019f7e83-b3fa-7030-aaa3-24649470cb34",
+        "product_sku_id": "019f6ed5-57c1-733d-8f00-e8799878183a",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f879e-8ac6-70af-9c4f-c020198ddaa5",
+        "topping_group_item_id": "019f879e-8ac4-7049-a31a-d28a22c0237a",
+        "product_sku_id": "019f6ed5-51bb-7330-ae00-b45abf8468a1",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f879e-8fec-71ff-960f-eb5b2c0174a5",
+        "topping_group_item_id": "019f879e-8feb-73b6-b318-8d3fdb83d9ae",
+        "product_sku_id": "019f6ed5-51c6-7346-9e26-cd35d72eaee2",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f879e-a5e3-7272-b965-b2575a80d271",
+        "topping_group_item_id": "019f879e-a5e2-73b9-bc99-f18133ec8694",
+        "product_sku_id": "019f6ed5-5c47-7169-bcdf-96eaaaa72506",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f87a4-b015-73cc-9554-18f91ae4c045",
+        "topping_group_item_id": "019f87a4-b013-7188-9d17-c5775ea7b9de",
+        "product_sku_id": "019f6ed5-5360-7046-b315-27849c694a52",
+        "extra_price": "50.00"
+    },
+    {
+        "id": "019f87a4-c8de-70c0-8226-993828445e05",
+        "topping_group_item_id": "019f87a4-c8dc-736b-87d8-2caeb5994eb0",
+        "product_sku_id": "019f6ed5-536a-70d6-adf1-4ff8da2f2d47",
+        "extra_price": "50.00"
+    },
+    {
+        "id": "019f87a5-19ef-7039-92c4-30164b648098",
+        "topping_group_item_id": "019f87a5-19ed-733e-84b9-89db819c6f03",
+        "product_sku_id": "019f6ed5-546e-73ca-a47e-cfd53c2da12d",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f87a5-23bd-7001-889a-ae4e43d45332",
+        "topping_group_item_id": "019f87a5-23bc-7275-b75b-4f95e19a119f",
+        "product_sku_id": "019f6ed5-5b8c-71e2-a40d-9e5b0674d528",
+        "extra_price": "180.00"
+    },
+    {
+        "id": "019f87a9-9643-73c1-b822-03e484504962",
+        "topping_group_item_id": "019f87a9-9641-72de-89d8-1c68f2d426a7",
+        "product_sku_id": "019f6ed5-473d-7140-b909-73fb63e8547b",
+        "extra_price": "70.00"
+    },
+    {
+        "id": "019f87a9-ac80-7325-a851-43abb76e25d6",
+        "topping_group_item_id": "019f87a9-ac7e-731a-b7a8-3143fda8d5c1",
+        "product_sku_id": "019f6ed5-5b29-7394-93c8-f2c34a47e07a",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f87a9-c67e-71d2-b01e-fa9cbc0f1882",
+        "topping_group_item_id": "019f87a9-c67c-7116-bd39-9624b90b1f9e",
+        "product_sku_id": "019f6ed5-5d55-72c8-813b-39483c64d994",
+        "extra_price": "20.00"
+    },
+    {
+        "id": "019f87aa-5511-70b8-9856-e590f425fc68",
+        "topping_group_item_id": "019f87aa-550f-73ad-8bdc-3d5d98acbf6f",
+        "product_sku_id": "019f6ed5-5d5a-707c-a8e0-d5b42d2715bc",
+        "extra_price": "20.00"
+    },
+    {
+        "id": "019f87ad-a10b-7127-940d-813530106a7a",
+        "topping_group_item_id": "019f87ad-a109-7354-b419-3d99a29b1dd9",
+        "product_sku_id": "019f6ed5-59af-73d6-af01-ba1af60e9072",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f87ae-49b6-7333-a25a-69f1e1a07997",
+        "topping_group_item_id": "019f87ae-49b4-7381-9c77-91db9f8fe915",
+        "product_sku_id": "019f6ed5-5b6a-73b1-be2d-d0eb6220b12e",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f87ae-6c49-7375-88fa-3c30c370ad9c",
+        "topping_group_item_id": "019f87ae-6c47-70b4-80ab-fbfc056f6715",
+        "product_sku_id": "019f6ed5-5b7f-7048-ba2e-7ce8487aaee3",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f8800-9f72-72fe-8a3f-da01d2b8b0bc",
+        "topping_group_item_id": "019f8800-9f6f-71c1-8c9c-da0e4968293a",
+        "product_sku_id": "019f6ed5-488d-7398-ba14-b435704b760d",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f8800-b728-7215-8c22-c780f7da17fa",
+        "topping_group_item_id": "019f8800-b726-72e0-8266-9e940496a1c0",
+        "product_sku_id": "019f6ed5-48a4-70b4-93c8-787254c0e563",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f8802-0bef-7363-9a93-304927160c8a",
+        "topping_group_item_id": "019f8802-0bed-7067-be08-397f0524cb47",
+        "product_sku_id": "019f6ed5-57c1-733d-8f00-e8799878183a",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f8802-1f2b-72d3-89dd-f418788378b6",
+        "topping_group_item_id": "019f8802-1f2a-7148-bef5-ab440a12a2fe",
+        "product_sku_id": "019f6ed5-57be-72fa-9afc-4c3824fce9ae",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f8802-4e3c-72c0-b6e1-0cc99df5d849",
+        "topping_group_item_id": "019f8802-4e3a-7003-acee-9605d101e653",
+        "product_sku_id": "019f6ed5-57ed-738c-ae61-81159086d87b",
+        "extra_price": "100.00"
+    },
+    {
+        "id": "019f88aa-9314-722f-9bc4-85b23ee66569",
+        "topping_group_item_id": "019f88aa-9313-711d-9787-47d60b108f76",
+        "product_sku_id": "019f6ed5-5b58-72fd-8ca4-11fb846d8ac1",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f88aa-98ad-716e-84ed-02bd96e66805",
+        "topping_group_item_id": "019f88aa-98ab-72fd-b323-fcb4c812b016",
+        "product_sku_id": "019f6ed5-5b5f-7123-8c5b-1946ffe7b94d",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f88aa-9e37-712c-b999-2a3c3b12250f",
+        "topping_group_item_id": "019f88aa-9e36-718a-947c-fbc73b2fe1b8",
+        "product_sku_id": "019f6ed5-5b65-729f-9a67-ea7365c1db43",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f88aa-a36e-7041-a613-535a1a4eae69",
+        "topping_group_item_id": "019f88aa-a36d-73a8-aa9d-25e514c06601",
+        "product_sku_id": "019f6ed5-5b67-72fe-a907-798f4fc6b2f1",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f88aa-c11b-708a-9932-f16c7480ac9b",
+        "topping_group_item_id": "019f88aa-c119-70a2-9e32-b1934a1ff60c",
+        "product_sku_id": "019f6ed5-5d66-727f-a827-34fc5a88cf92",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019f88aa-f2e4-731a-9479-daa3dcc7cd38",
+        "topping_group_item_id": "019f88aa-f2e1-71be-b7e1-6272d0e10fa0",
+        "product_sku_id": "019f6ed5-58f2-729b-ae7f-ba05159f4da6",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019fd63f-e62a-71ac-a6e1-4296c2ca1d27",
+        "topping_group_item_id": "019fd63f-e628-7256-a508-801d50168e0c",
+        "product_sku_id": "d90f8675-69a8-4b8e-aeb6-2dc30fc1d386",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019fd63f-e62d-7330-86c9-ae7fc7f6ec79",
+        "topping_group_item_id": "019fd63f-e62d-7330-86c9-ae7fc7d1077d",
+        "product_sku_id": "b82fa330-5734-48bf-8cae-ab584353878f",
+        "extra_price": "0.00"
+    },
+    {
+        "id": "019fdb31-8d18-71b5-8f76-6ee1b29a4bff",
+        "topping_group_item_id": "019fdb31-8d16-7243-8cdc-bad01c6ec3ad",
+        "product_sku_id": "019f6ed5-510f-711b-8a7d-d24c49b3e034",
+        "extra_price": "0.00"
+    }
+]

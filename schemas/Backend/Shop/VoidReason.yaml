@@ -1,0 +1,120 @@
+# =============================================================================
+# VoidReason (取消理由マスタ / Lý do hủy món — plan-051, #1149)
+# =============================================================================
+#
+# Brand-scoped master list of item-void reasons. Staff PICK a reason instead
+# of typing free text; the reason's stock_effect drives the inventory
+# compensation when a line that was ALREADY deducted is voided
+# (StockDeductionService::compensateVoid — see VoidStockEffect enum).
+#
+# Written by: HQ admins via VoidReasonController (/hq/{brand}/void-reasons).
+# Read by: shop read-only list (/shops/{slug}/void-reasons), the workstation
+#   settings mirror (GET /workstation/branch → settings.void_reasons — synced
+#   DOWN to LAN SQLite so pos-web keeps its picker offline), and the Cloud
+#   void gate (void_reason_id on voidItem, P3).
+#
+# Business rules:
+#   - No slug / no unique on label (label is translatable) — rows are
+#     addressed by UUID only.
+#   - Deactivate over delete: a reason referenced by historical lines is
+#     soft-deactivated (is_active=false via update); NO hard-delete endpoint.
+#     Voided lines keep void_reason_id + a text snapshot of the label in
+#     customer_order_items.void_reason, so history is self-sufficient.
+#   - requires_note forces the operator to ADD a free-text note on top of
+#     the picked reason (e.g. 客 đổi món — which dish?).
+#   - When a brand has ZERO rows, the HQ index response carries a
+#     `suggestions` array (5 built-in starter reasons, is_builtin_suggestion)
+#     — creation hints only, NEVER persisted rows.
+#
+# Hierarchy:
+#   Organization
+#     └── Brand
+#           └── VoidReason ← this schema (plain Uuid scoping columns like
+#               VnEinvoiceSetting — no Association FKs)
+#
+# =============================================================================
+
+displayName:
+  en: Void Reason
+  ja: 取消理由
+  vi: Lý do hủy món
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    # Tenant scope — every query filters by organization_id
+    - columns: [organization_id]
+    # Shop/workstation read path: active reasons of a brand ordered by
+    # sort_order — the exact composite this index covers.
+    - columns: [brand_id, is_active, sort_order]
+
+properties:
+  # Owning organization — LOCAL organizations.id (same as TaxType: written
+  # from HasOrganizationContext::getOrganizationId, compared against the
+  # request's resolved organization_id by VoidReasonPolicy).
+  organization_id:
+    type: Uuid
+    displayName:
+      en: Organization ID
+      ja: 組織ID
+      vi: ID tổ chức
+
+  # Brand the reason belongs to (local brands.id).
+  brand_id:
+    type: Uuid
+    displayName:
+      en: Brand ID
+      ja: ブランドID
+      vi: ID thương hiệu
+
+  # Label the staff sees in the picker (ja/en/vi). Translatable — no unique
+  # constraint (see header).
+  label:
+    type: String
+    length: 100
+    translatable: true
+    displayName:
+      en: Label
+      ja: 名称
+      vi: Nhãn
+
+  # How voiding an ALREADY-deducted line affects stock (see VoidStockEffect).
+  stock_effect:
+    type: EnumRef
+    enum: VoidStockEffect
+    displayName:
+      en: Stock Effect
+      ja: 在庫処理
+      vi: Hiệu ứng kho
+
+  # Force an operator-entered free-text note on top of the picked reason.
+  requires_note:
+    type: Boolean
+    default: false
+    displayName:
+      en: Requires Note
+      ja: 備考必須
+      vi: Bắt buộc ghi chú
+
+  # Active flag — deactivation hides the reason from pickers (shop list +
+  # workstation mirror) but historical lines keep referencing it.
+  is_active:
+    type: Boolean
+    default: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+
+  # Picker ordering (ascending).
+  sort_order:
+    type: Int
+    default: 0
+    displayName:
+      en: Sort Order
+      ja: 表示順
+      vi: Thứ tự

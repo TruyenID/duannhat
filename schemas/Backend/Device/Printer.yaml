@@ -1,0 +1,251 @@
+# ==============================================================================
+# Printer Schema (プリンター / Máy in)
+# ==============================================================================
+#
+# Máy in ESC/POS vật lý trong một quán. Trước đây Cloud KHÔNG biết gì về máy in
+# — cấu hình chỉ nằm trong SQLite của workstation (xem
+# workstation-app/internal/store/migrations/002_printers.sql: "Workstation-local
+# only — Cloud has no knowledge of physical printers"). Entity này đưa cấu hình
+# đó lên Cloud để quản lý tập trung từ admin-web.
+#
+# TẠI SAO KHÔNG DÙNG `Device`:
+#   Device được xây quanh vòng đời PAIRING (pairing_code, device_token,
+#   paired_at, status pending_activation→active→revoked). Máy in ESC/POS không
+#   pair, không có token, không gọi API — nhét vào Device sẽ để lại 5 cột luôn
+#   NULL và một máy trạng thái vô nghĩa. Nên tách bảng riêng.
+#
+# Scope: Branch. Mỗi máy in thuộc đúng 1 chi nhánh.
+#
+# MULTI-ROLE: một máy in giữ NHIỀU vai trò cùng lúc (quán nhỏ dùng chung 1 máy
+# cho cả bếp lẫn hoá đơn). Đây là ngữ nghĩa migration 013 của workstation đã
+# thiết lập — `roles` là MẢNG, không phải giá trị đơn. Cột `type` cũ bên
+# workstation chỉ còn để back-compat, KHÔNG dùng để định tuyến.
+#
+# HAI TRƯỜNG HỢP VẬN HÀNH (thiết kế cốt lõi):
+#   TH1 — bình thường: Cloud giữ IP/port → workstation pull xuống → kết nối và
+#         in. Cloud là nguồn sự thật.
+#   TH2 — Cloud sập: workstation dùng bảng `printers` trong SQLite của nó (đã
+#         cache từ lần pull trước) → vẫn in bình thường. Cloud KHÔNG BAO GIỜ
+#         nằm trên đường đi của byte gửi ra máy in.
+#   TH3 — Cloud sống nhưng IP trên Cloud sai (máy đổi IP do DHCP, thay máy mới):
+#         nhân viên sửa tại chỗ trên app workstation → bản ghi local ĐÈ bản ghi
+#         cloud và lần pull sau không ghi đè lại. Xem cột `source` phía
+#         workstation (không thuộc schema này).
+#
+# Business Rules:
+#   - BR-P01: name unique per branch.
+#   - BR-P02: roles không được rỗng — máy in không giữ vai trò nào là vô nghĩa.
+#   - BR-P03: connection_type=network ⇒ address bắt buộc, dạng "host:port".
+#             Host PHẢI là IP LAN riêng tư (RFC1918/loopback/link-local) hoặc
+#             tên mDNS .local. Chặn SSRF — mirror ValidateAddress() trong
+#             workstation-app/internal/printer/printer.go:194.
+#   - BR-P04: connection_type=usb ⇒ address là đường dẫn thiết bị, PHỤ THUỘC
+#             TỪNG MÁY TÍNH nên Cloud không kiểm chứng được. Cấu hình USB nên
+#             làm tại chỗ trên workstation; Cloud lưu để hiển thị là chính.
+#   - BR-P05: Nhiều máy in có thể trùng address (cùng 1 máy vật lý khai báo
+#             nhiều bản ghi) — KHÔNG unique address. Migration 013 gộp theo IP
+#             nhưng đó là chuyện của workstation.
+#
+# ==============================================================================
+
+displayName:
+  en: Printer
+  ja: プリンター
+  vi: Máy in
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  audit:
+    createdBy: true
+    updatedBy: true
+  indexes:
+    - columns: [transport]
+    - columns: [branch_id, name]
+      unique: true
+    - columns: [branch_id, is_active]
+    - columns: [organization_id]
+
+properties:
+  name:
+    type: String
+    length: 255
+    searchable: true
+    lookupable: true
+    displayName:
+      en: Printer Name
+      ja: プリンター名
+      vi: Tên máy in
+    description:
+      en: "Friendly name, unique per branch (BR-P01). Example: Kitchen Printer, Bar Printer."
+      ja: "表示名。店舗内で一意（BR-P01）。例：キッチンプリンター、バープリンター。"
+      vi: "Tên hiển thị, unique trong quán (BR-P01). Ví dụ: Máy in bếp, Máy in bar."
+
+  roles:
+    type: Json
+    displayName:
+      en: Roles
+      ja: 役割
+      vi: Vai trò
+    description:
+      en: "ARRAY of PrinterRole values — a printer can hold several roles at once (BR-P02). Example: [\"kitchen_printer\",\"receipt_printer\"]. This is the routing key, not `type`."
+      ja: "PrinterRole値の配列。1台が複数役割を兼任可能（BR-P02）。例：[\"kitchen_printer\",\"receipt_printer\"]。ルーティングはこの項目で行う。"
+      vi: "MẢNG các giá trị PrinterRole — một máy giữ được nhiều vai trò (BR-P02). Ví dụ: [\"kitchen_printer\",\"receipt_printer\"]. Đây là khoá định tuyến."
+
+  connection_type:
+    type: EnumRef
+    enum: PrinterConnectionType
+    default: network
+    filterable: true
+    displayName:
+      en: Connection Type
+      ja: 接続方式
+      vi: Kiểu kết nối
+    description:
+      en: "network = TCP over LAN (configurable from Cloud). usb = device path, machine-specific (BR-P04)."
+      ja: "network＝LAN経由TCP（Cloudから設定可）。usb＝デバイスパス、PC依存（BR-P04）。"
+      vi: "network = TCP qua LAN (cấu hình được từ Cloud). usb = đường dẫn thiết bị, phụ thuộc máy tính (BR-P04)."
+
+  address:
+    type: String
+    length: 255
+    nullable: true
+    displayName:
+      en: Address
+      ja: アドレス
+      vi: Địa chỉ
+    description:
+      en: "For network: \"IP:port\", default ESC/POS port 9100 (e.g. 192.168.1.100:9100). Must be a private LAN IP or .local mDNS name (BR-P03). For usb: device path (/dev/usb/lp0, COM3)."
+      ja: "network の場合：\"IP:ポート\"、ESC/POS既定ポートは9100（例：192.168.1.100:9100）。プライベートIPまたは.localのみ（BR-P03）。usb の場合：デバイスパス（/dev/usb/lp0、COM3）。"
+      vi: "Với network: \"IP:port\", cổng ESC/POS mặc định 9100 (vd 192.168.1.100:9100). Phải là IP LAN riêng tư hoặc tên .local (BR-P03). Với usb: đường dẫn thiết bị (/dev/usb/lp0, COM3)."
+
+  paper_width:
+    type: Int
+    default: 80
+    displayName:
+      en: Paper Width (mm)
+      ja: 用紙幅（mm）
+      vi: Khổ giấy (mm)
+    description:
+      en: "Thermal paper width in mm: 58 or 80. Drives the print column count (80mm = 48 cols)."
+      ja: "感熱紙の幅（mm）：58 または 80。印字桁数を決める（80mm＝48桁）。"
+      vi: "Khổ giấy nhiệt tính bằng mm: 58 hoặc 80. Quyết định số cột in (80mm = 48 cột)."
+
+  cut_type:
+    type: EnumRef
+    enum: PrinterCutType
+    default: full
+    displayName:
+      en: Cut Type
+      ja: カット方式
+      vi: Kiểu cắt giấy
+
+  encoding:
+    type: String
+    length: 32
+    default: shift_jis
+    displayName:
+      en: Encoding
+      ja: 文字コード
+      vi: Bảng mã
+    description:
+      en: "Character encoding sent to the printer. Default shift_jis (Japanese thermal printers). Vietnamese text is ASCII-folded before encoding."
+      ja: "プリンターへ送る文字コード。既定はshift_jis（日本語感熱プリンター）。ベトナム語はASCII折り畳み後に送信。"
+      vi: "Bảng mã gửi tới máy in. Mặc định shift_jis (máy in nhiệt Nhật). Tiếng Việt được ASCII-fold trước khi encode."
+
+  is_active:
+    type: Boolean
+    default: true
+    filterable: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Đang dùng
+    description:
+      en: "Inactive printers are skipped by the workstation's LoadFromDB() and never receive jobs."
+      ja: "無効なプリンターはworkstationのLoadFromDB()で読み込まれず、ジョブを受け取らない。"
+      vi: "Máy in tắt sẽ bị workstation bỏ qua khi nạp cấu hình, không nhận lệnh in."
+
+  last_seen_at:
+    type: DateTime
+    nullable: true
+    displayName:
+      en: Last Seen At
+      ja: 最終通信日時
+      vi: Lần hoạt động cuối
+    description:
+      en: "Reported by the workstation after a successful connection. Lets admin-web show which printers are actually reachable in the shop."
+      ja: "接続成功時にworkstationが報告。admin-webで到達可能なプリンターを表示するために使用。"
+      vi: "Do workstation báo lên sau khi kết nối thành công. Giúp admin-web hiển thị máy nào thực sự đang kết nối được."
+
+  notes:
+    type: Text
+    nullable: true
+    displayName:
+      en: Notes
+      ja: メモ
+      vi: Ghi chú
+
+  # Relationships
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    onDelete: CASCADE
+    displayName:
+      en: Branch
+      ja: 店舗
+      vi: Chi nhánh
+    description:
+      en: "Printer is physically located in a specific branch."
+      ja: "プリンターは特定の店舗に物理的に設置される。"
+      vi: "Máy in đặt vật lý tại một quán cụ thể."
+
+  transport:
+    type: String
+    length: 32
+    default: ws_lan
+    displayName:
+      ja: トランスポート
+      en: Transport
+      vi: Kênh truyền
+
+  print_token:
+    type: String
+    length: 128
+    nullable: true
+    unique: true
+    displayName:
+      ja: 印刷トークン
+      en: Print Token
+      vi: Token in
+
+  model_profile:
+    type: Json
+    nullable: true
+    displayName:
+      ja: モデルプロファイル
+      en: Model Profile
+      vi: Hồ sơ thiết bị
+
+  last_status:
+    type: String
+    length: 32
+    nullable: true
+    displayName:
+      ja: 最終ステータス
+      en: Last Status
+      vi: Trạng thái gần nhất

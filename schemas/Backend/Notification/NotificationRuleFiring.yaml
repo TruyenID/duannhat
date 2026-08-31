@@ -1,0 +1,151 @@
+# =============================================================================
+# NotificationRuleFiring (ルール発火履歴 / Lịch sử fire rule)
+# =============================================================================
+#
+# Plan-023 M7 — audit log for every NotificationRule attempt. The
+# EvaluateRuleJob writes one row per attempt regardless of outcome:
+#
+#   outcome=matched         — condition passed; notification dispatched
+#   outcome=skipped_cooldown — same (rule, model) fired within cooldown
+#   outcome=skipped_condition — condition tree evaluated to false
+#   outcome=shadow          — rule matched, but NOTIFICATION_USE_RULES=false
+#                             so dispatch was suppressed (parallel-shadow mode)
+#   outcome=error           — exception inside EvaluateRuleJob; error_message
+#                             captures the throwable
+#
+# The evaluation_trace column carries the per-leaf pass/fail map so
+# admins can debug "why didn't my rule fire?" without spelunking the
+# logs. Shape:
+#
+#   [
+#     { "field": "status", "op": "changed_to", "expected": "approved",
+#       "actual": "pending", "pass": false }
+#   ]
+#
+# Retention: same as notifications (Prunable per-priority cutoffs in
+# plan-008). The audit log is heavier than the notifications themselves
+# but invaluable when an admin asks "what made this fire / not fire?".
+# =============================================================================
+
+displayName:
+  en: Notification Rule Firing
+  ja: ルール発火履歴
+  vi: Lịch sử fire rule
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: false
+  id: Uuid
+  indexes:
+    # Admin per-rule firings page (plan-023 T7.10 — deferred).
+    - columns: [rule_id, fired_at]
+    # Debug "why didn't this model fire?"
+    - columns: [model_type, model_id, fired_at]
+
+properties:
+  rule:
+    type: Association
+    relation: ManyToOne
+    target: NotificationRule
+    onDelete: CASCADE
+    displayName:
+      en: Rule
+      ja: ルール
+      vi: Rule
+    description:
+      en: Parent rule. Cascade-delete with the rule so orphaned firing rows can't pile up.
+      ja: 親ルール。ルールと CASCADE 削除 — 孤立した発火行が蓄積されない。
+      vi: Parent rule. Cascade-delete với rule để row firing mồ côi không tích lại.
+
+  notification:
+    type: Association
+    relation: ManyToOne
+    target: Notification
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Notification
+      ja: 通知
+      vi: Notification
+    description:
+      en: Dispatched notification (outcome=matched only). SET NULL on notification delete so the firing row survives Prunable retention.
+      ja: ディスパッチされた通知（outcome=matched のみ）。Prunable リテンションを発火行が生き延びるよう通知削除時 SET NULL。
+      vi: Notification đã dispatch (outcome=matched only). SET NULL khi notification xoá để firing row sống sót Prunable retention.
+
+  model_type:
+    type: String
+    length: 100
+    nullable: true
+    filterable: true
+    displayName:
+      en: Model Type
+      ja: モデル型
+      vi: Model type
+    description:
+      en: Morph alias of the firing Eloquent model. Null on custom.* event triggers.
+      ja: 発火 Eloquent モデルのモーフエイリアス。custom.* イベントトリガーでは null。
+      vi: Morph alias của Eloquent model fire. Null cho trigger custom.*.
+
+  model_id:
+    type: String
+    length: 64
+    nullable: true
+    filterable: true
+    displayName:
+      en: Model ID
+      ja: モデル ID
+      vi: Model ID
+    description:
+      en: Primary key of the firing model row. String to absorb UUID and bigInt PKs alike. Null on custom.* triggers.
+      ja: 発火モデル行の主キー。UUID と bigInt PK を吸収するため文字列型。custom.* トリガーでは null。
+      vi: PK của row model fire. Dạng String để hấp thụ cả UUID và bigInt PK. Null cho trigger custom.*.
+
+  fired_at:
+    type: Timestamp
+    displayName:
+      en: Fired At
+      ja: 発火日時
+      vi: Thời điểm fire
+    description:
+      en: When the EvaluateRuleJob processed the trigger. Indexed for the per-rule firings page.
+      ja: EvaluateRuleJob がトリガーを処理した日時。ルール毎の発火ページ用にインデックス化。
+      vi: Khi EvaluateRuleJob xử lý trigger. Indexed cho trang firings per-rule.
+
+  outcome:
+    type: String
+    length: 30
+    filterable: true
+    displayName:
+      en: Outcome
+      ja: 結果
+      vi: Kết quả
+    description:
+      en: '`matched` / `skipped_cooldown` / `skipped_condition` / `shadow` / `error`. See schema header for semantics.'
+      ja: '`matched` / `skipped_cooldown` / `skipped_condition` / `shadow` / `error`。意味論についてはスキーマヘッダを参照。'
+      vi: '`matched` / `skipped_cooldown` / `skipped_condition` / `shadow` / `error`. Semantic xem header schema.'
+
+  evaluation_trace:
+    type: Json
+    nullable: true
+    displayName:
+      en: Evaluation Trace
+      ja: 評価トレース
+      vi: Evaluation trace
+    description:
+      en: 'Per-leaf pass/fail breakdown produced by RuleEvaluatorService::evaluate. Powers the admin "why didn''t this fire?" debug view. Shape: `[{field, op, expected, actual, pass}, …]`.'
+      ja: 'RuleEvaluatorService::evaluate により生成されたリーフ毎の合格／不合格内訳。管理者「なぜ発火しなかったか？」デバッグビューを駆動。形状：`[{field, op, expected, actual, pass}, …]`。'
+      vi: 'Breakdown pass/fail từng leaf do RuleEvaluatorService::evaluate sinh ra. Driver cho admin debug view "tại sao không fire?". Shape: `[{field, op, expected, actual, pass}, …]`.'
+
+  error_message:
+    type: Text
+    nullable: true
+    displayName:
+      en: Error Message
+      ja: エラーメッセージ
+      vi: Error message
+    description:
+      en: Captured throwable message when outcome=error. Null for every other outcome.
+      ja: outcome=error のときにキャプチャされた throwable メッセージ。他の結果では null。
+      vi: Throwable message capture khi outcome=error. Null cho mọi outcome khác.

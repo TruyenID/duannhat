@@ -1,0 +1,232 @@
+# =============================================================================
+# Post (投稿 / Bài viết)
+# =============================================================================
+#
+# Blog / news / promotion article hiển thị trên customer-web và admin-web.
+# Dùng cho: banner Family Day, thông báo khuyến mãi, bài viết câu chuyện
+# thương hiệu, hướng dẫn sử dụng app, v.v.
+#
+# Written by:  HQ admin qua `/hq/{brand}/posts` (PostService CRUD).
+# Read by:     customer-web `/posts`, `/posts/{slug}` (public, status=Published).
+#              admin-web (all statuses, preview draft).
+#
+# Workflow: Draft → Published → Archived (xem PostStatus enum).
+# Publish rule: `status = Published AND published_at IS NOT NULL
+#                AND published_at <= NOW()` → public.
+#
+# Multi-tenant: chỉ scope theo organization (không gắn brand). Cùng org thì
+# slug unique — bài viết dùng chung cho toàn org, hiển thị ở tất cả brand.
+# Soft-delete: bật để preserve SEO (URL cũ vẫn resolve tới bài archived).
+#
+# Relationships:
+#   - category: ManyToOne PostCategory (nullable, 1 bài 1 cat)
+#   - tags:     ManyToMany PostTag via `post_post_tag` pivot
+#   - author:   ManyToOne User (người tạo; khác với audit createdBy nếu bài
+#               được migrate từ hệ thống cũ)
+#
+# Translatable fields: title, excerpt, content (qua Post_translations table
+# auto-generated bởi Omnify — xem ProductTranslation.php để tham khảo).
+# =============================================================================
+
+displayName:
+  en: Post
+  ja: 投稿
+  vi: Bài viết
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  audit:
+    createdBy: true
+    updatedBy: true
+  indexes:
+    - columns: [organization_id]
+    - columns: [organization_id, slug]
+      unique: true
+    - columns: [organization_id, status, published_at]
+    - columns: [category_id]
+    - columns: [author_id]
+    - columns: [status, published_at]
+
+properties:
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  author:
+    type: Association
+    relation: ManyToOne
+    target: User
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Author
+      ja: 著者
+      vi: Tác giả
+    description:
+      en: User who wrote the post. Nullable to preserve post when author is removed.
+      ja: 投稿の執筆者。著者が削除されても投稿を保持するため null 可。
+      vi: User soạn bài. Cho phép null để giữ bài khi author bị xoá.
+
+  category:
+    type: Association
+    relation: ManyToOne
+    target: PostCategory
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Category
+      ja: カテゴリー
+      vi: Danh mục
+
+  # #1673 — FAQ theo chi nhánh.
+  #
+  #   NULL          = bài của TOÀN TỔ CHỨC (cấp HQ). Mọi bài news/promotion và
+  #                   mọi câu hỏi do HQ soạn đều nằm ở đây.
+  #   có giá trị    = bài riêng của đúng chi nhánh đó.
+  #
+  # Chi nhánh có công tắc `branches.faq_inherit_hq` để chọn có đọc kèm bộ câu
+  # hỏi cấp HQ hay không.
+  #
+  # CASCADE chứ KHÔNG SET NULL: nếu xoá chi nhánh mà FAQ riêng của nó rơi về
+  # NULL thì nó lặng lẽ "thăng cấp" thành câu hỏi của toàn tổ chức và hiện ra ở
+  # mọi chi nhánh còn lại — sai, và không ai nhìn thấy lúc nó xảy ra.
+  #
+  # Không khai index cho cột này trong `options.indexes`: entity Post đã tồn
+  # tại, mà generator NUỐT index thêm vào entity có sẵn (ghi vào schemas.json
+  # là đã áp dụng nhưng không sinh DDL — xem CLAUDE.md mục 2). Index đi kèm
+  # Association thì vẫn sinh đúng, nên `branch_id` được đánh index qua chính
+  # khai báo này.
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    nullable: true
+    onDelete: CASCADE
+    displayName:
+      en: Branch
+      ja: 店舗
+      vi: Chi nhánh
+    description:
+      en: NULL = organization-wide (HQ) post. Set = post owned by that branch alone.
+      ja: NULL は組織全体（本部）の投稿。値がある場合はその店舗専用の投稿。
+      vi: NULL = bài của toàn tổ chức (HQ). Có giá trị = bài riêng của chi nhánh đó.
+
+  tags:
+    type: Association
+    relation: ManyToMany
+    target: PostTag
+    joinTable: post_post_tag
+    displayName:
+      en: Tags
+      ja: タグ
+      vi: Thẻ
+
+  slug:
+    type: String
+    length: 180
+    displayName:
+      en: Slug
+      ja: スラッグ
+      vi: Slug
+    description:
+      en: URL-safe identifier for routing. Unique per organization.
+      ja: ルーティング用のURLセーフな識別子。組織内で一意。
+      vi: Mã định danh URL-safe cho routing. Duy nhất trong phạm vi tổ chức.
+
+  title:
+    type: String
+    length: 200
+    translatable: true
+    searchable: true
+    displayName:
+      en: Title
+      ja: タイトル
+      vi: Tiêu đề
+
+  excerpt:
+    type: Text
+    nullable: true
+    translatable: true
+    displayName:
+      en: Excerpt
+      ja: 抜粋
+      vi: Tóm tắt
+    description:
+      en: Short summary for listings and social preview (recommended ≤ 280 chars).
+      ja: リスト表示とソーシャルプレビュー用の短い要約（280文字以内推奨）。
+      vi: Tóm tắt ngắn cho trang list và social preview (khuyến nghị ≤ 280 ký tự).
+
+  content:
+    type: LongText
+    nullable: true
+    translatable: true
+    displayName:
+      en: Content
+      ja: 本文
+      vi: Nội dung
+    description:
+      en: Full article body. Markdown or sanitized HTML (service-enforced).
+      ja: 記事本文。Markdown またはサニタイズ済み HTML（サービス側で強制）。
+      vi: Nội dung bài đầy đủ. Markdown hoặc HTML đã sanitize (service enforce).
+
+  cover_image_url:
+    type: String
+    length: 500
+    nullable: true
+    displayName:
+      en: Cover Image URL
+      ja: カバー画像URL
+      vi: URL ảnh bìa
+
+  status:
+    type: EnumRef
+    enum: PostStatus
+    default: Draft
+    filterable: true
+    displayName:
+      en: Status
+      ja: ステータス
+      vi: Trạng thái
+
+  published_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Published At
+      ja: 公開日時
+      vi: Thời điểm xuất bản
+    description:
+      en: When the post goes public. Must be set AND status=Published AND in the past for post to be visible.
+      ja: 投稿が公開される日時。status=Published かつ過去日時である必要がある。
+      vi: Thời điểm bài đi public. Phải set + status=Published + đã qua thì bài mới hiển thị.
+
+  is_pinned:
+    type: Boolean
+    default: false
+    filterable: true
+    displayName:
+      en: Pinned
+      ja: ピン留め
+      vi: Ghim
+    description:
+      en: When true, appears at top of listings regardless of published_at.
+      ja: true のとき published_at に関わらずリスト先頭に表示。
+      vi: Khi true, luôn hiện đầu list bất kể published_at.
+
+  view_count:
+    type: Int
+    default: 0
+    displayName:
+      en: View Count
+      ja: 閲覧数
+      vi: Lượt xem

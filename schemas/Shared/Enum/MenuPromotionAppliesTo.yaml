@@ -1,0 +1,38 @@
+# =============================================================================
+# MenuPromotionAppliesTo (プロモーション適用範囲 / Phạm vi promotion)
+# =============================================================================
+#
+# Drives the FE scope picker on the shop promotion form (S8) and the
+# query path inside MenuPromotionService::resolveActivePromotion():
+#
+#   all_items   → match every product in the branch (no pivot rows
+#                 needed). Lowest specificity.
+#   categories  → match products whose CategoryProduct row points at
+#                 a category in menu_promotion_category pivot.
+#   products    → match products in menu_promotion_product pivot
+#                 directly.
+#   mixed       → either pivot matches (categories OR products). Used
+#                 when a campaign covers a category PLUS a hand-picked
+#                 standalone product outside that category.
+#
+# When multiple promotions match the same product (Decision B3 —
+# `highest discount_percent wins`), `applies_to` does NOT bias the
+# tiebreak — only `discount_percent` matters.
+# =============================================================================
+
+kind: enum
+
+displayName:
+  ja: プロモーション適用範囲
+  en: Promotion Applies To
+  vi: Phạm vi áp dụng
+
+values:
+  - value: all_items
+    label: { ja: 全商品, en: All Items, vi: Tất cả món }
+  - value: categories
+    label: { ja: カテゴリ, en: Categories, vi: Theo danh mục }
+  - value: products
+    label: { ja: 個別商品, en: Specific Products, vi: Theo món }
+  - value: mixed
+    label: { ja: ミックス, en: Mixed, vi: Kết hợp }

@@ -1,0 +1,143 @@
+Module,TC_ID,Title,Priority,Type,Precondition,Test_Data,Step_No,Action,Expected_Result,Status,Notes
+M1-Materials-List,TC-M1-01,Smoke: trang danh sách material load,P0,Smoke,"Đăng nhập HQ, chọn brand",-,1,Vào /hq/{brandSlug}/materials,Trang load; bảng material hiển thị 12 cột; có nút '+ New',,
+M1-Materials-List,TC-M1-01,Smoke: trang danh sách material load,P0,Smoke,,,2,Quan sát khi đang tải,Hiện DataTableSkeleton; sau đó ra dữ liệu,,
+M1-Materials-List,TC-M1-02,Empty state khi brand chưa có material,P1,Functional,Brand mới chưa có material,-,1,Vào materials list,Hiện text empty (hq.materials.empty); không có dòng,,
+M1-Materials-List,TC-M1-03,Tìm kiếm theo tên/SKU,P1,Functional,Có >=3 material,"keyword khớp 1 material",1,Gõ keyword vào ô Search,Sau ~300ms bảng lọc còn material khớp; URL có ?search=,,debounce 300ms
+M1-Materials-List,TC-M1-03,Tìm kiếm theo tên/SKU,P1,Functional,,,2,Xóa keyword,Bảng trở lại đầy đủ,,
+M1-Materials-List,TC-M1-04,Lọc theo Kind (raw/produced),P1,Functional,Có cả material raw và produced,-,1,Chọn filter Kind = Produced,Chỉ hiện material produced (badge 🏭); URL ?kind=produced,,
+M1-Materials-List,TC-M1-04,Lọc theo Kind (raw/produced),P1,Functional,,,2,Chọn Kind = Raw,Chỉ hiện material raw (badge 📦),,
+M1-Materials-List,TC-M1-05,Lọc theo Status,P2,Functional,Có material active và inactive,-,1,Chọn Status = Inactive,Chỉ hiện material inactive,,
+M1-Materials-List,TC-M1-06,Hiển thị material đã xóa (trashed),P1,Functional,Có >=1 material đã soft-delete,-,1,Bật checkbox 'Show Trashed',Hiện thêm material có badge 'deleted'; action đổi thành Restore,,
+M1-Materials-List,TC-M1-07,Phân trang + per_page,P2,Functional,Có >25 material,-,1,Đổi per_page = 50,Bảng hiện tối đa 50 dòng; URL ?per_page=50,,
+M1-Materials-List,TC-M1-07,Phân trang + per_page,P2,Functional,,,2,Sang trang 2,Hiện trang kế; STT tiếp tục đúng (meta.from + index),,
+M1-Materials-List,TC-M1-08,Xóa 1 material có xác nhận,P1,Functional,Có material chưa dùng,-,1,Mở dropdown action 1 dòng > Delete,DeleteConfirmDialog mở,,
+M1-Materials-List,TC-M1-08,Xóa 1 material có xác nhận,P1,Functional,,,2,Xác nhận,DELETE gọi; toast success; dòng biến mất (chuyển trashed),,
+M1-Materials-List,TC-M1-09,Khôi phục material đã xóa,P1,Functional,Đang xem trashed; có material deleted,-,1,Dropdown action > Restore,POST restore; toast; material trở lại active,,
+M1-Materials-List,TC-M1-10,Bulk delete,P2,Functional,Có >=2 material,-,1,Tick chọn 2 dòng,Thanh bulk hiện 'Delete Selected',,
+M1-Materials-List,TC-M1-10,Bulk delete,P2,Functional,,,2,Click Delete Selected > xác nhận,POST bulk-delete; cả 2 chuyển trashed; toast,,
+M1-Materials-List,TC-M1-11,Cảnh báo lot sắp hết hạn ở cột Active Lots,P1,Functional,Material có lot expiring_soon > 0,-,1,Xem cột Active Lots,Hiện count + badge amber số lot sắp hết hạn,,
+M1-Materials-List,TC-M1-12,Clear filters,P2,Functional,Đang áp nhiều filter,-,1,Click Clear Filters,Mọi filter + search reset về mặc định; URL sạch,,
+M2-Material-Create,TC-M2-01,Smoke: tạo material RAW,P0,Smoke,HQ brand,"Name=Bột mì",1,Vào materials > + New,Form mở; Kind mặc định = Raw 📦,,
+M2-Material-Create,TC-M2-01,Smoke: tạo material RAW,P0,Smoke,,,2,Nhập Name,Save enabled,,
+M2-Material-Create,TC-M2-01,Smoke: tạo material RAW,P0,Smoke,,,3,Click Save,POST tạo; redirect tới /materials/{newId} (raw); toast success,,
+M2-Material-Create,TC-M2-02,Smoke: tạo material PRODUCED + flow recipe,P0,Smoke,HQ brand,"Name=Nước sốt, yield_unit=kg",1,Chọn Kind = Produced 🏭,Hiện thêm field Yield Quantity / Yield Unit / Shelf Life,,
+M2-Material-Create,TC-M2-02,Smoke: tạo material PRODUCED + flow recipe,P0,Smoke,,,2,Nhập Name; để trống Yield Unit; Save,Báo lỗi inline yield_unit_required; không submit,,validation
+M2-Material-Create,TC-M2-02,Smoke: tạo material PRODUCED + flow recipe,P0,Smoke,,,3,Nhập Yield Unit=kg; Save,POST tạo; redirect tới recipes/new?output_material_id={newId},,
+M2-Material-Create,TC-M2-03,Validation: Name bắt buộc,P1,Validation,-,-,1,Để trống Name (mọi locale) > Save,Lỗi inline name_required; không gọi API,,
+M2-Material-Create,TC-M2-04,Name đa ngôn ngữ (translatable),P1,i18n,-,"ja/en/vi name",1,Nhập Name ở từng tab locale ja/en/vi,Mỗi locale lưu riêng; top-level mirror = default locale,,
+M2-Material-Create,TC-M2-05,Allergens multi-select,P1,Functional,Brand có allergen,-,1,Mở Allergens combobox; chọn 2 allergen,Hiện 2 badge có nút × xóa,,
+M2-Material-Create,TC-M2-06,Temperature CCP có điều kiện,P2,Functional,-,-,1,Bật switch requires_temperature_check,Hiện 2 input temperature_min/max,,
+M2-Material-Create,TC-M2-06,Temperature CCP có điều kiện,P2,Functional,,,2,Tắt switch,2 input ẩn đi,,
+M2-Material-Create,TC-M2-07,Yield Quantity nhận tối đa 4 chữ số thập phân,P2,Validation,Kind=Produced,"1.23456",1,Nhập Yield Quantity = 1.23456,"Lưu/làm tròn theo step 0.0001; xác nhận hành vi",,Edge
+M2-Material-Create,TC-M2-08,Hủy có cảnh báo unsaved,P1,Functional,Form đã nhập dở,-,1,Nhập Name rồi click Cancel,Hiện dialog cảnh báo mất thay đổi,,
+M2-Material-Create,TC-M2-08,Hủy có cảnh báo unsaved,P1,Functional,,,2,Chọn tiếp tục chỉnh sửa,Dialog đóng; ở lại form,,
+M2-Material-Create,TC-M2-09,Lỗi 422 từ BE hiển thị inline,P1,Validation,-,"SKU trùng (nếu áp dụng)",1,Submit gây 422,Field lỗi hiển thị đỏ; form giữ nguyên,,
+M3-Material-Detail,TC-M3-01,Smoke: mở material detail,P0,Smoke,Có material A,-,1,Vào /hq/{brandSlug}/materials/{A.id},Trang load đủ card: Basic/Recipes/Allergens/Yield/Status/Cost/Temperature/Expiry/Substitution,,
+M3-Material-Detail,TC-M3-02,Sửa và lưu material,P0,Smoke,Material A,-,1,Đổi Name; click Save,PATCH gọi; toast; ở lại trang; dữ liệu cập nhật,,
+M3-Material-Detail,TC-M3-03,Save disabled khi Name rỗng,P1,Validation,Material A,-,1,Xóa trống Name,Save disabled,,
+M3-Material-Detail,TC-M3-04,Unsaved-changes guard,P1,Functional,Material A,-,1,Đổi field bất kỳ > Cancel,Dialog cảnh báo mất thay đổi,,
+M3-Material-Detail,TC-M3-05,Expiry alert thresholds parse,P1,Functional,Material A,"7, 3, 1",1,Nhập '7, 3, 1' vào Expiry Alert Thresholds,Hiện badge 7d 3d 1d,,
+M3-Material-Detail,TC-M3-05,Expiry alert thresholds parse,P1,Functional,,"abc, -2, 0",2,Nhập giá trị không hợp lệ 'abc, -2, 0',Bị lọc bỏ; chỉ giữ số nguyên dương; rỗng -> 'system default [7,3,1]',,Edge
+M3-Material-Detail,TC-M3-06,Yield card luôn hiển thị kể cả raw,P2,Functional,Material raw,-,1,Mở material raw,Card Yield vẫn hiện (BE suy ra kind từ yield_unit),,
+M3-Material-Detail,TC-M3-07,404 khi material không tồn tại,P1,Functional,-,"id rác",1,Vào /materials/{uuid-rac},Hiện trang 404 (notFound),,
+M3-Material-Detail,TC-M3-08,Link sang Units và Recipes,P2,Functional,Material A,-,1,Click nút 'Units',Điều hướng /materials/{id}/units,,
+M3-Material-Detail,TC-M3-08,Link sang Units và Recipes,P2,Functional,,,2,Click link Recipes card,Điều hướng /recipes?material_id={id},,
+M4-Material-Units,TC-M4-01,Smoke: danh sách + thêm unit,P0,Smoke,Material A,"unit=g, ratio=0.001",1,Vào /materials/{A.id}/units,Bảng units load (Unit/Ratio/Is Base/Actions),,
+M4-Material-Units,TC-M4-01,Smoke: danh sách + thêm unit,P0,Smoke,,,2,Click Add > nhập unit=g ratio=0.001 > Save,POST tạo; dialog đóng; dòng mới xuất hiện,,
+M4-Material-Units,TC-M4-02,Validation: unit bắt buộc + ratio > 0,P1,Validation,Material A,-,1,Mở Add; để unit rỗng,Save disabled,,
+M4-Material-Units,TC-M4-02,Validation: unit bắt buộc + ratio > 0,P1,Validation,,,2,Nhập unit; ratio=0,Save disabled,,
+M4-Material-Units,TC-M4-03,Ratio quá 4 chữ số thập phân,P1,Validation,Material A,"0.00001",1,Nhập ratio=0.00001,Báo lỗi ratio_precision_error; Save disabled,,Edge
+M4-Material-Units,TC-M4-04,Không cho xóa base unit,P1,Functional,Material A có base unit,-,1,Mở action base unit,Nút Delete bị disabled (is_base=true),,
+M4-Material-Units,TC-M4-05,Sửa unit,P2,Functional,Material A có unit,-,1,Click edit unit > đổi ratio > Save,PATCH; dòng cập nhật,,
+M4-Material-Units,TC-M4-06,Guard unsaved trong dialog,P2,Functional,Material A,-,1,Mở Add; nhập dở; Escape,Dialog 3 nút: Continue/Exit Without Saving/Save,,
+M5-Substitution,TC-M5-01,Empty state substitution,P1,Functional,Material A chưa có rule,-,1,Cuộn xuống card Substitution Rules,Hiện empty (substitution_empty); nút Add,,
+M5-Substitution,TC-M5-02,Smoke: tạo substitution rule,P0,Smoke,"A primary; B,C,D",B,1,Click Add,Dialog mở; factor=1.0000 priority=0 active on; Save disabled,,
+M5-Substitution,TC-M5-02,Smoke: tạo substitution rule,P0,Smoke,,,2,Mở dropdown Substitute,Không có A (chính nó); có B/C/D,,
+M5-Substitution,TC-M5-02,Smoke: tạo substitution rule,P0,Smoke,,,3,Chọn B; factor=1.25; Save,POST tạo; toast; dòng B xuất hiện factor 1.2500 badge Active,,
+M5-Substitution,TC-M5-03,Save disabled khi factor <= 0,P1,Validation,Material A,-,1,Chọn B; factor=0,Save disabled,,
+M5-Substitution,TC-M5-04,Dropdown loại substitute đã dùng,P1,Functional,A đã có rule với B,-,1,Mở Add lại,Dropdown không còn B; chỉ C/D,,Edge
+M5-Substitution,TC-M5-05,Edit giữ substitute hiện tại + chặn trùng,P1,Functional,"A có rule1->B, rule2->C",-,1,Edit rule1 (B),"Dropdown có B (đang sửa), không có C (đã dùng) -> tránh trùng cặp",,Edge/anti-dup
+M5-Substitution,TC-M5-06,Tạo lỗi (422) giữ dialog mở,P1,Validation,-,-,1,Ép tạo cặp trùng (mock 422),Dialog vẫn mở; toast.error message,,
+M5-Substitution,TC-M5-07,Notes rỗng -> null + counter,P2,Functional,Material A,-,1,Nhập Notes '   ' rồi Save,payload notes=null; counter 'N/1000' realtime,,
+M5-Substitution,TC-M5-08,Xóa rule có xác nhận,P1,Functional,A có rule,-,1,Click Trash > xác nhận,DELETE; toast; dòng biến mất,,
+M5-Substitution,TC-M5-09,Sửa priority + toggle active,P2,Functional,A có rule,-,1,Edit > priority=9 tắt Active > Save,PATCH (không gửi primary_material_id); badge -> Inactive,,
+M6-Material-Lots,TC-M6-01,Smoke: danh sách lot HQ,P0,Smoke,HQ brand có lot,-,1,Vào /hq/{brandSlug}/material-lots,Bảng 11 cột load; có Lot Code/Material/Warehouse/Qty/Expiry/Status,,
+M6-Material-Lots,TC-M6-02,Lọc theo status lot,P1,Functional,Có lot nhiều status,-,1,Chọn Status filter = Quarantined,Chỉ hiện lot quarantined,,
+M6-Material-Lots,TC-M6-03,Badge ngày hết hạn,P1,Functional,"Lot expiry <0, <=1, <=7, >7",-,1,Xem cột Expiry / detail DaysUntilBadge,"Expired(đỏ) / 1d(đỏ) / Nd(amber) / Nd(thường) đúng theo ngưỡng",,Edge
+M6-Material-Lots,TC-M6-04,Quarantine lot (active),P0,Functional,Lot status=active,"reason 'nghi nhiễm'",1,Action > Quarantine; nhập reason >=3 ký tự,Button active; POST quarantine; status -> quarantined,,
+M6-Material-Lots,TC-M6-04,Quarantine lot (active),P0,Functional,,,2,Thử reason < 3 ký tự,Button disabled (min 3),,validation
+M6-Material-Lots,TC-M6-05,Release lot (quarantined),P1,Functional,Lot quarantined,-,1,Action > Release; note optional; xác nhận,POST release; status -> active,,
+M6-Material-Lots,TC-M6-06,Dispose lot,P1,Functional,Lot active/quarantined/expired,-,1,Action > Dispose; reason optional; xác nhận (force),POST dispose force=true; status -> disposed,,
+M6-Material-Lots,TC-M6-07,Bulk delete lot,P2,Functional,Có >=2 lot,-,1,Tick 2 lot > Delete Selected > xác nhận,POST bulk-delete; lot chuyển trashed,,
+M6-Material-Lots,TC-M6-08,Lot detail HQ đầy đủ card,P1,Functional,Có lot,-,1,Click Lot Code,"Detail: Overview/Supplier/Cost/Temperature/Actions/Timeline",,
+M6-Material-Lots,TC-M6-09,Shop xem lot read-only + Receive,P1,Functional,Đăng nhập Shop,-,1,Vào /shop/{shopSlug}/material-lots,Bảng 6 cột read-only; có nút Receive,,
+M6-Material-Lots,TC-M6-10,Shop nhận lot mới (Receive),P0,Smoke,Shop có warehouse + material,-,1,Click Receive > điền form > Submit,Lot mới tạo; xuất hiện trong danh sách,,
+M6-Material-Lots,TC-M6-11,Split lot (shop),P1,Functional,Lot active qty>0,"2 parts",1,Lot detail > Split,Dialog mở 2 part mặc định,,
+M6-Material-Lots,TC-M6-11,Split lot (shop),P1,Functional,,,2,Nhập qty 2 part; tổng > qty_on_hand,Cảnh báo đỏ over-limit; Submit disabled,,Edge
+M6-Material-Lots,TC-M6-11,Split lot (shop),P1,Functional,,,3,Sửa tổng <= qty_on_hand; Submit,POST split; dialog đóng; lot tách,,
+M6-Material-Lots,TC-M6-12,Split: thêm/bớt part,P2,Functional,Dialog split mở,-,1,Click Add Part,Thêm part; nút Remove hiện khi >2 part,,
+M7-Recipes,TC-M7-01,Smoke: danh sách recipe,P0,Smoke,HQ brand có recipe,-,1,Vào /hq/{brandSlug}/recipes,Bảng load; cột Approval Status hiển thị Draft/Pending/Approved/Rejected,,
+M7-Recipes,TC-M7-02,Smoke: tạo recipe output=material,P0,Smoke,"Có produced material + ingredient",-,1,+ New; nhập Name; Output Kind=Material; chọn material,Output Unit khóa theo yield_unit của material,,
+M7-Recipes,TC-M7-02,Smoke: tạo recipe output=material,P0,Smoke,,,2,Nhập Output Quantity; thêm 1 ingredient qty>0; Save,POST tạo; redirect /recipes; recipe ở trạng thái Draft,,
+M7-Recipes,TC-M7-03,Tạo recipe output=SKU,P1,Functional,Có product SKU + ingredient,-,1,+ New; Output Kind=SKU; chọn >=1 sku,Output Unit free-text; sku đã chọn ẩn khỏi combobox,,
+M7-Recipes,TC-M7-04,Submit disabled khi thiếu điều kiện,P1,Validation,-,-,1,Để trống Name hoặc không có ingredient hợp lệ,Nút Save/Submit disabled,,
+M7-Recipes,TC-M7-05,Đổi Output Kind clear lựa chọn cũ,P2,Functional,Đang tạo recipe,-,1,Chọn material rồi đổi sang SKU,material_id bị clear; yêu cầu chọn sku,,Edge
+M7-Recipes,TC-M7-06,Ingredient material không cho chọn chính output,P1,Functional,Recipe output material X,-,1,Thêm ingredient type=Material,Dropdown ẩn material X (không tự tham chiếu),,Edge
+M7-Recipes,TC-M7-07,Approval flow: submit for approval,P0,Functional,Recipe Draft,-,1,Action > Submit for Approval,POST submit-for-approval; status -> Pending,,
+M7-Recipes,TC-M7-08,Approval flow: approve,P0,Functional,Recipe Pending,-,1,Action > Approve,POST approve; status -> Approved,,
+M7-Recipes,TC-M7-09,Approval flow: reject có lý do,P0,Functional,Recipe Pending,"reason 'thiếu định lượng'",1,Action > Reject,RejectRecipeDialog mở; Reject disabled khi reason rỗng,,
+M7-Recipes,TC-M7-09,Approval flow: reject có lý do,P0,Functional,,,2,Nhập reason > Reject,POST reject; status -> Rejected; banner hiện rejection_reason,,
+M7-Recipes,TC-M7-10,Resubmit sau khi bị reject,P1,Functional,Recipe Rejected,-,1,Mở recipe > Resubmit,status -> Pending; banner cũ vẫn lưu reason,,
+M7-Recipes,TC-M7-11,Activate/Deactivate recipe,P2,Functional,Recipe approved,-,1,Toggle Activate/Deactivate,PATCH is_active; trạng thái cập nhật,,
+M7-Recipes,TC-M7-12,Per-order material draw preview,P2,Functional,Đang tạo recipe có ingredient,-,1,Nhập Output Quantity và ingredient qty,"Hiện preview 'ingredient qty/unit per order' = ingredient.qty/output_quantity",,Plan-024
+M7-Recipes,TC-M7-13,Yield variance tolerance,P2,Validation,Recipe,"-5, 150",1,Nhập variance % = -5 và 150,Bị kẹp về [0,100] (Math.max 0; max 100),,Edge
+M7-Recipes,TC-M7-14,Xóa + khôi phục recipe,P2,Functional,Recipe tồn tại,-,1,Action > Delete > xác nhận; bật trashed > Restore,DELETE rồi POST restore hoạt động,,
+M7-Recipes,TC-M7-15,404 recipe không tồn tại,P2,Functional,-,"id rác",1,Vào /recipes/{uuid-rac},Trang 404,,
+M8-Material-Batch,TC-M8-01,Smoke: danh sách batch sản xuất,P0,Smoke,"Đăng nhập Shop có warehouse",-,1,Vào /shop/{shopSlug}/production/batches,Bảng batch load (Code/Material/Warehouse/Multiplier/Planned/Actual/Status/Created),,
+M8-Material-Batch,TC-M8-02,Smoke: tạo batch (Save Draft),P0,Smoke,"Shop có produced material + recipe approved",-,1,+ New; chọn Warehouse,Form mở,,
+M8-Material-Batch,TC-M8-02,Smoke: tạo batch (Save Draft),P0,Smoke,,,2,Chọn Produced Material,"Chỉ list material có yield_unit; field Recipe hiện ra (auto chọn nếu chỉ 1)",,
+M8-Material-Batch,TC-M8-02,Smoke: tạo batch (Save Draft),P0,Smoke,,"multiplier=2",3,Nhập Multiplier=2,"Planned Yield = yield_quantity × 2 (read-only); Yield Unit auto",,
+M8-Material-Batch,TC-M8-02,Smoke: tạo batch (Save Draft),P0,Smoke,,,4,Click Save Draft,POST tạo batch; toast 'Batch created'; status=Draft,,
+M8-Material-Batch,TC-M8-03,Validation canSave,P1,Validation,Shop,-,1,Để trống warehouse/material/recipe hoặc multiplier<=0,Nút Save disabled,,
+M8-Material-Batch,TC-M8-04,Cảnh báo không có produced material / recipe,P1,Functional,"Material chưa có recipe",-,1,Chọn material không có recipe,Banner cảnh báo no_recipe_warning; không tạo được,,Edge
+M8-Material-Batch,TC-M8-05,Approval flow: submit -> approve,P0,Functional,Batch Draft,-,1,Detail > Submit,POST submit; status -> Pending,,
+M8-Material-Batch,TC-M8-05,Approval flow: submit -> approve,P0,Functional,,,2,Approve,POST approve; status -> Approved,,
+M8-Material-Batch,TC-M8-06,Start batch trừ nguyên liệu khỏi stock,P0,Functional,Batch Approved; nguyên liệu đủ tồn,-,1,Detail > Start,POST start; status -> In Progress; toast 'materials drawn from stock'; tồn kho component giảm,,critical
+M8-Material-Batch,TC-M8-07,Complete batch cộng yield vào stock,P0,Functional,Batch In Progress,"actual_yield=900",1,Detail > Complete; nhập Actual Yield,Dialog mở; Actual Yield > 0,,
+M8-Material-Batch,TC-M8-07,Complete batch cộng yield vào stock,P0,Functional,,,2,Submit,POST complete; status -> Completed; toast 'yield added to stock'; lot/tồn của produced material tăng,,critical
+M8-Material-Batch,TC-M8-08,Variance reason bắt buộc khi vượt tolerance,P1,Validation,"Batch In Progress; recipe tolerance=0%",-,1,Complete với actual_yield khác planned,"variancePct>tolerance -> Yield Variance Reason bắt buộc; Submit disabled khi rỗng",,Edge
+M8-Material-Batch,TC-M8-08,Variance reason bắt buộc khi vượt tolerance,P1,Validation,,,2,Nhập reason; Submit,Complete thành công,,
+M8-Material-Batch,TC-M8-09,Cancel batch,P1,Functional,"Batch Draft/Pending/Approved/InProgress",-,1,Detail > Cancel,POST cancel; status -> Cancelled,,
+M8-Material-Batch,TC-M8-10,Delete chỉ cho Draft/Cancelled,P2,Functional,Batch Completed,-,1,Xem nút Delete,Delete chỉ hiện/enabled với Draft hoặc Cancelled; Completed không xóa được,,
+M8-Material-Batch,TC-M8-11,Batch item link tới source lot,P2,Functional,Batch đã start,-,1,Detail xem bảng component,Cột Source Lot link tới /material-lots/{lotId},,
+M8-Material-Batch,TC-M8-12,Lọc batch theo status/warehouse/ngày,P2,Functional,Có batch nhiều status,-,1,Áp filter Status + Warehouse + date range,Danh sách lọc đúng; reset về page 1,,
+M9-Stock-Levels,TC-M9-01,Smoke: tồn kho theo SKU/lot,P0,Smoke,Shop có tồn kho,-,1,Vào /shop/{shopSlug}/stock/levels,"Bảng load: SKU/Name/Type/Warehouse/Lot/Expiry/Qty/Unit/Min-Max/Status",,
+M9-Stock-Levels,TC-M9-02,Badge trạng thái low/out,P1,Functional,"Có item qty<=0 và qty<=min",-,1,Xem cột Status,"qty<=0 -> 'out'(đỏ); qty<=min -> 'low'; còn lại 'normal'",,Edge
+M9-Stock-Levels,TC-M9-03,Lot legacy (NULL lot) hiển thị badge,P2,Functional,Có stock NULL lot_id,-,1,Xem cột Lot,Hiện badge 'Legacy' cho lot_id null,,Plan-017
+M9-Stock-Levels,TC-M9-04,Lọc theo warehouse / stock_status,P1,Functional,Nhiều warehouse,-,1,Chọn Warehouse + Stock Status=low,Lọc đúng; trang về 1,,
+M9-Stock-Trans,TC-M9-05,Smoke: tạo Stock In hoàn tất ghi tồn,P0,Smoke,Shop có warehouse + item,"qty=100",1,/stock/transactions > nút Stock In,Form mở type=stock_in,,
+M9-Stock-Trans,TC-M9-05,Smoke: tạo Stock In hoàn tất ghi tồn,P0,Smoke,,,2,Chọn warehouse; thêm item qty=100; Save,POST tạo; status Draft,,
+M9-Stock-Trans,TC-M9-05,Smoke: tạo Stock In hoàn tất ghi tồn,P0,Smoke,,,3,Submit > Approve,"status -> completed; tồn kho item tăng 100 (chỉ ghi khi completed)",,critical
+M9-Stock-Trans,TC-M9-06,Stock Out trừ tồn,P0,Functional,Item có tồn >=10,"qty=10",1,Stock Out; item qty=10; Submit > Approve,status completed; tồn giảm 10,,critical
+M9-Stock-Trans,TC-M9-07,Approve cho phép âm (allow_negative),P1,Edge,"Item tồn < qty out",-,1,Stock Out qty > tồn; Approve,"Mặc định chặn; với allow_negative=true cho completed tồn âm",,Edge
+M9-Stock-Trans,TC-M9-08,Cancel transaction,P1,Functional,Transaction Draft/Pending,-,1,Cancel,status -> cancelled; không ghi tồn,,
+M9-Stock-Trans,TC-M9-09,Sửa/Xóa chỉ khi Draft,P2,Functional,Transaction completed,-,1,Thử Edit/Delete,Chỉ Draft mới Edit/Delete được,,
+M9-Stock-Trans,TC-M9-10,Validation item >=1 và qty>0,P1,Validation,-,-,1,Tạo transaction không item hoặc qty=0,Không submit được; báo lỗi,,
+M9-Stock-Transfer,TC-M9-11,Smoke: chuyển kho nguồn->đích,P0,Smoke,Có 2 warehouse + tồn ở nguồn,-,1,/stock/transfers > New; chọn source và dest khác nhau; thêm item; Save,POST tạo; status Draft,,
+M9-Stock-Transfer,TC-M9-12,Source = Dest bị chặn,P1,Validation,-,-,1,Chọn source = dest,Báo lỗi / submit chặn (phải khác nhau),,Edge
+M9-Stock-Transfer,TC-M9-13,Flow submit->approve->receive,P0,Functional,Transfer Draft,-,1,Submit > Approve,status -> approved rồi in_transit (xuất kho nguồn),,
+M9-Stock-Transfer,TC-M9-13,Flow submit->approve->receive,P0,Functional,,,2,Receive,POST receive; status -> completed; nhập kho đích (tồn dest tăng),,critical
+M9-Stock-Count,TC-M9-14,Smoke: kiểm kê full,P0,Smoke,Shop có tồn,-,1,/stock/counts > Create; warehouse; scope=Full,POST tạo; snapshot toàn bộ item của kho,,
+M9-Stock-Count,TC-M9-14,Smoke: kiểm kê full,P0,Smoke,,,2,Start > nhập counted_quantity > Submit > Approve,"status start->in_progress->pending_approval->approved; điều chỉnh tồn theo số đếm",,critical
+M9-Stock-Count,TC-M9-15,Partial count cho phép add-items,P1,Functional,Count scope=Partial,-,1,Tạo partial; trong in_progress dùng add-items,Thêm được item vào scope; full thì chỉ update-items,,Edge
+M9-Stock-Count,TC-M9-16,Cancel count,P2,Functional,Count draft/in_progress,-,1,Cancel,status -> cancelled; không điều chỉnh tồn,,
+M9-Stock-Alerts,TC-M9-17,Summary cards low/out,P1,Functional,Có alert active,-,1,/stock/alerts,"3 card: Total Active / Low / Out hiển thị đúng số; tô đỏ/amber khi >0",,
+M9-Stock-Alerts,TC-M9-18,Configure threshold inline auto-resolve,P1,Functional,Alert low active,-,1,Click Configure Threshold; chỉnh min_stock thấp hơn qty; Save,PUT stock-level; alert tự resolve khỏi danh sách active,,Edge
+M9-Stock-Alerts,TC-M9-19,Lọc alert theo type/status,P2,Functional,Có alert nhiều loại,-,1,Filter Alert Type=out_of_stock; Status=active,Lọc đúng,,
+M9-Disposals,TC-M9-20,Smoke: tạo disposal (waste),P0,Smoke,Item có tồn,-,1,/stock/disposals > New Disposal; warehouse; item; Save,POST stock_out sub_type=disposal; status Draft,,
+M9-Disposals,TC-M9-21,Disposal flow submit->approve trừ tồn,P0,Functional,Disposal Draft,-,1,Submit > Approve,status completed; tồn giảm; ghi nhận waste,,critical
+M9-Disposals,TC-M9-22,Waste report,P2,Functional,Có disposal completed,-,1,Click Waste Report,Hiển thị by_reason / top_items / daily_trend / summary,,
+GLOBAL,TC-G-01,i18n đủ key 3 ngôn ngữ,P1,i18n,-,-,1,Đổi locale ja/en/vi trên toàn feature material,Không lộ raw key (vd material.substitution_rules); nhãn dịch đúng,,
+GLOBAL,TC-G-02,Phân quyền HQ vs Shop,P1,Permission,-,-,1,Đăng nhập user chỉ có quyền Shop; thử vào route /hq/...,Bị chặn/redirect; không thấy CRUD cấp HQ,,
+GLOBAL,TC-G-03,Xử lý lỗi mạng/5xx,P1,Functional,-,-,1,Giả lập backend 500 khi tải danh sách,Hiện trạng thái lỗi/recovery phù hợp; không crash trắng trang,,
+GLOBAL,TC-G-04,Accept-Language gửi đúng locale,P2,Functional,locale=vi,-,1,Đổi locale vi; xem network request,Header Accept-Language=vi; dữ liệu trả về đúng ngôn ngữ,,

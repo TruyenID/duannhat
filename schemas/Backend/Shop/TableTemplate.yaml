@@ -1,0 +1,139 @@
+# TableTemplate schema (issue #890)
+# Bàn MẶC ĐỊNH ở cấp brand (HQ) — template để các shop "nhận bàn mặc định".
+# Không phải bàn vật lý: KHÔNG có status/qr_token/current_order — đó là dữ liệu
+# runtime per shop, sinh ra khi copy template thành Table thật (apply-defaults,
+# match theo code, idempotent). Sửa template sau đó KHÔNG tự động sync xuống shop.
+#
+# Scope: Brand (HQ). Code unique theo brand.
+#
+# Business Rules:
+#   - BR-TT01: code unique trong scope của một brand
+#   - BR-TT02: zone_template_id RESTRICT — không xoá zone template trực tiếp
+#              khi còn table template (cascade soft-delete ở service layer)
+#   - BR-TT03: seat_count >= 1
+
+displayName:
+  en: Table Template
+  ja: テーブルテンプレート
+  vi: Mẫu bàn
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    - columns: [brand_id, code]
+      unique: true
+    - columns: [zone_template_id]
+    - columns: [brand_id, is_active]
+
+properties:
+  code:
+    type: String
+    length: 50
+    searchable: true
+    filterable: true
+    defaultSort: asc
+    lookupable: true
+    displayName:
+      en: Table Code
+      ja: テーブルコード
+      vi: Mã bàn
+    description:
+      en: "Unique code per brand (BR-TT01). Example: T-01. Copied to the shop table on apply-defaults."
+      ja: "ブランド内で一意のコード（BR-TT01）。例：T-01。既定適用時に店舗テーブルへコピー。"
+      vi: "Mã unique trong brand (BR-TT01). Ví dụ: T-01. Copy sang bàn của shop khi nhận mặc định."
+
+  name:
+    type: String
+    length: 255
+    nullable: true
+    searchable: true
+    lookupable: true
+    displayName:
+      en: Table Name
+      ja: テーブル名
+      vi: Tên bàn
+    description:
+      en: "Optional friendly name. UI falls back to code when null."
+      ja: "任意の表示名。空のときはコードにフォールバック。"
+      vi: "Tên hiển thị tuỳ chọn. Nếu trống, UI dùng code."
+
+  seat_count:
+    type: Int
+    default: 2
+    lookupable: true
+    displayName:
+      en: Seat Count
+      ja: 座席数
+      vi: Số chỗ ngồi
+    description:
+      en: "Number of seats. Must be >= 1 (BR-TT03)."
+      ja: "座席数。1以上必須（BR-TT03）。"
+      vi: "Số chỗ ngồi. Tối thiểu 1 (BR-TT03)."
+
+  is_active:
+    type: Boolean
+    default: true
+    filterable: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+    description:
+      en: "Inactive templates are skipped when a shop applies brand defaults."
+      ja: "無効なテンプレートは既定適用時にスキップされます。"
+      vi: "Template vô hiệu sẽ bị bỏ qua khi shop nhận mặc định."
+
+  # Relationships
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  # Brand scope. CASCADE — deleting the brand removes its templates.
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: CASCADE
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu
+
+  # Target branch (issue #890 follow-up). NULL = brand-wide default — every
+  # shop receives it on apply-defaults. Set = only that branch receives it.
+  # A table template is only applied where BOTH itself and its zone template
+  # are applicable to the shop.
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    nullable: true
+    onDelete: CASCADE
+    displayName:
+      en: Target Branch
+      ja: 対象店舗
+      vi: Chi nhánh áp dụng
+
+  zoneTemplate:
+    type: Association
+    relation: ManyToOne
+    target: ZoneTemplate
+    onDelete: RESTRICT
+    displayName:
+      en: Zone Template
+      ja: エリアテンプレート
+      vi: Mẫu khu vực
+    description:
+      en: "RESTRICT at the DB level (BR-TT02). Cascade soft-delete is handled in ZoneTemplateService::delete inside a DB::transaction."
+      ja: "DBレベルでRESTRICT（BR-TT02）。カスケードソフト削除はZoneTemplateService::deleteのトランザクション内で処理。"
+      vi: "RESTRICT ở DB (BR-TT02). Cascade soft-delete xử lý ở ZoneTemplateService::delete trong DB::transaction."

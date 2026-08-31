@@ -1,0 +1,86 @@
+version: '3'
+
+includes:
+  common: ./build/Taskfile.yml
+  windows: ./build/windows/Taskfile.yml
+  darwin: ./build/darwin/Taskfile.yml
+  linux: ./build/linux/Taskfile.yml
+
+vars:
+  APP_NAME: "ws-app"
+  BIN_DIR: "bin"
+  VITE_PORT: '{{.WAILS_VITE_PORT | default 5173}}'   # team-standard Vite port
+  # Baked into internal/config.Version via -ldflags -X, so a release binary
+  # reports a real version on GET /api/version instead of "dev".
+  #
+  # Suy từ git, giống Makefile (#1832). Trước đây đây là bản sao thứ hai của một
+  # con số cứng, kèm dòng "KEEP IN SYNC with VERSION in the Makefile" — một lời
+  # nhắc thay cho rào, và nó đã lệch: cả hai ghi 0.2.0 trong khi bản phát hành là
+  # v0.3.0. Giờ không còn gì để sync.
+  #
+  # `--match 'v*'` bắt buộc: repo có tag `recover/pr-1410-…`, không lọc thì mọi
+  # build cục bộ tự xưng bằng tên một nhánh khôi phục.
+  #
+  # Ghi đè theo từng lần build:  wails3 task package APP_VERSION=v9.9.9
+  APP_VERSION:
+    sh: |
+      # #2660 — đọc từ FILE `VERSION` ở gốc cây, KHÔNG dò git tag nữa.
+      # Dò tag phụ thuộc việc có người NHỚ đẩy tag, và đường phát hành đã đứng
+      # im 3 ngày đúng vì điều đó: tag thật toàn dạng ngày nên không khớp
+      # pattern nào. Giữ hậu tố `-dirty` — binary dựng từ cây bẩn phải TỰ KHAI.
+      root="$(git rev-parse --show-toplevel 2>/dev/null)"
+      v="$(cat "${root}/VERSION" 2>/dev/null | tr -d '[:space:]')"
+      if [ -z "$v" ]; then echo dev; exit 0; fi
+      if [ -n "$(git status --porcelain 2>/dev/null)" ]; then echo "v${v}-dirty"; else echo "v${v}"; fi
+  VERSION_LDFLAG: "-X github.com/dxs-platform/workstation-app/internal/config.Version={{.APP_VERSION}}"
+
+tasks:
+  build:
+    summary: Builds the application
+    cmds:
+      - task: "{{OS}}:build"
+
+  package:
+    summary: Packages a production build of the application
+    cmds:
+      - task: "{{OS}}:package"
+
+  run:
+    summary: Runs the application
+    cmds:
+      - task: "{{OS}}:run"
+
+  dev:
+    summary: Runs the application in development mode
+    cmds:
+      - wails3 dev -config ./build/config.yml -port {{.VITE_PORT}}
+    env:
+      # The compiled-in default cloud is PRODUCTION (internal/config/config.go).
+      # Dev must opt out explicitly or a `task dev` pairing burns a real pairing
+      # code on the live cloud. Override: WS_APP_CLOUD_URL=... wails3 task dev
+      WS_APP_CLOUD_URL: '{{.WS_APP_CLOUD_URL | default "http://localhost:5400"}}'
+
+  setup:docker:
+    summary: Builds Docker image for cross-compilation (~800MB download)
+    cmds:
+      - task: common:setup:docker
+
+  build:server:
+    summary: Builds the application in server mode (no GUI, HTTP server only)
+    cmds:
+      - task: common:build:server
+
+  run:server:
+    summary: Runs the application in server mode
+    cmds:
+      - task: common:run:server
+
+  build:docker:
+    summary: Builds a Docker image for server mode deployment
+    cmds:
+      - task: common:build:docker
+
+  run:docker:
+    summary: Builds and runs the Docker image
+    cmds:
+      - task: common:run:docker

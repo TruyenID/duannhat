@@ -1,0 +1,180 @@
+# =============================================================================
+# BranchScheduleOverride (店舗スケジュール上書き / Ghi đè lịch trình chi nhánh)
+# =============================================================================
+#
+# Branch managers may override the `start_time`, `end_time`, `days_of_week`,
+# `start_date` and `end_date` of an HQ-created schedule window without touching
+# the HQ row. `is_active` and `priority` remain under HQ control.
+#
+# Written by: branch_manager role via BranchMenuScheduleService::upsertOverride().
+#             `organization_id` is server-resolved from the branch on write —
+#             never accepted from the request body.
+# Read by:    BranchMenuScheduleService::getEffectiveSchedules() (LEFT JOIN COALESCE),
+#             MenuService::getCurrentMenu() (branch-aware correlated subquery),
+#             BranchEffectiveScheduleResource (COALESCED effective times).
+#
+# Lifecycle:
+#   - Created/updated: branch manager sets an override via PUT
+#     /branch/{branchSlug}/menus/{menu}/schedules/{schedule}/override.
+#   - Deleted: branch manager calls DELETE to reset to HQ defaults, OR the parent
+#     schedule is hard-deleted (FK CASCADE removes this row automatically).
+#   - No soft delete — branch overrides do not need an audit trail of deleted rows.
+#
+# Uniqueness: UNIQUE(menu_schedule_id, branch_id) — exactly one override row per
+# (schedule, branch) pair. upsertOverride() uses updateOrCreate to enforce this.
+#
+# NULL semantics: NULL in start_time or end_time means "not overridden for this field";
+# COALESCE in the query falls back to the HQ schedule value.
+#
+# =============================================================================
+
+displayName:
+  en: Branch Schedule Override
+  ja: 店舗スケジュール上書き
+  vi: Ghi đè lịch trình chi nhánh
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: false
+  id: Uuid
+  indexes:
+    # UNIQUE constraint — one override row per (schedule, branch) pair.
+    # upsertOverride() uses updateOrCreate against this constraint.
+    - columns: [menu_schedule_id, branch_id]
+      unique: true
+
+properties:
+  # Overridden start time for this branch (HH:MM:SS).
+  # NULL = not overridden for start_time; COALESCE falls back to the HQ schedule start_time.
+  # Written by: branch manager (optional — only present when branch sets a custom start).
+  # Read by: BranchMenuScheduleService COALESCE query + BranchEffectiveScheduleResource.
+  start_time:
+    type: Time
+    nullable: true
+    displayName:
+      en: Start Time (Override)
+      ja: 開始時刻（上書き）
+      vi: Giờ bắt đầu (ghi đè)
+
+  # Overridden days-of-week bitmask for this branch (bit0=Sun … bit6=Sat, same
+  # encoding as menu_schedules.days_of_week). NULL = not overridden; COALESCE
+  # falls back to the HQ schedule days. Range 1–127 enforced by FormRequest.
+  days_of_week:
+    type: TinyInt
+    nullable: true
+    displayName:
+      en: Days of Week (Override)
+      ja: 曜日（上書き）
+      vi: Ngày trong tuần (ghi đè)
+
+  # Overridden end time for this branch (HH:MM:SS).
+  # NULL = not overridden for end_time; COALESCE falls back to the HQ schedule end_time.
+  # Written by: branch manager (optional — only present when branch sets a custom end).
+  # Read by: BranchMenuScheduleService COALESCE query + BranchEffectiveScheduleResource.
+  end_time:
+    type: Time
+    nullable: true
+    displayName:
+      en: End Time (Override)
+      ja: 終了時刻（上書き）
+      vi: Giờ kết thúc (ghi đè)
+
+  # Overridden calendar-window start for this branch (#1970).
+  # NULL = not overridden; COALESCE falls back to menu_schedules.start_date, which
+  # is itself NULL-means-unbounded. A branch can therefore narrow or shift a window
+  # HQ set, but cannot CLEAR one — NULL here is already spoken for ("follow HQ").
+  # Same NULL semantics as start_time/end_time above, deliberately.
+  start_date:
+    type: Date
+    nullable: true
+    displayName:
+      en: Start Date (Override)
+      ja: 開始日（上書き）
+      vi: Ngày bắt đầu (ghi đè)
+
+  # Overridden calendar-window end for this branch (#1970). See start_date.
+  end_date:
+    type: Date
+    nullable: true
+    displayName:
+      en: End Date (Override)
+      ja: 終了日（上書き）
+      vi: Ngày kết thúc (ghi đè)
+
+  # Overridden day-of-month bitmask for this branch (#1979), read only when the
+  # HQ row's recurrence_kind is Monthly. Same COALESCE shape as days_of_week:
+  # NULL = not overridden, fall back to HQ.
+  #
+  # The branch may NOT override `recurrence_kind` itself — changing the kind
+  # changes what every other column on the row means, so a branch flipping it
+  # would silently reinterpret HQ's data rather than adjust it. Nor may it
+  # override the SpecificDates list: that is a set, not a scalar, so it needs
+  # its own table and its own feed. Both are deliberate omissions, not oversights.
+  days_of_month:
+    type: BigInt
+    nullable: true
+    displayName:
+      en: Days of Month (Override)
+      ja: 日付（上書き）
+      vi: Ngày trong tháng (ghi đè)
+
+  # ==========================================================================
+  # Associations
+  # ==========================================================================
+
+  # Parent HQ schedule. ON DELETE CASCADE — when HQ soft-deletes the schedule,
+  # this override is automatically hard-deleted (no orphaned branch overrides).
+  # Branch cannot create schedules — they can only override times on HQ schedules.
+  # Written by: route parameter (menu_schedule_id injected from URL). Read by: policy check.
+  menuSchedule:
+    type: Association
+    relation: ManyToOne
+    target: MenuSchedule
+    nullable: false
+    onDelete: CASCADE
+    displayName:
+      en: Menu Schedule
+      ja: メニュースケジュール
+      vi: Lịch trình menu
+
+  # The branch whose manager set this override.
+  # ON DELETE CASCADE — if a branch is deleted, its overrides are deleted too.
+  # Written by: route parameter (branch_id injected from URL). Read by: policy check.
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    nullable: false
+    onDelete: CASCADE
+    displayName:
+      en: Branch
+      ja: 店舗
+      vi: Chi nhánh
+
+  # Organization owning this override — server-resolved from the branch on write.
+  # Never accepted from the request body. Used for org-boundary policy checks.
+  # Written by: BranchMenuScheduleService::upsertOverride() — sets branch.organization_id.
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    nullable: false
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  # Last user to set or modify this override. Nullable for system-generated rows.
+  # Written by: BranchMenuScheduleService::upsertOverride() — sets auth()->id().
+  # Read by: audit trails (UI deferred to a later iteration).
+  updatedBy:
+    type: Association
+    relation: ManyToOne
+    target: User
+    nullable: true
+    displayName:
+      en: Updated By
+      ja: 更新者
+      vi: Người cập nhật

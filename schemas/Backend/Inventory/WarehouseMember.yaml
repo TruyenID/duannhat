@@ -1,0 +1,59 @@
+# WarehouseMember schema
+# Assigns users to specific warehouses with role-based permissions.
+# Org Admin (from SSO) automatically has full access to ALL warehouses
+# without needing a record here (BR-05).
+#
+# Business Rules:
+#   - BR-04: A user can be assigned to multiple warehouses with different roles
+#   - BR-05: Org Admin auto has full access, no record needed
+#   - BR-08: Cascade delete when warehouse is deleted
+#   - BR-10: Available users = active org users, excluding already assigned + Org Admin
+
+displayName:
+  en: Warehouse Member
+  ja: 倉庫メンバー
+  vi: Thành viên kho
+
+kind: object
+
+options:
+  timestamps: true
+  id: Uuid
+  indexes:
+    - columns: [warehouse_id, user_id]
+      unique: true
+    - columns: [user_id]
+
+properties:
+  warehouse:
+    type: Association
+    relation: ManyToOne
+    target: Warehouse
+    onDelete: CASCADE
+    displayName:
+      en: Warehouse
+      ja: 倉庫
+      vi: Kho hàng
+
+  user_id:
+    type: Uuid
+    displayName:
+      en: User ID
+      ja: ユーザーID
+      vi: ID người dùng
+    description:
+      en: "References user_caches.id (SSO user). No hard FK because user_caches is an SSO cache table."
+      ja: "user_caches.idを参照（SSOユーザー）。user_cachesはSSOキャッシュテーブルのためハードFKなし。"
+      vi: "Tham chiếu user_caches.id (user SSO). Không dùng FK cứng vì user_caches là cache SSO."
+
+  role:
+    type: EnumRef
+    enum: WarehouseMemberRole
+    displayName:
+      en: Role
+      ja: 役割
+      vi: Vai trò
+    description:
+      en: "manager = view + create + approve; staff = view + create only (BR-06)"
+      ja: "manager = 閲覧+作成+承認; staff = 閲覧+作成のみ（BR-06）"
+      vi: "manager = xem + tạo + duyệt; staff = chỉ xem + tạo (BR-06)"

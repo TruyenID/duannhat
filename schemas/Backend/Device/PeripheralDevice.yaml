@@ -1,0 +1,88 @@
+# Thiết bị ngoại vi gắn với một chi nhánh: máy đếm tiền, terminal thẻ, cân…
+# Khác `Device` (thiết bị đã pair có token riêng) — cái này là phần cứng treo
+# sau một thiết bị đã pair, nên `registered_by_device_id` trỏ về thiết bị đã
+# đăng ký nó.
+kind: object
+
+options:
+  id: Uuid
+  timestamps: true
+  softDelete: true
+  indexes:
+    - columns: [branch_id, name]
+      unique: true
+    - columns: [type]
+
+properties:
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      ja: 組織
+      en: Organization
+      vi: Tổ chức
+
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    onDelete: CASCADE
+    displayName:
+      ja: 支店
+      en: Branch
+      vi: Chi nhánh
+
+  name:
+    type: String
+    length: 255
+    displayName:
+      ja: 名称
+      en: Name
+      vi: Tên
+
+  type:
+    type: String
+    length: 50
+    displayName:
+      ja: 種別
+      en: Type
+      vi: Loại
+
+  is_active:
+    type: Boolean
+    default: true
+    displayName:
+      ja: 有効
+      en: Active
+      vi: Hoạt động
+
+  metadata:
+    type: Json
+    nullable: true
+    displayName:
+      ja: メタデータ
+      en: Metadata
+      vi: Dữ liệu kèm
+
+  secret:
+    type: String
+    nullable: true
+    displayName:
+      ja: シークレット
+      en: Secret
+      vi: Khoá bí mật
+
+  # Thiết bị đã pair đứng ra đăng ký cái ngoại vi này. Xoá thiết bị đó thì
+  # ngoại vi vẫn còn, chỉ mất dấu vết ai đăng ký.
+  registeredByDevice:
+    type: Association
+    relation: ManyToOne
+    target: Device
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      ja: 登録した端末
+      en: Registered By Device
+      vi: Thiết bị đã đăng ký

@@ -1,0 +1,96 @@
+# ==============================================================================
+# MenuSection Schema (メニューセクション / Nhóm danh mục trong Menu)
+# ==============================================================================
+#
+# MenuSection is a named group/tag used to organize products within a menu.
+# Owned by a brand within an organization.
+#
+# Key Features:
+#   - N:N with Menu via pivot menu_menu_sections (with display_order per menu)
+#   - 1:N with MenuProduct via menu_products.menu_section_id. To place one
+#     product in multiple sections of a menu, create multiple menu_products
+#     rows with the same product_id and different menu_section_id values.
+#     The composite unique on (menu_id, product_id, menu_section_id) protects
+#     against accidental duplicates within the same section.
+#
+# Example:
+#   Sections: 前菜, メイン, ドリンク, デザート
+#   Menu "Lunch" → sections: 前菜(order=1), メイン(order=2)
+#   Menu "Dinner" → sections: メイン(order=1), ドリンク(order=2), デザート(order=3)
+#
+# ==============================================================================
+
+displayName:
+  en: Menu Section
+  ja: メニューセクション
+  vi: Nhóm danh mục Menu
+
+kind: object
+
+options:
+  service: false
+  timestamps: true
+  softDelete: true
+  id: Uuid
+
+properties:
+  name:
+    type: String
+    length: 255
+    translatable: true
+    displayName:
+      en: Section Name
+      ja: セクション名
+      vi: Tên nhóm
+    description:
+      en: Display name for this menu section
+      ja: メニューセクションの表示名
+      vi: Tên hiển thị của nhóm danh mục
+
+  # #1187 — drives the customer "featured" carousel. Before this, the two
+  # customer-web surfaces decided by scanning `name` for "Nổi bật" / "Featured" /
+  # "おすすめ" / "⭐" / "🔥", so renaming a section silently emptied the carousel
+  # and a shop outside those three languages could never fill it.
+  is_featured:
+    type: Boolean
+    default: false
+    displayName:
+      en: Featured
+      ja: おすすめ表示
+      vi: Nổi bật
+    description:
+      en: Show this section's items in the customer featured carousel
+      ja: このセクションの商品を顧客側のおすすめカルーセルに表示する
+      vi: Hiển thị món của nhóm này ở carousel nổi bật cho khách
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: CASCADE
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu
+
+  # N:N with Menu (inverse side)
+  menus:
+    type: Association
+    relation: ManyToMany
+    target: Menu
+    joinTable: menu_menu_sections
+    mappedBy: menuSections
+    displayName:
+      en: Menus
+      ja: メニュー
+      vi: Các menu

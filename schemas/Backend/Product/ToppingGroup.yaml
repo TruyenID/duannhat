@@ -1,0 +1,232 @@
+# =============================================================================
+# ToppingGroup (トッピンググループ / Nhóm Topping)
+# =============================================================================
+#
+# Nhóm topping scoped per-brand. Mỗi nhóm chứa nhiều ToppingGroupItem
+# (trỏ vào Product có type.code = 'topping') và có thể được gắn vào
+# nhiều Product thông qua ProductToppingGroup (pivot M-N).
+#
+# Written by: HQ admin via ToppingGroupService.
+# Read by:
+#   - HQ admin UI (list/edit pages)
+#   - POS/handy (menu detail modal — chọn topping khi thêm vào order)
+#   - Workstation (sync menu từ cloud, phục vụ handy qua LAN)
+#
+# Soft delete: yes — group cũ vẫn referenced bởi order_item_toppings.
+#
+# Translation pattern (giống Category, ProductType):
+#   - `name` khai báo translatable: true → Omnify tạo topping_group_translations.
+#   - Không có column `name` trên main table — chỉ ở translations table.
+#   - Locale fallback chain: ja → en → vi (định nghĩa ở omnify.yaml).
+#
+# Key fields:
+#   selection_type : single = radio (exactly 1), multiple = checkbox group.
+#   modifier_type  : add (extras/sauces) vs remove (exclusions "no onion").
+#   min_select     : 0 = optional, ≥1 = bắt buộc chọn ít nhất N loại.
+#   max_select     : NULL = không giới hạn. Thường set với selection_type=multiple.
+#
+# Per-product override (via ProductToppingGroup pivot):
+#   Phase 2: min_select_override / max_select_override trên pivot cho phép
+#   cùng 1 group behave khác nhau tùy theo product nó được gắn vào.
+#
+# Pricing:
+#   price_strategy=flat      : mỗi topping charge extra_price riêng.
+#   price_strategy=free_up_to_n : free_quantity toppings ĐẮT NHẤT (most-expensive)
+#                               được miễn phí (chuẩn Toast/Square, khách lợi nhất),
+#                               phần còn lại charge bình thường. Parity: backend
+#                               ToppingPricingService::priceFreeUpToN + pos-web
+#                               topping-pricing.ts đều sort unit_price DESC.
+#
+# Removed fields (deferred to Phase 2+):
+#   available_from / available_to / available_days : scheduling theo giờ/ngày
+# =============================================================================
+
+displayName:
+  en: Topping Group
+  ja: トッピンググループ
+  vi: Nhóm Topping
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  audit:
+    createdBy: true
+    updatedBy: true
+  indexes:
+    # Brand-scoped queries — HQ UI luôn filter theo brand
+    - columns: [brand_id]
+    # Org-wide queries — list across brands trong cùng org
+    - columns: [organization_id]
+    # Active lookup — POS/handy filter is_active=true
+    - columns: [brand_id, is_active]
+
+properties:
+  # Tên nhóm hiển thị cho admin và khách hàng.
+  # Translatable → lưu ở topping_group_translations (ja/en/vi).
+  # Searchable → service có thể filter by name qua whereTranslationLike.
+  name:
+    type: String
+    length: 255
+    translatable: true
+    searchable: true
+    lookupable: true
+    displayName:
+      en: Name
+      ja: グループ名
+      vi: Tên nhóm
+
+  # Chiến lược tính giá (xem ToppingGroupPriceStrategy enum để biết ý nghĩa).
+  # flat          : default, mỗi topping tính extra_price riêng.
+  # free_up_to_n  : free_quantity toppings ĐẮT NHẤT (most-expensive) miễn phí, còn lại charge.
+  # Cross-field: free_up_to_n yêu cầu free_quantity non-null.
+  price_strategy:
+    type: EnumRef
+    enum: ToppingGroupPriceStrategy
+    default: flat
+    displayName:
+      en: Price Strategy
+      ja: 価格戦略
+      vi: Chiến lược giá
+
+  # Số lượng toppings được miễn phí khi price_strategy=free_up_to_n.
+  # NULL khi price_strategy=flat (không áp dụng).
+  free_quantity:
+    type: Int
+    nullable: true
+    displayName:
+      en: Free Quantity
+      ja: 無料数量
+      vi: Số lượng miễn phí
+
+  # Cách chọn — single (radio button, exactly 1) hoặc multiple (checkbox).
+  # customer-web / handy đọc field này để render UX widget tương ứng.
+  # Cross-field rule (form request): selection_type=single → max_select=1.
+  # KHÔNG derive từ max_select=1 vì max_select=1 + min_select=0 có nghĩa
+  # khác: "có thể không chọn, hoặc chọn đúng 1".
+  selection_type:
+    type: EnumRef
+    enum: ToppingGroupSelectionType
+    default: multiple
+    displayName:
+      en: Selection Type
+      ja: 選択方式
+      vi: Cách chọn
+
+  # ADD vs REMOVE semantics.
+  # add    : sauces, extras — hiện thêm phụ phí nếu có.
+  # remove : exclusions ("no onion", "không hành", "ít cay") — extra_price=0,
+  #          kitchen ticket render bold red ❌ ở đầu dòng.
+  modifier_type:
+    type: EnumRef
+    enum: ToppingGroupModifierType
+    default: add
+    displayName:
+      en: Modifier Type
+      ja: 修飾タイプ
+      vi: Loại điều chỉnh
+
+  # Số lượng loại topping tối thiểu khách phải chọn.
+  # 0 = optional (không bắt buộc), ≥1 = bắt buộc chọn ít nhất N loại.
+  min_select:
+    type: Int
+    default: 0
+    displayName:
+      en: Min Select
+      ja: 最小選択数
+      vi: Số lượng tối thiểu
+
+  # Số lượng loại topping tối đa khách có thể chọn.
+  # NULL = không giới hạn.
+  # Validation: max_select >= min_select khi cả hai non-null.
+  # Cross-field: selection_type=single → max_select phải là 1.
+  max_select:
+    type: Int
+    nullable: true
+    displayName:
+      en: Max Select
+      ja: 最大選択数
+      vi: Số lượng tối đa
+
+  # Số lượng tối đa mỗi LOẠI topping khách có thể pick (stepper cap).
+  # =1 → binary pick (checkbox/radio on customer-web). >1 → +/- counter UI.
+  # Orthogonal với max_select (max_select cap số loại, max_qty_per_item cap
+  # số lượng từng loại). Default 1 = "Phase 1 behavior" (mỗi loại 1 cái).
+  max_qty_per_item:
+    type: Int
+    default: 1
+    displayName:
+      en: Max Qty Per Item
+      ja: アイテムあたりの最大数量
+      vi: Số lượng tối đa mỗi loại
+
+  # Thứ tự hiển thị trong danh sách nhóm topping của brand (nhỏ hơn = trước).
+  # Per-product ordering dùng sort_order trên pivot ProductToppingGroup.
+  sort_order:
+    type: Int
+    default: 0
+    sortable: true
+    displayName:
+      en: Sort Order
+      ja: 表示順序
+      vi: Thứ tự hiển thị
+
+  # Bật/tắt nhóm. Khi false, nhóm ẩn khỏi handy/POS và customer-web.
+  is_active:
+    type: Boolean
+    default: true
+    filterable: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+
+  # ==========================================================================
+  # Associations
+  # ==========================================================================
+
+  # Brand sở hữu. CASCADE — khi brand bị xoá thì topping groups đi theo.
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: CASCADE
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu
+
+  # Organization sở hữu (multi-tenant root). CASCADE.
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  # Items trong nhóm — mỗi item trỏ vào 1 topping product.
+  items:
+    type: Association
+    relation: OneToMany
+    target: ToppingGroupItem
+    mappedBy: toppingGroup
+    displayName:
+      en: Items
+      ja: トッピング項目
+      vi: Mục topping
+
+  # Products được assign nhóm này (M:N qua product_topping_groups).
+  products:
+    type: Association
+    relation: ManyToMany
+    target: Product
+    joinTable: product_topping_groups
+    displayName:
+      en: Products
+      ja: 商品
+      vi: Sản phẩm

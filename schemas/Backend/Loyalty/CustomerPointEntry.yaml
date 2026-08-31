@@ -1,0 +1,154 @@
+# =============================================================================
+# CustomerPointEntry (ポイント履歴 / Sổ cái điểm khách hàng)
+# =============================================================================
+#
+# Sổ cái điểm APPEND-ONLY. Số dư của khách = SUM(points) trên các dòng của
+# khách đó — KHÔNG có cột `balance` nào cả. Đây là quyết định có chủ đích:
+# một cột số dư song song với sổ cái là hai nguồn sự thật, và cái thứ hai
+# luôn là cái lệch (xem `Coupon.times_used` phải cần lockForUpdate + CHECK
+# constraint mới giữ được đồng bộ).
+#
+# Written by:  CustomerPointService (earn/redeem/revoke/adjust). KHÔNG có
+#              đường ghi nào khác — controller không tự insert.
+# Read by:     customer-web `/account/points` (số dư + lịch sử), trang
+#              đặc quyền thành viên (hạng suy ra từ tổng điểm đã tích).
+# Lifecycle:   immutable sau insert. Sửa sai = ghi bút toán ngược dấu.
+#
+# Business Rules:
+#   - BR-PT01: `points` có dấu. earn/adjust(+) dương, redeem/revoke/expire âm.
+#              Service tự ép dấu theo `kind`, request layer không quyết định.
+#   - BR-PT02: Tích điểm idempotent theo (customer_order_id, kind) — unique
+#              index ở DB. OrderPaid có thể phát lại (webhook Stripe + xác
+#              nhận đồng bộ cùng bắn), lần thứ hai phải là no-op chứ không
+#              phải nhân đôi điểm.
+#   - BR-PT03: Số dư không bao giờ âm. Redeem chạy trong transaction có
+#              lockForUpdate trên hàng `customers` để tuần tự hoá theo từng
+#              khách — hai tab bấm đổi cùng lúc không tiêu quá số dư.
+#   - BR-PT04: `organization_id` là PROVENANCE, không phải scope. Tài khoản
+#              khách tự đăng ký là toàn cục (customers.organization_id NULL —
+#              xem CustomerAuthService::register), nên số dư cũng tính toàn
+#              cục cho mỗi khách. Cột này để sau này muốn tách ví theo org
+#              thì chỉ phải đổi câu query, không phải backfill.
+#   - BR-PT05: `expires_at` hiện LUÔN null — chưa bật hạn dùng điểm. Không
+#              có job nào sinh `kind=expire`. Giữ cột để bật được mà không
+#              phải migrate lại sổ đã có dữ liệu.
+# =============================================================================
+
+displayName:
+  en: Customer Point Entry
+  ja: ポイント履歴
+  vi: Lịch sử điểm
+
+kind: object
+
+options:
+  timestamps: true
+  id: Uuid
+  indexes:
+    # Trang lịch sử: mọi bút toán của một khách, mới nhất trước.
+    - columns: [customer_id, created_at]
+    # BR-PT02 — chống tích/thu hồi hai lần trên cùng một đơn.
+    # customer_order_id nullable ⇒ nhiều NULL vẫn hợp lệ trong unique index
+    # (redeem/adjust không gắn đơn nào).
+    - columns: [customer_order_id, kind]
+      unique: true
+      name: customer_point_entries_order_kind_unique
+
+properties:
+  points:
+    # Có dấu. Số dư = SUM(points). Dùng Int chứ không Decimal: điểm là đơn
+    # vị đếm, không phải tiền — không có nửa điểm.
+    type: Int
+    displayName:
+      en: Points
+      ja: ポイント
+      vi: Điểm
+
+  kind:
+    type: EnumRef
+    enum: PointEntryKind
+    filterable: true
+    displayName:
+      en: Kind
+      ja: 種別
+      vi: Loại
+
+  note:
+    # Bắt buộc (ở tầng service) với `adjust` — một bút toán chỉnh tay không
+    # có lý do thì tháng sau không ai giải thích được.
+    type: String
+    length: 255
+    nullable: true
+    displayName:
+      en: Note
+      ja: 備考
+      vi: Ghi chú
+
+  expires_at:
+    # BR-PT05 — luôn null cho tới khi bật hạn dùng điểm.
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Expires At
+      ja: 有効期限
+      vi: Hạn dùng
+
+  # === Relationships ===
+
+  customer:
+    type: Association
+    relation: ManyToOne
+    target: Customer
+    onDelete: CASCADE
+    displayName:
+      en: Customer
+      ja: 顧客
+      vi: Khách hàng
+
+  organization:
+    # BR-PT04 — provenance, KHÔNG phải scope. Nullable vì đơn có thể không
+    # dựng được org (dữ liệu cũ), và vì bút toán chỉnh tay không gắn org.
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  customerOrder:
+    # Đơn đã sinh ra bút toán này (earn/revoke). NULL với redeem/adjust.
+    type: Association
+    relation: ManyToOne
+    target: CustomerOrder
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Customer Order
+      ja: 注文
+      vi: Đơn hàng
+
+  coupon:
+    # Coupon cá nhân được mint ra khi đổi điểm (kind=redeem).
+    type: Association
+    relation: ManyToOne
+    target: Coupon
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Coupon
+      ja: クーポン
+      vi: Coupon
+
+  pointReward:
+    type: Association
+    relation: ManyToOne
+    target: PointReward
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Point Reward
+      ja: 交換商品
+      vi: Phần thưởng

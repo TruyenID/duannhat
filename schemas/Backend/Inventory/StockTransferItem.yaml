@@ -1,0 +1,138 @@
+# StockTransferItem schema
+# Individual item in a stock transfer.
+# Each item represents a product variant or material being transferred between warehouses.
+# received_quantity may differ from sent_quantity (BR-04).
+#
+# Business Rules:
+#   - BR-02: Exactly one of (product_sku_id, material_id) must be set
+#   - BR-04: Received quantity may differ from sent quantity (partial receipt)
+#   - received_quantity/received_base_quantity set when destination receives items
+
+displayName:
+  en: Stock Transfer Item
+  ja: 在庫移動明細
+  vi: Chi tiết chuyển kho
+
+kind: object
+
+options:
+  timestamps: true
+  id: Uuid
+  indexes:
+    - columns: [stock_transfer_id]
+
+properties:
+  stockTransfer:
+    type: Association
+    relation: ManyToOne
+    target: StockTransfer
+    onDelete: CASCADE
+    displayName:
+      en: Stock Transfer
+      ja: 在庫移動
+      vi: Chuyển kho
+
+  productSku:
+    type: Association
+    relation: ManyToOne
+    target: ProductSku
+    onDelete: RESTRICT
+    nullable: true
+    displayName:
+      en: Product Variant
+      ja: 商品バリエーション
+      vi: Biến thể sản phẩm
+    description:
+      en: "Product variant being transferred. Mutually exclusive with material."
+      ja: "移動する商品バリエーション。materialと排他的。"
+      vi: "Biến thể sản phẩm chuyển kho. Loại trừ với material."
+
+  material:
+    type: Association
+    relation: ManyToOne
+    target: Material
+    onDelete: RESTRICT
+    nullable: true
+    displayName:
+      en: Material
+      ja: 材料
+      vi: Nguyên liệu
+    description:
+      en: "Material being transferred. Mutually exclusive with productSku."
+      ja: "移動する材料。productSkuと排他的。"
+      vi: "Nguyên liệu chuyển kho. Loại trừ với productSku."
+
+  sent_quantity:
+    type: Decimal
+    precision: 15
+    scale: 4
+    displayName:
+      en: Sent Quantity
+      ja: 送付数量
+      vi: Số lượng gửi
+    description:
+      en: "Quantity sent in user-selected unit"
+      ja: "ユーザー選択単位での送付数量"
+      vi: "Số lượng gửi theo đơn vị user chọn"
+
+  sent_base_quantity:
+    type: Decimal
+    precision: 15
+    scale: 4
+    displayName:
+      en: Sent Base Quantity
+      ja: 送付基本数量
+      vi: Số lượng gửi (đơn vị gốc)
+    description:
+      en: "Sent quantity converted to base unit"
+      ja: "基本単位に変換した送付数量"
+      vi: "Số lượng gửi đã quy đổi về đơn vị gốc"
+
+  received_quantity:
+    type: Decimal
+    precision: 15
+    scale: 4
+    nullable: true
+    displayName:
+      en: Received Quantity
+      ja: 受領数量
+      vi: Số lượng nhận
+    description:
+      en: "Quantity received in user-selected unit. May differ from sent (BR-04)."
+      ja: "ユーザー選択単位での受領数量。送付と異なる場合あり（BR-04）。"
+      vi: "Số lượng nhận theo đơn vị user chọn. Có thể khác số gửi (BR-04)."
+
+  received_base_quantity:
+    type: Decimal
+    precision: 15
+    scale: 4
+    nullable: true
+    displayName:
+      en: Received Base Quantity
+      ja: 受領基本数量
+      vi: Số lượng nhận (đơn vị gốc)
+    description:
+      en: "Received quantity converted to base unit"
+      ja: "基本単位に変換した受領数量"
+      vi: "Số lượng nhận đã quy đổi về đơn vị gốc"
+
+  unit:
+    type: String
+    length: 50
+    nullable: true
+    displayName:
+      en: Unit
+      ja: 単位
+      vi: Đơn vị
+    description:
+      en: "User-selected unit for display"
+      ja: "表示用のユーザー選択単位"
+      vi: "Đơn vị user chọn để hiển thị"
+
+  note:
+    type: Text
+    nullable: true
+    displayName:
+      en: Note
+      ja: 備考
+      vi: Ghi chú

@@ -1,0 +1,59 @@
+!.vscode/extensions.json
+.claude/settings.local.json
+.codegraph/
+.DS_Store
+.env
+.env.local
+.fleet
+.idea
+.nova
+.omnify/codegen-cache/
+.omnify/omnify-config-schema.json
+.omnify/workspace-cache/
+.playwright-mcp/
+.pnpm-store/
+.vscode
+.vscode/*
+.zed
+*.local
+*.log
+*.njsproj
+*.ntvs*
+*.sln
+*.suo
+*.sw?
+# Claude Code local settings (machine-specific, not for VCS)
+# CodeGraph index (local, regenerable)
+# committed inside each submodule. Keeping them out of VCS avoids merge
+# copy is kept) and mirror the backend PHP base files that are already
+# Editor directories and files
+# IDE / editor
+# in the repo).
+# Local secrets / overrides
+# Local-only artifacts emitted by `omnify schema` (used by IDE schema validation
+# Logs
+# Node (omnify codegen workspace at umbrella root — runtime only on host)
+# noise on every codegen and keeps the diff surface honest.
+# Omnify intermediate caches — regenerable by `npm run omnify:gen` from the
+# Playwright MCP scratch snapshots
+# Superpowers docs (local-only)
+# The compiled binaries live in tools/ (built via `go build` from tools-src/).
+# Tools source — managed in a separate repo, cloned locally into tools-src/
+# via the cdn URL in omnify.yaml's yaml-language-server directive — not needed
+# YAML schemas. Contents duplicate `.omnify/schemas.json` (top-level canonical
+coverage
+dist
+dist-ssr
+docker-compose.override.yml
+docs/superpowers/plans/
+docs/superpowers/specs/
+lerna-debug.log*
+logs
+node_modules
+node_modules/
+npm-debug.log*
+pnpm-debug.log*
+Thumbs.db
+tools-src/
+yarn-debug.log*
+yarn-error.log*

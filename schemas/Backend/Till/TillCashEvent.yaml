@@ -1,0 +1,135 @@
+# ==============================================================================
+# TillCashEvent — Mid-shift paid-in / paid-out / safe move
+# ==============================================================================
+#
+# Plan 030 — Cashier Shift.
+# ARTS ODM 7.3: maps to `TenderControlTransaction` (subset: cash-only events).
+#
+# Một row = một giao dịch tiền mặt GIỮA CA, không phải payment cho đơn hàng.
+# Tác động trực tiếp tới expected_cash khi kết ca:
+#
+#   expected_cash = opening_float + cash_sales + Σ paid_in − Σ paid_out
+#                                            (+ loan_from_safe − pickup_to_safe, v2)
+#
+# v1 chỉ expose paid_in / paid_out trên UI (xem TillCashEventType enum).
+# loan_from_safe / pickup_to_safe reserved cho v2 (safe flow chưa làm).
+#
+# Written by: POST /pos/till/sessions/{id}/cash-events → TillSessionService::recordCashEvent().
+# Read by: reconciliation expected_cash calc, audit, close report.
+#
+# Business Rules:
+#   - BR-CE01: amount > 0 always (sign theo event_type — service convention).
+#   - BR-CE02: Session phải status='open' (paid_in/out không hợp lệ khi
+#              closing/settled/abandoned).
+#   - BR-CE03: reason BẮT BUỘC tại form layer (Required khi paid_out, recommend
+#              khi paid_in).
+#   - BR-CE04: NO soft delete — audit.
+# ==============================================================================
+
+displayName:
+  en: Till Cash Event
+  ja: 現金イベント
+  vi: Giao dịch tiền mặt giữa ca
+
+kind: object
+
+options:
+  timestamps: true
+  id: Uuid
+  indexes:
+    - columns: [session_id, occurred_at]
+    - columns: [session_id, event_type]
+
+properties:
+  event_type:
+    # paid_in / paid_out / loan_from_safe / pickup_to_safe — xem
+    # TillCashEventType enum.
+    type: EnumRef
+    enum: TillCashEventType
+    filterable: true
+    displayName:
+      en: Event Type
+      ja: 種別
+      vi: Loại
+
+  amount:
+    # Luôn dương. Sign convention nằm ở event_type khi tính expected_cash.
+    type: Decimal
+    precision: 15
+    scale: 2
+    displayName:
+      en: Amount
+      ja: 金額
+      vi: Số tiền
+
+  currency_code:
+    type: String
+    length: 3
+    default: JPY
+    displayName:
+      en: Currency
+      ja: 通貨
+      vi: Tiền tệ
+
+  reason:
+    # Lý do (audit). Required tại form request.
+    type: Text
+    nullable: true
+    displayName:
+      en: Reason
+      ja: 理由
+      vi: Lý do
+
+  reference_no:
+    # Optional reference (vd: số hoá đơn supplier khi paid_out).
+    type: String
+    length: 100
+    nullable: true
+    displayName:
+      en: Reference No
+      ja: 参照番号
+      vi: Mã tham chiếu
+
+  occurred_at:
+    # Service set = now() trừ khi cashier override (admin edit hậu nghiệm).
+    # Hữu ích khi cashier nhập muộn (vd: 出金 lúc 14h nhưng nhập 14:30).
+    type: Timestamp
+    displayName:
+      en: Occurred At
+      ja: 発生日時
+      vi: Thời điểm
+
+  performed_by_id:
+    # SSO user id (user_caches.id). Soft FK.
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Performed By
+      ja: 実行者
+      vi: Người thực hiện
+
+  manual_adjustment:
+    # Plan-032 (manual-settle override flag). True ⇔ this row was inserted
+    # post-hoc by TillSessionService::manualSettle() on an expired session —
+    # i.e. the manager recorded a cash event the cashier never logged before
+    # disappearing. Default false so existing rows stay correctly classified
+    # as "real-time cashier-recorded". Audit dashboard filters fraud-signal
+    # queries on this flag.
+    type: Boolean
+    default: false
+    filterable: true
+    displayName:
+      en: Manual Adjustment
+      ja: 手動調整
+      vi: Điều chỉnh thủ công
+
+  # Relationships
+  session:
+    type: Association
+    relation: ManyToOne
+    target: TillSession
+    onDelete: CASCADE
+    displayName:
+      en: Session
+      ja: セッション
+      vi: Ca

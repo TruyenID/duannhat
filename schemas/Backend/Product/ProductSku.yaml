@@ -1,0 +1,455 @@
+# =============================================================================
+# ProductSku (商品SKU / SKU sản phẩm)
+# =============================================================================
+#
+# Đơn vị stockable thực tế của Product — mỗi tổ hợp option là 1 SKU riêng.
+# Product là "khái niệm món hàng" (vd: フォー), còn SKU mới là cái có giá vốn,
+# có recipe, có tồn kho, có đơn vị bán cụ thể.
+# Vd: Product "Áo phông" có Size × Color → SKU [S, Red], [S, Blue], [M, Red]...
+#
+# -----------------------------------------------------------------------------
+# Option model (tối đa 3 trục, Shopify-style flat)
+# -----------------------------------------------------------------------------
+#
+#   Product ──< ProductOption (position 1/2/3)
+#               └── ProductOptionValue
+#                       │
+#                       └── referenced bởi ProductSku.optionValue{N}
+#
+# Position cố định khi đã có SKU:
+#   - Nếu Size = position 1, Color = position 2 → KHÔNG được swap sau khi
+#     SKU đã tồn tại (sẽ phá optionSignature & quan hệ).
+#   - Muốn swap: phải migrate toàn bộ SKU + recompute signature.
+#
+# -----------------------------------------------------------------------------
+# Lifecycle: Tạo SKU
+# -----------------------------------------------------------------------------
+#
+# 1. Default SKU (Product không có option):
+#    - ProductService::create() tự sinh 1 SKU mặc định với:
+#        sku            = NULL  (hoặc auto-gen từ slug nếu user muốn)
+#        name           = NULL  (UI fallback về tên Product)
+#        optionValue1-3 = NULL
+#        optionSignature = ""
+#    - Dùng cho món hàng đơn giản: 1 product = 1 stockable.
+#
+# 2. SKU theo option (Product có ProductOption):
+#    - User định nghĩa options + values trước (vd: Size [S, M, L]).
+#    - Sau đó tạo SKU bằng ProductSkuService::create([
+#          'product_id'        => $product->id,
+#          'option_value1_id'  => $sizeS->id,
+#          'option_value2_id'  => $colorRed->id,
+#          'sku'               => 'TS-S-RED',
+#          'cost_price'        => 5000,
+#      ])
+#    - Service tự compute optionSignature trước khi save.
+#    - Service validate: optionValue{N} phải thuộc option có position=N của
+#      cùng product (không cho gán value của product khác).
+#
+# 3. Cartesian generate (UI bulk):
+#    - Khi user thêm option mới, UI có thể gọi
+#      ProductSkuService::generateMissingCombinations($product) để tự sinh
+#      tất cả tổ hợp còn thiếu (skip những tổ hợp đã có).
+#
+# -----------------------------------------------------------------------------
+# Unique tổ hợp options (NULL-safe)
+# -----------------------------------------------------------------------------
+#
+# MySQL unique index KHÔNG coi NULL = NULL (NULL distinct trick) — nếu index
+# chỉ trên (product_id, option_value1_id, option_value2_id, option_value3_id)
+# thì nhiều SKU [S, Red, NULL] vẫn pass được → DUPLICATE.
+#
+# Giải pháp: `option_signature` — chuỗi canonical do app tính (COALESCE NULL → "")
+# rồi đặt unique index trên (product_id, option_signature).
+#
+#   option_signature = implode('|', [
+#       $optionValue1?->id ?? '',
+#       $optionValue2?->id ?? '',
+#       $optionValue3?->id ?? '',
+#   ])
+#
+# App layer (ProductSkuService::saving observer) PHẢI tính & ghi option_signature
+# trước mỗi save. KHÔNG để user nhập trực tiếp field này.
+#
+# -----------------------------------------------------------------------------
+# Cost calculation (giá vốn)
+# -----------------------------------------------------------------------------
+#
+# Hai field song song:
+#   - cost_price_auto : tính từ recipe (sum nguyên liệu × recipe_multiplier).
+#                       RecipeObserver::recompute() update mỗi khi recipe đổi.
+#   - cost_price      : giá vốn dùng thực tế (báo cáo, P&L).
+#
+# Quy tắc:
+#   - is_cost_override = false → cost_price = cost_price_auto (tự đồng bộ).
+#   - is_cost_override = true  → user manual set cost_price, suppress auto sync.
+#                                Dùng khi recipe chưa chuẩn nhưng cần khoá giá vốn.
+#
+# Toggle override: ProductSkuService::overrideCost($sku, $price) /
+#                  ProductSkuService::clearOverride($sku) (sẽ recompute lại).
+#
+# -----------------------------------------------------------------------------
+# Đơn vị bán (VariantUnit)
+# -----------------------------------------------------------------------------
+#
+# 1 SKU có thể có nhiều đơn vị bán (lon / lốc / thùng) — quản lý ở VariantUnit.
+# Mỗi VariantUnit có:
+#   - is_base = true cho đơn vị gốc (tồn kho lưu theo unit này).
+#   - conversion_rate so với base (vd lốc = 6 lon, thùng = 24 lon).
+# Tồn kho ALWAYS quy về base unit; khi bán theo lốc thì trừ kho 6× base.
+#
+# -----------------------------------------------------------------------------
+# Cascade & RESTRICT semantics
+# -----------------------------------------------------------------------------
+#
+#   product            : CASCADE  → xoá Product thì xoá SKU theo (xoá mềm).
+#   optionValue1/2/3   : RESTRICT → DB block xoá ProductOptionValue khi còn SKU
+#                                   dùng. Buộc user dọn SKU trước.
+#   recipe             : SET NULL → xoá Recipe thì SKU mất link nhưng còn tồn tại.
+#
+# -----------------------------------------------------------------------------
+# Thêm / sửa option sau khi đã có SKU
+# -----------------------------------------------------------------------------
+#
+# - Thêm option mới (vd Material làm position=3):
+#     SKU cũ tự động có optionValue3 = NULL (preserve, không phá history).
+#     option_signature của SKU cũ được recompute khi save tiếp theo
+#     (vẫn unique vì "S|red|" ≠ "S|red|cotton").
+#
+# - Xoá option: phải xoá hết SKU đang dùng option đó trước (RESTRICT chặn).
+#
+# - Đổi position: KHÔNG support runtime — chỉ làm qua migration thủ công
+#   + recompute signature.
+#
+# -----------------------------------------------------------------------------
+# Quan hệ ngược (reverse)
+# -----------------------------------------------------------------------------
+#
+#   ProductSku ──< VariantUnit         (đơn vị bán; 1 base + n derived)
+#   ProductSku ──< Material.outputSku  (nguyên liệu đầu ra của BOM/recipe)
+#   ProductSku ──< StockLevel          (tồn kho theo warehouse)
+#   ProductSku ──< StockMovement       (lịch sử nhập/xuất/chuyển)
+#
+# -----------------------------------------------------------------------------
+# Query pattern phổ biến
+# -----------------------------------------------------------------------------
+#
+#   # List SKU của product (kèm option label cho UI)
+#   $product->skus()
+#       ->with(['optionValue1.option', 'optionValue2.option', 'optionValue3.option'])
+#       ->get();
+#
+#   # Lookup theo SKU code (scope theo brand để tránh trùng giữa brand)
+#   ProductSku::whereHas('product', fn($q) => $q->where('brand_id', $brandId))
+#       ->where('sku', $code)
+#       ->first();
+#
+#   # Tồn kho hiện tại của 1 SKU ở 1 warehouse
+#   StockLevel::where('product_sku_id', $sku->id)
+#       ->where('warehouse_id', $warehouseId)
+#       ->value('quantity_base');
+#
+# -----------------------------------------------------------------------------
+# Common pitfalls
+# -----------------------------------------------------------------------------
+#
+# - KHÔNG insert thẳng vào product_skus mà bỏ qua ProductSkuService — sẽ thiếu
+#   option_signature → unique index fail hoặc duplicate ngầm.
+# - KHÔNG dùng `sku` (mã) làm khoá business — nó nullable & không unique global.
+#   Khoá chính ALWAYS là id (Uuid).
+# - KHÔNG đổi cost_price khi is_cost_override=false rồi mong nó persist —
+#   recipe recompute sẽ ghi đè. Phải set is_cost_override=true.
+# - Khi xoá Product (soft delete), SKU cũng soft delete; restore Product PHẢI
+#   restore SKU thủ công nếu cần (CASCADE chỉ áp dụng khi xoá cứng).
+#
+# =============================================================================
+
+displayName:
+  en: Product SKU
+  ja: 商品SKU
+  vi: SKU sản phẩm
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+
+  audit:
+    createdBy: true
+    updatedBy: true
+
+  indexes:
+    # Tra cứu nhanh theo product (list SKU của 1 product)
+    - columns: [product_id]
+    # Lookup SKU code (unique nullable: sku có thể NULL với default SKU)
+    - columns: [sku]
+    # NULL-safe unique: option_signature = "val1_id|val2_id|val3_id" (NULL → "")
+    # Đảm bảo trong 1 product không bao giờ có 2 SKU cùng tổ hợp option.
+    - columns: [product_id, option_signature]
+      unique: true
+
+properties:
+  # ===========================================================================
+  # Identity & Product FK
+  # ===========================================================================
+
+  product:
+    type: Association
+    relation: ManyToOne
+    target: Product
+    onDelete: CASCADE
+    displayName:
+      en: Product
+      ja: 商品
+      vi: Sản phẩm
+
+  sku:
+    type: String
+    length: 50
+    nullable: true
+    displayName:
+      en: SKU Code
+      ja: SKUコード
+      vi: Mã SKU
+    description:
+      en: Unique stock-keeping code. Nullable for auto-generated default SKU.
+      ja: 在庫管理コード。デフォルトSKUは自動生成のためNullable。
+      vi: Mã quản lý tồn kho. Nullable với SKU mặc định tự động tạo.
+
+  name:
+    type: String
+    length: 255
+    nullable: true
+    translatable: true
+    displayName:
+      en: Variant Name
+      ja: バリエーション名
+      vi: Tên biến thể
+    description:
+      en: Auto-generated from option labels or manually entered.
+      ja: オプションラベルから自動生成、または手動入力。
+      vi: Tự động tạo từ label option hoặc nhập thủ công.
+
+  # ===========================================================================
+  # Option value FKs (position 1 / 2 / 3)
+  #
+  # - nullable: true → SKU có thể không dùng đủ 3 option (vd product chỉ có 1
+  #   option thì optionValue2 & optionValue3 = NULL).
+  # - onDelete: RESTRICT → DB block xoá ProductOptionValue khi còn SKU dùng.
+  # - FK column tên: option_value1_id / option_value2_id / option_value3_id
+  #   (omnify camelCase → snake_case convention).
+  # - optionValue{N} CHỈ được reference value thuộc option có position=N trong
+  #   cùng product — enforce ở ProductSkuService, không express được trong YAML.
+  # ===========================================================================
+
+  optionValue1:
+    type: Association
+    relation: ManyToOne
+    target: ProductOptionValue
+    nullable: true
+    onDelete: RESTRICT
+    displayName:
+      en: Option Value 1
+      ja: オプション値1
+      vi: Giá trị tùy chọn 1
+    description:
+      en: Value for the option at position=1. Must belong to same product's option.
+      ja: position=1のオプション値。同一商品のオプションに属する必要がある。
+      vi: Giá trị cho option position=1. Phải thuộc option cùng product.
+
+  optionValue2:
+    type: Association
+    relation: ManyToOne
+    target: ProductOptionValue
+    nullable: true
+    onDelete: RESTRICT
+    displayName:
+      en: Option Value 2
+      ja: オプション値2
+      vi: Giá trị tùy chọn 2
+    description:
+      en: Value for the option at position=2. Null if product has < 2 options.
+      ja: position=2のオプション値。オプションが2未満の場合はNull。
+      vi: Giá trị cho option position=2. Null nếu product có < 2 option.
+
+  optionValue3:
+    type: Association
+    relation: ManyToOne
+    target: ProductOptionValue
+    nullable: true
+    onDelete: RESTRICT
+    displayName:
+      en: Option Value 3
+      ja: オプション値3
+      vi: Giá trị tùy chọn 3
+    description:
+      en: Value for the option at position=3. Null if product has < 3 options.
+      ja: position=3のオプション値。オプションが3未満の場合はNull。
+      vi: Giá trị cho option position=3. Null nếu product có < 3 option.
+
+  # ===========================================================================
+  # NULL-safe unique signature
+  #
+  # Computed bởi app (ProductSkuService) trước mỗi save:
+  #   option_signature = implode('|', [
+  #       $optionValue1?->id ?? '',
+  #       $optionValue2?->id ?? '',
+  #       $optionValue3?->id ?? '',
+  #   ])
+  # Unique index trên (product_id, option_signature) đảm bảo không trùng tổ hợp.
+  # ===========================================================================
+
+  optionSignature:
+    type: String
+    length: 120
+    default: ""
+    displayName:
+      en: Option Signature
+      ja: オプションシグネチャ
+      vi: Chữ ký tổ hợp option
+    description:
+      en: "Canonical string: '{val1_id}|{val2_id}|{val3_id}' (NULL → ''). Computed by app. Used for NULL-safe unique enforcement."
+      ja: "正規文字列: '{val1_id}|{val2_id}|{val3_id}'（NULL→''）。アプリが計算。NULL安全な一意性保証に使用。"
+      vi: "Chuỗi chuẩn: '{val1_id}|{val2_id}|{val3_id}' (NULL → ''). App tính toán. Dùng để đảm bảo unique NULL-safe."
+
+  # ===========================================================================
+  # Recipe & Cost
+  # ===========================================================================
+
+  recipe:
+    type: Association
+    relation: ManyToOne
+    target: Recipe
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Recipe
+      ja: レシピ
+      vi: Công thức
+    description:
+      en: Recipe used to produce this SKU.
+      ja: このSKUを生産するためのレシピ。
+      vi: Công thức dùng để sản xuất SKU này.
+
+  recipe_multiplier:
+    type: Decimal
+    precision: 8
+    scale: 4
+    default: 1.0
+    displayName:
+      en: Recipe Multiplier
+      ja: レシピ倍率
+      vi: Hệ số nhân công thức
+    description:
+      en: "Scale factor for recipe (Size S = 0.8, Size L = 1.2)"
+      ja: "レシピのスケール係数（Sサイズ = 0.8、Lサイズ = 1.2）"
+      vi: "Hệ số scale cho công thức (Size S = 0.8, Size L = 1.2)"
+
+  cost_price:
+    type: Decimal
+    precision: 15
+    scale: 2
+    default: 0
+    displayName:
+      en: Cost Price
+      ja: 原価
+      vi: Giá vốn
+    description:
+      en: Actual cost price (may be overridden from auto-calculated value).
+      ja: 実際の原価（自動計算値から上書き可能）。
+      vi: Giá vốn thực tế (có thể override từ giá tự động tính).
+
+  cost_price_auto:
+    type: Decimal
+    precision: 15
+    scale: 2
+    default: 0
+    displayName:
+      en: Auto Cost Price
+      ja: 自動原価
+      vi: Giá vốn tự động
+    description:
+      en: Auto-calculated from recipe materials.
+      ja: レシピ材料から自動計算。
+      vi: Tự động tính từ nguyên liệu trong công thức.
+
+  is_cost_override:
+    type: Boolean
+    default: false
+    displayName:
+      en: Cost Override
+      ja: 原価上書き
+      vi: Override giá vốn
+    description:
+      en: True when cost_price was manually set, suppressing auto-recalculation.
+      ja: cost_priceが手動設定された場合True。自動再計算を抑制。
+      vi: True khi cost_price được đặt thủ công, ngăn tự động tính lại.
+
+  selling_price:
+    type: Decimal
+    precision: 15
+    scale: 2
+    default: 0
+    displayName:
+      en: Selling Price
+      ja: 販売価格
+      vi: Giá bán
+    description:
+      en: List/retail selling price. This is the single source of truth for the default price shown on menus. When a menu is cloned to a branch, menu_product_skus.selling_price copies from this field.
+      ja: 定価/小売販売価格。メニューに表示されるデフォルト価格の唯一の真実の源。メニューが店舗にクローンされると、menu_product_skus.selling_priceはこのフィールドからコピーされます。
+      vi: Giá bán niêm yết. Đây là single source of truth cho giá mặc định hiển thị trên menu. Khi clone menu sang branch, menu_product_skus.selling_price copy từ field này.
+
+  is_active:
+    type: Boolean
+    default: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+
+  # Plan-024 — inventory tracking mode.
+  # Determines what `OrderClosingService::close()` does for this SKU when an
+  # order is paid + closed:
+  #   - made_to_order (default): no stock-out, no recipe deduction. The SKU
+  #     is treated as ephemeral. Correct for restaurant menu items where
+  #     the kitchen replenishes from raw materials.
+  #   - track_stock: emits a `sales` stock_out for the SKU itself AND, if
+  #     the linked Recipe has ingredients, a second `sales_material_consumption`
+  #     stock_out aggregating recipe-derived material quantities.
+  # Default is conservative to avoid surprise stock-outs on shops that did
+  # not opt in. See docs/explanation/inventory-domain.md + plan-024 DESIGN.md.
+  inventory_mode:
+    type: EnumRef
+    enum: ProductSkuInventoryMode
+    default: made_to_order
+    nullable: false
+    displayName:
+      en: Inventory Mode
+      ja: 在庫モード
+      vi: Chế độ tồn kho
+
+  # ===========================================================================
+  # Reverse associations
+  # ===========================================================================
+
+  units:
+    type: Association
+    relation: OneToMany
+    target: VariantUnit
+    mappedBy: productSku
+    displayName:
+      en: Units
+      ja: 単位
+      vi: Đơn vị
+
+  outputMaterials:
+    type: Association
+    relation: OneToMany
+    target: Material
+    mappedBy: outputSku
+    displayName:
+      en: Output Materials
+      ja: 出力材料
+      vi: Nguyên liệu đầu ra

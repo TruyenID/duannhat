@@ -1,0 +1,47 @@
+# =============================================================================
+# CouponStatus (クーポン状態 / Trạng thái Coupon)
+# =============================================================================
+#
+# ONLY the two storable states (`draft`, `paused`) live in the DB column.
+# Display states `scheduled / active / expired / exhausted` are DERIVED at
+# read time by CouponService::computeStatus() from `valid_from / valid_until /
+# usage_limit_total / times_used` — they are NOT persisted, NOT settable, and
+# NOT part of any unique index. Filtering by display state on list endpoints
+# is implemented as derived predicates on the storable columns.
+#
+# Lifecycle (storable):
+#
+#   [draft] --activate--> (auto when published) --pause--> [paused]
+#                                                          ^   |
+#                                                          |   resume
+#                                                          +---+
+#
+# Lifecycle (derived view, computed by CouponService::computeStatus):
+#
+#   storable=paused → display "paused"        (only short-circuit)
+#   ELSE storable AND now < valid_from              → "scheduled"
+#   ELSE storable AND in window AND not exhausted   → "active"
+#   ELSE storable AND now > valid_until             → "expired"
+#   ELSE storable AND times_used >= usage_limit_total → "exhausted"
+#
+# A freshly-created `draft` coupon whose `valid_from` is in the past
+# will therefore show "active" immediately — there is no separate
+# admin "publish" action; the time-window IS the activation. Resume
+# explicitly sets storable=draft (DESIGN.md endpoint #7) and relies
+# on this fallthrough to land on the appropriate derived state.
+#
+# Why derived: avoids cron jobs that would race with apply() (Decision 3).
+# =============================================================================
+
+kind: enum
+
+displayName:
+  ja: クーポン状態
+  en: Coupon Status
+  vi: Trạng thái Coupon
+
+values:
+  - value: draft
+    label: { ja: 下書き, en: Draft, vi: Bản nháp }
+  - value: paused
+    label: { ja: 一時停止, en: Paused, vi: Tạm dừng }

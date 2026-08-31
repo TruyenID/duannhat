@@ -1,0 +1,144 @@
+# =============================================================================
+# NotificationDigestPreference (ダイジェスト設定 / Tuỳ chọn digest)
+# =============================================================================
+#
+# Plan-023 M5 T5.4 — per-user opt-in for the daily / weekly digest email.
+# Pre-M5 there was no path between "I want to be notified" and "I'm
+# muted" — users who set master_mute or opted out of email-per-type
+# lost all visibility. This row toggles a periodic summary email
+# instead, scoped to the priorities they care about.
+#
+# Written by:
+#   - `PATCH /me/settings/notifications/digest` (T5.8) — user toggles
+#     cadence / time / weekday / priorities
+#
+# Read by:
+#   - `SendDigestJob` (T5.6) — hourly query for users whose
+#     delivery_time matches now() in their tz AND
+#     last_sent_at < today (daily) / start_of_week (weekly)
+#   - `/me/settings/notifications` (T5.9) — restores form state
+#
+# Eligibility (hourly):
+#   delivery_time.hour == now().hour in user.timezone
+#   AND (cadence='daily' OR (cadence='weekly' AND weekday=now().day_of_week))
+#   AND last_sent_at < startOfDay(now())
+#
+# Idempotency: setting last_sent_at after the mail Mailable is queued
+# ensures the same hour can't ship two digests for the same user even
+# if the scheduler double-fires. Daily-savings repeats are absorbed —
+# the second hour in a fall-back doesn't re-send because last_sent_at
+# < startOfDay() guard catches it.
+#
+# Empty-window short-circuit: DigestBuilderService returns null when
+# no notifications matched the window; SendDigestJob skips Mail::queue
+# in that case but STILL updates last_sent_at so an empty-mailbox
+# day doesn't retry every hour.
+# =============================================================================
+
+displayName:
+  en: Notification Digest Preference
+  ja: 通知ダイジェスト設定
+  vi: Tuỳ chọn digest thông báo
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: false
+  id: Uuid
+  indexes:
+    # One row per user — uniqueness enforced.
+    - columns: [user_id]
+      unique: true
+    # Hourly eligibility scan.
+    - columns: [cadence, last_sent_at]
+
+properties:
+  user:
+    type: Association
+    relation: ManyToOne
+    target: User
+    onDelete: CASCADE
+    displayName:
+      en: User
+      ja: ユーザー
+      vi: Người dùng
+    description:
+      en: User this preference belongs to. One row per user (unique index).
+      ja: この設定の所有ユーザー。1ユーザー1行（unique index）。
+      vi: User sở hữu tuỳ chọn này. 1 user 1 row (unique index).
+
+  cadence:
+    type: String
+    length: 10
+    default: "off"
+    filterable: true
+    displayName:
+      en: Cadence
+      ja: 頻度
+      vi: Tần suất
+    description:
+      en: "`off` (default — no digest), `daily`, or `weekly`. Eligibility check skips `off` rows entirely so the digest table can hold opt-out rows alongside opt-ins without affecting send throughput."
+      ja: "`off`（既定 — 配信しない）、`daily`、または `weekly`。`off` の行は適格性チェックで完全にスキップされるため、配信スループットに影響を与えずにオプトアウト行と並べて保存できる。"
+      vi: "`off` (mặc định — không digest), `daily`, hoặc `weekly`. Eligibility check skip toàn bộ row `off` để có thể giữ opt-out row cùng với opt-in mà không ảnh hưởng throughput gửi."
+
+  delivery_time:
+    type: String
+    length: 5
+    default: "08:00"
+    displayName:
+      en: Delivery Time
+      ja: 配信時刻
+      vi: Thời điểm gửi
+    description:
+      en: "`HH:MM` in the user's `timezone`. Stored as String (not Time) to dodge DB-time-zone-conversion surprises across MySQL servers; the hourly scheduler parses with substr/intval so a 09:00 row only matches the 09:00–09:59 window in user.timezone."
+      ja: "`HH:MM`（ユーザーの `timezone` 基準）。MySQL サーバー間のタイムゾーン変換の予期せぬ動作を避けるため、Time ではなく String として保存。スケジューラは substr/intval で解析し、09:00 の行はユーザーのタイムゾーンで 09:00–09:59 のウィンドウにのみ一致。"
+      vi: "`HH:MM` (theo `timezone` của user). Lưu dạng String (không Time) để tránh DB-timezone-conversion bất ngờ giữa các MySQL server; scheduler parse bằng substr/intval nên row 09:00 chỉ match window 09:00–09:59 trong user.timezone."
+
+  timezone:
+    type: String
+    length: 64
+    default: "Asia/Tokyo"
+    displayName:
+      en: Timezone
+      ja: タイムゾーン
+      vi: Múi giờ
+    description:
+      en: IANA tz (`Asia/Tokyo` / `America/Los_Angeles`). Validated against `DateTimeZone::listIdentifiers()` on PATCH.
+      ja: IANA タイムゾーン名（`Asia/Tokyo` / `America/Los_Angeles`）。PATCH 時に `DateTimeZone::listIdentifiers()` で検証。
+      vi: Tên tz IANA (`Asia/Tokyo` / `America/Los_Angeles`). Validate `DateTimeZone::listIdentifiers()` lúc PATCH.
+
+  weekday:
+    type: Int
+    nullable: true
+    displayName:
+      en: Weekday
+      ja: 曜日
+      vi: Thứ trong tuần
+    description:
+      en: "Required when `cadence='weekly'`: 0=Sunday … 6=Saturday. Nullable otherwise. Validator enforces the cadence×weekday relationship; the schema is permissive."
+      ja: "`cadence='weekly'` 時に必須：0=日曜 … 6=土曜。それ以外では Nullable。Validator が cadence×weekday の関係を強制；スキーマは寛容。"
+      vi: "Bắt buộc khi `cadence='weekly'`: 0=Chủ nhật … 6=Thứ bảy. Nullable trong trường hợp khác. Validator enforce quan hệ cadence×weekday; schema permissive."
+
+  include_priorities:
+    type: Json
+    displayName:
+      en: Include Priorities
+      ja: 含める優先度
+      vi: Bao gồm priority
+    description:
+      en: 'JSON array of NotificationPriority values (default `["urgent","high","normal","low"]`). DigestBuilderService filters by this array so users can opt out of low-priority noise without losing urgent visibility.'
+      ja: 'NotificationPriority 値の JSON 配列（既定 `["urgent","high","normal","low"]`）。DigestBuilderService はこの配列でフィルタリングし、ユーザーは urgent の可視性を失わずに低優先度のノイズをオプトアウトできる。'
+      vi: 'Mảng JSON các giá trị NotificationPriority (mặc định `["urgent","high","normal","low"]`). DigestBuilderService filter theo mảng này để user có thể opt-out priority thấp mà không mất visibility urgent.'
+
+  last_sent_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Last Sent At
+      ja: 最終送信日時
+      vi: Lần gửi cuối
+    description:
+      en: 'Updated by `SendDigestJob` after the Mailable is queued OR after an empty-window skip. The "last_sent_at < startOfDay(now())" guard prevents double-send on hourly re-fires and absorbs DST repeats.'
+      ja: '`SendDigestJob` が Mailable をキューに入れた後、または空ウィンドウのスキップ後に更新。"last_sent_at < startOfDay(now())" ガードが時間ごとの再起動時の二重送信を防ぎ、DST 繰り返しを吸収する。'
+      vi: 'Cập nhật bởi `SendDigestJob` sau khi queue Mailable HOẶC sau khi skip empty-window. Guard "last_sent_at < startOfDay(now())" chặn double-send khi hourly re-fire và hấp thụ DST repeats.'

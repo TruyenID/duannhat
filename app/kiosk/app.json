@@ -1,0 +1,81 @@
+{
+  "expo": {
+    "name": "Tempo Kiosk",
+    "slug": "godx-kiosk",
+    "version": "0.1.0",
+    "orientation": "landscape",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "godx-kiosk",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "jp.godx.tempokiosk",
+      "infoPlist": {
+        "NSLocalNetworkUsageDescription": "Tìm Workstation trong mạng nhà hàng để xử lý order nhanh hơn",
+        "NSBonjourServices": [
+          "_ws-app._tcp"
+        ],
+        "UIRequiresFullScreen": true,
+        "UIStatusBarHidden": true,
+        "UISupportedInterfaceOrientations~ipad": [
+          "UIInterfaceOrientationLandscapeLeft",
+          "UIInterfaceOrientationLandscapeRight"
+        ],
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": false,
+          "NSAllowsLocalNetworking": true,
+          "NSAllowsArbitraryLoadsInWebContent": true
+        }
+      }
+    },
+    "android": {
+      "package": "jp.godx.tempo.kiosk",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.CHANGE_WIFI_MULTICAST_STATE",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Kiosk to access your camera for QR code scanning."
+        }
+      ],
+      "expo-asset",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ],
+      "expo-status-bar",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "386404f7-5ed5-4a6a-924c-e71bf584f77d"
+      }
+    },
+    "owner": "alexdev257"
+  }
+}

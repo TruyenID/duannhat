@@ -1,0 +1,23 @@
+kind: enum
+
+displayName:
+  ja: 在庫切れ操作の出所
+  en: Availability Change Source
+  vi: Nguồn thao tác bật/tắt món
+
+# Ai bấm nút, nhìn từ phía Cloud:
+#   pos         — thu ngân bấm trên màn "Tồn món" của pos-web, gọi thẳng Cloud
+#                 (chế độ cloud, hoặc máy trạm không dựng).
+#   workstation — cùng thao tác đó nhưng đi qua LAN: máy trạm ghi cục bộ trước
+#                 rồi đẩy lên bằng device token. Tách khỏi `pos` vì đây là
+#                 đường DUY NHẤT có độ trễ (đơn có thể lên sau hàng giờ nếu
+#                 quán mất mạng), nên khi đọc lại lịch sử `occurred_at` mới là
+#                 lúc thật sự bấm, không phải lúc Cloud nhận.
+#   admin       — quản lý bấm trên admin-web (đường `toggle` sẵn có).
+values:
+  - value: pos
+    label: { ja: POS, en: POS, vi: POS }
+  - value: workstation
+    label: { ja: ワークステーション, en: Workstation, vi: Máy trạm }
+  - value: admin
+    label: { ja: 管理画面, en: Admin, vi: Trang quản trị }

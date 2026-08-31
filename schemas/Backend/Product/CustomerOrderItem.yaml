@@ -1,0 +1,420 @@
+# CustomerOrderItem schema
+# Chi tiết từng món trong đơn hàng — mỗi dòng là 1 món khách gọi.
+# Thuộc về CustomerOrder (header). Có status riêng cho kitchen workflow.
+#
+# Written by: staff POS khi khách gọi món, bếp khi cập nhật trạng thái
+# Read by: POS, Kitchen Display System (KDS), stock deduction on close
+#
+# Business Rules:
+#   - BR-OI01: unit_price auto-fetch từ product_skus.selling_price nếu POS không gửi.
+#              POS có thể override bằng cách gửi unit_price explicit.
+#              Giá snapshot — không đổi khi menu thay đổi sau đó.
+#              MenuPromotion auto-apply (plan-019): khi có active promotion
+#              match, CustomerOrderService::addItems() ghi đè unit_price
+#              bằng giá đã giảm và snapshot giá gốc vào original_unit_price.
+#   - BR-OI02: subtotal = (unit_price + topping_subtotal) × quantity (Phase 2)
+#              Phase 1: subtotal = quantity × unit_price (no toppings)
+#              unit_price ở đây là giá đã giảm khi có promotion (giá gốc
+#              không tham gia phép tính subtotal — display only).
+#   - BR-OI03: productSku RESTRICT — không xoá sản phẩm đang có trong đơn
+#   - BR-OI04: Cascade delete khi xoá CustomerOrder
+#   - BR-OI05: Chỉ void được khi status=pending (chưa chế biến)
+#   - BR-OI06: Merge two add-item requests into the same line iff
+#              (product_sku_id, unit_price, note, sorted topping tuple) match.
+#              Different toppings → separate line. (Phase 2 extension)
+#              Promotion-applied + non-applied lines KHÔNG merge dù cùng
+#              SKU vì unit_price khác (giá đã giảm vs giá gốc).
+#   - BR-OI07: Voided items không xuất hiện trong stock_out transaction.
+#              Voided items cũng KHÔNG tính vào stacking guard
+#              (CouponService::apply ignore voided items).
+#   - BR-OI08: topping_subtotal là per-unit topping cost (sau khi áp dụng
+#              free_up_to_n discount nếu có). Snapshot bất biến.
+#   - BR-OI09: (plan-045) REFUND line = a NEW appended row with refund_of_item_id
+#              set + negative quantity/subtotal/tax_amount copied (negated) from
+#              the original line; it carries the original's product_sku_id. The
+#              original line's refunded_quantity accumulates Σ refunded units and
+#              is guarded ≤ quantity. Refund lines are EXCLUDED from stock-out
+#              (like voided items, BR-OI07) and from the positive group-once tax
+#              (their negated snapshot tax is added directly — exact reversal).
+#
+# Kitchen flow:
+#   pending → preparing → ready → served (1 chiều)
+#   pending → voided (CHỈ từ pending, cần void_reason)
+
+displayName:
+  en: Customer Order Item
+  ja: 注文明細
+  vi: Chi tiết đơn hàng
+
+kind: object
+
+options:
+  timestamps: true
+  id: Uuid
+  indexes:
+    - columns: [customer_order_id]
+    - columns: [product_sku_id]
+    - columns: [customer_order_id, product_sku_id]
+    - columns: [customer_order_id, status]
+    # Plan-019 — applied_promotion_id index auto-created by the FK. The
+    # in-use guard (MenuPromotionService::delete count) + report aggs
+    # use that auto-index — no explicit declaration needed.
+
+properties:
+  quantity:
+    # Số lượng đặt
+    type: Decimal
+    precision: 15
+    scale: 4
+    displayName:
+      en: Quantity
+      ja: 数量
+      vi: Số lượng
+
+  unit_price:
+    # Auto-fetch từ product_skus.selling_price nếu POS không gửi.
+    # POS có thể override. Giá snapshot — không đổi khi menu thay đổi. (BR-OI01)
+    # Khi có MenuPromotion match (plan-019, Decision B6) field này lưu
+    # GIÁ ĐÃ GIẢM (= original_unit_price * (100-percent)/100, round half-up
+    # 2 dec). Giá gốc snapshot ở original_unit_price.
+    type: Decimal
+    precision: 15
+    scale: 2
+    displayName:
+      en: Unit Price
+      ja: 単価
+      vi: Đơn giá
+
+  original_unit_price:
+    # Plan-019 — Snapshot giá gốc TRƯỚC khi promotion áp dụng. #2617
+    # (ruling #2132 §B): dấu vết định hình giá BẮT BUỘC trên MỌI dòng —
+    # bằng unit_price khi không cơ chế nào hạ giá, NOT NULL. Display
+    # strikethrough trên POS cart + receipt khi original > unit.
+    type: Decimal
+    precision: 15
+    scale: 2
+    displayName:
+      en: Original Unit Price
+      ja: 元の単価
+      vi: Đơn giá gốc
+
+  price_source:
+    # #2618 (ruling #2132 §B) — nguồn đã QUYẾT giá cuối của dòng, snapshot
+    # bất biến do engine đóng dấu tại chỗ resolve giá (addItems legacy,
+    # typed resolver, offline verifier). Precedence: menu|sku_base →
+    # floating CHỈ KHI floating THẤP HƠN (min() — floating cao hơn menu
+    # thì nguồn vẫn là menu) → menu_promotion khi promotion áp.
+    #
+    # NULLABLE CÓ CHỦ ĐÍCH: NULL = "engine định giá của Cloud KHÔNG quyết
+    # giá dòng này" — dòng workstation sync-UP transport và ghost line KDS
+    # mang unit_price do thiết bị khai, sync-UP không chở nguồn, và đóng
+    # một trong bốn giá trị lên đó là snapshot bịa (tệ hơn không có).
+    # Dòng hoàn (refund line) COPY nguyên price_source của dòng gốc.
+    type: EnumRef
+    enum: OrderItemPriceSource
+    nullable: true
+    displayName:
+      en: Price Source
+      ja: 価格ソース
+      vi: Nguồn giá
+
+  applied_promotion_snapshot:
+    # Plan-019 — JSON snapshot {name, discount_percent, stacking_mode}
+    # tại apply time. Receipt + reporting đọc field này thay vì JOIN
+    # menu_promotions để giữ giá trị nếu promotion sau này edit/xóa.
+    # Null khi item không hưởng promotion.
+    type: Json
+    nullable: true
+    displayName:
+      en: Promotion Snapshot
+      ja: プロモーションスナップショット
+      vi: Bản sao promotion
+
+  subtotal:
+    # = (unit_price + topping_subtotal) × quantity (BR-OI02)
+    type: Decimal
+    precision: 15
+    scale: 2
+    displayName:
+      en: Subtotal
+      ja: 小計
+      vi: Thành tiền
+
+  topping_subtotal:
+    # Per-unit topping cost (snapshot, sau khi áp dụng free_up_to_n nếu có).
+    # Phase 2 — Plan 015. Default 0 cho line không có topping.
+    # Bất biến: snapshot tại thời điểm addItem(), không re-tính khi
+    # admin update ToppingGroupItemSku.extra_price sau đó. (BR-OI08)
+    type: Decimal
+    precision: 15
+    scale: 2
+    default: 0
+    displayName:
+      en: Topping Subtotal (per unit)
+      ja: トッピング小計（単価）
+      vi: Tổng tiền topping (đơn vị)
+
+  # ===========================================================================
+  # Tax snapshots (plan-043 §6.3) — ENGINE-STAMPED, BẤT BIẾN
+  # ===========================================================================
+  # Stamp bởi TaxResolver + OrderPricingCalculator tại addItems() — cùng chỗ
+  # snapshot unit_price. Sửa bảng tax_types về sau KHÔNG được đổi các giá trị
+  # này (order / hóa đơn / báo cáo lịch sử bất biến — đây là fix gốc của bug
+  # invoice tax_rate=0).
+  #
+  # Re-stamp CHỈ xảy ra khi đổi topping/thành phần của dòng (A1). Đổi
+  # order_type KHÔNG còn re-resolve nữa (#1099, 2026-07-27): một tax type là
+  # MỘT thuế suất, ngữ cảnh tiêu dùng do MENU quyết định, nên lật dine-in ↔
+  # takeaway không bao giờ được đổi giá — đường re-resolve cũ đã bị gỡ khỏi
+  # transportWorkstationPatchOrder.
+  #
+  # Order đã settled (closed/voided) thì BỊ CHẶN re-resolve ngay tại
+  # reResolveOrderLines (409) — KHÔNG còn ngoại lệ nào. Hai đường thoát cũ
+  # (lệnh `orders:backfill-tax-snapshots` và nhánh lazy re-stamp cho
+  # dòng tax_rate = null) đã bị gỡ theo ruling #2188; dòng chưa đóng dấu bị
+  # loại khỏi nhóm thuế kèm cảnh báo, không bao giờ được vá lúc chạy.
+
+  tax_rate:
+    # % thuế ĐÃ resolve cho dòng. Một con số duy nhất lấy từ tax_type đã
+    # resolve (#1099) — KHÔNG phải tích với order_type như mô hình cũ.
+    #
+    # NOT NULL từ #2411. Trước đó nullable để chứa dòng cũ chưa đóng dấu; theo
+    # ruling #2188 dữ liệu cũ được reseed lần cuối rồi cột chuyển NOT NULL, chứ
+    # không giữ một nhánh xử lý NULL sống mãi. Đo trước khi áp: production
+    # 175/175 dòng đã có tax_rate, 0 NULL (2026-08-12).
+    type: Decimal
+    precision: 5
+    scale: 2
+    nullable: false
+    displayName:
+      en: Tax Rate (%)
+      ja: 税率 (%)
+      vi: Thuế suất (%)
+
+  tax_amount:
+    # Tiền thuế phần của dòng (informational share cho breakdown/refund).
+    # LƯU Ý: totals của order derive từ làm-tròn-1-lần-MỖI-NHÓM-RATE (§8
+    # bước 4, chuẩn インボイス) — KHÔNG phải Σ cột này; Σ per-line có thể
+    # lệch ±1 step so với order.tax_amount (case 3×¥333 trong TESTS).
+    type: Decimal
+    precision: 15
+    scale: 2
+    default: 0
+    displayName:
+      en: Tax Amount
+      ja: 税額
+      vi: Tiền thuế
+
+  refunded_quantity:
+    # (plan-045 BR-OI09) Accumulator on the ORIGINAL line — Σ units refunded so
+    # far across all its refund children. Guarded refunded_quantity ≤ quantity
+    # (RefundService rejects over-refund 422). Always 0 on a refund line itself.
+    type: Decimal
+    precision: 15
+    scale: 2
+    default: 0
+    displayName:
+      en: Refunded Quantity
+      ja: 返金済み数量
+      vi: Số lượng đã hoàn
+
+  printed_quantity:
+    # #2622 (tầng 1 của #2551) — số đơn vị của CHÍNH dòng này mà máy trạm đã
+    # gửi xuống bếp (mirror của order_items.printed_quantity phía máy trạm,
+    # migration 034). Báo lên qua sync-UP addItems; payload thiếu field
+    # (build máy trạm cũ) ⇒ giữ 0. Cloud clamp về [0, quantity] khi ghi.
+    # Các chi nhánh in thẳng từ Cloud (cloudprnt/epos_http/webprnt) KHÔNG có
+    # máy trạm báo — ở đó cột đứng yên ở 0; vì vậy luật gộp cùng SKU của
+    # Cloud CHƯA được nới ở tầng này (#S2 của #2551).
+    type: Int
+    default: 0
+    displayName:
+      en: Printed Quantity
+      ja: 印刷済み数量
+      vi: Số lượng đã in bếp
+
+  status:
+    # Kitchen workflow status. Xem diagram ở header comment.
+    # Chỉ void được khi pending (BR-OI05).
+    type: EnumRef
+    enum: OrderItemStatus
+    default: pending
+    displayName:
+      en: Status
+      ja: ステータス
+      vi: Trạng thái
+
+  started_preparing_at:
+    # Plan-028 — Set khi chuyển sang preparing. KdsItemResource dùng để
+    # compute time_in_current_status_seconds phía server, loại bỏ client drift.
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Started Preparing At
+      ja: 調理開始日時
+      vi: Thời điểm bắt đầu chế biến
+
+  ready_at:
+    # Plan-028 — Set khi chuyển sang ready. Pair với started_preparing_at.
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Ready At
+      ja: 完成日時
+      vi: Thời điểm sẵn sàng
+
+  served_at:
+    # Set khi chuyển sang served
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Served At
+      ja: 提供日時
+      vi: Thời điểm phục vụ
+
+  voided_at:
+    # Set khi void
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Voided At
+      ja: 取消日時
+      vi: Thời điểm hủy
+
+  void_reason:
+    # Bắt buộc khi void (VD: "hết nguyên liệu", "khách đổi ý").
+    # plan-051: giữ làm freetext note / label snapshot / đường workstation cũ —
+    # khi void qua master row, label tại thời điểm void được ghi vào đây để
+    # lịch sử tự đủ (không cần join void_reasons).
+    type: String
+    length: 500
+    nullable: true
+    displayName:
+      en: Void Reason
+      ja: 取消理由
+      vi: Lý do hủy
+
+  void_reason_id:
+    # plan-051 (#1149) — link tới VoidReason master (brand-scoped). Plain Uuid,
+    # KHÔNG FK: reason bị soft-deactivate/soft-delete vẫn giữ id trên line;
+    # text snapshot ở void_reason. Null = void kiểu cũ (freetext/legacy).
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Void Reason ID
+      ja: 取消理由ID
+      vi: ID lý do hủy
+
+  stock_deducted_at:
+    # plan-051 (#1150) — per-line idempotent deduction marker. Non-null = kho
+    # ĐÃ trừ cho line này (mọi timing). OrderClosingService phase-5 sweep chỉ
+    # trừ line chưa marker; đổi stock_deduction_timing giữa ngày an toàn.
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Stock Deducted At
+      ja: 在庫引落日時
+      vi: Thời điểm trừ kho
+
+  stock_out_transaction_id:
+    # plan-051 (#1150) — id của stock_out transaction ĐÃ trừ cho line (plain
+    # Uuid, không FK). compensateVoid dùng làm reference khi bù adjustment_in
+    # (stock_effect=restock) hoặc tag waste.
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Stock-Out Transaction ID
+      ja: 在庫引落トランザクションID
+      vi: ID giao dịch trừ kho
+
+  note:
+    # Yêu cầu riêng cho món (VD: không hành, ít cay)
+    type: Text
+    nullable: true
+    displayName:
+      en: Note
+      ja: 備考
+      vi: Ghi chú
+
+  # Relationships
+  customerOrder:
+    # Đơn hàng cha. Cascade delete (BR-OI04)
+    type: Association
+    relation: ManyToOne
+    target: CustomerOrder
+    onDelete: CASCADE
+    displayName:
+      en: Customer Order
+      ja: 注文
+      vi: Đơn hàng
+
+  productSku:
+    # Biến thể sản phẩm. RESTRICT — không xoá SKU đang có đơn (BR-OI03)
+    type: Association
+    relation: ManyToOne
+    target: ProductSku
+    onDelete: RESTRICT
+    displayName:
+      en: Product Variant
+      ja: 商品バリエーション
+      vi: Biến thể sản phẩm
+
+  appliedPromotion:
+    # Plan-019 — FK MenuPromotion lúc add item. Null nếu không có
+    # promotion match. SET NULL khi promotion bị hard-delete (item
+    # vẫn giữ giá đã giảm + snapshot — không recompute). Reporting
+    # đếm "items_with_promotion_count" qua field này.
+    type: Association
+    relation: ManyToOne
+    target: MenuPromotion
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Applied Promotion
+      ja: 適用プロモーション
+      vi: Promotion áp dụng
+
+  refundOfItem:
+    # (plan-045 BR-OI09) Self-FK — when set, THIS row is a REFUND line: negative
+    # quantity/subtotal/tax_amount, copied from the original line it points at.
+    # null on normal lines. RESTRICT — can't hard-delete a line that has refund
+    # children (history integrity). The refund line copies the original's
+    # product_sku_id so sync-UP never drops it.
+    type: Association
+    relation: ManyToOne
+    target: CustomerOrderItem
+    nullable: true
+    onDelete: RESTRICT
+    displayName:
+      en: Refund Of Item
+      ja: 返金対象明細
+      vi: Hoàn tiền cho món
+
+  taxType:
+    # (plan-043) Loại thuế ĐÃ áp cho dòng (snapshot reference — code/label
+    # derive qua join, an toàn vì RESTRICT giữ row TaxType sống mãi).
+    # Nullable = row cũ trước plan-043 chưa stamp. RESTRICT — lịch sử
+    # order chặn hard-delete tax type (BR-TT02; đường vận hành là
+    # deactivate). Engine-stamped, user không bao giờ sửa trực tiếp.
+    type: Association
+    relation: ManyToOne
+    target: TaxType
+    nullable: true
+    onDelete: RESTRICT
+    displayName:
+      en: Tax Type
+      ja: 税区分
+      vi: Loại thuế
+
+  orderItemToppings:
+    # Topping snapshots cho line này. Append-only — service write
+    # 1 row per chosen ToppingGroupItem×SKU tại thời điểm addItem().
+    # Cascade delete khi xoá line. Phase 2 (Plan 015).
+    type: Association
+    relation: OneToMany
+    target: OrderItemTopping
+    mappedBy: customerOrderItem
+    displayName:
+      en: Order Item Toppings
+      ja: 注文アイテムトッピング
+      vi: Topping của line

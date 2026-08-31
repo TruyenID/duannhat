@@ -1,0 +1,120 @@
+# =============================================================================
+# MenuProductToppingItemOverride (メニュー商品トッピング項目上書き / Ghi đè Topping cấp Branch)
+# =============================================================================
+#
+# Shop-level override cho price + visibility của từng topping item, scoped vào
+# một menu product cụ thể (menu_product_id = branch scoped).
+#
+# Sits ABOVE ProductToppingGroupItemOverride (HQ per-product) trong resolution chain:
+#
+#   shop override_price   (table này, scoped theo menu_product_id)
+#     → HQ override_price   (product_topping_group_item_overrides)
+#       → HQ base extra_price (topping_group_item_skus)
+#
+# menu_product_id scopes row vào branch menu product → mỗi branch customize
+# độc lập mà không ảnh hưởng branch khác hoặc HQ.
+#
+# product_sku_id nullable = wildcard row: override áp dụng cho mọi SKU
+# của topping item này cho menu product này.
+#
+# Constraint (application layer):
+#   is_hidden = true → override_price PHẢI NULL.
+#
+# Written by: Branch admin via ShopMenuToppingOverrideService.
+# Read by: POS/Handy (resolve effective topping price + visibility per branch).
+# =============================================================================
+
+displayName:
+  en: Menu Product Topping Item Override
+  ja: メニュー商品トッピング項目上書き
+  vi: Ghi đè Topping cấp Branch
+
+kind: object
+
+options:
+  softDelete: false
+  timestamps: true
+  id: Uuid
+  indexes:
+    - columns: [menu_product_id, topping_group_id, topping_group_item_id, product_sku_id]
+      unique: true
+      name: uq_mptio_mp_group_item_sku
+    - columns: [menu_product_id]
+    - columns: [topping_group_id]
+    - columns: [topping_group_item_id]
+
+properties:
+  menuProduct:
+    type: Association
+    relation: ManyToOne
+    target: MenuProduct
+    onDelete: CASCADE
+    displayName:
+      en: Menu Product
+      ja: メニュー商品
+      vi: Sản phẩm trong Menu
+    description:
+      en: Branch-scoped menu product this override applies to
+      ja: このオーバーライドが適用されるブランチスコープのメニュー商品
+      vi: Menu product cấp branch mà override này áp dụng vào
+
+  toppingGroup:
+    type: Association
+    relation: ManyToOne
+    target: ToppingGroup
+    onDelete: CASCADE
+    displayName:
+      en: Topping Group
+      ja: トッピンググループ
+      vi: Nhóm Topping
+
+  toppingGroupItem:
+    type: Association
+    relation: ManyToOne
+    target: ToppingGroupItem
+    onDelete: CASCADE
+    displayName:
+      en: Topping Group Item
+      ja: トッピンググループ項目
+      vi: Mục Topping
+
+  productSku:
+    type: Association
+    relation: ManyToOne
+    target: ProductSku
+    nullable: true
+    onDelete: CASCADE
+    displayName:
+      en: Product SKU
+      ja: 商品SKU
+      vi: SKU sản phẩm
+    description:
+      en: Null = wildcard override for all SKUs of this topping item
+      ja: Null = このトッピング項目の全SKUへのワイルドカードオーバーライド
+      vi: Null = override wildcard cho mọi SKU của topping item này
+
+  is_hidden:
+    type: Boolean
+    default: false
+    displayName:
+      en: Is Hidden
+      ja: 非表示
+      vi: Ẩn
+    description:
+      en: Hide this topping item for this menu product at branch level
+      ja: ブランチレベルでこのメニュー商品のトッピング項目を非表示にする
+      vi: Ẩn topping item này với menu product này ở cấp branch
+
+  override_price:
+    type: Decimal
+    precision: 15
+    scale: 2
+    nullable: true
+    displayName:
+      en: Override Price
+      ja: 上書き価格
+      vi: Giá ghi đè
+    description:
+      en: Branch override extra price. Null = inherit from HQ override or topping_group_item_skus
+      ja: ブランチの上書き追加価格。Null = HQ上書きまたはtopping_group_item_skusから継承
+      vi: Giá extra ghi đè cấp branch. Null = kế thừa từ HQ override hoặc topping_group_item_skus

@@ -1,0 +1,92 @@
+# =============================================================================
+# PostTag (投稿タグ / Thẻ Bài viết)
+# =============================================================================
+#
+# Flat taxonomy cho Post. 1 post có thể có nhiều tag (ManyToMany).
+# Khác với PostCategory (hierarchical, 1-to-many).
+#
+# Join table: `post_post_tag` (pivot theo convention `{alias_a}_{alias_b}`
+# snake_cased alphabet — xem Category.yaml để đối chiếu).
+#
+# Written by: HQ admin qua `/hq/{brand}/post-tags` CRUD, hoặc tự động tạo
+#             inline khi author gõ tag mới trong post editor (service upsert).
+# Read by:    Customer-web filter "bài viết theo tag", tag cloud widget.
+#
+# Scope: organization-only. Cùng org thì slug unique — tag dùng chung toàn org.
+# =============================================================================
+
+displayName:
+  en: Post Tag
+  ja: 投稿タグ
+  vi: Thẻ Bài viết
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  audit:
+    createdBy: true
+    updatedBy: true
+  indexes:
+    - columns: [organization_id]
+    - columns: [organization_id, slug]
+      unique: true
+
+properties:
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  name:
+    type: String
+    length: 80
+    translatable: true
+    searchable: true
+    displayName:
+      en: Name
+      ja: 名前
+      vi: Tên
+
+  slug:
+    type: String
+    length: 100
+    displayName:
+      en: Slug
+      ja: スラッグ
+      vi: Slug
+    description:
+      en: URL-safe identifier. Unique per organization.
+      ja: URLセーフな識別子。組織内で一意。
+      vi: Mã định danh URL-safe. Duy nhất trong phạm vi tổ chức.
+
+  color:
+    type: String
+    length: 20
+    nullable: true
+    displayName:
+      en: Color
+      ja: 色
+      vi: Màu
+    description:
+      en: Optional hex color for tag chip display (e.g. "#fff5d6").
+      ja: タグチップ表示用のオプションのHEXカラー（例 "#fff5d6"）。
+      vi: Mã màu HEX tùy chọn cho chip hiển thị tag (VD "#fff5d6").
+
+  posts:
+    type: Association
+    relation: ManyToMany
+    target: Post
+    joinTable: post_post_tag
+    mappedBy: tags
+    displayName:
+      en: Posts
+      ja: 投稿
+      vi: Bài viết

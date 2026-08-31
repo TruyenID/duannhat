@@ -1,0 +1,18 @@
+# Immutable provider-object environment. Merchant identities, secrets, attempts, refunds,
+# and event identities must never cross these values. `local` is provider-free only.
+kind: enum
+
+displayName:
+  en: Payment Gateway Environment
+  ja: 決済ゲートウェイ環境
+  vi: Môi trường cổng thanh toán
+
+values:
+  - value: local
+    label: { en: Local, ja: ローカル, vi: Cục bộ }
+  - value: sandbox
+    label: { en: Sandbox, ja: サンドボックス, vi: Sandbox }
+  - value: test
+    label: { en: Test, ja: テスト, vi: Kiểm thử }
+  - value: live
+    label: { en: Live, ja: 本番, vi: Chính thức }

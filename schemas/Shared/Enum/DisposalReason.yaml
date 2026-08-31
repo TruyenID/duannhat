@@ -1,0 +1,75 @@
+# ==============================================================================
+# Disposal Reason Enum (廃棄理由 / Lý do hủy)
+# ==============================================================================
+#
+# Fixed set of reasons for disposing inventory items.
+# Used in disposal_records to classify why items are being disposed.
+# Users cannot add custom reasons to ensure consistent reporting (BR-05).
+#
+# Values:
+#   - expired: Items past their use-by date (期限切れ)
+#     Example: End-of-day leftover pho, wilted vegetables, expired milk
+#
+#   - overproduction: Produced/cooked more than needed (過剰生産)
+#     Example: Cooked 60L broth, only used 40L
+#
+#   - damaged: Physical damage during transport/storage (破損)
+#     Example: Broken bottles, torn bags, spills
+#
+#   - quality: Below quality standards (品質不良)
+#     Example: Discolored meat, clumped flour, flat beer
+#
+#   - contaminated: Bacterial/environmental contamination (汚染)
+#     Example: Insects, mold
+#
+#   - other: Other reasons (その他)
+#     Requires a note explaining the reason (BR-02)
+#
+# Used in:
+#   - DisposalRecord.disposal_reason: Reason for each disposed item
+#   - Waste reports: Aggregate statistics by reason
+#
+# Business Rules:
+#   - BR-02: reason=other requires a note
+#   - BR-05: Fixed enum, users cannot add custom reasons
+#
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: 廃棄理由
+  en: Disposal Reason
+  vi: Lý do hủy
+
+values:
+  - value: expired
+    label:
+      ja: 期限切れ
+      en: Expired
+      vi: Hết hạn
+  - value: overproduction
+    label:
+      ja: 過剰生産
+      en: Overproduction
+      vi: Sản xuất thừa
+  - value: damaged
+    label:
+      ja: 破損
+      en: Damaged
+      vi: Hư hỏng
+  - value: quality
+    label:
+      ja: 品質不良
+      en: Quality Issue
+      vi: Không đạt chất lượng
+  - value: contaminated
+    label:
+      ja: 汚染
+      en: Contaminated
+      vi: Nhiễm bẩn
+  - value: other
+    label:
+      ja: その他
+      en: Other
+      vi: Khác

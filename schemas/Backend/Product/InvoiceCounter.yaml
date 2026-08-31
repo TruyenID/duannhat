@@ -1,0 +1,35 @@
+# Bộ đếm số hoá đơn theo (chi nhánh × tháng). Chỉ bị cộng dồn, không bao giờ
+# được "tạo lại" theo nghĩa nghiệp vụ — nên nó chỉ mang `updated_at`, không có
+# `created_at` (omnify-go#143).
+kind: object
+
+options:
+  id: false
+  primaryKey: [branch_id, year_month]
+  timestamps: { createdAt: false, updatedAt: true }
+  softDelete: false
+
+properties:
+  branch_id:
+    type: Uuid
+    displayName:
+      ja: 支店ID
+      en: Branch ID
+      vi: ID chi nhánh
+
+  year_month:
+    type: String
+    length: 6
+    displayName:
+      ja: 年月
+      en: Year-Month
+      vi: Tháng
+
+  last_seq:
+    type: Int
+    unsigned: true
+    default: 0
+    displayName:
+      ja: 最終連番
+      en: Last Sequence
+      vi: Số cuối

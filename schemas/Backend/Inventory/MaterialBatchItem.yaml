@@ -1,0 +1,161 @@
+# MaterialBatchItem schema
+# Line items for a material batch — each represents one component (NVL) needed.
+# Components are auto-calculated from the material's recipe × multiplier (BR-02).
+#
+# Key Design:
+#   - component_type determines which FK is active:
+#     - material → material_id NOT NULL (BR-04)
+#     - variant → product_sku_id NOT NULL (BR-05)
+#   - planned_quantity = recipe.component.qty × batch.multiplier
+#   - actual_quantity: recorded on batch completion (may differ from planned)
+#   - stock_available: snapshot of stock at batch creation time (for UI display)
+#   - CASCADE delete: items deleted when parent batch is deleted
+#
+# Business Rules:
+#   - BR-02: planned_quantity = component.qty × multiplier (auto-calculated)
+#   - BR-04: material components → lookup stock via material_id
+#   - BR-05: variant components → lookup stock via product_sku_id
+#   - BR-10: unit must match base unit in stock_levels
+
+displayName:
+  en: Material Batch Item
+  ja: 製造バッチ明細
+  vi: Chi tiết batch NVL
+
+kind: object
+
+options:
+  timestamps: true
+  id: Uuid
+
+properties:
+  materialBatch:
+    type: Association
+    relation: ManyToOne
+    target: MaterialBatch
+    onDelete: CASCADE
+    displayName:
+      en: Material Batch
+      ja: 製造バッチ
+      vi: Batch nguyên liệu
+    description:
+      en: Parent batch. Items are cascade-deleted with the batch.
+      ja: 親バッチ。バッチと一緒にカスケード削除される。
+      vi: Batch cha. Items bị xóa cascade khi xóa batch.
+
+  component_type:
+    type: EnumRef
+    enum: ComponentType
+    displayName:
+      en: Component Type
+      ja: 原材料タイプ
+      vi: Loại thành phần
+    description:
+      en: "material = raw material (BR-04), variant = product variant (BR-05)"
+      ja: "material = 原材料（BR-04）、variant = 商品バリエーション（BR-05）"
+      vi: "material = nguyên liệu (BR-04), variant = biến thể sản phẩm (BR-05)"
+
+  productSku:
+    type: Association
+    relation: ManyToOne
+    target: ProductSku
+    onDelete: RESTRICT
+    nullable: true
+    displayName:
+      en: Product Variant
+      ja: 商品バリエーション
+      vi: Biến thể sản phẩm
+    description:
+      en: "Product variant component. Active when component_type = variant (BR-05)"
+      ja: "商品バリエーション原材料。component_type = variantの場合有効（BR-05）"
+      vi: "Biến thể sản phẩm. Khi component_type = variant (BR-05)"
+
+  material:
+    type: Association
+    relation: ManyToOne
+    target: Material
+    onDelete: RESTRICT
+    nullable: true
+    displayName:
+      en: Material
+      ja: 材料
+      vi: Nguyên liệu
+    description:
+      en: "Raw material component. Active when component_type = material (BR-04)"
+      ja: "原材料。component_type = materialの場合有効（BR-04）"
+      vi: "Nguyên liệu. Khi component_type = material (BR-04)"
+
+  materialLot:
+    type: Association
+    relation: ManyToOne
+    target: MaterialLot
+    onDelete: SET NULL
+    nullable: true
+    # Plan-017: stamps the lot allocated to satisfy this component. Written by
+    # MaterialBatchService::start (T3.5) via FEFO at batch start time. Allows
+    # one item row to span only one lot — multi-lot allocations split the item
+    # into N rows just like StockTransactionItem does on stock_out.
+    # NULL = pre-lot-tracking batch OR variant component (only material
+    # components carry lot identity).
+    displayName:
+      en: Material Lot
+      ja: 材料ロット
+      vi: Lô nguyên liệu
+    description:
+      en: "Lot allocated to satisfy this component. Stamped by MaterialBatchService::start via FEFO. Multi-lot allocations split into N item rows. NULL = legacy/variant component."
+      ja: "この原材料を充当するロット。MaterialBatchService::startがFEFOで刻印。マルチロット配分はN行に分割。NULL = レガシー/variant原材料。"
+      vi: "Lô được cấp phát cho component này. Stamp bởi MaterialBatchService::start qua FEFO. Multi-lot allocation tách thành N dòng. NULL = legacy/component variant."
+
+  planned_quantity:
+    type: Decimal
+    precision: 15
+    scale: 4
+    displayName:
+      en: Planned Quantity
+      ja: 計画数量
+      vi: Số lượng kế hoạch
+    description:
+      en: "Auto-calculated: component.qty × batch.multiplier (BR-02)"
+      ja: "自動計算：component.qty × batch.multiplier（BR-02）"
+      vi: "Tự động tính: component.qty × batch.multiplier (BR-02)"
+
+  actual_quantity:
+    type: Decimal
+    precision: 15
+    scale: 4
+    nullable: true
+    displayName:
+      en: Actual Quantity
+      ja: 実際数量
+      vi: Số lượng thực tế
+    description:
+      en: "Actual amount used, recorded on batch completion. May differ from planned."
+      ja: "実際に使用された量。バッチ完了時に記録。計画と異なる場合あり。"
+      vi: "Số lượng thực tế sử dụng, ghi nhận khi hoàn thành. Có thể khác kế hoạch."
+
+  unit:
+    type: String
+    length: 50
+    nullable: true
+    displayName:
+      en: Unit
+      ja: 単位
+      vi: Đơn vị
+    description:
+      en: "Base unit for this component. Must match stock_levels.unit (BR-10)"
+      ja: "この原材料の基本単位。stock_levels.unitと一致する必要あり（BR-10）"
+      vi: "Đơn vị cơ bản. Phải khớp stock_levels.unit (BR-10)"
+
+  stock_available:
+    type: Decimal
+    precision: 15
+    scale: 4
+    nullable: true
+    displayName:
+      en: Stock Available
+      ja: 在庫数量
+      vi: Tồn kho hiện có
+    description:
+      en: "Snapshot of available stock at batch creation time (for UI display only)"
+      ja: "バッチ作成時の在庫スナップショット（UI表示用のみ）"
+      vi: "Snapshot tồn kho tại thời điểm tạo batch (chỉ hiển thị trên UI)"

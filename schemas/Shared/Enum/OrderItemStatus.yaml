@@ -1,0 +1,18 @@
+kind: enum
+
+displayName:
+  ja: 注文明細ステータス
+  en: Order Item Status
+  vi: Trạng thái món
+
+values:
+  - value: pending
+    label: { ja: 受付済み, en: Pending, vi: Chờ chế biến }
+  - value: preparing
+    label: { ja: 調理中, en: Preparing, vi: Đang chế biến }
+  - value: ready
+    label: { ja: 完成, en: Ready, vi: Sẵn sàng }
+  - value: served
+    label: { ja: 提供済み, en: Served, vi: Đã phục vụ }
+  - value: voided
+    label: { ja: 取消, en: Voided, vi: Đã hủy }

@@ -1,0 +1,604 @@
+# ShopOrderSetting schema
+# Per-branch configuration for order behavior.
+# Each branch has at most 1 settings record (unique branch_id).
+#
+# Written by: shop admin via ShopOrderSettingsController
+# Read by: CustomerOrderService when creating items, admin-web settings page
+#
+# Business Rules:
+#   - BR-SOS01: One record per branch (branch_id unique)
+#   - BR-SOS02: default_order_item_status must be a valid OrderItemStatus
+#               (pending/preparing/ready/served — NOT voided)
+#   - BR-SOS03: null default_order_item_status = system default (pending)
+#   - BR-SOS04: enable_quick_order toggles pos-web UX — true = "Tạo nhanh"
+#               button posts a floating order (no table/customer/guest);
+#               false = full create-order dialog. Default false preserves
+#               current pos-web behavior for branches without a settings row.
+#   - BR-SOS05: tax_rate + service_charge_rate are server-applied at
+#               checkout via CustomerOrderService::checkout (uses these
+#               settings to compute amounts). POS no longer accepts
+#               tax_amount / service_charge on the checkout request —
+#               OrderCheckoutRequest only takes discount_amount.
+#   - BR-SOS06: currency_code is the ISO 4217 currency code (e.g. "VND",
+#               "JPY", "USD") that pos-web uses to format every money
+#               amount it renders. The backend does NOT convert amounts;
+#               this is a pure display-side preference. Default "VND"
+#               preserves existing pos-web behaviour for branches that
+#               never explicitly configured a currency.
+#   - BR-SOS07: split_bill_rounding_mode controls dine-in split-bill rounding
+#               (auto/integer/two_decimals/none). Default auto derives the
+#               rounding step from currency_code so JPY/VND stay integer
+#               while USD/EUR use 2 decimals.
+#   - BR-SOS08: prep_before_payment + customer_email_required are nullable so
+#               a null value means "inherit brand default". Resolution happens
+#               in EffectiveOrderPolicyService::resolve(). When
+#               prep_before_payment === true, takeaway orders are saved with
+#               status=pending until payment lands, then flip to open so the
+#               kitchen (KDS / workstation) doesn't start prepping unpaid
+#               orders. See plan-035.
+#   - BR-SOS09: (plan-043) default_tax_type_id is the BRANCH-level tax type
+#               default (tier 3 of TaxResolver §7). Nullable = fall through
+#               to the brand default (TaxType.is_default). RESTRICT — a tax
+#               type set as a branch default cannot be hard-deleted (409
+#               TAX_TYPE_IN_USE). Legacy tax_rate stays until plan-043
+#               Phase 6, then dropped.
+#   - BR-SOS10: (plan-043) prices_include_tax is the GLOBAL 総額表示 flag.
+#               Snapshotted onto each order at creation (CustomerOrder
+#               .is_tax_included) — flipping it never touches historical
+#               orders. Changing it while ANY till in the org has an open
+#               shift → 409 TAX_MODE_CHANGE_BLOCKED_OPEN_SHIFT (plan-031
+#               guard pattern). Rate / default-type changes are allowed
+#               mid-shift (snapshots protect the data; UI advisory only).
+#   - BR-SOS11: (plan-043) service_charge_tax_rate taxes the service charge
+#               separately (spec §8 step 3). Its tax joins the matching
+#               rate group when a per-rate breakdown is rendered. Range 0–100.
+#   - BR-SOS12: (plan-045) tax_rounding_mode (half_up/round_up/round_down) +
+#               tax_rounding_decimals (0–3, null → currency step) configure the
+#               consumption-tax 端数処理, INDEPENDENT of split_bill_rounding_mode.
+#               Both are snapshotted onto each order at creation so a later
+#               change never re-rounds historical orders. Group-once (NTA) holds.
+#
+# Extensibility:
+#   Future shop-level order settings (auto_print_receipt, require_guest_count,
+#   default_order_type, etc.) can be added as new columns here without
+#   touching the branches table.
+
+displayName:
+  en: Shop Order Setting
+  ja: 店舗注文設定
+  vi: Cài đặt đơn hàng cửa hàng
+
+kind: object
+
+options:
+  timestamps: true
+  id: Uuid
+  indexes:
+    - columns: [branch_id]
+      unique: true
+    - columns: [organization_id]
+
+properties:
+  default_order_item_status:
+    # Default status for order items when a customer places an order.
+    # null = pending (system default). Valid: pending, preparing, ready, served.
+    # See OrderItemStatus enum — voided is excluded (not a valid default).
+    type: String
+    length: 20
+    nullable: true
+    displayName:
+      en: Default Order Item Status
+      ja: デフォルト注文明細ステータス
+      vi: Trạng thái mặc định của món
+
+  enable_quick_order:
+    # When true, pos-web shows a single "Tạo nhanh" button that posts an empty
+    # order (order_type=spot, no table, no customer, no guest_count). When
+    # false (default), pos-web shows the existing full create-order dialog.
+    # Backend order API already accepts empty bodies — this flag only
+    # controls pos-web UX. See BR-SOS04.
+    type: Boolean
+    default: false
+    displayName:
+      en: Enable Quick Order
+      ja: クイック注文を有効化
+      vi: Cho phép tạo order nhanh
+
+  # plan-043 T6.2 — the legacy single per-branch `tax_rate` was DROPPED here.
+  # Consumption tax is now brand-scoped TaxTypes with two rates resolved per
+  # order line (default_tax_type_id below + Product/MenuProduct FKs). BR-SOS05
+  # is superseded: tax comes from the per-line snapshots, not a branch rate.
+
+  service_charge_rate:
+    # Service charge rate applied at checkout, expressed as percent of the
+    # discounted subtotal (e.g. 5.00 = 5%). Computed server-side in
+    # CustomerOrderService::checkout from this setting — POS clients are
+    # NOT allowed to pass service_charge on the checkout request anymore
+    # (BR-SOS05). Default 0 = no service charge. Range 0–100.
+    type: Decimal
+    precision: 5
+    scale: 2
+    default: 0
+    displayName:
+      en: Service Charge Rate (%)
+      ja: サービス料率 (%)
+      vi: Phí phục vụ (%)
+
+  # === Consumption-tax settings (plan-043) ===
+
+  prices_include_tax:
+    # (BR-SOS10) Global 総額表示 flag. false (default) = tax-excluded
+    # (current BR-O04 behaviour: tax added on top). true = tax-included:
+    # the engine EXTRACTS tax from gross prices (内税 display), total =
+    # Σ gross + service charge. Snapshotted per order at creation
+    # (CustomerOrder.is_tax_included). Flipping while any org shift is open
+    # → 409 TAX_MODE_CHANGE_BLOCKED_OPEN_SHIFT.
+    type: Boolean
+    default: false
+    displayName:
+      en: Prices Include Tax (総額表示)
+      ja: 税込価格 (総額表示)
+      vi: Giá đã gồm thuế
+
+  service_charge_tax_rate:
+    # (BR-SOS11) Separate tax rate for the service charge (spec §8 step 3),
+    # percent 0–100. e.g. 10.00 → sc_tax = round(service_charge × 10%).
+    # The sc tax joins the matching rate group in per-rate breakdowns
+    # (gap #7). Default 0 = service charge untaxed. Included-mode base is
+    # gross (Q12).
+    type: Decimal
+    precision: 5
+    scale: 2
+    default: 0
+    displayName:
+      en: Service Charge Tax Rate (%)
+      ja: サービス料の税率 (%)
+      vi: Thuế phí phục vụ (%)
+
+  tax_rounding_mode:
+    # (plan-045 BR-SOS12) Merchant-configurable consumption-tax rounding rule
+    # (端数処理), INDEPENDENT of split_bill_rounding_mode. Written by: shop
+    # manager via PATCH settings (ShopOrderSettingPolicy@updateTax). Read by:
+    # OrderPricingCalculator when pricing a NEW order — the resolved mode is
+    # then snapshotted onto customer_orders.tax_rounding_mode so a later change
+    # here never re-rounds historical orders. Three directions (plan-045 rev-B):
+    #   - round : floor(v/step + 0.5)·step (四捨五入 — round half up, DEFAULT)
+    #   - ceil  : ceil(v/step)·step        (切り上げ — round up)
+    #   - floor : floor(v/step)·step       (切り捨て — round down)
+    # Legacy snapshots (half_up/round_up/round_down) are still priced correctly:
+    # RoundingMode::roundToStep aliases them to round/ceil/floor.
+    # Tax still rounds ONCE per rate group (NTA No.6371) regardless of mode.
+    type: String
+    length: 20
+    default: round
+    displayName:
+      en: Tax Rounding Mode
+      ja: 消費税の端数処理
+      vi: Cách làm tròn thuế
+
+  tax_rounding_decimals:
+    # (plan-045 BR-SOS12) Number of decimal places the tax rounds to; the step
+    # is 10^(-decimals) (0 → 1, 1 → 0.1, 2 → 0.01, 3 → 0.001). Default 0 (整数,
+    # JPY/VND). Snapshotted onto the order alongside tax_rounding_mode. Range 0–3.
+    # Kept nullable so legacy rows (null) still price via the currency minor unit
+    # (RoundingMode::taxStep) — the settings UI never writes null (no "auto").
+    type: Int
+    nullable: true
+    default: 0
+    displayName:
+      en: Tax Rounding Decimals
+      ja: 消費税の小数点桁数
+      vi: Số thập phân làm tròn thuế
+
+  currency_code:
+    # ISO 4217 currency code that pos-web uses to format displayed amounts
+    # (BR-SOS06). Pure display-side preference — backend never converts
+    # values. Valid examples: VND, JPY, USD, EUR, KRW, CNY, THB, IDR.
+    # Default "VND" preserves the original hard-coded pos-web behaviour
+    # for branches that never picked a currency.
+    type: String
+    length: 8
+    default: VND
+    displayName:
+      en: Display Currency
+      ja: 表示通貨
+      vi: Đơn vị tiền tệ
+
+  prep_before_payment:
+    # plan-035 BR-SOS08. When true, takeaway orders that arrive without a
+    # paid Stripe intent are saved with status=pending and the kitchen
+    # (KDS / workstation pull) does NOT see them until the customer pays
+    # at the counter. nullable = "inherit brand default". Use
+    # EffectiveOrderPolicyService::resolve() to read the effective value.
+    type: Boolean
+    nullable: true
+    displayName:
+      en: Require payment before prep
+      ja: 調理前の支払い必須
+      vi: Phải thanh toán trước khi chuẩn bị món
+
+  customer_email_required:
+    # plan-035 BR-SOS08. When true, the customer-web takeaway checkout
+    # form forces the customer to enter an email. Used to send the
+    # OrderPlaced QR + OrderPaidInvoice PDF mailers. Default false so
+    # existing branches keep the optional-email behaviour.
+    type: Boolean
+    default: false
+    displayName:
+      en: Require customer email
+      ja: 顧客メールを必須にする
+      vi: Bắt buộc nhập email khách
+
+  print_label_locale:
+    # Ngôn ngữ của MỌI phiếu in tại quán (vé bếp, phiếu hold/runner, hoá đơn).
+    # Quản lý đặt ở admin-web; workstation kéo về qua GET /workstation/branch →
+    # settings và đọc từ shop_settings.print_label_locale khi in — nên vẫn in
+    # đúng ngôn ngữ khi MẤT MẠNG (giá trị nằm sẵn trong SQLite local).
+    #
+    # Chi phối CẢ HAI phần chữ trên phiếu:
+    #   - Nhãn cố định (Tạm tính / 小計 / Subtotal) — lấy từ catalog nhãn
+    #     biên dịch sẵn trong workstation.
+    #   - Tên món — lấy từ bản dịch đã nhập (product_translations →
+    #     pos_products.name_<locale>). Món CHƯA có bản dịch sẽ fallback về
+    #     `name` gốc; đó là giới hạn của DỮ LIỆU, không phải của thiết kế.
+    #
+    # BR: mọi phiếu của CÙNG một đơn phải dùng CÙNG một giá trị này. Trước đây
+    # mỗi đường in tự đọc Accept-Language của máy gọi, nên máy A (ja) fire bếp
+    # còn máy B (vi) in hoá đơn thì hai tờ giấy ra hai tên món khác nhau và
+    # nhân viên không đối chiếu được lúc trả món.
+    #
+    # nullable = "chưa cấu hình" → workstation lần lượt fallback:
+    #   branches.locale → settings.pos_print_locale (legacy) → "ja".
+    # Nhờ vậy shop đang chạy không đổi hành vi cho tới khi quản lý chủ động đặt.
+    # Giá trị hợp lệ: ja | en | vi (đúng tập locale toàn hệ thống ở omnify.yaml).
+    type: String
+    length: 8
+    nullable: true
+    displayName:
+      en: Print label language
+      ja: 印刷言語
+      vi: Ngôn ngữ in
+
+  print_shift_open_report:
+    # When true (default), the workstation prints the レジ開け shift-open
+    # cash-count slip when a cashier opens a shift. Pulled to the workstation
+    # via GET /workstation/branch → settings and enforced there
+    # (shop_settings.print_shift_open_report). Set false to skip it.
+    type: Boolean
+    default: true
+    displayName:
+      en: Print shift-open report
+      ja: レジ開けレポートを印刷
+      vi: In báo cáo mở ca
+
+  print_table_paid:
+    # #1306 — the workstation ALREADY gates the table-paid slip on this key
+    # (auto_print.go: shopSetting("print_table_paid", "true")), but Cloud had no
+    # column, no literal, nowhere to send it from. Default "true" meant the slip
+    # kept printing correctly while the OFF branch was unreachable: shop_settings
+    # on the workstation has exactly one writer — the Cloud pull — and there is no
+    # local settings screen or LAN endpoint to set it. A half-built feature whose
+    # missing half was silent.
+    #
+    # Adding the column is necessary but NOT sufficient: the feed selects an
+    # explicit allowlist (Workstation/BranchController) and the editable model
+    # SHADOWS the omnify base $fillable, so both must name it too.
+    type: Boolean
+    default: true
+    displayName:
+      en: Print table-paid slip
+      ja: 卓会計伝票を印刷
+      vi: In phiếu thanh toán bàn
+
+  # === Shift-CLOSE (精算) report section toggles ===
+  # Each controls whether an OPTIONAL section prints on the cashier-shift
+  # settlement slip. All default true (full report). Pulled to the workstation
+  # (shop_settings.*) and gated in FormatShiftReport. Editable in pos-web +
+  # admin-web; the workstation reads them at print time.
+
+  close_report_payment_methods:
+    # 支払方法 — per-tender breakdown block (現金 / PayPay / card / e-money…).
+    type: Boolean
+    default: true
+    displayName:
+      en: Close report — payment methods
+      ja: 精算 — 支払方法
+      vi: Báo cáo kết ca — Phương thức thanh toán
+
+  close_report_service_charge:
+    # サービス料 — service-charge line on the settlement slip.
+    type: Boolean
+    default: true
+    displayName:
+      en: Close report — service charge
+      ja: 精算 — サービス料
+      vi: Báo cáo kết ca — Phí phục vụ
+
+  close_report_denominations:
+    # 金種 — closing cash-count denomination breakdown.
+    type: Boolean
+    default: true
+    displayName:
+      en: Close report — denominations
+      ja: 精算 — 金種
+      vi: Báo cáo kết ca — Mệnh giá
+
+  close_report_drawer_check:
+    # レジ点検 — drawer-check block (レジ金額 / 想定レジ金額 / 過不足 /
+    # つり銭準備金 / 預入金 / 担当者).
+    type: Boolean
+    default: true
+    displayName:
+      en: Close report — drawer check
+      ja: 精算 — レジ点検
+      vi: Báo cáo kết ca — Kiểm quỹ
+
+  close_report_tax_breakdown:
+    # (plan-043) 消費税内訳 — per-rate consumption-tax breakdown block
+    # (課税売上 + 消費税 for each rate). Gates ONLY the THERMAL close
+    # report (workstation print). The backend Z-report PDF ALWAYS includes
+    # the breakdown — it is the audit document (DESIGN Decision 8). Joins
+    # the close_report_* toggle family above.
+    type: Boolean
+    default: true
+    displayName:
+      en: Close report — tax breakdown
+      ja: 精算 — 消費税内訳
+      vi: Báo cáo kết ca — Chi tiết thuế
+
+  split_bill_rounding_mode:
+    # Rounding behavior for dine-in split-bill (BR-SOS07). Controls how
+    # per-person amounts are rounded when customers choose "Chia đều".
+    # Enum (documented, not DB-enforced): auto, integer, two_decimals, none.
+    # - auto: derive step from currency_code (zero-decimal currencies → 1,
+    #   3-decimal currencies → 0.001, everything else → 0.01).
+    # - integer: always round UP to whole units (step = 1).
+    # - two_decimals: always round UP to 2 decimal places (step = 0.01).
+    # - none: no rounding (step = 0) — exact division, last person absorbs
+    #   the leftover. For non-integer currencies this effectively behaves
+    #   like two_decimals because Stripe amounts are in minor units.
+    type: String
+    length: 16
+    default: auto
+    displayName:
+      en: Split-bill rounding mode
+      ja: 割り勘の丸めモード
+      vi: Cách làm tròn chia bill
+
+  allow_item_edit_any_status:
+    # Item VOID policy (#1148 tightened 2026-07-27 — the name predates the
+    # tightening). false (DEFAULT) = an order item can only be edited/removed/
+    # voided while `pending` (BR-OI05). true = staff may VOID a preparing/
+    # ready/served line, and ONLY with a real operator-entered reason (junk
+    # defaults rejected 422). EDITING qty/note/toppings is pending-only ALWAYS
+    # — the flag never unlocks edits, and a line's SKU is immutable outright:
+    # a different variant = void (with reason) + add. Enforced in
+    # CustomerOrderService (Cloud) AND the workstation order engine. The ORDER
+    # must still be open; a voided line stays terminal. ⚠ Inventory caveat:
+    # voided lines are excluded from stock deduction at close, so voiding a
+    # cooked dish makes system stock drift above reality (see issue #1148 —
+    # admin-web shows a permanent red warning under the toggle). Synced to the
+    # workstation via ShopOrderSetting → /workstation/branch `settings`.
+    type: Boolean
+    default: false
+    displayName:
+      en: Allow item edit in any status
+      ja: ステータス不問で商品編集を許可
+      vi: Cho phép sửa/xoá món ở mọi trạng thái
+
+  item_voidable_statuses:
+    # plan-051 (#1149) — per-status VOID matrix replacing the boolean
+    # allow_item_edit_any_status flag above. JSON array of OrderItemStatus
+    # values (subset of pending/preparing/ready/served) in which an item may
+    # be VOIDED. `pending` is HARD-guaranteed — the resolver unions it in
+    # even when absent from the stored list. null = not yet configured →
+    # resolve from the legacy flag (true → all four, false → pending-only),
+    # so deploy needs no backfill. ONE canonical resolution:
+    # App\Services\Shop\VoidableStatusResolver — Cloud void gate, settings
+    # serializers and the workstation payload all go through it. EDIT stays
+    # pending-only ALWAYS (#1148 law) — this matrix governs VOID only.
+    type: Json
+    nullable: true
+    displayName:
+      en: Voidable Item Statuses
+      ja: 取消可能な明細ステータス
+      vi: Trạng thái món được phép hủy
+
+  stock_deduction_timing:
+    # plan-051 (#1150) — WHEN a sold line's ingredients are deducted from
+    # stock: on_close (default — today's behaviour), on_preparing (kitchen
+    # accepts — physical truth), on_add (line added). Per-LINE idempotent
+    # markers on customer_order_items (stock_deducted_at +
+    # stock_out_transaction_id) make mid-day changes safe: deducted lines
+    # never deduct twice, un-deducted lines are swept at close regardless.
+    # Deduction runs on CLOUD (workstation passthrough-displays only).
+    type: EnumRef
+    enum: StockDeductionTiming
+    default: on_close
+    displayName:
+      en: Stock Deduction Timing
+      ja: 在庫引落タイミング
+      vi: Thời điểm trừ kho
+
+  # #1152 — print/display the resolved 登録番号 (branch ?? brand) on receipts
+  # and invoices. Default ON: a registered 事業者 should show it (適格簡易請求書
+  # requires it); operators may hide it. The number itself lives on
+  # branches/brands — this is display policy only; issuance snapshots are
+  # taken regardless of this toggle (data integrity).
+  show_seller_registration_on_receipt:
+    type: Boolean
+    default: true
+    displayName:
+      ja: 登録番号をレシートに表示
+      en: Show registration number on receipts
+      vi: Hiện số đăng ký trên hóa đơn
+
+  prep_minutes_per_item:
+    # #1160 — minutes of kitchen prep for ONE portion. The customer-facing
+    # takeaway estimate is `this x SUM(quantity)`, and the same number floors
+    # the earliest slot a customer may schedule.
+    #
+    # null = inherit BrandOrderPolicy.default_prep_minutes_per_item, which is
+    # itself nullable and falls through to
+    # EffectiveOrderPolicyService::DEFAULT_PREP_MINUTES_PER_ITEM. Nullable
+    # rather than default-0 on purpose: 0 is a MEANINGFUL value (a shop
+    # handing over pre-made goods promises no wait), so it must not double as
+    # "unset" — that would silently promise instant food to every shop that
+    # never touched the setting. Range 0–120 enforced by the controllers.
+    type: Int
+    nullable: true
+    displayName:
+      en: Prep minutes per item
+      ja: 1品あたりの調理時間 (分)
+      vi: Thời gian chuẩn bị mỗi món (phút)
+
+  handy_allow_direct_payment:
+    # #876 — optional per-shop toggle: when true, Handy (the handheld
+    # order-taking terminal) may settle an order directly at the table.
+    # false (DEFAULT) keeps today's behaviour — Handy takes orders only and
+    # payment happens at the register. Exposed to the device via
+    # GET /handy/settings/order (Cloud + workstation LAN mirror) so the app
+    # shows/hides the pay action; the payment endpoints enforce it
+    # server-side too (a toggled-off shop 403s even a stale app build).
+    type: Boolean
+    default: false
+    displayName:
+      en: Allow direct payment on Handy
+      ja: ハンディでの直接会計を許可
+      vi: Cho phép thanh toán trực tiếp trên Handy
+
+  counter_pay_enabled:
+    # #2806 — does this branch OFFER "pay at the counter" on customer-web?
+    #
+    # Whether the guest may choose to settle at the till has now flipped three
+    # times, and every flip was a code change because the answer was derived
+    # rather than stored: originally always offered (takeaway's default), then
+    # #2545 narrowed it to "only when the branch has no working online gateway",
+    # then the project owner asked for it back on every branch. #2797 tried to
+    # answer the third flip by hard-coding `true`, which is the same mistake in
+    # the opposite direction.
+    #
+    # It is a shop's own decision, so it lives where the shop's other decisions
+    # live. Default true = offered everywhere, which is the answer the owner
+    # asked for; a branch that genuinely wants online-only turns it off itself
+    # instead of waiting for a release.
+    #
+    # Read by customer-web via GET /customer/branches/{slug}/payment-context
+    # (`lib/counter-pay.ts` is the single lever the four screens share).
+    type: Boolean
+    default: true
+    displayName:
+      en: Offer pay-at-counter
+      ja: レジ支払いを提供
+      vi: Cho phép thanh toán tại quầy
+
+  counter_pay_show_qr:
+    # #2806 — when pay-at-counter IS offered, does the guest screen show the QR
+    # the kiosk scans?
+    #
+    # A SECOND switch on purpose. Turning the QR off (staff read the `#xxxx`
+    # order code instead) and turning the whole counter channel off are
+    # different decisions, and a shop that wants the first would lose the
+    # channel entirely if they shared one column.
+    #
+    # false only hides the QR — it does NOT drop the payload behind it.
+    # `counterPartialAmount` / `counterItems` in payment-view.tsx encode the
+    # guest's split-bill choice (amount, and per-item units the kiosk forwards
+    # as `metadata.item_allocations`); that is the only path carrying those
+    # numbers to the kiosk, so deleting it costs a feature, not dead code.
+    #
+    # #3206 — mặc định đổi `true` → `false` (chủ dự án chốt 2026-08-18).
+    #
+    # Yêu cầu gốc là "bỏ QR thanh toán trong customer-web, giữ paypay". Công tắc
+    # đã có từ #2806, nhưng CẢ HAI cùng mặc định bật nên QR vẫn hiện ở mọi chi
+    # nhánh — tức tính năng đã dựng xong mà yêu cầu chưa đạt.
+    #
+    # Đổi ở ĐÂY, không đổi `counter_pay_enabled`: cái kia quyết định quán có MỜI
+    # thanh toán tại quầy hay không, và `true` của nó là câu trả lời chủ dự án đã
+    # yêu cầu sau ba lần lật (xem docblock của nó). Giấu QR và gỡ cả kênh là hai
+    # quyết định khác nhau — đó chính là lý do #2806 tách làm hai cột.
+    #
+    # PHẠM VI: chỉ hàng MỚI. Đo production 2026-08-18 — 17 hàng
+    # `shop_order_settings`, trong đó **1 hàng đã là false**: có người chủ động
+    # tắt QR cho một chi nhánh. Cột này vì thế là lựa chọn thật của quán, nên
+    # KHÔNG backfill 16 hàng còn lại; deploy tái áp giá trị quán sở hữu là điều
+    # CLAUDE.md cấm, và ngày 2026-08-11 nó đã tốn hai lần dịch vụ thật.
+    type: Boolean
+    default: false
+    displayName:
+      en: Show pay-at-counter QR
+      ja: レジ支払いのQRを表示
+      vi: Hiện mã QR thanh toán tại quầy
+
+  manual_discount_max_percent:
+    # #1124 — cashier ceiling for MANUAL checkout discounts, as a percent of
+    # the live items subtotal (default 20). Manager+ roles (shop-manager /
+    # org-manager / org-admin) are exempt and may comp up to the full
+    # subtotal — that absolute floor (never above subtotal) applies to
+    # everyone and lives in the domain checkout writer.
+    type: Decimal
+    precision: 5
+    scale: 2
+    default: 20
+    displayName:
+      en: Manual discount cap (%)
+      ja: 手動割引の上限（％）
+      vi: Trần giảm giá thủ công (%)
+
+  # === Relationships ===
+
+  defaultTaxType:
+    # (BR-SOS09) Branch-level default tax type — tier 3 of TaxResolver §7.
+    # Nullable = fall through to the brand default (TaxType.is_default,
+    # tier 4). RESTRICT — a type used as a branch default cannot be
+    # hard-deleted (409 TAX_TYPE_IN_USE guard). Must belong to the branch's
+    # brand and be active (FormRequest validation, not YAML).
+    type: Association
+    relation: ManyToOne
+    target: TaxType
+    nullable: true
+    onDelete: RESTRICT
+    displayName:
+      en: Default Tax Type
+      ja: デフォルト税区分
+      vi: Loại thuế mặc định
+
+  branch:
+    # One setting record per branch (BR-SOS01)
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    onDelete: CASCADE
+    displayName:
+      en: Branch
+      ja: 店舗
+      vi: Chi nhánh
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  # Ghi đè cấp shop; để trống là kế thừa mặc định của brand (#1127).
+  confirmation_timeout_minutes:
+    type: Int
+    nullable: true
+    displayName:
+      ja: 確認期限（分）
+      en: Confirmation Timeout (minutes)
+      vi: Hạn xác nhận (phút)
+
+  # #491 — NULL nghĩa là kế thừa mặc định brand (free | cleaning).
+  table_status_after_payment:
+    type: String
+    length: 16
+    nullable: true
+    displayName:
+      ja: 支払後テーブル状態
+      en: Table Status After Payment
+      vi: Trạng thái bàn sau thanh toán

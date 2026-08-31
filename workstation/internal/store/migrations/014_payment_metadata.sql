@@ -1,0 +1,11 @@
+-- plan-08: split-bill receipt support.
+--
+-- Mirror backend order_payments.metadata onto the workstation payments table so
+-- the workstation can derive split state (split_count, amount_per_person) when
+-- formatting the "DA THANH TOAN" / "PHAN CON LAI" receipts — entirely from local
+-- SQLite, without a Cloud round-trip.
+--
+-- The kiosk sends `metadata` (JSON) on POST /api/v1/kiosk/payments; the
+-- workstation stores it here and replays it on sync UP so backend's
+-- /split-status endpoint stays consistent end-to-end.
+ALTER TABLE payments ADD COLUMN metadata TEXT;

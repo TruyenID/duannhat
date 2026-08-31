@@ -1,0 +1,142 @@
+{
+  "//": "Chính sách vòng lặp agent cho TempoFast. Cơ chế nằm ở plugin agent-loop (godx-jp/claude-agent-loop); file này là phần riêng của repo. `tal config` in ra bản đã giải.",
+  "baseBranch": "dev",
+  "ttlSeconds": 2700,
+  "agentLogins": ["ecsol"],
+  "maxAttempts": 3,
+  "submodulePrBase": "gitmodules",
+  "//refNamespace": "PHẢI khớp bản .claude/tools/agent-loop/tal đang còn trong repo. Hai namespace khác nhau = hai session không thấy lease của nhau = mất hẳn loại trừ tương hỗ, đúng cái vòng lặp này dựng ra để tránh. Chỉ được đổi sang mặc định của plugin (refs/agent-loop/leases/) SAU KHI đã xoá bản trong repo và không còn session nào chạy nó.",
+  "refNamespace": "refs/tempo/leases/",
+  "//labels": "working/reviewing/blocked/shipped dùng đúng nhãn status:* sẵn có của repo để bảng issue không bị chẻ làm hai hệ. KHÔNG dùng lại status:approved — trong repo này nó mang nghĩa 'plan được duyệt để làm', không phải 'PR đạt review'.",
+  "labels": {
+    "working": "status:executing",
+    "reviewing": "status:reviewing",
+    "blocked": "status:blocked",
+    "shipped": "status:shipped",
+    "ready": "agent:ready",
+    "awaitingReview": "agent:awaiting-review",
+    "changesRequested": "agent:changes-requested",
+    "reviewPassed": "agent:review-passed",
+    "deadLetter": "agent:dead-letter"
+  },
+  "severityOrder": [
+    "critical",
+    "security",
+    "high",
+    "bug"
+  ],
+  "//promotionBranch": "Nhánh phát hành. Cổng `fullSuite` là cổng baseBranch → promotionBranch, KHÔNG phải cổng của từng PR (#1454). Khai ra để skill gọi đúng tên: trước #2348 cả hai skill ghi cứng 'dev → staging', một môi trường repo này không có, trong khi docs/guide/full-suite.md nói rõ là dev→main.",
+  "promotionBranch": "main",
+
+  "//formatCmd": "Formatter chạy MỘT lần, bằng tay, ngay trước commit — không chạy lại mỗi bước. Khai ở đây thay vì ghi cứng trong skill, vì mỗi dự án một lệnh khác (pint/prettier/gofmt/rustfmt).",
+  "formatCmd": "cd backend && vendor/bin/pint --dirty",
+
+  "//riskDomains": "Vùng RỦI RO của repo NÀY. Diff chạm bất kỳ vùng nào ⇒ review/verify phải ở tier model cao nhất, kể cả khi bản sửa do tier thấp viết. Danh sách này là thứ duy nhất quyết định điều đó — skill không được ghi cứng, vì 'tiền/thuế/parity' là rủi ro của một hệ POS, không phải của mọi dự án.",
+  "riskDomains": [
+    "tiền · thuế · pricing · rounding (OrderPricingCalculator, TaxResolver, order_payments)",
+    "parity Cloud↔Go · golden fixture (TR-40, SlipByteParity, tests/Fixtures/*.json)",
+    "migration · schema · omnify codegen",
+    "offline order signing (Ed25519, device_signing_keys)",
+    "ranh giới ghi theo aggregate (config/domain-mutation-guard.php)",
+    "arch test và mọi rào ratchet"
+  ],
+
+  "policyDocs": {
+    "work": ".claude/agent-loop/work-policy.md",
+    "review": ".claude/agent-loop/review-checklist.md",
+    "test": ".claude/agent-loop/test-policy.md"
+  },
+  "//setup": "Dựng môi trường trong CÂY TẠM của `tal merge-batch`, chạy sau khi đã trộn cả lô và trước `fullSuite`. Cây tạm là worktree mới tinh: mọi thứ trong .gitignore (backend/vendor, node_modules, .env) đều KHÔNG có — thiếu bước này thì cổng đỏ 100% lần chạy vì thiếu binary chứ không vì test (#1329). Cài SAU khi trộn là cố ý: lô có thể đổi composer.lock, nên cổng phải cài đúng bản lô khai — vì vậy KHÔNG tái dùng vendor/ của cây chính (bản nháp batchBootstrap cũ copy vendor từ cây chính, và đó là chỗ nó sai). Đo thật: composer install --prefer-dist với cache ấm = 8s, không đáng đánh đổi tính đúng để cache. Thêm lệnh app web vào fullSuite thì PHẢI thêm `pnpm install` cho đúng app ở đây — mỗi app mang lockfile riêng, `pnpm install` ở gốc KHÔNG cài chúng.",
+  "setup": [
+    "cd backend && composer install --no-interaction --prefer-dist --no-progress -q",
+    "cd backend && { [ -f .env ] || { cp .env.example .env && php artisan key:generate --force -q; }; }"
+  ],
+  "//setupVerify": "Kiểm rẻ tiền chứng minh môi trường đã dựng được, trước khi tốn hàng chục phút chạy suite. Trượt ở đây báo CỔNG HỎNG (exit 3) chứ không báo 'test đỏ' (exit 2) — phân biệt đó chính là nội dung #1329: một cây thiếu vendor từng in ra 'full suite ĐỎ' và không ai đọc ra là môi trường. Phải kiểm CHẠY ĐƯỢC, không phải TỒN TẠI: `test -x backend/vendor/bin/pest` từng PASS trong khi payload của package đã bị xoá mất (#1355) — `vendor/bin/pest` là shim, nó vẫn còn và vẫn -x, nên cổng tin là ok rồi chết giữa suite với `Class \"Pest\\Panic\" not found`, một thông điệp chỉ vào một test hỏng không tồn tại.",
+  "setupVerify": [
+    "cd backend && ./vendor/bin/pest --version"
+  ],
+  "//fullSuite": "Cổng merge, chạy MỘT lần cho cả lô ở `tal merge-batch`. Xếp NHANH TRƯỚC CHẬM: tal_test.py xong trong vài giây (không mạng, không GitHub, không lease), nên hỏng ở đó thì biết ngay thay vì sau cả lượt pest. Vì sao tal_test.py phải nằm đây: chính `tal` là thứ nhiều session sửa song song mỗi ngày, và một hồi quy ở đó lại âm thầm đóng nhầm issue — đúng loại lỗi #1342 đã mở ra (#1356). Ngoài hai lệnh này thì KHÔNG thêm `pnpm typecheck`: nó cần node_modules của từng app, dựng lại trong cây tạm thì tốn hơn giá trị nó mang — và vai code đã typecheck đúng app nó chạm theo test-policy.md.",
+  "fullSuite": [
+    "python3 .claude/tools/agent-loop/tal_test.py",
+    "npm run test:omnify-drift --silent",
+    "npm run omnify:drift --silent",
+    "cd backend && php -d memory_limit=-1 vendor/bin/pest --compact"
+  ],
+  "//docsRules": "Bản đồ code→doc, lấy từ chính các dòng 'Tracked in docs/guide/...' trong CLAUDE.md chứ không tự nghĩ ra. `tal docs-check <PR>` dùng nó để báo khoảng trống cho người review. Là GỢI Ý: có thay đổi thật sự không cần doc. Nhưng thiếu doc cho một thay đổi QUY ƯỚC/HÀNH VI thì reviewer phải chặn.",
+  "docsRules": [
+    {
+      "when": "BusinessClock|business_day|Timezone/",
+      "expect": [
+        "docs/guide/business-time.md"
+      ],
+      "why": "thời gian nghiệp vụ: mọi 'hôm nay'/biên ca/hạn dùng phải qua BusinessClock::forBranch (#1091)"
+    },
+    {
+      "when": "TillSession|Till[A-Z]|Settlement|ShiftReport|shift_",
+      "expect": [
+        "docs/guide/cashier-shift-recovery.md"
+      ],
+      "why": "máy trạng thái ca thu ngân + đường thoát cho ca treo (plan-030/031/032/044/046)"
+    },
+    {
+      "when": "TaxType|TaxResolver|tax_type|OrderPricingCalculator",
+      "expect": [
+        "docs/guide/tax-types.md",
+        "docs/guide/thue-tieu-thu-van-hanh.md"
+      ],
+      "why": "thuế tiêu thụ: một tax type = một rate, làm tròn theo nhóm rate (plan-043/#1099)"
+    },
+    {
+      "when": "OfflineOrderEvidence|device_signing|catalog_revision|offline_signing",
+      "expect": [
+        "docs/guide/offline-order-evidence.md"
+      ],
+      "why": "bằng chứng đơn offline: Cloud định giá lại từ catalog revision, không tin số của thiết bị (#1092)"
+    },
+    {
+      "when": "ReturnInvoice|CustomerInvoice|InvoiceCounter|invoice_no|赤伝",
+      "expect": [
+        "docs/guide/item-edit-and-void-policy.md"
+      ],
+      "why": "hoá đơn + 適格返還請求書: chứng từ chính thức, số hoá đơn không rollback được"
+    },
+    {
+      "when": "PaymentGateway|PaymentAttempt|async_payment|Stripe|PayPay",
+      "expect": [
+        "docs/guide/async-payment-methods.md",
+        "docs/guide/stripe-terminal-card-present.md",
+        "docs/guide/payment-topology-and-tender-model.md"
+      ],
+      "why": "cổng thanh toán: lifecycle pending→webhook, cờ fail-closed, capability per-device"
+    },
+    {
+      "when": "\\.env|config/.*\\.php|docker-compose|compose\\..*\\.yml|BYPASS|_DEV_",
+      "expect": [
+        "docs/guide/local-config.md"
+      ],
+      "why": "ranh giới local vs production: cờ bypass, guard theo môi trường, file pin host/credential"
+    },
+    {
+      "when": "PrintJob|Printer|print_template|escpos|ESC/POS",
+      "expect": [
+        "docs/guide/printing.md",
+        "docs/guide/print-templates.md"
+      ],
+      "why": "đường in: transport theo máy in, template phiếu"
+    },
+    {
+      "when": "\\.claude/tools/agent-loop/|\\.claude/skills/issue-",
+      "expect": [
+        "docs/guide/agent-issue-loop.md"
+      ],
+      "why": "vòng lặp issue: cơ chế lease/fencing/merge và lý do thiết kế"
+    },
+    {
+      "when": "schemas/.*\\.yaml",
+      "expect": [
+        "CLAUDE.md"
+      ],
+      "why": "đổi schema thường kéo theo quy ước codegen — kiểm mục 'lỗi generator đã biết' còn đúng không"
+    }
+  ]
+}

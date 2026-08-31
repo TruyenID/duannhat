@@ -1,0 +1,39 @@
+# plan-041 — single source of truth for the gapless, global-per-year
+# ORD-{year}-{NNNN} order code sequence. One row per calendar year holding the
+# NEXT value to hand out. CustomerOrderService::nextOrderCode() allocates under
+# lockForUpdate inside the order-insert transaction so a rollback releases the
+# number (no gap) and concurrent allocators serialise (no duplicate).
+#
+# Internal counter, not a domain resource — no API/controller is needed; the
+# service reads/writes it directly via the model.
+displayName:
+  en: Order Code Counter
+  ja: 注文コードカウンター
+  vi: Bộ đếm mã đơn
+
+kind: object
+
+options:
+  timestamps: true
+  id: Uuid
+  indexes:
+    - columns: [year]
+      unique: true
+
+properties:
+  year:
+    # Calendar year the sequence belongs to (e.g. 2026).
+    type: Int
+    displayName:
+      en: Year
+      ja: 年
+      vi: Năm
+
+  next_value:
+    # The next sequence number to hand out for this year (starts at 1).
+    type: Int
+    default: 1
+    displayName:
+      en: Next Value
+      ja: 次の値
+      vi: Giá trị kế tiếp

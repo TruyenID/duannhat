@@ -1,0 +1,337 @@
+# MaterialBatch schema
+# Material batch header for daily production processing (製造バッチ).
+# Each batch represents a single production run that consumes components (NVL)
+# and produces a semi-finished material (BTP).
+#
+# Business Rules:
+#   - BR-01: Only materials with non-empty components can create batches
+#   - BR-02: Auto-calculate NVL = components × multiplier
+#   - BR-03: All component stock must be sufficient before approval
+#   - BR-06: Output goes into stock_levels via material_id
+#   - BR-07: If material has output_variant_id → also add stock for that variant (dual tracking)
+#   - BR-08: actual_yield may differ from planned_yield (waste, spoilage)
+#   - BR-09: Each batch creates 2 stock_transactions (out NVL + in BTP), reference_type = material_batch
+#   - BR-10: Component unit must match base unit in stock_levels
+#
+# Workflow:
+#   draft → pending → approved → in_progress → completed
+#                  ↘ cancelled
+#          ↗ cancelled
+#                    ↗ cancelled
+#
+# Stock Impact:
+#   - approved → in_progress: Creates stock_out transaction (deduct components)
+#   - in_progress → completed: Creates stock_in transaction (add output material)
+#
+# Key Design:
+#   - batch_code auto-generated: MB-YYYYMMDD-XXX
+#   - multiplier: number of batches (1 = 1 recipe, 2 = double)
+#   - planned_yield = material.yield_quantity × multiplier
+#   - stock_out/in_transaction_id: Links to auto-created stock transactions
+#   - created_by_id / approved_by_id: SSO user IDs (no hard FK)
+#   - Soft delete enabled for audit trail
+
+displayName:
+  en: Material Batch
+  ja: 製造バッチ
+  vi: Batch nguyên liệu
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    # plan-040 C5/M13: batch_code unique PER-ORG + deleted_at-scoped for soft-delete
+    # code reuse (was a global single-column unique). deleted_at is a softDelete
+    # auto-column — falls back to a non-omnify migration if omnify can't index it.
+    - columns: [organization_id, batch_code, deleted_at]
+      unique: true
+      # Explicit short name to stay under MySQL's 64-char identifier limit.
+      name: uq_material_batch_org_code
+    - columns: [organization_id, status]
+    - columns: [warehouse_id, material_id]
+    # Note: idx(warehouse_id, created_at) added via custom migration
+    # because timestamps: true auto-columns can't be referenced in Omnify indexes
+
+properties:
+  batch_code:
+    type: String
+    length: 50
+    displayName:
+      en: Batch Code
+      ja: バッチコード
+      vi: Mã batch
+    description:
+      en: "Auto-generated code: MB-YYYYMMDD-XXX (sequential per day)"
+      ja: "自動生成コード：MB-YYYYMMDD-XXX（日ごとの連番）"
+      vi: "Mã tự động: MB-YYYYMMDD-XXX (tăng dần theo ngày)"
+
+  warehouse:
+    type: Association
+    relation: ManyToOne
+    target: Warehouse
+    onDelete: RESTRICT
+    displayName:
+      en: Warehouse
+      ja: 倉庫
+      vi: Kho hàng
+    description:
+      en: Production warehouse where components are consumed and output is stored
+      ja: 原材料を消費し、成果物を保管する生産倉庫
+      vi: Kho sản xuất — nơi tiêu thụ NVL và lưu trữ BTP
+
+  material_id:
+    type: Uuid
+    displayName:
+      en: Output Material ID
+      ja: 出力材料ID
+      vi: ID nguyên liệu đầu ra
+    description:
+      en: "FK to materials — the material being produced. Must have non-empty components (BR-01)"
+      ja: "materialsへのFK — 生産される材料。componentsが空でないこと（BR-01）"
+      vi: "FK đến materials — NVL đầu ra. Phải có components không rỗng (BR-01)"
+
+  recipe:
+    type: Association
+    relation: ManyToOne
+    target: Recipe
+    onDelete: RESTRICT
+    nullable: true
+    # Plan-022 T3.5 — explicit Recipe selection on production batch.
+    # Snapshot of which Recipe (and therefore which BOM revision) was used
+    # to expand the batch. Nullable only because pre-T3.5 batches exist in
+    # old databases; there is no backfill command (#2188 — reseed instead).
+    # MaterialBatchService::create() requires recipe_id and asserts it
+    # belongs to the same material + is_active + approval_status=approved.
+    # RESTRICT on delete: Recipe deletion is blocked while any batch
+    # references it (production audit trail). Use is_active=false to retire.
+    displayName:
+      en: Recipe
+      ja: レシピ
+      vi: Công thức
+    description:
+      en: "Recipe snapshot used to expand this batch. RESTRICT on delete preserves audit."
+      ja: "このバッチの展開に使用されたレシピのスナップショット。削除時はRESTRICTで監査保全。"
+      vi: "Snapshot công thức dùng để khai triển batch này. RESTRICT khi xóa để giữ audit."
+
+  multiplier:
+    type: Decimal
+    precision: 10
+    scale: 4
+    default: 1
+    displayName:
+      en: Multiplier
+      ja: 倍数
+      vi: Số mẻ
+    description:
+      en: "Number of batches (1 = 1 recipe, 2 = double). All component quantities are multiplied by this (BR-02)"
+      ja: "バッチ数（1 = 1レシピ、2 = 2倍）。全原材料数量にこの値を乗算（BR-02）"
+      vi: "Số mẻ (1 = 1 công thức, 2 = gấp đôi). Tất cả NVL × hệ số này (BR-02)"
+
+  planned_yield:
+    type: Decimal
+    precision: 15
+    scale: 4
+    displayName:
+      en: Planned Yield
+      ja: 計画生産量
+      vi: Sản lượng kế hoạch
+    description:
+      en: "Expected output: material.yield_quantity × multiplier"
+      ja: "期待出力：material.yield_quantity × multiplier"
+      vi: "Sản lượng dự kiến: material.yield_quantity × multiplier"
+
+  actual_yield:
+    type: Decimal
+    precision: 15
+    scale: 4
+    nullable: true
+    displayName:
+      en: Actual Yield
+      ja: 実際生産量
+      vi: Sản lượng thực tế
+    description:
+      en: "Actual output recorded on completion. May differ from planned (BR-08: waste, spoilage)"
+      ja: "完了時に記録された実際の出力。計画と異なる場合あり（BR-08：廃棄、損失）"
+      vi: "Sản lượng thực tế ghi nhận khi hoàn thành. Có thể khác kế hoạch (BR-08: hao hụt, hỏng)"
+
+  # Plan-022 (yield variance) — operator-supplied reason when actual_yield
+  # deviates from planned_yield beyond the recipe's tolerance. Required at
+  # complete() time when the variance breaches recipe.yield_variance_tolerance_pct.
+  # Free-form text so shops can record operational context (boiled too long,
+  # spilled, etc.) for audit + future analytics.
+  yield_variance_reason:
+    type: Text
+    nullable: true
+    displayName:
+      en: Yield Variance Reason
+      ja: 歩留まり差異理由
+      vi: Lý do chênh lệch sản lượng
+    description:
+      en: "Operator-supplied reason when actual_yield deviates beyond the recipe's tolerance %."
+      ja: "実際生産量がレシピの許容差を超えた場合の作業者入力理由。"
+      vi: "Lý do người vận hành nhập khi sản lượng thực lệch quá ngưỡng của recipe."
+
+  yield_unit:
+    type: String
+    length: 50
+    displayName:
+      en: Yield Unit
+      ja: 生産単位
+      vi: Đơn vị đầu ra
+    description:
+      en: "Output unit from material recipe (e.g., kg, LITER, piece)"
+      ja: "材料レシピからの出力単位（例：kg、LITER、piece）"
+      vi: "Đơn vị đầu ra từ công thức (VD: kg, LITER, piece)"
+
+  status:
+    type: EnumRef
+    enum: MaterialBatchStatus
+    default: draft
+    displayName:
+      en: Status
+      ja: ステータス
+      vi: Trạng thái
+    description:
+      en: "Workflow: draft → pending → approved → in_progress → completed / cancelled"
+      ja: "ワークフロー：下書き → 承認待ち → 承認済み → 進行中 → 完了 / キャンセル"
+      vi: "Workflow: nháp → chờ duyệt → đã duyệt → đang chế biến → hoàn thành / đã hủy"
+
+  stock_out_transaction_id:
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Stock Out Transaction
+      ja: 出庫取引
+      vi: Phiếu xuất kho
+    description:
+      en: "FK to stock_transactions — auto-created when batch starts (deduct components). No hard FK."
+      ja: "stock_transactionsへのFK — バッチ開始時に自動作成（原材料差引）。ハードFKなし。"
+      vi: "FK đến stock_transactions — tự tạo khi bắt đầu batch (trừ NVL). Không dùng FK cứng."
+
+  stock_in_transaction_id:
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Stock In Transaction
+      ja: 入庫取引
+      vi: Phiếu nhập kho
+    description:
+      en: "FK to stock_transactions — auto-created when batch completes (add output). No hard FK."
+      ja: "stock_transactionsへのFK — バッチ完了時に自動作成（出力追加）。ハードFKなし。"
+      vi: "FK đến stock_transactions — tự tạo khi hoàn thành batch (nhập BTP). Không dùng FK cứng."
+
+  note:
+    type: Text
+    nullable: true
+    displayName:
+      en: Note
+      ja: 備考
+      vi: Ghi chú
+
+  created_by_id:
+    type: Uuid
+    displayName:
+      en: Created By
+      ja: 作成者
+      vi: Người tạo
+    description:
+      en: "SSO user who created this batch (user_caches.id). No hard FK."
+      ja: "このバッチを作成したSSOユーザー（user_caches.id）。ハードFKなし。"
+      vi: "User SSO tạo batch (user_caches.id). Không dùng FK cứng."
+
+  approved_by_id:
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Approved By
+      ja: 承認者
+      vi: Người duyệt
+    description:
+      en: "SSO user who approved this batch. Null if not yet approved."
+      ja: "このバッチを承認したSSOユーザー。未承認の場合はNull。"
+      vi: "User SSO duyệt batch. Null nếu chưa duyệt."
+
+  approved_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Approved At
+      ja: 承認日時
+      vi: Ngày duyệt
+
+  started_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Started At
+      ja: 開始日時
+      vi: Ngày bắt đầu chế biến
+    description:
+      en: "When batch processing started (approved → in_progress transition)"
+      ja: "バッチ処理が開始された日時（承認済み → 進行中の遷移）"
+      vi: "Thời điểm bắt đầu chế biến (chuyển approved → in_progress)"
+
+  completed_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Completed At
+      ja: 完了日時
+      vi: Ngày hoàn thành
+
+  expiry_date:
+    type: DateTime
+    nullable: true
+    displayName:
+      en: Expiry Date
+      ja: 有効期限
+      vi: Hạn sử dụng
+    description:
+      en: "Expiry date of the output product (set on completion)"
+      ja: "出力製品の有効期限（完了時に設定）"
+      vi: "Hạn sử dụng của sản phẩm đầu ra (đặt khi hoàn thành)"
+
+  outputLot:
+    type: Association
+    relation: ManyToOne
+    target: MaterialLot
+    onDelete: SET NULL
+    nullable: true
+    # Plan-017: pointer to the production-source MaterialLot minted by
+    # MaterialBatchService::complete(). NULL while batch is in any pre-completed
+    # state (draft / pending / approved / in_progress) AND for any pre-plan-017
+    # legacy batch that completed before lot tracking shipped. SET NULL on lot
+    # delete so the batch row survives for audit if the produced lot is later
+    # purged (extremely rare — production lots typically deplete naturally).
+    displayName:
+      en: Output Lot
+      ja: 出力ロット
+      vi: Lô đầu ra
+    description:
+      en: "MaterialLot minted on complete() with source=production. NULL until completed (or for legacy pre-plan-017 batches). SET NULL on lot delete preserves audit."
+      ja: "complete()時にsource=productionで発行されるMaterialLot。完了まで（またはplan-017以前のレガシーバッチ）はNULL。ロット削除時はSET NULLで監査保全。"
+      vi: "MaterialLot được mint khi complete() với source=production. NULL cho đến khi completed (hoặc batch legacy trước plan-017). SET NULL khi xóa lô để giữ audit."
+
+  # Relationships
+  items:
+    type: Association
+    relation: OneToMany
+    target: MaterialBatchItem
+    mappedBy: materialBatch
+    displayName:
+      en: Batch Items
+      ja: バッチ明細
+      vi: Chi tiết batch
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức

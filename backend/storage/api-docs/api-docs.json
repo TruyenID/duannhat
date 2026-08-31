@@ -1,0 +1,752 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "TempoFast API",
+        "description": "## TempoFast — API Documentation\n\nThis API supports **two authentication modes**:\n\n### 1. Standalone Mode (Email/Password)\n- `POST /api/v1/auth/register` — Register a new account\n- `POST /api/v1/auth/login` — Login with email & password\n- `POST /api/v1/auth/logout` — Logout\n- `GET  /api/v1/auth/user` — Get current user\n\n### 2. Console SSO Mode (OAuth2)\n- User is redirected to DXS Console for authentication\n- After login, frontend receives an authorization code\n- `POST /api/v1/auth/sso/callback` — Exchange code for tokens\n- `POST /api/v1/auth/sso/logout` — Logout & revoke Console tokens\n- `GET  /api/v1/auth/sso/user` — Get current user with organizations\n\n### Authentication\nAll protected endpoints require a Bearer token:\n```\nAuthorization: Bearer {token}\n```\n\nFor **Standalone mode**, obtain the token from login/register (pass `device_name`).\nFor **Console SSO mode**, obtain the token from SSO callback (pass `device_name`).\n\nWithout `device_name`, session-based authentication is used (cookie).\n\n### Multi-Tenancy Headers (Console SSO mode)\nProtected endpoints may require:\n```\nX-Organization-Id: {organization_slug}    # Required\nX-Branch-Id: {branch_uuid}                # Optional\n```",
+        "contact": {
+            "name": "TempoFast"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:5400",
+            "description": "Local Development"
+        }
+    ],
+    "paths": {
+        "/api/v1/auth/login": {
+            "post": {
+                "tags": [
+                    "Auth — Standalone"
+                ],
+                "summary": "Login with email & password",
+                "description": "Authenticate a user with email and password (standalone mode).\n\n**With `device_name`**: Returns a Sanctum API token for mobile/SPA apps.\n**Without `device_name`**: Creates a session (cookie-based auth for web).",
+                "operationId": "c99bdfd067de5ad8950a4ef4cbef1406",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "device_name": {
+                                        "description": "Device name for API token auth. Omit for session/cookie auth.",
+                                        "type": "string",
+                                        "example": "iPhone 15",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string",
+                                                            "format": "uuid",
+                                                            "example": "019d4e6a-1234-7abc-def0-123456789abc"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "format": "email",
+                                                            "example": "user@example.com"
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "田中 太郎"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "token": {
+                                                    "description": "Sanctum API token (only returned when device_name is provided)",
+                                                    "type": "string",
+                                                    "example": "1|abc123xyz...",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "INVALID_CREDENTIALS"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The provided credentials are incorrect."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Account disabled",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "ACCOUNT_DISABLED"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Your account has been disabled."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The email field is required."
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": "{\"email\": [\"The email field is required.\"]}"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/register": {
+            "post": {
+                "tags": [
+                    "Auth — Standalone"
+                ],
+                "summary": "Register a new account",
+                "description": "Create a new user account (standalone mode only).\n\nThis endpoint may be disabled via configuration (`dxs-sso.standalone.registration = false`).\n\n**With `device_name`**: Returns a Sanctum API token.\n**Without `device_name`**: Creates a session (cookie-based auth).",
+                "operationId": "17ef4c276b0f125a91a8356a1d7e1ea5",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "田中 太郎"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "maxLength": 255,
+                                        "example": "user@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "minLength": 8,
+                                        "example": "password123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "device_name": {
+                                        "type": "string",
+                                        "example": "iPhone 15",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Registration successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string",
+                                                            "format": "uuid"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "format": "email"
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "token": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error (duplicate email, weak password, etc.)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/logout": {
+            "post": {
+                "tags": [
+                    "Auth — Standalone"
+                ],
+                "summary": "Logout",
+                "description": "Logout the current user.\n\n- **Bearer token auth**: Revokes the current API token only (other device tokens remain active).\n- **Session auth**: Destroys the session.",
+                "operationId": "701698ad6a92079bfcb81ed22d4d02fc",
+                "responses": {
+                    "200": {
+                        "description": "Logged out successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Logged out successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/user": {
+            "get": {
+                "tags": [
+                    "Auth — Standalone"
+                ],
+                "summary": "Get current user",
+                "description": "Returns the authenticated user's profile information.",
+                "operationId": "ac428264909ac726eb44134f36d83e29",
+                "responses": {
+                    "200": {
+                        "description": "User info",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string",
+                                                            "format": "uuid"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "format": "email"
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/sso/callback": {
+            "post": {
+                "tags": [
+                    "Auth — SSO"
+                ],
+                "summary": "SSO callback — exchange code for tokens",
+                "description": "Exchange an OAuth2 authorization code (from DXS Console redirect) for authentication tokens.\n\n### Flow\n1. User authenticates on DXS Console\n2. Console redirects to your app with `?code=AUTH_CODE`\n3. Frontend sends the code to this endpoint\n4. Backend exchanges code → verifies JWT → creates/updates user → returns auth\n\n### Auth Modes\n- **With `device_name`**: Returns a Sanctum API token for mobile/SPA.\n- **Without `device_name`**: Creates a session (cookie-based auth).\n\n### Side Effects\n- Creates or updates user in local database from JWT claims\n- Stores encrypted Console tokens for API proxy\n- Syncs organizations, branches, and role assignments from Console",
+                "operationId": "fca4cdc8a1e13e8fd69b50b86d01588f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "code"
+                                ],
+                                "properties": {
+                                    "code": {
+                                        "description": "Authorization code from Console SSO redirect",
+                                        "type": "string",
+                                        "example": "dxs_auth_abc123xyz"
+                                    },
+                                    "device_name": {
+                                        "description": "Device name for API token auth. Omit for session/cookie auth.",
+                                        "type": "string",
+                                        "example": "iPhone 15",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Authentication successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "description": "Authenticated user",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string",
+                                                            "format": "uuid",
+                                                            "example": "019d4e6a-1234-7abc-def0-123456789abc"
+                                                        },
+                                                        "console_user_id": {
+                                                            "description": "User ID from Console SSO",
+                                                            "type": "string",
+                                                            "format": "uuid"
+                                                        },
+                                                        "console_organization_id": {
+                                                            "description": "Primary organization ID",
+                                                            "type": "string",
+                                                            "format": "uuid",
+                                                            "nullable": true
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "format": "email",
+                                                            "example": "user@example.com"
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "田中 太郎"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "organizations": {
+                                                    "description": "Organizations the user has access to",
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "organization_id": {
+                                                                "type": "string",
+                                                                "format": "uuid"
+                                                            },
+                                                            "organization_slug": {
+                                                                "type": "string",
+                                                                "example": "famgia"
+                                                            },
+                                                            "organization_name": {
+                                                                "type": "string",
+                                                                "example": "Famgia"
+                                                            },
+                                                            "organization_role": {
+                                                                "type": "string",
+                                                                "example": "admin"
+                                                            },
+                                                            "service_role": {
+                                                                "type": "string",
+                                                                "example": "admin",
+                                                                "nullable": true
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "token": {
+                                                    "description": "Sanctum API token (only when device_name provided)",
+                                                    "type": "string",
+                                                    "example": "1|abc123xyz...",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid authorization code or JWT token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "enum": [
+                                                "INVALID_CODE",
+                                                "INVALID_TOKEN"
+                                            ]
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/sso/logout": {
+            "post": {
+                "tags": [
+                    "Auth — SSO"
+                ],
+                "summary": "SSO Logout",
+                "description": "Logout the current SSO user.\n\n- Revokes Console access & refresh tokens (calls Console revoke API)\n- Deletes current Sanctum API token (if Bearer auth)\n- Destroys session (if session auth)",
+                "operationId": "ab501819c8aa4652d767955e7880852c",
+                "responses": {
+                    "200": {
+                        "description": "Logged out successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Logged out successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/sso/user": {
+            "get": {
+                "tags": [
+                    "Auth — SSO"
+                ],
+                "summary": "Get current SSO user",
+                "description": "Returns the authenticated SSO user's profile and their accessible organizations with roles.",
+                "operationId": "acd79e4b0590c527c6921347ed027086",
+                "responses": {
+                    "200": {
+                        "description": "User info with organizations",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string",
+                                                            "format": "uuid"
+                                                        },
+                                                        "console_user_id": {
+                                                            "type": "string",
+                                                            "format": "uuid"
+                                                        },
+                                                        "console_organization_id": {
+                                                            "type": "string",
+                                                            "format": "uuid",
+                                                            "nullable": true
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "format": "email"
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "organizations": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "organization_id": {
+                                                                "type": "string",
+                                                                "format": "uuid"
+                                                            },
+                                                            "organization_slug": {
+                                                                "type": "string"
+                                                            },
+                                                            "organization_name": {
+                                                                "type": "string"
+                                                            },
+                                                            "organization_role": {
+                                                                "type": "string"
+                                                            },
+                                                            "service_role": {
+                                                                "type": "string",
+                                                                "nullable": true
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/webhook/cache-purge": {
+            "post": {
+                "tags": [
+                    "Webhook"
+                ],
+                "summary": "Purge SSO caches (webhook)",
+                "description": "Called by DXS Console when roles, permissions, or JWKS keys change.\n\nClears:\n- JWKS public key cache (forces re-fetch on next JWT verification)\n- Organization access cache for specified user/org\n\n### Authentication\nRequires `X-Omnify-Signature` header with HMAC-SHA256 of request body,\nsigned with `SSO_SERVICE_SECRET`.",
+                "operationId": "74a4ad60f450a6ada0e8c0bf06186cdc",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "organization_id": {
+                                        "description": "Organization to clear cache for",
+                                        "type": "string",
+                                        "format": "uuid"
+                                    },
+                                    "user_id": {
+                                        "description": "Specific user to clear cache for",
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Cache cleared",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "cleared"
+                                        },
+                                        "organization_id": {
+                                            "type": "string",
+                                            "format": "uuid",
+                                            "nullable": true
+                                        },
+                                        "user_id": {
+                                            "type": "string",
+                                            "format": "uuid",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Invalid webhook signature",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Invalid webhook signature"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "sanctum": {
+                "type": "http",
+                "description": "Bearer token from login or SSO callback",
+                "scheme": "bearer",
+                "bearerFormat": "Token"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Auth — Standalone",
+            "description": "Email/password authentication (standalone mode)"
+        },
+        {
+            "name": "Auth — SSO",
+            "description": "Console SSO authentication (console mode)"
+        },
+        {
+            "name": "Webhook",
+            "description": "Console webhook endpoints"
+        }
+    ]
+}

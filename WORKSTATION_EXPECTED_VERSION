@@ -1,0 +1,21 @@
+# Bản mà máy trạm ở quán NÊN đang chạy — KHÔNG phải bản repo này sắp dựng.
+#
+# `VERSION` (cùng thư mục) là số hiệu build kế tiếp; file này là quyết định VẬN
+# HÀNH "quán nên ở bản nào", thứ #2635/#3173 giao cho HQ. Hai số cố ý rời nhau:
+# phát hành một bản không có nghĩa là đẩy nó xuống quán.
+#
+# Deploy CHÉP giá trị này vào `WORKSTATION_EXPECTED_VERSION` của `.env`
+# production, rồi `deploy:verify-workstation-expected-version` xác nhận nó tải
+# được thật. Trước 2026-08-18 con số nằm đặt tay trong `.env` trên server nên nó
+# trôi im lặng: trang tải ở v0.8.31 trong khi `.env` vẫn v0.8.30.
+#
+# HÃM MỘT BẢN LỖI = KHÔNG bump file này. Deploy sẽ không bao giờ tự chọn hộ —
+# đó là điều kiện để #3173 không bị gỡ mất.
+#
+# Cẩn trọng: `WORKSTATION_EXPECTED_AUTO_APPLY=true` đang bật trên production
+# (từ 2026-08-18), nên bump file này là ra lệnh cho máy quán tự cài và khởi
+# động lại trong cửa sổ 02:00–04:00 giờ quán, không có ai đứng đó.
+#
+# Chỉ được đặt một bản ĐÃ phát hành lên trang tải:
+#   https://tempo-prod.godx.jp/downloads/workstation/manifest.json
+v0.8.34

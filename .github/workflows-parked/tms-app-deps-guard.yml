@@ -1,0 +1,61 @@
+name: deps-guard
+
+# Server-side enforcement of dependency bans. Complements the client-side
+# pre-commit hook at `.githooks/pre-commit` — the hook catches local
+# commits, this workflow catches PRs (even ones that bypass the hook with
+# --no-verify or commit through the GitHub web UI).
+#
+# Currently enforces:
+#   - `@godxjp/ui` is forbidden. tms-app is React Native; @godxjp/ui is
+#     React DOM. Removed three times (commits 4cb43de, 3af58d1, …) and
+#     keeps coming back via feature branches cut before the last removal
+#     landed. See godx-tempo-tmt commit 832cf81 for full context.
+
+# `dev` is the working branch. Watching only PRs and pushes to `main` meant
+# this guard sat out the one thing it existed for: since 2026-06-09 exactly
+# one commit touched package.json — 48fe76c, titled "add payment due and
+# timeout fields to CustomerOrder", which also deleted
+# @testing-library/react-hooks as a drive-by and broke `npm ci`. It went
+# straight to dev, so the guard never ran. Same shape as #1197, where CI
+# gated only main and could therefore only report a break after the release.
+on:
+  pull_request:
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/deps-guard.yml'
+  push:
+    branches:
+      - dev
+      - main
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+
+jobs:
+  forbidden-deps:
+    name: Forbidden dependencies
+    # Self-hosted only. This org has no Actions billing — a GitHub-hosted job
+    # dies in ~4s with "recent account payments have failed". This guard last
+    # ran successfully on 2026-06-09; had it been triggered since, it would
+    # have failed for that reason rather than doing its job.
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for '@godxjp/ui' in package.json
+        run: |
+          if grep -q '"@godxjp/ui"' package.json; then
+            echo "::error file=package.json::@godxjp/ui is not allowed in tms-app (React Native project). Use @godxjp/ui-native if you need shared RN primitives. See commit 832cf81 for context."
+            exit 1
+          fi
+          echo "✓ package.json clean"
+
+      - name: Check for '@godxjp/ui' in package-lock.json
+        run: |
+          if [ -f package-lock.json ] && grep -q '"@godxjp/ui"' package-lock.json; then
+            echo "::error file=package-lock.json::@godxjp/ui resolved in lockfile — package.json must also carry it. Run 'npm install' after removing from package.json."
+            exit 1
+          fi
+          echo "✓ package-lock.json clean"

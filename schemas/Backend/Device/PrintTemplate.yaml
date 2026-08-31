@@ -1,0 +1,116 @@
+# Mẫu phiếu in, có phiên bản. `scope` quyết định ai sở hữu: system (chưa dùng),
+# brand, hay shop. `version` tăng dần trong bộ (kind, scope, brand, branch).
+# `definition` là IR trình bày — CHỈ bố cục, không bao giờ chứa phép tính tiền.
+kind: object
+
+options:
+  id: Uuid
+  timestamps: true
+  softDelete: true
+  indexes:
+    - columns: [kind, scope, brand_id, branch_id, version]
+      unique: true
+      name: print_templates_scope_version_unique
+    - columns: [kind, scope, brand_id, branch_id, status]
+      name: print_templates_scope_status_idx
+    - columns: [branch_id, status]
+      name: print_templates_branch_status_idx
+    - columns: [updated_at]
+      name: print_templates_updated_at_idx
+
+properties:
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    nullable: true
+    onDelete: CASCADE
+    displayName: { ja: 組織, en: Organization, vi: Tổ chức }
+
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    nullable: true
+    onDelete: CASCADE
+    displayName: { ja: ブランド, en: Brand, vi: Thương hiệu }
+
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    nullable: true
+    onDelete: CASCADE
+    displayName: { ja: 支店, en: Branch, vi: Chi nhánh }
+
+  kind:
+    type: String
+    length: 32
+    displayName: { ja: 種別, en: Kind, vi: Loại phiếu }
+
+  scope:
+    type: String
+    length: 16
+    displayName: { ja: スコープ, en: Scope, vi: Phạm vi }
+
+  version:
+    type: Int
+    unsigned: true
+    displayName: { ja: バージョン, en: Version, vi: Phiên bản }
+
+  status:
+    type: String
+    length: 16
+    default: draft
+    displayName: { ja: 状態, en: Status, vi: Trạng thái }
+
+  definition:
+    type: Json
+    displayName: { ja: 定義, en: Definition, vi: Định nghĩa }
+
+  # scope=brand: danh sách đường dẫn mà shop được phép ghi đè.
+  shop_editable:
+    type: Json
+    nullable: true
+    displayName: { ja: 店舗編集可, en: Shop Editable, vi: Shop sửa được }
+
+  # Giờ treo tường của chi nhánh; null = hiệu lực ngay khi publish.
+  effective_from:
+    type: DateTime
+    nullable: true
+    displayName: { ja: 適用開始, en: Effective From, vi: Hiệu lực từ }
+
+  parentVersion:
+    type: Association
+    relation: ManyToOne
+    target: PrintTemplate
+    nullable: true
+    onDelete: SET NULL
+    displayName: { ja: 親バージョン, en: Parent Version, vi: Bản gốc }
+
+  notes:
+    type: String
+    length: 500
+    nullable: true
+    displayName: { ja: 変更メモ, en: Notes, vi: Ghi chú }
+
+  createdBy:
+    type: Association
+    relation: ManyToOne
+    target: User
+    nullable: true
+    onDelete: SET NULL
+    displayName: { ja: 作成者, en: Created By, vi: Người tạo }
+
+  publishedBy:
+    type: Association
+    relation: ManyToOne
+    target: User
+    nullable: true
+    onDelete: SET NULL
+    displayName: { ja: 公開者, en: Published By, vi: Người phát hành }
+
+  published_at:
+    type: DateTime
+    nullable: true
+    displayName: { ja: 公開日時, en: Published At, vi: Phát hành lúc }

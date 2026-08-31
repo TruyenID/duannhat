@@ -1,0 +1,41 @@
+# ==============================================================================
+# Stock Transaction Type Enum (在庫取引タイプ / Loại phiếu kho)
+# ==============================================================================
+#
+# Phân loại chiều di chuyển kho hàng (nhập/xuất).
+# Quyết định hướng tác động lên tồn kho: nhập (+) hoặc xuất (-).
+#
+# Giá trị (Values):
+#   - stock_in: Nhập kho (入庫)
+#     Tác động: Tăng tồn kho (quantity += base_quantity)
+#     Sub-types: purchase, production, transfer_in, return (in), adjustment_in, other (in)
+#
+#   - stock_out: Xuất kho (出庫)
+#     Tác động: Giảm tồn kho (quantity -= base_quantity)
+#     Sub-types: sales, transfer_out, disposal, return (out), adjustment_out, other (out)
+#
+# Sử dụng trong:
+#   - StockTransaction.type: Xác định loại phiếu nhập/xuất
+#   - stock_movements.movement_type: Ánh xạ tương ứng (in/out)
+#   - Auto-code: SI-YYYYMMDD-XXX (stock_in) / SO-YYYYMMDD-XXX (stock_out)
+#
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: 在庫取引タイプ
+  en: Stock Transaction Type
+  vi: Loại phiếu kho
+
+values:
+  - value: stock_in
+    label:
+      ja: 入庫
+      en: Stock In
+      vi: Nhập kho
+  - value: stock_out
+    label:
+      ja: 出庫
+      en: Stock Out
+      vi: Xuất kho

@@ -1,0 +1,38 @@
+# ==============================================================================
+# Stock Count Scope Enum (棚卸範囲 / Phạm vi kiểm kê)
+# ==============================================================================
+#
+# Phạm vi kiểm kê: toàn bộ kho hoặc chọn sản phẩm cụ thể.
+#
+# Giá trị (Values):
+#   - full: Kiểm kê toàn bộ (全品棚卸)
+#     Hệ thống tự snapshot toàn bộ stock_levels có quantity > 0 tại warehouse
+#     Tạo items cho tất cả sản phẩm/nguyên liệu có tồn kho
+#
+#   - partial: Kiểm kê một phần (一部棚卸)
+#     Manager chọn sản phẩm/nguyên liệu cụ thể cần kiểm
+#     Items được thêm thủ công sau khi tạo phiên
+#
+# Sử dụng trong:
+#   - StockCount.scope: Phạm vi kiểm kê
+#
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: 棚卸範囲
+  en: Stock Count Scope
+  vi: Phạm vi kiểm kê
+
+values:
+  - value: full
+    label:
+      ja: 全品棚卸
+      en: Full Count
+      vi: Kiểm kê toàn bộ
+  - value: partial
+    label:
+      ja: 一部棚卸
+      en: Partial Count
+      vi: Kiểm kê một phần

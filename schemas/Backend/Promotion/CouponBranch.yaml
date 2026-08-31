@@ -1,0 +1,27 @@
+# =============================================================================
+# CouponBranch (クーポン店舗ピボット / Coupon × Branch pivot)
+# =============================================================================
+#
+# M2M whitelist between Coupon and Branch. Empty rowset for a coupon ⇒
+# brand-wide (apply OK from any branch in the brand). Any row(s) ⇒
+# restricted whitelist — apply rejects 422 coupon_branch_not_eligible
+# nếu branch không có row.
+#
+# Written by:  CouponService::create() / update() qua sync() pivot
+#              attach/detach trong DB::transaction.
+# Read by:     CouponService::apply() (eligibility check), HQ list
+#              filter (`branch_id` query param), HQ detail S3 (Branches
+#              tab).
+# Lifecycle:   CASCADE từ cả 2 phía (xóa coupon hoặc branch ⇒ row biến
+#              mất). Pivot không có dữ liệu nghiệp vụ (chỉ là tập
+#              whitelist) nên CASCADE là đúng.
+# =============================================================================
+
+kind: pivot
+pivotFor: [Coupon, Branch]
+
+options:
+  indexes:
+    - columns: [coupon_id, branch_id]
+      unique: true
+      name: coupon_branch_unique

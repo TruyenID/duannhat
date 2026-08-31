@@ -1,0 +1,215 @@
+{
+  "version": "tempo-tax-resolution-v1",
+  "purpose": "Cross-language contract for the #1099 single-rate tax resolution chain. Cloud (backend/app/Services/Customer/TaxResolver.php) is AUTHORITATIVE; the workstation mirror (workstation/internal/service/tax_resolver.go) must reproduce it to the yen so an offline line stamps the rate Cloud would have stamped. This file is byte-identical in both repos: backend/tests/Fixtures/ and workstation/internal/service/testdata/. Edit both or the digest check fails.",
+  "chain": [
+    "tier 1  menu line override        MenuProduct.tax_type_id",
+    "tier 2  section in this menu      MenuMenuSection.tax_type_id   (#1218)",
+    "tier 3  whole menu                Menu.tax_type_id              (#1218)",
+    "tier 4  product default           Product.tax_type_id",
+    "tier 5  branch default            ShopOrderSetting.default_tax_type_id",
+    "tier 6  brand default             TaxType.is_default = true",
+    "none    -> rate 0, NO snapshot   (legacy tax_rate fallback was dropped in plan-043 T6.2)"
+  ],
+  "tier_collapse_note": "The workstation never sees tiers 1-4 separately: the menu feed collapses them into one column (menu_items.tax_type_id) at backend/app/Services/Customer/CustomerMenuService.php — $menuProduct->tax_type_id ?? <section-in-this-menu> ?? $menu->tax_type_id ?? $product->tax_type_id (#1218 added the middle two; they sit ABOVE the product by ruling, so a menu-wide 8% does override a tax-exempt product). Each case therefore states both inputs; the Go harness applies exactly that collapse, and a case where the collapse itself would lose information is a bug in the feed, not in the resolver. The collapse order is pinned on the Cloud side by tests/Feature/Customer/MenuFeedTaxCollapseTest.php.",
+  "digest_algorithm": "sha256 over the lines produced by joining, per case in file order, the fields name|menu_tax_type_id|product_tax_type_id|branch_default_tax_type_id|legacy_branch_tax_rate|expect.tax_type_id|expect.rate|expect.has_snapshot with '|', absent ids rendered as '~', rates formatted with exactly 2 decimals, booleans as 'true'/'false', cases joined with '\\n' (no trailing newline).",
+  "digest": "3bacd934f9936a216a126c0818b7d592eb44a79d25187040bbc33dad9a60b39b",
+  "case_count": 12,
+  "tax_types": [
+    {
+      "id": "11111111-1111-4111-8111-111111111111",
+      "code": "STANDARD",
+      "rate": 10.0,
+      "is_default": true,
+      "is_active": true
+    },
+    {
+      "id": "22222222-2222-4222-8222-222222222222",
+      "code": "REDUCED",
+      "rate": 8.0,
+      "is_default": false,
+      "is_active": true
+    },
+    {
+      "id": "33333333-3333-4333-8333-333333333333",
+      "code": "EXEMPT",
+      "rate": 0.0,
+      "is_default": false,
+      "is_active": true
+    },
+    {
+      "id": "44444444-4444-4444-8444-444444444444",
+      "code": "RETIRED",
+      "rate": 5.0,
+      "is_default": false,
+      "is_active": false
+    }
+  ],
+  "cases": [
+    {
+      "name": "tier1 menu override wins over the product type",
+      "menu_tax_type_id": "22222222-2222-4222-8222-222222222222",
+      "product_tax_type_id": "11111111-1111-4111-8111-111111111111",
+      "branch_default_tax_type_id": "11111111-1111-4111-8111-111111111111",
+      "legacy_branch_tax_rate": 10.0,
+      "expect": {
+        "tax_type_id": "22222222-2222-4222-8222-222222222222",
+        "rate": 8.0,
+        "has_snapshot": true
+      },
+      "why": "This is how takeaway gets 8%: the takeaway MENU carries the reduced type on its line. No order-type input exists anywhere in the chain."
+    },
+    {
+      "name": "tier1 menu override wins even when it is the more expensive rate",
+      "menu_tax_type_id": "11111111-1111-4111-8111-111111111111",
+      "product_tax_type_id": "22222222-2222-4222-8222-222222222222",
+      "branch_default_tax_type_id": "22222222-2222-4222-8222-222222222222",
+      "legacy_branch_tax_rate": 8.0,
+      "expect": {
+        "tax_type_id": "11111111-1111-4111-8111-111111111111",
+        "rate": 10.0,
+        "has_snapshot": true
+      },
+      "why": "Precedence is positional, not min/max. A resolver that picked the lower rate would pass the case above and fail this one."
+    },
+    {
+      "name": "tier2 product type applies when the menu line overrides nothing",
+      "menu_tax_type_id": null,
+      "product_tax_type_id": "22222222-2222-4222-8222-222222222222",
+      "branch_default_tax_type_id": "11111111-1111-4111-8111-111111111111",
+      "legacy_branch_tax_rate": 10.0,
+      "expect": {
+        "tax_type_id": "22222222-2222-4222-8222-222222222222",
+        "rate": 8.0,
+        "has_snapshot": true
+      },
+      "why": "The product's own type must beat the branch default."
+    },
+    {
+      "name": "tier3 branch default applies when neither line nor product carries a type",
+      "menu_tax_type_id": null,
+      "product_tax_type_id": null,
+      "branch_default_tax_type_id": "22222222-2222-4222-8222-222222222222",
+      "legacy_branch_tax_rate": 10.0,
+      "expect": {
+        "tax_type_id": "22222222-2222-4222-8222-222222222222",
+        "rate": 8.0,
+        "has_snapshot": true
+      },
+      "why": "A shop-wide default, e.g. an all-takeaway branch."
+    },
+    {
+      "name": "tier4 brand default applies when the branch has no default either",
+      "menu_tax_type_id": null,
+      "product_tax_type_id": null,
+      "branch_default_tax_type_id": null,
+      "legacy_branch_tax_rate": 8.0,
+      "expect": {
+        "tax_type_id": "11111111-1111-4111-8111-111111111111",
+        "rate": 10.0,
+        "has_snapshot": true
+      },
+      "why": "STANDARD is the brand's is_default row. The legacy 8 is deliberately different so a resolver that fell back to it fails here."
+    },
+    {
+      "name": "explicit 0% EXEMPT is a stamped rate, not an absent one",
+      "menu_tax_type_id": "33333333-3333-4333-8333-333333333333",
+      "product_tax_type_id": "11111111-1111-4111-8111-111111111111",
+      "branch_default_tax_type_id": "11111111-1111-4111-8111-111111111111",
+      "legacy_branch_tax_rate": 10.0,
+      "expect": {
+        "tax_type_id": "33333333-3333-4333-8333-333333333333",
+        "rate": 0.0,
+        "has_snapshot": true
+      },
+      "why": "非課税 must be distinguishable from unresolved: same rate, but has_snapshot true and a type id to print on the invoice."
+    },
+    {
+      "name": "nothing resolves anywhere - 0% and NO snapshot, legacy rate is NOT used",
+      "menu_tax_type_id": null,
+      "product_tax_type_id": null,
+      "branch_default_tax_type_id": null,
+      "legacy_branch_tax_rate": 10.0,
+      "expect": {
+        "tax_type_id": null,
+        "rate": 0.0,
+        "has_snapshot": false
+      },
+      "why": "Only reachable for a brand with zero tax types (seeding skipped). Cloud dropped the legacy tax_rate fallback in plan-043 T6.2, so the workstation must not resurrect it: a 10% offline receipt that Cloud re-prices to 0% is a receipt handed to a customer that the books then contradict. THIS CASE REQUIRES no_brand_default.",
+      "no_brand_default": true
+    },
+    {
+      "name": "an INACTIVE type still resolves when explicitly assigned to the line",
+      "menu_tax_type_id": "44444444-4444-4444-8444-444444444444",
+      "product_tax_type_id": null,
+      "branch_default_tax_type_id": "11111111-1111-4111-8111-111111111111",
+      "legacy_branch_tax_rate": 10.0,
+      "expect": {
+        "tax_type_id": "44444444-4444-4444-8444-444444444444",
+        "rate": 5.0,
+        "has_snapshot": true
+      },
+      "why": "Deactivation blocks NEW assignment (BR-TT02); it does not retroactively unstick lines that already point at the type. Filtering is_active inside the resolver would silently re-rate live menus the moment an admin deactivates a type."
+    },
+    {
+      "name": "an INACTIVE type still resolves as the branch default",
+      "menu_tax_type_id": null,
+      "product_tax_type_id": null,
+      "branch_default_tax_type_id": "44444444-4444-4444-8444-444444444444",
+      "legacy_branch_tax_rate": 10.0,
+      "expect": {
+        "tax_type_id": "44444444-4444-4444-8444-444444444444",
+        "rate": 5.0,
+        "has_snapshot": true
+      },
+      "why": "Same rule one tier down. Cloud follows ShopOrderSetting.default_tax_type_id without an is_active filter, so the mirror must not add one."
+    },
+    {
+      "name": "a branch default pointing at a type that does not exist falls THROUGH to the brand default",
+      "menu_tax_type_id": null,
+      "product_tax_type_id": null,
+      "branch_default_tax_type_id": "99999999-9999-4999-8999-999999999999",
+      "legacy_branch_tax_rate": 8.0,
+      "expect": {
+        "tax_type_id": "11111111-1111-4111-8111-111111111111",
+        "rate": 10.0,
+        "has_snapshot": true
+      },
+      "why": "On Cloud the FK cannot dangle, so this is the OFFLINE-ONLY case: the workstation pulled shop_settings before the tax_types row arrived. Continuing down the chain keeps the tier order; bailing out to the legacy rate would stamp 8 where Cloud stamps 10."
+    },
+    {
+      "name": "a menu line pointing at a type that does not exist falls THROUGH to the branch default",
+      "menu_tax_type_id": "99999999-9999-4999-8999-999999999999",
+      "product_tax_type_id": null,
+      "branch_default_tax_type_id": "22222222-2222-4222-8222-222222222222",
+      "legacy_branch_tax_rate": 10.0,
+      "expect": {
+        "tax_type_id": "22222222-2222-4222-8222-222222222222",
+        "rate": 8.0,
+        "has_snapshot": true
+      },
+      "why": "Same partial-sync window, one tier up. Cloud reaches this state via a soft-deleted type, whose relation resolves to null."
+    },
+    {
+      "name": "a fractional rate survives the round trip unchanged",
+      "menu_tax_type_id": "55555555-5555-4555-8555-555555555555",
+      "product_tax_type_id": null,
+      "branch_default_tax_type_id": "11111111-1111-4111-8111-111111111111",
+      "legacy_branch_tax_rate": 10.0,
+      "extra_tax_types": [
+        {
+          "id": "55555555-5555-4555-8555-555555555555",
+          "code": "VN_VAT",
+          "rate": 8.25,
+          "is_default": false,
+          "is_active": true
+        }
+      ],
+      "expect": {
+        "tax_type_id": "55555555-5555-4555-8555-555555555555",
+        "rate": 8.25,
+        "has_snapshot": true
+      },
+      "why": "rate is DECIMAL(5,2) on Cloud and REAL in SQLite. A mirror that rounded to an integer percent, or that lost the .25 through a float32, would diverge on every Vietnamese line."
+    }
+  ]
+}

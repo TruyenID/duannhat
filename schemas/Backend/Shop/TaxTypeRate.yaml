@@ -1,0 +1,125 @@
+# =============================================================================
+# TaxTypeRate (税率の適用期間 / Kỳ hiệu lực của thuế suất)
+# =============================================================================
+#
+# One rate of one TaxType, valid over a closed-open period. #1366 (from #1129
+# item 2), shape decided 2026-08-01.
+#
+# WHY A TABLE AND NOT TWO COLUMNS ON TaxType
+#
+#   A tax rate is a SEQUENCE OF RECORDS BY PERIOD, never a single number that
+#   gets overwritten. Two columns (`effective_from`/`effective_to`) on TaxType
+#   cannot do the two things this exists for:
+#     - keep history — "what was my reduced rate in March" must stay answerable
+#       after the rate changes;
+#     - schedule ahead — 8% (running now) and 10% (from 01/10) have to exist AT
+#       THE SAME TIME, which is two rows. One row forces somebody awake at
+#       midnight to edit by hand, the exact thing this removes.
+#   Precedent in this repo: PrintTemplate versions by `effective_from` with a
+#   `live` notion (HQ/PrintTemplateController). Same shape on purpose.
+#
+# `TaxType.rate` STAYS as a cache of the currently-effective row, maintained by
+# the service, so the menu feed and every "today's rate" reader keeps working
+# unchanged. It is a CACHE, NOT THE SOURCE: any date-aware calculation must go
+# through this table.
+#
+# WHICH ROW APPLIES
+#
+#   effective_from <= <order's BUSINESS date> AND
+#   (effective_to IS NULL OR <that date> <= effective_to)
+#
+# That date comes from `BusinessClock::forBranch($branchId)` (#1091) — never
+# `now()`, never a bare `whereDate(...)`, never the DB clock. VN shops (UTC+7)
+# and JP shops (UTC+9) share one UTC backend, so the wrong clock puts NINE
+# HOURS OF EVERY DAY on the wrong rate, and a rate-change day is the most
+# expensive day to get that wrong. Offline replay dates from
+# `evidence.issued_at` — the rate at the time of SALE, not of sync.
+#
+# INVARIANTS (service + tests; the unique index below is only the DB backstop)
+#
+#   - NO OVERLAPPING PERIODS per tax_type_id. Two overlapping rows mean an
+#     order has two valid rates and the winner depends on sort order.
+#   - NO EDITING the rate of a CLOSED period. Correcting history means opening
+#     a new period, never overwriting — same immutability as the per-line
+#     snapshot already on customer_order_items.
+#   - NO GAPS: a new period starts the day after the previous one ends.
+#
+# The per-line snapshot on existing orders remains the source of truth for
+# those orders. This table prices NEW orders and answers master-data-over-time
+# questions; it never rewrites history.
+#
+# BACKFILL: every existing TaxType gets ONE row — its current `rate`,
+# `effective_from = 1900-01-01`, `effective_to = NULL`. Deliberately NOT
+# `created_at`: orders raised BEFORE somebody created the master row (data
+# imported later, brand onboarded later, re-seed) would resolve to no rate at
+# all, mid-calculation. An open-ended past bound always resolves, and loses
+# nothing — there were no transactions before it.
+#
+# =============================================================================
+
+displayName:
+  en: Tax Rate Period
+  ja: 税率適用期間
+  vi: Kỳ hiệu lực thuế suất
+
+kind: object
+
+options:
+  timestamps: true
+  id: Uuid
+  indexes:
+    # Serves both jobs with one index: it IS the resolver's lookup (rows of
+    # one type, ordered by period start), and being unique it is the DB
+    # backstop for "no two periods start on the same day for one type".
+    # Unique alone does NOT prove non-overlap — that is the service's job plus
+    # tests; this only makes the cheapest violation impossible.
+    - columns: [tax_type_id, effective_from]
+      unique: true
+
+properties:
+  # The rate for this period — percent, 0–100, 2dp. Same shape as the
+  # TaxType.rate cache it feeds.
+  rate:
+    type: Decimal
+    precision: 5
+    scale: 2
+    displayName:
+      en: Rate (%)
+      ja: 税率 (%)
+      vi: Thuế suất (%)
+
+  # First BUSINESS day this rate applies, inclusive. NOT NULL: a period with
+  # no start cannot be ordered against the others.
+  effective_from:
+    type: Date
+    displayName:
+      en: Effective From
+      ja: 適用開始日
+      vi: Hiệu lực từ
+
+  # Last business day this rate applies, inclusive. NULL = still in effect —
+  # exactly one such row per tax type at any time.
+  effective_to:
+    type: Date
+    nullable: true
+    displayName:
+      en: Effective To
+      ja: 適用終了日
+      vi: Hiệu lực đến
+
+  # ===========================================================================
+  # Associations
+  # ===========================================================================
+
+  # Owning tax type. CASCADE — the periods have no meaning without it, and
+  # TaxType itself is already protected from deletion while referenced
+  # (BR-TT02, RESTRICT from products/menu items/order lines).
+  taxType:
+    type: Association
+    relation: ManyToOne
+    target: TaxType
+    onDelete: CASCADE
+    displayName:
+      en: Tax Type
+      ja: 税区分
+      vi: Loại thuế

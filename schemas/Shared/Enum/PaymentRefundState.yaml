@@ -1,0 +1,24 @@
+# Append-only refund operation states. Ambiguous remote outcomes stay reserved in
+# reconciliation_required and must never be collapsed into failed.
+kind: enum
+
+displayName:
+  en: Payment Refund State
+  ja: 返金ステータス
+  vi: Trạng thái hoàn tiền
+
+values:
+  - value: prepared
+    label: { en: Prepared, ja: 準備済み, vi: Đã chuẩn bị }
+  - value: submitted
+    label: { en: Submitted, ja: 送信済み, vi: Đã gửi }
+  - value: pending
+    label: { en: Pending, ja: 保留中, vi: Đang chờ }
+  - value: reconciliation_required
+    label: { en: Reconciliation Required, ja: 照合が必要, vi: Cần đối soát }
+  - value: succeeded
+    label: { en: Succeeded, ja: 成功, vi: Thành công }
+  - value: failed
+    label: { en: Failed, ja: 失敗, vi: Thất bại }
+  - value: canceled
+    label: { en: Canceled, ja: 取消済み, vi: Đã huỷ }

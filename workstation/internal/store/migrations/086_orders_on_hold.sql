@@ -1,0 +1,21 @@
+-- #2063 — cờ ĐANG TREO của Cloud, giữ nguyên BA trạng thái.
+--
+-- NULL  = Cloud CHƯA nói (đơn chưa từng đi qua một đường đọc có đóng dấu)
+-- 0     = Cloud nói KHÔNG treo
+-- 1     = Cloud nói TREO
+--
+-- Ba, không phải hai. Gộp NULL vào 0 là bẫy số 2 của issue: mọi endpoint GHI
+-- của Cloud trả order về mà không kèm cờ, nên một lượt sửa dòng món sẽ ghi đè
+-- "chưa biết" thành "không treo" và hai nút in hiện lại trên đúng đơn vừa bị
+-- chặn.
+--
+-- Nullable + không DEFAULT là CỐ Ý: `DEFAULT 0` sẽ biến mọi đơn đang có trên
+-- máy thành "Cloud nói không treo" ngay lúc migrate, tức bịa một câu trả lời
+-- Cloud chưa từng đưa ra.
+--
+-- Vì sao cờ đến TỪ Cloud chứ không tự tính (bẫy số 1): khoản thu nợ cưỡi trên
+-- MỘT ĐƠN KHÁC và chỉ trỏ ngược bằng `metadata.settles_payment_id`; bản sao
+-- local của đơn kia chỉ có `cloud_payment_summary` — danh sách nhãn phương
+-- thức, không có metadata. Nên máy trạm tự tính thì chỉ BẬT được cờ, không bao
+-- giờ TẮT, và một đơn đã trả nợ xong sẽ vĩnh viễn không in được hoá đơn.
+ALTER TABLE orders ADD COLUMN is_on_hold INTEGER;

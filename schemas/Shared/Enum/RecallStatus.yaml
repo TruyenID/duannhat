@@ -1,0 +1,32 @@
+# ==============================================================================
+# Recall Status Enum (リコールステータス / Trạng thái thu hồi)
+# ==============================================================================
+#
+# Plan-017 Tier 1.A — recall lifecycle.
+#
+# Values:
+#   - draft:     RecallService::preview run; no auto-quarantine yet
+#   - active:    initiate() committed; downstream lots flipped to
+#                quarantined; affected customer_orders snapshotted
+#   - completed: ops marked the recall resolved (everything disposed
+#                or returned)
+#   - cancelled: ops aborted the recall; auto-quarantined lots are
+#                released back to active
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: リコールステータス
+  en: Recall Status
+  vi: Trạng thái thu hồi
+
+values:
+  - value: draft
+    label: { ja: 下書き, en: Draft, vi: Nháp }
+  - value: active
+    label: { ja: 実行中, en: Active, vi: Đang thực hiện }
+  - value: completed
+    label: { ja: 完了, en: Completed, vi: Hoàn thành }
+  - value: cancelled
+    label: { ja: キャンセル, en: Cancelled, vi: Đã hủy }

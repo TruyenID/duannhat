@@ -1,0 +1,27 @@
+# =============================================================================
+# AllergenJurisdiction (アレルゲン管轄 / Thẩm quyền dị ứng)
+# =============================================================================
+#
+# Regulatory jurisdiction that defines the mandatory / recommended allergen
+# set. Each Allergen row is scoped to exactly one jurisdiction so the same
+# substance (e.g. "milk") can carry jurisdiction-specific severity rules
+# (US mandatory vs JP mandatory vs EU mandatory).
+#
+# Values follow ISO 3166-1 alpha-2 where practical (`jp`, `us`); `eu` is used
+# for the supranational EU FIC 1169/2011 regulatory list.
+# =============================================================================
+
+kind: enum
+
+displayName:
+  ja: アレルゲン管轄
+  en: Allergen Jurisdiction
+  vi: Thẩm quyền dị ứng
+
+values:
+  - value: jp
+    label: { ja: 日本, en: Japan, vi: Nhật Bản }
+  - value: eu
+    label: { ja: 欧州連合, en: European Union, vi: Liên minh Châu Âu }
+  - value: us
+    label: { ja: 米国, en: United States, vi: Hoa Kỳ }

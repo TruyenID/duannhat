@@ -1,0 +1,46 @@
+# ==============================================================================
+# Void Stock Effect (取消時の在庫処理 / Hiệu ứng kho khi hủy món)
+# ==============================================================================
+#
+# Plan-051 (#1149/#1150) — how voiding an ALREADY-DEDUCTED order line affects
+# stock. Carried on VoidReason.stock_effect; the single junction point is
+# StockDeductionService::compensateVoid (P2):
+#
+#   - restock: mis-tap / customer changed mind BEFORE cooking → compensating
+#     `adjustment_in` transaction referencing the line's stock_out transaction.
+#   - waste:   dish was cooked / dumped → ingredients truly consumed, NO
+#     compensation; the original deduction is tagged with the reason for
+#     waste reporting.
+#   - none:    comp for the customer etc. → dish still served, NO compensation.
+#
+# A line that was NOT yet deducted at void time is simply skipped from
+# deduction (existing #1148 behaviour) regardless of this value.
+#
+# Used in:
+#   - VoidReason.stock_effect (plan-051)
+#
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: 取消時の在庫処理
+  en: Void Stock Effect
+  vi: Hiệu ứng kho khi hủy
+
+values:
+  - value: waste
+    label:
+      ja: 廃棄（在庫は戻さない）
+      en: Waste (no restock)
+      vi: Đổ bỏ (không hoàn kho)
+  - value: restock
+    label:
+      ja: 在庫に戻す
+      en: Restock
+      vi: Hoàn lại kho
+  - value: none
+    label:
+      ja: 在庫変動なし
+      en: No stock change
+      vi: Không thay đổi kho

@@ -1,0 +1,581 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "TempoFast API — KDS (Cloud side)",
+        "description": "## TempoFast — KDS ↔ Cloud\n\nHợp đồng giữa Cloud và màn hình bếp (`godx-kds`), dưới tiền tố\n`/api/v1/kds/...`.\n\nXác thực bằng **device token** cấp qua `POST /api/v1/devices/pair` — endpoint\nCHUNG cho mọi thiết bị, nên nó được ghi cả ở đây lẫn ở tài liệu Workstation.\n\n### Lưu ý vận hành\nKDS gọi Cloud qua `resolveBaseUrl()`: **ưu tiên workstation trên LAN**, Cloud\nchỉ là đường lui. Nên tài liệu này mô tả đường lui và nguồn chân lý, không\nphải đường đi thường ngày trong một quán có workstation.\n\nBump món **không có hàng đợi offline** — một lượt bump thất bại sẽ lăn ngược\ncập nhật lạc quan và báo lỗi cho đầu bếp. Đó là thiết kế cố ý: một lượt bump\nđồng bộ muộn một giờ sẽ dời phiếu sau khi món đã nguội.",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/v1/devices/broadcasting/auth": {
+            "post": {
+                "tags": [
+                    "Devices"
+                ],
+                "summary": "Device-authenticated broadcast channel auth",
+                "description": "Pusher-protocol auth endpoint for Reverb private channels subscribed by paired devices. Laravel's default /broadcasting/auth is sso.auth gated; this route provides the device-token equivalent. Channel authorization callbacks in routes/channels.php receive the resolved Device as the first argument.",
+                "operationId": "dd8df0bf88d657948be85725d1ab65cc",
+                "responses": {
+                    "200": {
+                        "description": "Signed auth payload"
+                    },
+                    "401": {
+                        "description": "Missing/invalid device token"
+                    },
+                    "403": {
+                        "description": "Device not authorized for requested channel"
+                    }
+                },
+                "security": [
+                    {
+                        "deviceToken": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/devices/me": {
+            "get": {
+                "tags": [
+                    "Devices"
+                ],
+                "summary": "Neutral device-token verify",
+                "description": "Accepts any active device type. Used by workstation CloudVerifier and any device-side client that needs to confirm its identity + branch.",
+                "operationId": "fa700d52c8db166f028f5bd53f356697",
+                "responses": {
+                    "200": {
+                        "description": "Device info (token stripped)"
+                    },
+                    "401": {
+                        "description": "Missing/invalid/inactive token"
+                    }
+                },
+                "security": [
+                    {
+                        "deviceToken": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/devices/reverb-config": {
+            "get": {
+                "tags": [
+                    "Devices"
+                ],
+                "summary": "Return the Reverb public creds for device-paired Echo clients",
+                "operationId": "af09f6196d5dd8161cfce45a848d1327",
+                "responses": {
+                    "200": {
+                        "description": "Reverb client creds"
+                    },
+                    "401": {
+                        "description": "Missing/invalid device token"
+                    },
+                    "422": {
+                        "description": "Device branch not linked to a Reverb-provisioned brand"
+                    }
+                },
+                "security": [
+                    {
+                        "deviceToken": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/kds/me": {
+            "get": {
+                "tags": [
+                    "KDS"
+                ],
+                "summary": "KDS device info",
+                "description": "Returns the KDS device record (with token stripped) plus branch/organization context. Used by kds-web to display the device name + branch on dashboard chrome and as a 30s heartbeat poll for revoke detection.",
+                "operationId": "c5b8af760b089c17478be585d1e0123d",
+                "responses": {
+                    "200": {
+                        "description": "KDS device record (token stripped)"
+                    },
+                    "401": {
+                        "description": "Missing/invalid token"
+                    },
+                    "403": {
+                        "description": "Device type is not kds"
+                    }
+                },
+                "security": [
+                    {
+                        "deviceToken": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/kds/orders/{customerOrder}/items/{item}/status": {
+            "patch": {
+                "tags": [
+                    "KDS"
+                ],
+                "summary": "Bump kitchen item status",
+                "description": "Advances item through pending→preparing→ready→served lifecycle. KDS controller restricts to [preparing, ready, served] — voided goes through POS, pending is the initial state and not set by KDS. Service-level allows free transitions between active statuses.",
+                "operationId": "cf82ebff72daa472847e893dc3b3077a",
+                "parameters": [
+                    {
+                        "name": "customerOrder",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "item",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated item"
+                    },
+                    "403": {
+                        "description": "Branch mismatch"
+                    },
+                    "404": {
+                        "description": "Order/item not found"
+                    },
+                    "409": {
+                        "description": "Invalid transition"
+                    },
+                    "422": {
+                        "description": "Validation (status not in [preparing,ready,served])"
+                    }
+                },
+                "security": [
+                    {
+                        "deviceToken": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/kds/orders/{customerOrder}/items/{item}/mark-preparing": {
+            "post": {
+                "tags": [
+                    "KDS"
+                ],
+                "summary": "Mark item as preparing",
+                "description": "Transitions a pending item to preparing status. Idempotency-Key required.",
+                "operationId": "ce957b5965e482523a1872bc33bb3f9b",
+                "parameters": [
+                    {
+                        "name": "customerOrder",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "item",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated item"
+                    },
+                    "401": {
+                        "description": "Missing/invalid token"
+                    },
+                    "403": {
+                        "description": "Branch mismatch (KDS_E006)"
+                    },
+                    "404": {
+                        "description": "Item not found (KDS_E007)"
+                    },
+                    "409": {
+                        "description": "Order finalized (KDS_E001)"
+                    },
+                    "422": {
+                        "description": "Idempotency-Key missing"
+                    },
+                    "429": {
+                        "description": "Throttled (KDS_E005)"
+                    }
+                },
+                "security": [
+                    {
+                        "deviceToken": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/kds/orders/{customerOrder}/items/{item}/mark-ready": {
+            "post": {
+                "tags": [
+                    "KDS"
+                ],
+                "summary": "Mark item as ready",
+                "description": "Transitions a preparing item to ready status. Requires all toppings to be ready first. Idempotency-Key required.",
+                "operationId": "8841c80ff00521fc70295b61929fad2c",
+                "parameters": [
+                    {
+                        "name": "customerOrder",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "item",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated item"
+                    },
+                    "401": {
+                        "description": "Missing/invalid token"
+                    },
+                    "403": {
+                        "description": "Branch mismatch (KDS_E006)"
+                    },
+                    "404": {
+                        "description": "Item not found (KDS_E007)"
+                    },
+                    "409": {
+                        "description": "Order finalized (KDS_E001) or toppings not ready (KDS_E004)"
+                    },
+                    "422": {
+                        "description": "Idempotency-Key missing"
+                    },
+                    "429": {
+                        "description": "Throttled (KDS_E005)"
+                    }
+                },
+                "security": [
+                    {
+                        "deviceToken": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/kds/orders/{customerOrder}/items/{item}/mark-served": {
+            "post": {
+                "tags": [
+                    "KDS"
+                ],
+                "summary": "Mark item as served",
+                "description": "Transitions a ready item to served status. Anti-misclick: requires item has been ready for at least 30s. Idempotency-Key required.",
+                "operationId": "afe0f169d6826151fd74ff2f4e8567e4",
+                "parameters": [
+                    {
+                        "name": "customerOrder",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "item",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated item"
+                    },
+                    "401": {
+                        "description": "Missing/invalid token"
+                    },
+                    "403": {
+                        "description": "Branch mismatch (KDS_E006)"
+                    },
+                    "404": {
+                        "description": "Item not found (KDS_E007)"
+                    },
+                    "409": {
+                        "description": "Order finalized (KDS_E001), item not ready (KDS_E002), or too soon after ready (KDS_E003)"
+                    },
+                    "422": {
+                        "description": "Idempotency-Key missing"
+                    },
+                    "429": {
+                        "description": "Throttled (KDS_E005)"
+                    }
+                },
+                "security": [
+                    {
+                        "deviceToken": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/kds/orders/{customerOrder}/items/{item}/revert": {
+            "post": {
+                "tags": [
+                    "KDS"
+                ],
+                "summary": "Revert item to an earlier status",
+                "description": "Backward transition for a kitchen item. Accepts `to: pending|preparing`. Served is terminal and cannot be reverted.",
+                "operationId": "f97a77738d49dd90e97cc53977bb854f",
+                "parameters": [
+                    {
+                        "name": "customerOrder",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "item",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "to"
+                                ],
+                                "properties": {
+                                    "to": {
+                                        "type": "string",
+                                        "enum": [
+                                            "pending",
+                                            "preparing"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated item"
+                    },
+                    "401": {
+                        "description": "Missing/invalid token"
+                    },
+                    "403": {
+                        "description": "Branch mismatch (KDS_E006)"
+                    },
+                    "404": {
+                        "description": "Item not found (KDS_E007)"
+                    },
+                    "409": {
+                        "description": "Cannot revert terminal status (KDS_E002)"
+                    },
+                    "422": {
+                        "description": "Idempotency-Key missing or invalid `to` value"
+                    },
+                    "429": {
+                        "description": "Throttled (KDS_E005)"
+                    }
+                },
+                "security": [
+                    {
+                        "deviceToken": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/kds/orders/{customerOrder}/bump-all": {
+            "post": {
+                "tags": [
+                    "KDS"
+                ],
+                "summary": "Bulk advance all items in a given scope",
+                "description": "scope=pending advances all pending items to preparing; scope=preparing advances all preparing items to ready. Returns updated KdsOrderResource.",
+                "operationId": "5119507c4338ea2eeab480ce50422786",
+                "parameters": [
+                    {
+                        "name": "customerOrder",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "scope"
+                                ],
+                                "properties": {
+                                    "scope": {
+                                        "type": "string",
+                                        "enum": [
+                                            "pending",
+                                            "preparing"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated order"
+                    },
+                    "401": {
+                        "description": "Missing/invalid token"
+                    },
+                    "403": {
+                        "description": "Branch mismatch (KDS_E006)"
+                    },
+                    "409": {
+                        "description": "Order finalized (KDS_E001)"
+                    },
+                    "422": {
+                        "description": "Idempotency-Key missing or invalid scope"
+                    }
+                },
+                "security": [
+                    {
+                        "deviceToken": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/kds/orders": {
+            "get": {
+                "tags": [
+                    "KDS"
+                ],
+                "summary": "Active orders for branch",
+                "description": "Returns customer orders in active statuses (open/dining/checkout/paying) scoped to the KDS device branch. Items eager-loaded.",
+                "operationId": "fb3e9b3c57a9b2897abac3a2e76e3457",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 200,
+                            "maximum": 500,
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Active orders list"
+                    }
+                },
+                "security": [
+                    {
+                        "deviceToken": []
+                    }
+                ]
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Devices",
+            "description": "Devices"
+        },
+        {
+            "name": "KDS",
+            "description": "KDS"
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "sanctum": {
+                "type": "http",
+                "description": "Bearer token from login or SSO callback",
+                "scheme": "bearer",
+                "bearerFormat": "Token"
+            }
+        }
+    }
+}

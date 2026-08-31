@@ -1,0 +1,111 @@
+# =============================================================================
+# PointRewardBranch (ポイント交換商品×店舗 / Pivot phần thưởng × chi nhánh)
+# =============================================================================
+#
+# Công tắc bật/tắt một phần thưởng cho RIÊNG một chi nhánh (#1514). Phần
+# thưởng thuộc về brand (BR-PR01), nhưng một cửa hàng có thể hết nguyên liệu
+# hoặc không phục vụ món đó — họ cần tắt cho mình mà không đụng tới chuỗi.
+#
+# **KHÔNG có dòng ⇒ CÒN BẬT.** Chỉ ghi dòng khi shop chủ động tắt (hoặc bật
+# lại thứ mình từng tắt). Đây là điểm khác có chủ đích so với `CouponBranch`
+# — bên đó pivot là whitelist nên "trống = brand-wide", ở đây pivot là
+# blacklist-có-cờ nên "trống = brand-wide" luôn, cùng một kết quả nhưng phép
+# ghi rẻ hơn nhiều: bật một phần thưởng mới cho 200 cửa hàng là 0 dòng, chứ
+# không phải backfill 200 dòng.
+#
+# Vì sao có cột `is_available` chứ không chỉ dựa vào sự tồn tại của dòng: một
+# shop tắt rồi bật lại phải để lại dấu vết (`updated_by`, `updated_at`) —
+# xoá dòng thì mất luôn ai tắt lúc nào, mà đó chính là câu hỏi HQ sẽ hỏi khi
+# doanh số đổi điểm của một cửa hàng về 0.
+#
+# Written by:  PointRewardService::setBranchAvailability() — gọi từ màn Shop
+#              (`PATCH /shops/{shop}/point-rewards/{reward}/availability`).
+#              HQ KHÔNG ghi bảng này; HQ tắt toàn brand bằng
+#              `point_rewards.is_active`.
+# Read by:     CustomerPointService::rewards($brandId, $branchId) — loại phần
+#              thưởng có dòng `is_available = false` cho branch đang xét.
+# Lifecycle:   CASCADE cả 2 phía. Xoá phần thưởng hoặc chi nhánh thì công tắc
+#              cũng hết nghĩa.
+#
+# Business Rules:
+#   - BR-PRB01: Không có dòng ⇒ available. Truy vấn phải là LEFT JOIN /
+#               whereDoesntHave, KHÔNG phải INNER JOIN — inner join sẽ làm
+#               MỌI phần thưởng biến mất ở mọi chi nhánh chưa từng tắt gì.
+#   - BR-PRB02: `is_active = false` ở cấp brand thắng tuyệt đối. Shop bật
+#               lại cũng không hiện — HQ đã ngừng phần thưởng đó.
+# =============================================================================
+
+displayName:
+  en: Point Reward Branch
+  ja: ポイント交換商品店舗
+  vi: Phần thưởng theo chi nhánh
+
+kind: pivot
+pivotFor: [PointReward, Branch]
+
+options:
+  # KHAI TƯỜNG MINH, đừng bỏ. Bỏ trống thì migration sinh ra bảng
+  # `branch_point_reward_pivot` trong khi model sinh ra lại ghi
+  # `$table = 'point_reward_branches'` — hai cái tên khác nhau, và mọi truy
+  # vấn qua model chết bằng "table doesn't exist". `CouponBranch` đang dính
+  # đúng lỗi này (bảng `coupon_branch` vs model `coupon_branches`), chỉ không
+  # ai thấy vì Coupon truy cập pivot bằng `belongsToMany(..., 'coupon_branch')`
+  # nên model pivot chưa từng được dùng.
+  tableName: point_reward_branches
+  timestamps: true
+  # CỐ Ý KHÔNG dùng `audit: createdBy/updatedBy` (#1689, #1723).
+  #
+  # `AuditConfig` của Omnify sinh cột `bigint unsigned` cứng, không có tuỳ chọn
+  # kiểu khoá — mà `users.id` ở repo này là `char(36)` (UUID). Nhét UUID vào cột
+  # bigint thì MySQL truncate và MỌI lần bấm công tắc đều chết:
+  #
+  #   SQLSTATE[01000]: Warning: 1265 Data truncated for column 'created_by_id'
+  #
+  # Và nó chết ở đúng chỗ test không nhìn thấy: test chạy sqlite, vốn có kiểu
+  # động, nên chuỗi UUID vào cột INTEGER không kêu một tiếng nào — 14 test tính
+  # năng xanh mướt cho một công tắc chết sạch trên MySQL.
+  #
+  # `toggledBy` dưới đây là `Association` thật, sinh đúng cột UUID + FK. Đổi lại:
+  # hook auto-fill đi kèm `audit` cũng mất, nên `PointRewardService::
+  # setBranchAvailability()` phải tự điền — xem ở đó.
+  indexes:
+    - columns: [point_reward_id, branch_id]
+      unique: true
+      name: point_reward_branch_unique
+    # BR-PRB01 — truy vấn catalog lọc theo branch rồi mới tới cờ.
+    - columns: [branch_id, is_available]
+
+properties:
+  # Người bấm công tắc gần nhất. MỘT cột, không phải cặp created/updated: dòng
+  # này chỉ có một hành động duy nhất (bật hoặc tắt), nên "ai tạo dòng" và "ai
+  # sửa lần cuối" là cùng một câu hỏi. `created_at`/`updated_at` lo phần "lúc nào".
+  #
+  # Tên KHÁC `created_by_id`/`updated_by_id` là có chủ đích: hai cột kia đã tồn
+  # tại dưới dạng `bigint` (do `audit` sinh ra trước khi #1689 phát hiện sai
+  # kiểu). Dùng lại đúng tên đó thì generator phát ra migration tự mâu thuẫn —
+  # `addColumn` có guard `hasColumn` nên bị bỏ qua, rồi `dropColumn` ở cuối xoá
+  # luôn, kết cục là mất cột mà không thêm lại được. Tên mới thì drop và add là
+  # hai cột khác nhau, không đụng nhau. Xem `PostBranch.yaml`, cùng một vết.
+  #
+  # SET NULL chứ không RESTRICT: xoá một nhân viên nghỉ việc không được phép bị
+  # chặn chỉ vì họ từng tắt một phần thưởng ở một cửa hàng.
+  toggledBy:
+    type: Association
+    relation: ManyToOne
+    target: User
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Toggled By
+      ja: 切替者
+      vi: Người bấm
+
+  is_available:
+    # BR-PRB01 — dòng tồn tại mà cờ true nghĩa là "đã từng tắt, nay bật lại".
+    type: Boolean
+    default: true
+    filterable: true
+    displayName:
+      en: Available
+      ja: 提供中
+      vi: Đang bật

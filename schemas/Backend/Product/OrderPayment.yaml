@@ -1,0 +1,437 @@
+# OrderPayment schema
+# Mỗi lần thu tiền = 1 record. Hỗ trợ split tender
+# (VD: 1 đơn 500 → 300 cash + 200 transfer = 2 records).
+#
+# Written by: staff POS tại quán via OrderPaymentService
+# Read by: POS (realtime), admin report, đối soát cuối ngày
+#
+# Business Rules:
+#   - BR-P01: payment_code auto: PAY-YYYY-NNNN (unique toàn cục)
+#   - BR-P02: amount > 0 (trừ refund → âm)
+#   - BR-P03: tip_amount không tính vào total_amount, không ảnh hưởng auto-close
+#   - BR-P04: Cash auto-confirm (dựa vào payment_method.is_auto_confirm)
+#   - BR-P05: Non-cash → pending, cần confirm thủ công
+#   - BR-P06: Overpayment guard: sum(pending + succeeded) + new <= total
+#   - BR-P07: Cash: tendered >= amount + tip, change = tendered - amount - tip
+#   - BR-P08: refund → record MỚI amount âm, link refund_of_id
+#   - BR-P09: 1 payment chỉ refund 1 lần
+#   - BR-P10: succeeded là immutable (chỉ refund, không sửa)
+#
+# Lifecycle:
+#   Cash:     → succeeded (auto-confirm on create)
+#   Non-cash: → pending → succeeded / failed
+#   Refund:   → succeeded (instant, refund_of_id set)
+
+displayName:
+  en: Order Payment
+  ja: 注文支払い
+  vi: Thanh toán đơn hàng
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    - columns: [tender_key]
+    - columns: [payment_code]
+      unique: true
+    - columns: [customer_order_id]
+    - columns: [customer_order_id, status]
+    - columns: [branch_id, paid_at]
+    - columns: [status]
+    # Plan 010 — kiosk hardening (2026-04-23): scheduled command scans
+    # `expires_at` to fail stale pending payments.
+    - columns: [expires_at]
+    - columns: [refund_of_id]
+    # Idempotency keys are unique PER ORDER, not globally. Two different
+    # orders may legitimately reuse the same client-generated key without
+    # collision. Service layer (OrderPaymentService) already scopes lookups
+    # to customer_order_id; this index makes the DB constraint match intent
+    # and prevents silent rejection on cross-order key collision.
+    - columns: [customer_order_id, idempotency_key]
+      unique: true
+    # Plan 030 — Cashier Shift (2026-06-09): index per-shift revenue split
+    # query (Σ amount WHERE till_session_id = … AND status = 'succeeded')
+    # used by TillSessionService::reconcile() and abandon-payments guard.
+    - columns: [till_session_id]
+    # Plan 047 — durable gateway audit joins. All references remain nullable so
+    # legacy cash, terminal, Stripe, and imported ledger rows stay readable.
+    # Association FKs receive single-column indexes from Omnify automatically;
+    # do not redeclare payment_attempt_id or MySQL receives a duplicate name.
+    - columns: [gateway_connection_id, gateway_option_id]
+    - columns: [gateway_provider_snapshot, gateway_environment_snapshot]
+      name: order_payments_gateway_provider_env
+
+properties:
+  payment_code:
+    # Mã tự động: PAY-YYYY-NNNN (BR-P01)
+    type: String
+    length: 50
+    displayName:
+      en: Payment Code
+      ja: 支払いコード
+      vi: Mã thanh toán
+
+  amount:
+    # Số tiền tính vào bill. Dương = thu, Âm = refund (BR-P02, BR-P08)
+    # Overpayment guard: amount <= order.remaining_amount (BR-P06)
+    type: Decimal
+    precision: 15
+    scale: 2
+    displayName:
+      en: Amount
+      ja: 金額
+      vi: Số tiền
+
+  tip_amount:
+    # Tiền tip cho nhân viên — KHÔNG tính vào total_amount (BR-P03)
+    # KHÔNG ảnh hưởng auto-close check (paid_amount >= total_amount)
+    type: Decimal
+    precision: 15
+    scale: 2
+    default: 0
+    displayName:
+      en: Tip Amount
+      ja: チップ
+      vi: Tiền tip
+
+  status:
+    # pending → succeeded / failed. Cash skip thẳng succeeded (BR-P04, BR-P05)
+    type: EnumRef
+    enum: PaymentStatus
+    default: pending
+    displayName:
+      en: Status
+      ja: ステータス
+      vi: Trạng thái
+
+  paid_at:
+    # Thời điểm thu tiền thành công
+    # Cash: set ngay lúc tạo (auto-confirm). Non-cash: set khi confirm.
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Paid At
+      ja: 支払い日時
+      vi: Thời điểm thanh toán
+
+  expires_at:
+    # Plan 010 — kiosk hardening (2026-04-23).
+    # Pending payments auto-fail past this timestamp via the
+    # ExpireStalePendingPayments scheduled command. Null on auto-confirm
+    # methods (cash) where the row goes straight to `succeeded`.
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Expires At
+      ja: 有効期限
+      vi: Hết hạn lúc
+
+  tendered_amount:
+    # Tiền khách đưa (chỉ khi payment_method.requires_tendered=true)
+    # VD: đơn 300, tip 50, khách đưa 500 → tendered=500, change=150 (BR-P07)
+    type: Decimal
+    precision: 15
+    scale: 2
+    nullable: true
+    displayName:
+      en: Tendered Amount
+      ja: 受取金額
+      vi: Tiền khách đưa
+
+  change_amount:
+    # Tiền thừa trả lại = tendered - amount - tip (BR-P07)
+    # Chỉ có giá trị khi requires_tendered=true
+    type: Decimal
+    precision: 15
+    scale: 2
+    nullable: true
+    displayName:
+      en: Change Amount
+      ja: おつり
+      vi: Tiền thừa
+
+  reference_no:
+    # Mã tham chiếu bên ngoài
+    # Card: txn ID từ POS terminal. Transfer: mã giao dịch ngân hàng.
+    type: String
+    length: 100
+    nullable: true
+    displayName:
+      en: Reference No
+      ja: 参照番号
+      vi: Mã tham chiếu
+
+  note:
+    type: Text
+    nullable: true
+    displayName:
+      en: Note
+      ja: 備考
+      vi: Ghi chú
+
+  idempotency_key:
+    # Plan 010 — kiosk hardening (2026-04-23).
+    # Client-supplied key sent as the `Idempotency-Key` header on payment
+    # endpoints to prevent duplicate inserts on network retry. Uniqueness
+    # is scoped per-order via composite index (see options.indexes) — two
+    # different orders may legitimately reuse the same key.
+    type: String
+    length: 64
+    nullable: true
+    displayName:
+      en: Idempotency Key
+      ja: 冪等キー
+      vi: Khoá idempotency
+
+  metadata:
+    # Plan 021 — split-bill audit trail.
+    # Written by: SplitBillDialog (pos-web) when staff confirms a split flow.
+    #   - equal mode    → {split_mode: 'equal', bill_index: int, total_bills: int}
+    #   - by_items mode → {split_mode: 'by_items', bill_index: int, label: string,
+    #                      item_allocations: [{item_id: uuid, units: int}]}
+    # Single payment (no split) → null.
+    # Read by: SplitBillReceiptDialog reprint flow, future analytics, audit.
+    # Informational only — no business logic reads this column, no state machine
+    # depends on it. Immutable after insert (payments never edit their metadata).
+    # CALLER-OWNED: this is the only field a client populates. The server MUST
+    # NOT write derived values here (see `channel` below — it used to be stamped
+    # into this blob, which both broke the "no split → null" contract and let a
+    # client override transport routing, #1058/#1059).
+    type: Json
+    nullable: true
+    displayName:
+      en: Metadata
+      ja: メタデータ
+      vi: Metadata
+
+  channel:
+    # plan-047 — the app that originated this payment (pos / kiosk / workstation
+    # / customer_web), matching PaymentChannelEnum. SERVER-OWNED: stamped from the
+    # resolved orchestrator transport at create, never from the request body, so
+    # the later confirm/fail routing (OrderPaymentOrchestrationCompat) can trust
+    # it. Previously carried inside `metadata.channel`, which was client-writable
+    # (#1059) and forced metadata non-null on every payment (#1058). Nullable so
+    # pre-migration rows read back through the metadata fallback.
+    type: String
+    length: 32
+    nullable: true
+    displayName:
+      en: Channel
+      ja: チャネル
+      vi: Kênh
+
+  refund_of_id:
+    # FK mềm → order_payments (self-ref) (BR-P08, BR-P09)
+    # Set khi record này là refund của payment gốc
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Refund Of
+      ja: 返金元
+      vi: Hoàn tiền từ
+
+  received_by_id:
+    # ACTOR đã ghi nhận khoản thu — đa hình theo quy ước, FK mềm, KHÔNG phải
+    # riêng "staff" như tên cột gợi ý (#2863):
+    #   POS (SSO)                    → users.id
+    #   workstation / kiosk / handy  → devices.id
+    #   customer-web tự xác nhận     → NULL
+    # Nullable vì vế thứ ba: webhook Stripe / ví điện tử / voucher Konbini không
+    # có người bấm lẫn thiết bị của quán. NULL là câu trả lời ĐÚNG cho ca đó —
+    # đừng đóng một sentinel lên, kể cả sentinel trông như UUID hợp lệ.
+    # Muốn hỏi "NHÂN VIÊN nào" thì phải qua đường khác; hiện chưa có đường nào.
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Received By
+      ja: 受取スタッフ
+      vi: Nhân viên thu
+
+  gateway_provider_snapshot:
+    # Immutable adapter/provider identity accepted when the ledger row was written.
+    # Nullable preserves historical and non-gateway payment compatibility.
+    type: EnumRef
+    enum: PaymentGatewayProviderCode
+    nullable: true
+    displayName:
+      en: Gateway Provider Snapshot
+      ja: 決済プロバイダースナップショット
+      vi: Snapshot nhà cung cấp thanh toán
+
+  gateway_environment_snapshot:
+    # Prevents test/sandbox/live identities from becoming ambiguous in history.
+    type: EnumRef
+    enum: PaymentGatewayEnvironment
+    nullable: true
+    displayName:
+      en: Gateway Environment Snapshot
+      ja: 決済環境スナップショット
+      vi: Snapshot môi trường thanh toán
+
+  gateway_currency_snapshot:
+    # ISO 4217 currency captured from the attempt, never recomputed from the order.
+    type: String
+    length: 3
+    nullable: true
+    rules:
+      uppercase: true
+      alpha: true
+    displayName:
+      en: Gateway Currency Snapshot
+      ja: 決済通貨スナップショット
+      vi: Snapshot tiền tệ thanh toán
+
+  gateway_amount_minor_snapshot:
+    # Integer amount in the captured currency's minor unit; avoids float ambiguity.
+    type: BigInt
+    unsigned: true
+    nullable: true
+    displayName:
+      en: Gateway Amount Minor Snapshot
+      ja: 決済最小通貨単位金額スナップショット
+      vi: Snapshot số tiền đơn vị nhỏ
+
+  gateway_state_snapshot:
+    # Provider-neutral attempt state at the immutable ledger-write boundary.
+    type: EnumRef
+    enum: PaymentAttemptState
+    nullable: true
+    displayName:
+      en: Gateway State Snapshot
+      ja: 決済状態スナップショット
+      vi: Snapshot trạng thái thanh toán
+
+  gateway_provider_status_snapshot:
+    # Raw provider status code/name only; never a payload, message, or secret.
+    type: String
+    length: 100
+    nullable: true
+    displayName:
+      en: Provider Status Snapshot
+      ja: プロバイダー状態スナップショット
+      vi: Snapshot trạng thái nhà cung cấp
+
+  # Relationships
+  payment_attempt:
+    # Durable orchestration operation that produced this ledger row.
+    type: Association
+    relation: ManyToOne
+    target: PaymentAttempt
+    nullable: true
+    onDelete: RESTRICT
+    displayName:
+      en: Payment Attempt
+      ja: 決済試行
+      vi: Lần thử thanh toán
+
+  gateway_connection:
+    # Exact merchant connection used; retained even after it is disabled.
+    type: Association
+    relation: ManyToOne
+    target: PaymentGatewayConnection
+    nullable: true
+    onDelete: RESTRICT
+    displayName:
+      en: Gateway Connection
+      ja: 決済ゲートウェイ接続
+      vi: Kết nối cổng thanh toán
+
+  gateway_option:
+    # Exact provider capability/catalog option selected by effective policy.
+    type: Association
+    relation: ManyToOne
+    target: PaymentGatewayOption
+    nullable: true
+    onDelete: RESTRICT
+    displayName:
+      en: Gateway Option
+      ja: 決済ゲートウェイオプション
+      vi: Tuỳ chọn cổng thanh toán
+
+  tillSession:
+    # Plan 030 — Cashier Shift (2026-06-09). Per-shift revenue split: every
+    # OrderPayment tạo trong khoảng một TillSession 'open' được dán
+    # till_session_id qua OrderPaymentService::create() (Decision 2: stamp,
+    # không phải time-window).
+    #
+    # Nullable: rows tạo trước plan-030 (legacy) hoặc đường tạo payment
+    # nào không qua ResolveOpenTillSession guard (vd: refund record link
+    # đến refund_of_id, hoặc out-of-band insert).
+    #
+    # onDelete: SET NULL — phòng case session bị hard-delete (lý thuyết
+    # không xảy ra vì TillSession no-softDelete + service immutability,
+    # nhưng giữ payment row an toàn).
+    type: Association
+    relation: ManyToOne
+    target: TillSession
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Till Session
+      ja: レジセッション
+      vi: Ca thu ngân
+
+  paymentMethod:
+    # Hình thức thanh toán — FK to payment_methods table (not enum)
+    # Logic auto-confirm + requires_tendered đọc từ bảng này
+    type: Association
+    relation: ManyToOne
+    target: PaymentMethod
+    onDelete: RESTRICT
+    displayName:
+      en: Payment Method
+      ja: 支払方法
+      vi: Phương thức thanh toán
+
+  customerOrder:
+    # Đơn hàng cha. Cascade delete.
+    type: Association
+    relation: ManyToOne
+    target: CustomerOrder
+    onDelete: CASCADE
+    displayName:
+      en: Customer Order
+      ja: 注文
+      vi: Đơn hàng
+
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    onDelete: CASCADE
+    displayName:
+      en: Branch
+      ja: 店舗
+      vi: Chi nhánh
+
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: CASCADE
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  tender_key:
+    type: String
+    length: 50
+    nullable: true
+    displayName:
+      ja: テンダーキー
+      en: Tender Key
+      vi: Khoá hình thức thanh toán

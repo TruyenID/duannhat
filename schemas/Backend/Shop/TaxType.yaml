@@ -1,0 +1,205 @@
+# =============================================================================
+# TaxType (税区分 / Loại thuế)
+# =============================================================================
+#
+# Brand-scoped consumption-tax category. A tax type is a PURE RATE
+# (2026-07-26 operator decision): 標準 10% · 軽減 8% · 非課税 0%. Which rate
+# applies in which consumption context (店内 vs 持ち帰り vs delivery…) is a
+# CATALOG decision, not a tax attribute — split the takeaway menu and set the
+# reduced type on its menu items (MenuProduct.tax_type_id, resolver tier 1).
+#
+# Standard Japanese seed (TaxTypeSeeder):
+#   標準 STANDARD 10 · 軽減 REDUCED 8 · 非課税 EXEMPT 0
+#
+# Resolution chain (TaxResolver, spec §7 — highest priority first):
+#   MenuProduct.tax_type_id → Product.tax_type_id →
+#   ShopOrderSetting.default_tax_type_id (branch) → brand's is_default type
+#
+# Written by: HQ admins via TaxTypeController (org-scoped, TaxTypePolicy).
+# Read by: TaxResolver at add-item time; the chosen rate is SNAPSHOTTED onto
+#   customer_order_items — editing rates here NEVER rewrites historical
+#   orders/invoices/reports (spec §6.3). Synced DOWN to the workstation
+#   SQLite `tax_types` mirror on the existing 5s pull.
+#
+# Hierarchy:
+#   Organization
+#     └── Brand
+#           └── TaxType ← this schema
+#                 └── referenced by Product / MenuProduct / ShopOrderSetting
+#                     / CustomerOrderItem (all RESTRICT)
+#
+# Multi-tenancy: code unique per brand (each brand owns its own set).
+#
+# Business rules:
+#   - BR-TT01: exactly ONE is_default = true per brand — enforced in
+#     TaxTypeService (setting a new default atomically clears the old one).
+#   - BR-TT02: destroying a type still referenced by products /
+#     menu_products / shop_order_settings → 409 TAX_TYPE_IN_USE (service
+#     guard; RESTRICT FKs are the DB backstop). Historical
+#     customer_order_items references also block hard-delete — the
+#     operational path is toggle-status (deactivate). Deactivation blocks
+#     NEW assignment only; existing references keep resolving.
+#   - The resolver applies NO special-casing on top of the tier walk —
+#     assigning the right type per product / per menu item is a pure catalog
+#     decision (alcohol flag/escalation removed 2026-07-26; per-order-type
+#     rate pair removed the same day).
+#
+# =============================================================================
+
+displayName:
+  en: Tax Type
+  ja: 税区分
+  vi: Loại thuế
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    # Tenant scope — every query filters by organization_id
+    - columns: [organization_id]
+    # Brand-scoped listing for the HQ UI
+    - columns: [brand_id]
+    # Code unique within a brand (each brand owns its own set of codes)
+    - columns: [brand_id, code]
+      unique: true
+
+properties:
+  # ===========================================================================
+  # Scalar fields
+  # ===========================================================================
+
+  # Short admin-entered identifier (e.g. STANDARD, REDUCED, EXEMPT).
+  # Unique per brand (see index above). Immutable after create (enforced in
+  # the update FormRequest) — it is the stable key used by the product CSV
+  # import/export (tax_type_code column) and by seeders (idempotency key).
+  code:
+    type: String
+    length: 50
+    displayName:
+      en: Code
+      ja: コード
+      vi: Mã
+
+  # Display name for admin dropdowns / lists (e.g. 標準税率, 軽減税率).
+  name:
+    type: String
+    length: 100
+    translatable: true
+    displayName:
+      en: Name
+      ja: 名前
+      vi: Tên
+
+  # THE tax rate — percent, range 0–100, 2dp (validated in FormRequest).
+  # Japan: 10.00 STANDARD · 8.00 REDUCED · 0.00 EXEMPT. Context (dine-in vs
+  # takeaway) never changes this number — it changes WHICH type the menu
+  # item is assigned to.
+  rate:
+    type: Decimal
+    precision: 5
+    scale: 2
+    displayName:
+      en: Rate (%)
+      ja: 税率 (%)
+      vi: Thuế suất (%)
+
+  # #1367 — TRỤC PHÂN LOẠI, tách khỏi thuế suất.
+  #
+  # `rate` KHÔNG suy ra được cái này: 免税 và 非課税 đều là 0%, nhưng khác nhau
+  # ở quyền khấu trừ thuế đầu vào và khác nhau trên tờ khai. Trước #1367 ba loại
+  # 0% chỉ phân biệt bằng chuỗi `code` do admin tự nhập, nên mọi báo cáo phân
+  # nhóm đều phải ĐOÁN.
+  #
+  # NULLABLE có chủ đích: `rate > 0` backfill được về `taxable`, nhưng `rate = 0`
+  # thì KHÔNG suy được — chỉ người vận hành từng brand mới biết đó là 非課税,
+  # 不課税 hay 免税. NULL nghĩa là **chưa phân loại**, không phải một mặc định
+  # đoán bừa: một tờ khai xếp 不課税 vào nhóm 非課税 vẫn in ra bình thường, vẫn
+  # cân, và sai.
+  #
+  # Xem `schemas/Shared/Enum/TaxClassification.yaml` cho bảng ánh xạ JP ↔ VN và
+  # lý do dùng MỘT trục chung cho cả hai nước.
+  classification:
+    type: EnumRef
+    enum: TaxClassification
+    nullable: true
+    displayName:
+      en: Classification
+      ja: 課税区分
+      vi: Phân loại thuế
+
+  # Brand default — tier 4 of the resolver chain. DESIGN Decision 9: the
+  # brand-level default lives HERE (not on BrandOrderPolicy). Exactly one
+  # per brand (BR-TT01, service-enforced).
+  is_default:
+    type: Boolean
+    default: false
+    displayName:
+      en: Default
+      ja: デフォルト
+      vi: Mặc định
+
+  # Active flag. Inactive types vanish from the lookup endpoint (no NEW
+  # assignment) but existing product/menu/order references keep resolving
+  # (BR-TT02 — deactivation ≠ deletion).
+  is_active:
+    type: Boolean
+    default: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+
+  # ===========================================================================
+  # Associations
+  # ===========================================================================
+
+  # Reverse: products assigned to this type (Product.taxType, nullable FK).
+  # Used by the HQ list resource (products_count via withCount) and by the
+  # BR-TT02 delete guard's usage counts.
+  products:
+    type: Association
+    relation: OneToMany
+    target: Product
+    mappedBy: taxType
+    displayName:
+      en: Products
+      ja: 商品
+      vi: Sản phẩm
+
+  # Rate periods (#1366). `rate` above is a CACHE of whichever row is
+  # effective today, maintained by the service; THIS is the source for any
+  # date-aware calculation. See TaxTypeRate.yaml for the invariants.
+  rates:
+    type: Association
+    relation: OneToMany
+    target: TaxTypeRate
+    mappedBy: taxType
+    displayName:
+      en: Rate Periods
+      ja: 税率適用期間
+      vi: Kỳ hiệu lực
+
+  # Owning organization. CASCADE — deleting the org removes its tax types.
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  # Brand scope. CASCADE — deleting the brand removes its tax types.
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: CASCADE
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu

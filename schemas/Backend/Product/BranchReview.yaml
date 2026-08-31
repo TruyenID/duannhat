@@ -1,0 +1,160 @@
+# =============================================================================
+# BranchReview (店舗レビュー / Đánh giá chi nhánh)
+# =============================================================================
+#
+# A star-rating (1-5) review of a Branch, submitted by a customer after their
+# order is closed (paid). One review per order enforced by unique index on
+# customer_order_id.
+#
+# Written by: customer via POST /api/v1/customer/orders/{id}/branch-review
+# Read by:    aggregate columns on Branch (review_avg_rating, review_total_count),
+#             GET /api/v1/customer/orders/{id}/branch-reviewable
+#
+# Lifecycle: write-once (no edit/delete in v1)
+#
+#   [submitted] — final (immutable after creation)
+#
+# Multi-tenancy: scoped by organization_id + brand_id
+# (inherited from the parent CustomerOrder at write time).
+#
+# =============================================================================
+
+displayName:
+  en: Branch Review
+  ja: 店舗レビュー
+  vi: Đánh giá chi nhánh
+
+kind: object
+
+options:
+  id: Uuid
+  timestamps: true
+  indexes:
+    # One branch review per order — unique constraint prevents double-vote.
+    - columns: [customer_order_id]
+      unique: true
+    # Aggregate queries per branch (recalculate avg, admin reports)
+    - columns: [branch_id]
+    # Scope queries by brand (HQ reports)
+    - columns: [brand_id]
+
+properties:
+  # ===========================================================================
+  # Core review data
+  # ===========================================================================
+
+  # The branch (store/shop) being reviewed.
+  # RESTRICT delete — cannot delete a branch that has reviews (preserve history).
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    onDelete: RESTRICT
+    displayName:
+      en: Branch
+      ja: 店舗
+      vi: Chi nhánh
+
+  # The order that proves the customer visited this branch.
+  # CASCADE — if order is hard-deleted (rare), reviews go with it.
+  customerOrder:
+    type: Association
+    relation: ManyToOne
+    target: CustomerOrder
+    onDelete: CASCADE
+    displayName:
+      en: Order
+      ja: 注文
+      vi: Đơn hàng
+
+  # Optional: logged-in customer identity. NULL for anonymous dine-in (QR).
+  # SET NULL on customer delete — review stays for aggregate, just loses identity.
+  customer:
+    type: Association
+    relation: ManyToOne
+    target: Customer
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Customer
+      ja: 顧客
+      vi: Khách hàng
+
+  # Overall star rating 1-5 ("Trải nghiệm tổng thể"). Industry standard for
+  # venue-level reviews (Google, Yelp). Validation (min:1, max:5) at FormRequest.
+  rating:
+    type: TinyInt
+    displayName:
+      en: Rating
+      ja: 評価
+      vi: Đánh giá
+
+  # Aspect ratings 1-5 (plan-026): "Dịch vụ", "Nhân viên", "Không gian".
+  # Nullable — customer may rate overall without breaking down by aspect.
+  service_rating:
+    type: TinyInt
+    nullable: true
+    displayName:
+      en: Service Rating
+      ja: サービス評価
+      vi: Đánh giá dịch vụ
+
+  staff_rating:
+    type: TinyInt
+    nullable: true
+    displayName:
+      en: Staff Rating
+      ja: スタッフ評価
+      vi: Đánh giá nhân viên
+
+  space_rating:
+    type: TinyInt
+    nullable: true
+    displayName:
+      en: Space Rating
+      ja: 空間評価
+      vi: Đánh giá không gian
+
+  # Selected highlight chips ("Điểm nổi bật") — JSON array of strings
+  # (e.g. ["Hương vị đậm đà", "Phục vụ nhanh"]). Null/empty = none.
+  highlights:
+    type: Json
+    nullable: true
+    displayName:
+      en: Highlights
+      ja: ハイライト
+      vi: Điểm nổi bật
+
+  # Free-text comment ("Nhận xét chung"). Nullable.
+  # Max 2000 chars enforced at FormRequest level, not DB (TEXT type).
+  comment:
+    type: Text
+    nullable: true
+    displayName:
+      en: Comment
+      ja: コメント
+      vi: Bình luận
+
+  # ===========================================================================
+  # Multi-tenancy scope (inherited from CustomerOrder at write time)
+  # ===========================================================================
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: CASCADE
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu

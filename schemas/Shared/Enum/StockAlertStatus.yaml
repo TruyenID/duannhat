@@ -1,0 +1,36 @@
+# ==============================================================================
+# Stock Alert Status Enum (アラートステータス / Trạng thái cảnh báo)
+# ==============================================================================
+#
+# Lifecycle status of a stock alert.
+#
+# Values:
+#   - active: Alert is unresolved, stock is below threshold
+#   - resolved: Stock has returned above threshold (auto-resolved)
+#
+# Workflow:
+#   active → resolved (auto, when quantity > min_stock)
+#
+# Used in:
+#   - StockAlert.status
+#
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: アラートステータス
+  en: Stock Alert Status
+  vi: Trạng thái cảnh báo
+
+values:
+  - value: active
+    label:
+      ja: アクティブ
+      en: Active
+      vi: Đang cảnh báo
+  - value: resolved
+    label:
+      ja: 解決済み
+      en: Resolved
+      vi: Đã giải quyết

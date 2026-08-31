@@ -1,0 +1,106 @@
+# DeviceSigningKey schema (#1092/#1093 — offline-order evidence, step 1/5)
+#
+# One Ed25519 PUBLIC key a paired device registered with Cloud. The device
+# generates the keypair itself and sends only the public half in the pair
+# request (or a later rotation) — the private key NEVER leaves the device.
+# The offline-replay verifier (#1096) uses these rows to check the signature
+# on offline-created orders before trusting any money claim (fail-closed).
+#
+# Business rules:
+#   - BR-DSK01: a device may hold MULTIPLE keys (rotation) — a key is VALID
+#     only while revoked_at IS NULL AND expires_at > now. Rotation keeps the
+#     old key valid until its expires_at (grace window: orders signed offline
+#     before the rotation must still verify when they sync UP).
+#   - BR-DSK02: revocation is immediate and irreversible (revoked_at +
+#     revoked_reason). Signatures made with a revoked key are REJECTED even
+#     inside the grace window — revoke means "treat this device as compromised".
+#   - BR-DSK03: device self-revoke (POST /workstation/self-revoke) revokes
+#     every key of the device.
+#   - BR-DSK04: rows are never hard-deleted while referenced by evidence —
+#     verification of historical orders needs the key material.
+#
+# The row's own id IS the `key_id` carried in OfflineOrderEvidence.
+
+displayName:
+  en: Device Signing Key
+  ja: デバイス署名鍵
+  vi: Khóa ký thiết bị
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: false
+  id: Uuid
+  indexes:
+    - columns: [device_id]
+    - columns: [device_id, revoked_at]
+    - columns: [organization_id]
+
+properties:
+  public_key:
+    type: String
+    length: 64
+    displayName:
+      en: Public Key
+      ja: 公開鍵
+      vi: Khóa công khai
+    description:
+      en: "Ed25519 public key, base64 (44 chars). The device keeps the private half."
+      ja: "Ed25519公開鍵（base64、44文字）。秘密鍵はデバイス側のみ保持。"
+      vi: "Khóa công khai Ed25519, base64 (44 ký tự). Khóa bí mật chỉ nằm trên thiết bị."
+
+  issued_at:
+    type: DateTime
+    displayName:
+      en: Issued At
+      ja: 発行日時
+      vi: Thời điểm cấp
+
+  expires_at:
+    type: DateTime
+    displayName:
+      en: Expires At
+      ja: 有効期限
+      vi: Hết hạn
+    description:
+      en: "Validity ceiling. Default 180 days from issue; rotation issues a fresh key rather than extending."
+      ja: "有効期限。発行から180日が既定。延長ではなくローテーションで新鍵を発行する。"
+      vi: "Trần hiệu lực. Mặc định 180 ngày từ lúc cấp; hết thì rotate khóa mới, không gia hạn."
+
+  revoked_at:
+    type: DateTime
+    nullable: true
+    displayName:
+      en: Revoked At
+      ja: 失効日時
+      vi: Thời điểm thu hồi
+
+  revoked_reason:
+    type: String
+    length: 255
+    nullable: true
+    displayName:
+      en: Revoked Reason
+      ja: 失効理由
+      vi: Lý do thu hồi
+
+  device:
+    type: Association
+    relation: ManyToOne
+    target: Device
+    onDelete: CASCADE
+    displayName:
+      en: Device
+      ja: デバイス
+      vi: Thiết bị
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức

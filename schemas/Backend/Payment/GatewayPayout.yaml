@@ -1,0 +1,83 @@
+# Một lần cổng thanh toán chuyển tiền về tài khoản. `net_minor` có dấu — âm
+# nghĩa là bị trừ ngược (S-11). `reconciled_at` chỉ được đặt khi tổng các
+# settlement khớp đúng net của payout.
+kind: object
+
+options:
+  id: Uuid
+  timestamps: true
+  softDelete: false
+  indexes:
+    - columns: [provider, external_payout_id]
+      unique: true
+      name: gateway_payouts_provider_external_unique
+    - columns: [connection_id, status]
+    - columns: [status]
+
+properties:
+  connection:
+    type: Association
+    relation: ManyToOne
+    target: PaymentGatewayConnection
+    onDelete: RESTRICT
+    displayName: { ja: 接続, en: Connection, vi: Kết nối }
+
+  provider:
+    type: String
+    length: 50
+    displayName: { ja: プロバイダ, en: Provider, vi: Nhà cung cấp }
+
+  external_payout_id:
+    type: String
+    length: 191
+    displayName: { ja: 外部入金ID, en: External Payout ID, vi: ID chi trả bên ngoài }
+
+  # Lịch của cổng, KHÔNG phải giờ nghiệp vụ chi nhánh (#1091).
+  expected_arrival_date:
+    type: Date
+    nullable: true
+    displayName: { ja: 入金予定日, en: Expected Arrival Date, vi: Ngày dự kiến về }
+
+  paid_at:
+    type: Timestamp
+    nullable: true
+    displayName: { ja: 入金日時, en: Paid At, vi: Đã trả lúc }
+
+  gross_minor:
+    type: BigInt
+    displayName: { ja: 総額（最小単位）, en: Gross (minor), vi: Tổng (đơn vị nhỏ) }
+
+  fee_minor:
+    type: BigInt
+    displayName: { ja: 手数料（最小単位）, en: Fee (minor), vi: Phí (đơn vị nhỏ) }
+
+  net_minor:
+    type: BigInt
+    displayName: { ja: 純額（最小単位）, en: Net (minor), vi: Thực nhận (đơn vị nhỏ) }
+
+  currency:
+    type: String
+    length: 3
+    displayName: { ja: 通貨, en: Currency, vi: Tiền tệ }
+
+  status:
+    type: String
+    length: 50
+    default: pending
+    displayName: { ja: 状態, en: Status, vi: Trạng thái }
+
+  reconciled_at:
+    type: Timestamp
+    nullable: true
+    displayName: { ja: 突合日時, en: Reconciled At, vi: Đối soát lúc }
+
+  bank_ref:
+    type: String
+    length: 191
+    nullable: true
+    displayName: { ja: 銀行参照, en: Bank Reference, vi: Tham chiếu ngân hàng }
+
+  metadata:
+    type: Json
+    nullable: true
+    displayName: { ja: メタデータ, en: Metadata, vi: Dữ liệu kèm }

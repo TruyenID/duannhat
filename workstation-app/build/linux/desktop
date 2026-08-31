@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Name=WS App
+Comment=Workstation Desktop Application
+# The Exec line includes %u to pass the URL to the application
+Exec=/usr/local/bin/ws-app %u
+Terminal=false
+Type=Application
+Icon=ws-app
+Categories=Utility;
+StartupWMClass=ws-app
+
+ 

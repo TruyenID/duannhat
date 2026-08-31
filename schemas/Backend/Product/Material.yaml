@@ -1,0 +1,273 @@
+# =============================================================================
+# Material (材料 / Nguyên liệu)
+# =============================================================================
+#
+# Raw / semi-finished ingredient used by Recipes. Holds component composition,
+# yield, calculated cost, and — as of plan-003 — declared allergens (HACCP
+# requirement).
+#
+# Written by:  HQ admin via MaterialService (`/hq/{brand}/materials`).
+# Read by:     Recipe (ingredients), AllergenRollupService (upstream allergen
+#              source for Recipe.allergen_rollup), Inventory domain (batches).
+#
+# Allergen model:
+#   Allergen (master data)
+#     ↕ M2M via material_allergens pivot (this schema = inverse/owned side)
+#   Material (this) — HQ admin tags which regulatory allergens apply
+#     → on allergen_ids change, AllergenRollupService recomputes downstream
+#       Recipe.allergen_rollup in the same DB transaction, and any `approved`
+#       Recipe whose rollup actually changes flips to `pending` (two-tier rule).
+#
+# i18n:
+#   - `name` and `description` translatable — stored in material_translations
+#     (Astrotomic). MaterialService MUST route locale-keyed payloads through
+#     fill() + flushTranslations(); raw Material::update() strips them.
+# =============================================================================
+
+displayName:
+  en: Material
+  ja: 材料
+  vi: Nguyên liệu
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    - columns: [organization_id]
+    - columns: [organization_id, sku]
+      unique: true
+    - columns: [brand_id]
+    - columns: [brand_id, sku]
+
+properties:
+  sku:
+    type: String
+    length: 50
+    nullable: true
+    displayName:
+      en: Material SKU
+      ja: 材料SKU
+      vi: Mã nguyên liệu
+    placeholder:
+      en: "e.g., M-001"
+      vi: "VD: M-001"
+      ja: "例：M-001"
+    description:
+      en: Unique SKU with prefix M-
+      ja: プレフィックスM-を持つ一意のSKU
+      vi: SKU duy nhất với tiền tố M-
+
+  name:
+    type: String
+    length: 255
+    searchable: true
+    translatable: true
+    displayName:
+      en: Material Name
+      ja: 材料名
+      vi: Tên nguyên liệu
+
+  description:
+    type: Text
+    nullable: true
+    translatable: true
+    displayName:
+      en: Description
+      ja: 説明
+      vi: Mô tả
+
+  # Plan-022 T4.5 — `components` JSON column dropped here. BOM lives on
+  # Recipe.ingredients (canonical, with approval workflow). Migration history
+  # for the column survives in earlier omnify-generated migrations + the
+  # commit removing this block; the drop migration ships from this regen.
+
+  yield_quantity:
+    type: Decimal
+    precision: 15
+    scale: 4
+    default: 1
+    displayName:
+      en: Yield Quantity
+      ja: 出来高
+      vi: Số lượng sản xuất
+    description:
+      en: How much output per batch
+      ja: 1バッチあたりの出力量
+      vi: 1 lần pha ra bao nhiêu
+
+  yield_unit:
+    type: String
+    length: 50
+    nullable: true
+    displayName:
+      en: Yield Unit
+      ja: 出力単位
+      vi: Đơn vị đầu ra
+    description:
+      en: "Unit of output (e.g., PORTION, LITER, GRAM)"
+      ja: "出力の単位（例：PORTION、LITER、GRAM）"
+      vi: "Đơn vị của output (VD: PORTION, LITER, GRAM)"
+
+  # Plan-022 T5 — shelf life policy in days for production output lots.
+  # NULL means "no policy" — output lot inherits parent lots' min expiry only.
+  # When set, MaterialBatchService::complete computes output.expiry_date as
+  # min(parent_min_expiry, today + shelf_life_days). Surfaces alert + FEFO
+  # eligibility for short-lived BTPs (e.g. dashi 3h, sauce 2 days).
+  shelf_life_days:
+    type: Int
+    nullable: true
+    displayName:
+      en: Shelf Life (days)
+      ja: 賞味期限（日数）
+      vi: Hạn sử dụng (ngày)
+    description:
+      en: "Days from production until expiry. NULL = no policy. Used by MaterialBatchService::complete to compute output lot expiry."
+      ja: "生産から期限切れまでの日数。NULL=ポリシーなし。MaterialBatchService::completeで出力ロットの期限計算に使用。"
+      vi: "Số ngày từ khi sản xuất đến khi hết hạn. NULL = không quy định. Dùng tính expiry lô đầu ra trong MaterialBatchService::complete."
+
+  calculated_cost:
+    type: Decimal
+    precision: 15
+    scale: 4
+    default: 0
+    # plan-040 L5: scale 2 → 4 — lot unit_cost (material_lots.unit_cost) and batch
+    # cost basis carry scale-4 precision; persisting cached cost at scale 2 truncated
+    # those values. Aligned so cost flowing from lots/recipes is not rounded away.
+    displayName:
+      en: Calculated Cost
+      ja: 計算原価
+      vi: Giá vốn tính toán
+    description:
+      en: Cached cost — written by the HQ admin or computed via the linked Recipe.
+      ja: キャッシュ原価。HQ管理者が手動で設定するか、紐づくレシピから計算される。
+      vi: Giá vốn cache — do quản trị HQ nhập tay hoặc tính từ Recipe liên kết.
+
+  is_active:
+    type: Boolean
+    default: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+
+  requires_temperature_check:
+    type: Boolean
+    default: false
+    # Plan-017 Tier 1.D — when true, MaterialLotReceiveRequest requires
+    # `received_temperature` + `temperature_unit`. Out-of-range receipts
+    # need `temperature_override_reason` to proceed.
+    displayName:
+      en: Requires Temperature Check
+      ja: 温度チェック必須
+      vi: Yêu cầu kiểm tra nhiệt độ
+
+  temperature_min:
+    type: Decimal
+    precision: 5
+    scale: 2
+    nullable: true
+    displayName:
+      en: Temperature Min (°C)
+      ja: 温度下限（°C）
+      vi: Nhiệt độ tối thiểu (°C)
+
+  temperature_max:
+    type: Decimal
+    precision: 5
+    scale: 2
+    nullable: true
+    displayName:
+      en: Temperature Max (°C)
+      ja: 温度上限（°C）
+      vi: Nhiệt độ tối đa (°C)
+
+  expiry_alert_thresholds:
+    type: Json
+    nullable: true
+    # Plan-017 Tier 1.C: per-material override of the [7, 3, 1] default
+    # alert windows. Stored as a JSON array of int days. NULL = use system
+    # default. ExpiryAlertService::scan walks every active lot and fires
+    # one notification per (lot, threshold) when the lot's expiry_date
+    # crosses the threshold relative to today.
+    displayName:
+      en: Expiry Alert Thresholds (days)
+      ja: 期限アラート閾値（日）
+      vi: Ngưỡng cảnh báo hạn (ngày)
+    description:
+      en: "JSON array of days, e.g. [7, 3, 1]. NULL = use system default."
+      ja: "日数のJSON配列。例：[7, 3, 1]。NULLの場合はシステム既定値を使用。"
+      vi: "Mảng JSON số ngày, VD: [7, 3, 1]. NULL = dùng giá trị mặc định hệ thống."
+
+  outputSku:
+    type: Association
+    relation: ManyToOne
+    target: ProductSku
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Output SKU
+      ja: 出力SKU
+      vi: SKU đầu ra
+    description:
+      en: The SKU produced from this material/recipe
+      ja: この材料/レシピから生成されるSKU
+      vi: Biến thể được tạo ra từ nguyên liệu/công thức này
+
+  # Declared allergens (HACCP / food-safety regulatory requirement).
+  # M2M owning side — pivot table is `material_allergens`. HQ admin picks
+  # from Allergen master data (jurisdiction-scoped). On sync, AllergenRollup
+  # Service recomputes downstream Recipe.allergen_rollup in the same
+  # transaction and auto-repends any approved Recipe whose rollup changes.
+  allergens:
+    type: Association
+    relation: ManyToMany
+    target: Allergen
+    joinTable: material_allergens
+    displayName:
+      en: Allergens
+      ja: アレルゲン
+      vi: Chất gây dị ứng
+
+  # Relations
+  recipes:
+    type: Association
+    relation: OneToMany
+    target: Recipe
+    mappedBy: material
+    displayName:
+      en: Recipes
+      ja: レシピ
+      vi: Công thức
+
+  skus:
+    type: Association
+    relation: OneToMany
+    target: ProductSku
+    mappedBy: material
+    displayName:
+      en: Linked SKUs
+      ja: リンクされたSKU
+      vi: Các SKU liên kết
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: CASCADE
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu

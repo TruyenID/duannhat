@@ -1,0 +1,45 @@
+version: 1
+applications:
+  - appRoot: web/pos
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - nvm install 22
+            - nvm use 22
+            - npm i -g pnpm@10.29.1
+            - git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
+            - git config --global --add url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "ssh://git@github.com/"
+            - git config --global --add url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "git@github.com:"
+            - echo "node-linker=hoisted" > .npmrc
+            - pnpm install --frozen-lockfile
+            # #3231 — DẤU VÂN TAY của lượt build, phát ra ở /build-info.json.
+            #
+            # Không có nó thì smoke test chỉ hỏi được "server còn thở", và một
+            # bundle sáu tháng tuổi trả lời "có" y hệt bundle vừa dựng. Chính lỗ
+            # đó để `/downloads` trả 500 qua BA lượt deploy xanh liên tiếp
+            # (#3222 → #3225 → #3227): mỗi vòng CI xanh, smoke xanh, trang vẫn 500.
+            #
+            # Commit lấy từ CHÍNH git clone mà Amplify đang dựng — không phải
+            # commit workflow nghĩ là nó dựng; hai cái lệch nhau chính là thứ
+            # cần đo, nên `github.sha` ở đây chỉ lặp lại câu hỏi. Cũng KHÔNG
+            # dùng `AWS_COMMIT_ID`: job kiểu RELEASE đặt nó là chuỗi "HEAD"
+            # (đo 2026-08-18, job 126) — smoke check không merge-base được và
+            # đỏ mọi lượt deploy dù bundle đúng.
+            - export BUILD_INFO_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "")
+            - >-
+              node -e "require('fs').writeFileSync('public/build-info.json',
+              JSON.stringify({commit: process.env.BUILD_INFO_COMMIT || '', branch:
+              process.env.AWS_BRANCH || '', built_at: new
+              Date().toISOString()}))"
+            - cat public/build-info.json
+        build:
+          commands:
+            - pnpm run build
+      artifacts:
+        baseDirectory: dist
+        files:
+          - "**/*"
+      cache:
+        paths:
+          - node_modules/**/*

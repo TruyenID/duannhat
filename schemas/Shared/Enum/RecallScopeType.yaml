@@ -1,0 +1,27 @@
+# ==============================================================================
+# Recall Scope Type Enum (リコール範囲 / Phạm vi thu hồi)
+# ==============================================================================
+#
+# Plan-017 Tier 1.A — what level the recall sweep operates at.
+#
+# Values:
+#   - lot:           single root lot + its full genealogy descent
+#   - supplier_lot:  every lot from one supplier_lot_code (cross-warehouse)
+#   - material:      every active lot of a given material (recalls of an
+#                    entire SKU regardless of supplier)
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: リコール範囲
+  en: Recall Scope Type
+  vi: Phạm vi thu hồi
+
+values:
+  - value: lot
+    label: { ja: ロット, en: Single Lot, vi: Lô đơn }
+  - value: supplier_lot
+    label: { ja: 仕入先ロット, en: Supplier Lot, vi: Lô NCC }
+  - value: material
+    label: { ja: 材料, en: Material, vi: Nguyên liệu }

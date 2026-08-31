@@ -1,0 +1,453 @@
+name: workstation-release
+
+# Build ws-server khi `main` ĐỔI — MỘT số phiên bản cho cả monorepo, đọc từ file
+# `VERSION` ở gốc cây.
+#
+# #2660 — trước đây workflow này chỉ kích trên tag `v[0-9]+.[0-9]+.[0-9]+`. Tag
+# thật trong repo lại toàn dạng ngày (`v2026.8.5m`, `v2026.8.10e`) nên KHÔNG tag
+# nào khớp: workflow không đỏ, không xanh, đơn giản là không chạy. Lần duy nhất
+# có người đẩy đúng semver (`v0.4.0`, 2026-08-10) thì `Build (darwin-arm64)` đỏ
+# vì lỗi giải nén cache trên runner tự host, nên `Publish` bị skip. Người ta
+# chuyển sang bấm tay, rồi ngừng bấm — trang download đứng im 3 ngày, phục vụ một
+# bản thiếu 45 commit gồm cả chuỗi 釣銭機 và in ấn.
+#
+# Kích theo `main` thì không ai phải nhớ gì. Số phiên bản đến từ `VERSION`, nên
+# tag (nếu vẫn muốn có) chỉ còn là nhãn cho con người, không phải cò súng.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'workstation/**'
+      # #2922 — sửa file luật KHÔNG tạo binary mới. Trước đó một lượt sửa
+      # `workstation/CLAUDE.md` kích 5 build đầy đủ (~10 phút runner tự host)
+      # rồi CHẮC CHẮN đỏ ở bước publish, vì `VERSION` không đổi nên rào #2783
+      # từ chối. Một `main` đỏ đều đặn là thứ người ta học cách bỏ qua.
+      - '!workstation/**/*.md'
+      - 'web/pos/**'
+      - '!web/pos/**/*.md'
+      - 'VERSION'
+      - '.github/workflows/workstation-release.yml'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Ghi đè số phiên bản (mặc định: đọc file VERSION)'
+        required: false
+        default: ''
+      force:
+        description: 'Build even if workstation/web/app unchanged since previous semver tag'
+        type: boolean
+        required: false
+        default: false
+
+concurrency:
+  group: workstation-release-${{ github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: workstation
+
+jobs:
+  detect-changes:
+    name: Detect workstation changes
+    runs-on: [self-hosted, Linux, X64]
+    outputs:
+      release: ${{ steps.decide.outputs.release }}
+      previous_tag: ${{ steps.decide.outputs.previous_tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Decide whether to release
+        id: decide
+        working-directory: ${{ github.workspace }}
+        env:
+          FORCE: ${{ github.event.inputs.force }}
+        run: |
+          set -euo pipefail
+          # shellcheck source=semver-release-tags.sh
+          source .github/scripts/semver-release-tags.sh
+          # Khớp với `paths:` của trigger — xem ghi chú ở đó (#2922). `git diff`
+          # không có cú pháp loại trừ, nên `.md` được lọc ở bước dưới.
+          PATHS=(
+            workstation/
+            web/
+            app/
+            .github/workflows/workstation-release.yml
+            .github/scripts/publish-workstation-downloads.sh
+            .github/scripts/semver-release-tags.sh
+          )
+
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            CURRENT="${{ github.ref_name }}"
+            assert_semver_tag "$CURRENT"
+            PREV="$(previous_semver_tag "$CURRENT")"
+          else
+            CURRENT="HEAD"
+            PREV="$(previous_semver_tag HEAD)"
+          fi
+          echo "previous_tag=${PREV}" >> "$GITHUB_OUTPUT"
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${FORCE:-false}" = "true" ]; then
+            echo "Manual dispatch with force=true — release."
+            echo "release=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ -z "$PREV" ]; then
+            echo "No previous semver tag — release."
+            echo "release=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # #2922 — MỘT SỐ HIỆU, MỘT BUILD. Đây là điều kiện quyết định, và nó
+          # phải đứng TRƯỚC phép so cây.
+          #
+          # Rào `refuse-same-workstation-version.py` (#2783) đã canh đúng bất
+          # biến này từ lâu — nhưng nó chạy ở bước PUBLISH, tức sau 5 build.
+          # Nên một lượt không đáng phát hành vẫn đốt ~10 phút runner rồi đỏ.
+          # Hỏi cùng câu hỏi đó ở đây biến nó thành một lượt BỎ QUA sạch sẽ.
+          #
+          # Rào ở bước publish GIỮ NGUYÊN: phòng thủ nhiều lớp, và nó là chỗ
+          # duy nhất còn chạy khi có `--force`.
+          # FAIL OPEN ở đây, khác chiều với bước publish — xem #2922 trong
+          # `refuse-same-workstation-version.py`. Chỉ mã thoát 1 (TRÙNG SỐ) mới
+          # được bỏ qua; mã 3 (không đọc được manifest) phải BUILD TIẾP, vì bỏ
+          # qua vì một trục trặc mạng là âm thầm nuốt một bản phát hành thật.
+          VERSION_NOW="$(tr -d ' \n\r' < VERSION)"
+          set +e
+          python3 .github/scripts/refuse-same-workstation-version.py --version "$VERSION_NOW"
+          VERSION_GATE=$?
+          set -e
+
+          if [ "$VERSION_GATE" = "1" ]; then
+            echo "::notice title=workstation-release skipped::VERSION ${VERSION_NOW} đã là bản mới nhất trên trang tải — không build lại. Bump VERSION để phát hành."
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Số hiệu đã đổi. Phép so cây chỉ còn là lớp thứ hai: bump VERSION mà
+          # không đụng gì dưới workstation/web/app là chuyện có thật (ví dụ sửa
+          # chính workflow này), và lúc đó vẫn nên phát hành.
+          if git diff --quiet "$PREV" "$CURRENT" -- "${PATHS[@]}"; then
+            echo "::notice title=workstation-release::VERSION đổi (${VERSION_NOW}) nhưng không có thay đổi cây since ${PREV} — vẫn phát hành."
+          else
+            echo "Changes since ${PREV}:"
+            git diff --stat "$PREV" "$CURRENT" -- "${PATHS[@]}"
+          fi
+          echo "release=true" >> "$GITHUB_OUTPUT"
+
+  skip-notice:
+    name: Skipped — no workstation changes
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.release != 'true'
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - run: |
+          echo "workstation-release skipped."
+          echo "Previous tag: ${PREV:-<none>}"
+          echo "To rebuild anyway: Actions → workstation-release → Run workflow → force=true"
+        env:
+          PREV: ${{ needs.detect-changes.outputs.previous_tag }}
+
+  lint:
+    name: Lint
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.release == 'true'
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: workstation/go.mod
+          # #2660 — TẮT cache của setup-go. Runner này là SELF-HOSTED và bền:
+          # `$GOMODCACHE` đã nằm sẵn trên đĩa giữa các lượt chạy. Bật cache làm
+          # nó tải + giải nén một tarball 8,5 GB ĐÈ LÊN chính thư mục đó, mỗi
+          # job một lần.
+          #
+          # Cái đó không chỉ phí. Runner có 2 slot song song, và ngày 2026-08-10
+          # `Build (windows-amd64)` (06:11:58) cùng `Build (darwin-arm64)`
+          # (06:11:56) giải nén CÙNG tarball vào CÙNG thư mục ⇒
+          # `tar: Cannot open: File exists` ⇒ darwin-arm64 đỏ ⇒ `Publish` skip ⇒
+          # trang download đứng im 3 ngày. Ba job sau chạy lần lượt khi slot
+          # trống nên xanh — đó là lý do lỗi trông như "chỉ một chân matrix hỏng".
+          cache: false
+      - name: Stub the embedded frontend
+        run: |
+          mkdir -p frontend/dist
+          echo '<!doctype html><title>ci stub</title>' > frontend/dist/index.html
+      - name: go vet
+        run: go vet $(go list ./... | grep -v '/cmd/workstation$')
+      - name: gofmt
+        run: |
+          unformatted=$(find . -name '*.go' \
+            -not -path './internal/domain/generated/*' \
+            -not -path './internal/generated/*' \
+            -not -path './vendor/*' | xargs gofmt -l)
+          if [ -n "$unformatted" ]; then
+            echo "Files need gofmt:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+  test:
+    name: Test
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.release == 'true'
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: workstation/go.mod
+          # #2660 — TẮT cache của setup-go. Runner này là SELF-HOSTED và bền:
+          # `$GOMODCACHE` đã nằm sẵn trên đĩa giữa các lượt chạy. Bật cache làm
+          # nó tải + giải nén một tarball 8,5 GB ĐÈ LÊN chính thư mục đó, mỗi
+          # job một lần.
+          #
+          # Cái đó không chỉ phí. Runner có 2 slot song song, và ngày 2026-08-10
+          # `Build (windows-amd64)` (06:11:58) cùng `Build (darwin-arm64)`
+          # (06:11:56) giải nén CÙNG tarball vào CÙNG thư mục ⇒
+          # `tar: Cannot open: File exists` ⇒ darwin-arm64 đỏ ⇒ `Publish` skip ⇒
+          # trang download đứng im 3 ngày. Ba job sau chạy lần lượt khi slot
+          # trống nên xanh — đó là lý do lỗi trông như "chỉ một chân matrix hỏng".
+          cache: false
+      - name: Stub the embedded frontend
+        run: |
+          mkdir -p frontend/dist
+          echo '<!doctype html><title>ci stub</title>' > frontend/dist/index.html
+      - name: go test
+        run: go test -count=1 -timeout=20m $(go list ./... | grep -v '/cmd/workstation$')
+
+  build-and-publish:
+    name: Build & publish (một job — không dùng artifact, #3067)
+    needs: [detect-changes, lint, test]
+    # CHẮN REF (#2679) — job này rsync lên máy production và dùng
+    # `X_SERVER_SSH_KEY`. Job `release` cũ có vế này; gộp job mà làm rơi nó thì
+    # một `workflow_dispatch` từ `dev` hay `issue-*` sẽ đẩy build CHƯA MERGE lên
+    # trang tải. `test:release-gate` bắt được ngay lượt chạy đầu.
+    if: >-
+      needs.detect-changes.outputs.release == 'true' &&
+      (github.ref == 'refs/heads/main' || github.ref_type == 'tag')
+    runs-on: [self-hosted, Linux, X64]
+    defaults:
+      run:
+        # GỐC REPO, không phải `workstation/`. Job `release` cũ có default này
+        # riêng, và các bước phát hành (refuse-same-version, publish script,
+        # rsync) đều viết đường dẫn theo gốc. Gộp job mà quên nó thì mọi bước
+        # phát hành chạy sai thư mục — và chỉ lộ ra ở lượt phát hành thật.
+        working-directory: ${{ github.workspace }}
+    permissions:
+      contents: write
+    env:
+      SSH_HOST: famgia.xbiz.jp
+      SSH_PORT: '10022'
+      SSH_USER: famgia
+      APP_DIR: apps/tempo
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # `0` — bước phát hành đọc lịch sử (mô tả release, đối chiếu tag).
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: workstation/go.mod
+          cache: false
+
+      # ── tài sản web: dựng TẠI CHỖ, không qua artifact ──
+      - name: Setup pnpm
+        # Do not pin `version:` — root package.json packageManager is pnpm@10.29.1;
+        # pinning 9 makes pnpm/action-setup fail with ERR_PNPM_BAD_PM_VERSION.
+        uses: pnpm/action-setup@v4
+        with:
+          dest: ${{ runner.temp }}/pnpm
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: pnpm
+          cache-dependency-path: workstation/frontend/pnpm-lock.yaml
+      - name: Build workstation frontend
+        working-directory: workstation/frontend
+        run: |
+          # --ignore-workspace: umbrella pnpm-workspace only lists packages/*,
+          # and walking up hits a root lockfile that is often ahead of CI.
+          pnpm install --ignore-workspace --frozen-lockfile
+          pnpm build
+
+      - name: Build pos-web for workstation embed
+        working-directory: web/pos
+        env:
+          UI_DEPLOY_KEY: ${{ secrets.UI_DEPLOY_KEY }}
+        run: |
+          set -u
+          if [ -n "${UI_DEPLOY_KEY:-}" ]; then
+            mkdir -p ~/.ssh && chmod 700 ~/.ssh
+            ssh-keyscan -t ed25519,rsa github.com >> ~/.ssh/known_hosts 2>/dev/null || true
+            eval "$(ssh-agent -s)"
+            printf '%s\n' "$UI_DEPLOY_KEY" | tr -d '\r' | ssh-add - 2>/dev/null || true
+            export GIT_CONFIG_GLOBAL="$RUNNER_TEMP/posweb-gitconfig"
+            : > "$GIT_CONFIG_GLOBAL"
+            git config --global url."ssh://git@github.com/".insteadOf "https://github.com/"
+          fi
+          pnpm install --ignore-workspace --frozen-lockfile
+          pnpm run build:workstation
+      - name: Stage pos-web dist
+        # Workflow defaults.working-directory is workstation/; stage from repo root.
+        working-directory: ${{ github.workspace }}
+        run: |
+          test -d web/pos/dist || { echo "::error::web/pos/dist missing after build:workstation"; ls -la web/pos; exit 1; }
+          # #3067 — chép THẲNG vào chỗ `go:embed all:pos-web/dist` đọc
+          # (`workstation/posweb.go`). Trước đây bước này chỉ dựng `pos-web-dist/`
+          # ở gốc repo để `upload-artifact` mang đi, rồi `download-artifact` mới
+          # đặt vào đúng chỗ. Không còn artifact thì phải tự đặt đúng chỗ.
+          rm -rf workstation/pos-web/dist && mkdir -p workstation/pos-web/dist
+          cp -R web/pos/dist/. workstation/pos-web/dist/
+          test -f workstation/pos-web/dist/index.html || { echo "::error::pos-web/dist thiếu index.html"; exit 1; }
+
+      # ── nhị phân ──
+      - name: Resolve release version
+        id: version
+        working-directory: ${{ github.workspace }}
+        run: |
+          # #2660 — file `VERSION` là nguồn chân lý. Trước đây chuỗi dự phòng
+          # rơi về `github.ref_name`, mà trên push `main` giá trị đó là chuỗi
+          # "main" — tức artifact sẽ mang tên phiên bản "main".
+          VERSION="${{ github.event.inputs.version }}"
+          if [ -z "$VERSION" ] && [ -f VERSION ]; then
+            VERSION="v$(tr -d '[:space:]' < VERSION)"
+          fi
+          if [ -z "$VERSION" ] && [ "${{ github.ref_type }}" = "tag" ]; then
+            VERSION="${{ github.ref_name }}"
+          fi
+          if [ -z "$VERSION" ]; then
+            VERSION="$(git rev-parse --short HEAD)"
+          fi
+          echo "value=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Release version: $VERSION"
+      - name: Build ws-server — 5 nền tảng, MỘT job (#3067)
+        working-directory: workstation
+        # Vòng lặp thay cho `strategy.matrix`. Matrix chạy song song nhưng mỗi
+        # nhánh phải NHẬN `frontend-dist`/`pos-web-dist` qua artifact — và đó
+        # chính là thứ hạn mức storage chặn. Cross-compile Go mất vài giây mỗi
+        # đích, nên đổi song song lấy độc lập là món hời.
+        env:
+          CGO_ENABLED: '0'
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/dist"
+          for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64; do
+            export GOOS="${target%%/*}" GOARCH="${target##*/}"
+            echo "==> $GOOS/$GOARCH"
+            mkdir -p build/bin
+            ext=""
+            if [ "$GOOS" = "windows" ]; then ext=".exe"; fi
+            go build -ldflags "-s -w -X 'github.com/dxs-platform/workstation-app/internal/config.Version=${VERSION}'" \
+              -o "$GITHUB_WORKSPACE/dist/ws-server-${GOOS}-${GOARCH}${ext}" ./cmd/ws-server
+          done
+          ls -la "$GITHUB_WORKSPACE/dist"
+
+      # ── phát hành ──
+      - name: Preflight — gh is available
+        run: |
+          command -v gh >/dev/null 2>&1 || { echo "::error::gh CLI missing on runner"; exit 1; }
+          gh --version
+
+      - name: Refuse same VERSION as production latest (#2783)
+        env:
+          FORCE: ${{ github.event.inputs.force }}
+          VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          set -euo pipefail
+          # self-test chạy TRƯỚC, không cần mạng: nếu không gọi ở đâu cả thì các
+          # bài ghim (User-Agent, fail-closed) không canh gì hết.
+          python3 .github/scripts/refuse-same-workstation-version.py --self-test
+          extra=()
+          if [ "${FORCE:-false}" = "true" ]; then extra+=(--force); fi
+          python3 .github/scripts/refuse-same-workstation-version.py \
+            --version "$VERSION" "${extra[@]}"
+
+      - name: Checksums
+        run: cd dist && sha256sum ws-server-* > SHA256SUMS.txt && cat SHA256SUMS.txt
+
+      - name: Stage backend/public/downloads
+        run: |
+          chmod +x .github/scripts/publish-workstation-downloads.sh
+          .github/scripts/publish-workstation-downloads.sh \
+            "${{ steps.version.outputs.value }}" \
+            "${{ github.sha }}" \
+            dist \
+            backend/public/downloads/workstation
+
+      - name: Publish GitHub Release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          source .github/scripts/semver-release-tags.sh
+          PREV="$(previous_semver_tag "${{ github.ref_name }}")"
+          if [ -n "$PREV" ]; then
+            RANGE="$PREV..${{ github.ref_name }}"
+            HEADING="Thay đổi kể từ $PREV"
+          else
+            RANGE="${{ github.ref_name }}"
+            HEADING="Thay đổi"
+          fi
+          {
+            echo "## Cài đặt"
+            echo
+            echo "Tải binary cho nền tảng của máy quán. Giao diện quản trị tại \`http://<ip>:<port>/\`, POS tại \`/pos\`."
+            echo
+            echo "Trang tải chính thức: https://tempo.godx.jp/downloads"
+            echo
+            echo "Đối chiếu \`SHA256SUMS.txt\` trước khi cài."
+            echo
+            echo "## $HEADING"
+            echo
+            git log --no-merges --pretty='- %s' "$RANGE" | head -100
+          } > NOTES.md
+          gh release create "${{ github.ref_name }}" \
+            --title "${{ github.ref_name }}" \
+            --notes-file NOTES.md \
+            dist/ws-server-* dist/SHA256SUMS.txt
+
+      - name: Setup SSH
+        run: |
+          install -m 700 -d "$RUNNER_TEMP/ssh"
+          printf '%s\n' "${{ secrets.X_SERVER_SSH_KEY }}" > "$RUNNER_TEMP/ssh/id_deploy"
+          chmod 600 "$RUNNER_TEMP/ssh/id_deploy"
+          ssh-keyscan -p "$SSH_PORT" "$SSH_HOST" > "$RUNNER_TEMP/ssh/known_hosts" 2>/dev/null
+
+      - name: Rsync workstation downloads to XServer
+        run: |
+          # Merge with server-side archive/ — never --delete the whole tree.
+          # deploy-xserver excludes public/downloads/, so ensure the target exists.
+          ssh -p "$SSH_PORT" -i "$RUNNER_TEMP/ssh/id_deploy" \
+            -o UserKnownHostsFile="$RUNNER_TEMP/ssh/known_hosts" -o IdentitiesOnly=yes \
+            "$SSH_USER@$SSH_HOST" "mkdir -p \"$APP_DIR/public/downloads/workstation/archive\""
+          rsync -az \
+            -e "ssh -p $SSH_PORT -i $RUNNER_TEMP/ssh/id_deploy -o UserKnownHostsFile=$RUNNER_TEMP/ssh/known_hosts -o IdentitiesOnly=yes" \
+            backend/public/downloads/workstation/ \
+            "$SSH_USER@$SSH_HOST:$APP_DIR/public/downloads/workstation/"
+
+      - name: Smoke — downloads page
+        run: |
+          # Đo MANIFEST, không đo trang.
+          #
+          # Trang tải nay là Next ở admin-web, deploy theo pipeline Amplify —
+          # nhịp khác hẳn lượt phát hành này, nên một lượt release xanh không
+          # chứng minh được gì về trang, và một lượt release ĐỎ vì trang chưa
+          # kịp deploy là báo động oan. Rào kêu oan thì bị TẮT chứ không bị
+          # tranh luận.
+          #
+          # Thứ lượt phát hành NÀY chịu trách nhiệm là file: manifest vừa ghi có
+          # thật sự phục vụ được không. Đó mới là câu hỏi nó trả lời được.
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 \
+            https://tempo-prod.godx.jp/downloads/workstation/manifest.json || echo 000)
+          echo "downloads manifest: HTTP $code"
+          case "$code" in
+            200) echo "OK";;
+            *) echo "::warning::downloads manifest returned $code — file vừa phát hành KHÔNG lấy được";;
+          esac
+
+      - name: Cleanup
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/ssh"

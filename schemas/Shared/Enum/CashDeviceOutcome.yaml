@@ -1,0 +1,44 @@
+# ==============================================================================
+# Cash Device Outcome Enum (釣銭機取引結果 / Kết cục lượt thu tiền mặt)
+# ==============================================================================
+#
+# T1 của #2876 (issue #2878).
+#
+# Bám ĐÚNG tập trạng thái KẾT THÚC của adapter Glory
+# (`workstation/internal/device/glory/types.go` — `Status`, nhánh `IsTerminal`).
+# Không thêm giá trị nào adapter không phát: một giá trị thừa ở đây là một
+# giá trị không đường nào ghi được, và nó sẽ được tin.
+#
+#   finish  — 取引完了: xong bình thường. CHỈ giá trị này mới có order_payment.
+#   cancel  — 取引キャンセル: huỷ, tiền khách bỏ vào đã trả lại.
+#   abort   — 取引強制終了: mất điện / OS chết giữa giao dịch.
+#   timeout — 取引タイムアウト: khách không bỏ đủ tiền kịp, MÁY GIỮ TIỀN.
+#   failure — 取引エラー終了: máy lỗi lúc nhả tiền thối / chờ khách lấy.
+#
+# `timeout` và `abort` là hai giá trị đắt nhất: tiền đang nằm trong máy mà
+# KHÔNG có dòng `order_payments` nào. Trước T1 hai kết cục này không để lại
+# dấu vết nào trên Cloud — đó là lý do bảng `cash_device_transactions` tồn tại.
+#
+# Trạng thái KHÔNG kết thúc (`beginDeposit`, `dispenseChange`, `waitPullOut`)
+# cố ý đứng ngoài: chúng là nhịp giữa chừng, một hàng sổ chỉ ra đời khi lượt
+# thu đã ngã ngũ.
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: 釣銭機取引結果
+  en: Cash Device Outcome
+  vi: Kết cục lượt thu tiền mặt
+
+values:
+  - value: finish
+    label: { ja: 取引完了, en: Finished, vi: Hoàn tất }
+  - value: cancel
+    label: { ja: 取引キャンセル, en: Cancelled, vi: Đã huỷ }
+  - value: abort
+    label: { ja: 取引強制終了, en: Aborted, vi: Đứt giữa chừng }
+  - value: timeout
+    label: { ja: 取引タイムアウト, en: Timed Out, vi: Quá thời gian }
+  - value: failure
+    label: { ja: 取引エラー終了, en: Failed, vi: Lỗi máy }

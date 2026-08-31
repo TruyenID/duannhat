@@ -1,0 +1,21 @@
+crossshow -> HTTP 404
+{
+    "message": "Resource not found in this brand.",
+    "exception": "Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException",
+    "file": "/var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php",
+    "line": 1437,
+    "trace": [
+        {
+            "file": "/var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/helpers.php",
+            "line": 67,
+            "function": "abort",
+            "class": "Illuminate\\Foundation\\Application",
+            "type": "->"
+        },
+        {
+            "file": "/var/www/html/app/Http/Controllers/Traits/HasOrganizationContext.php",
+            "line": 88,
+            "function": "abort"
+        },
+        {
+            "file": "/var/www/html/app/Http/Controllers/Api/V1/HQ/MaterialController.php",

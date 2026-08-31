@@ -1,0 +1,99 @@
+# ==============================================================================
+# FloatingSectionProductSku Schema (フローティングセクション商品SKU / SKU sản phẩm trong khung giờ ưu đãi)
+# ==============================================================================
+#
+# Per-SKU visibility + promotional price for a product inside a
+# FloatingSection. Unlike MenuProductSku (branch-only — HQ never prices a
+# Menu), a FloatingSection's whole purpose is an HQ-defined promo price, so
+# this table exists on BOTH the HQ master AND every branch clone:
+#   - HQ sets/toggles the promo price per variant on the master row
+#     (addProducts() seeds one row per active ProductSku, mirroring the
+#     product's own current price).
+#   - cloneToBranch() copies the master's rows (price + override flag +
+#     is_active) into the branch's own independent rows.
+#   - syncFromMaster() adds newly-appeared variants but never touches a row
+#     the shop already has (same "shop's own choice survives sync" rule as
+#     FloatingSectionProduct/FloatingSectionSchedule).
+#
+# Pricing flow mirrors MenuProductSku:
+#   1. Create: selling_price = product_skus.selling_price, is_price_overridden = false
+#   2. Override: HQ/shop sets a price → is_price_overridden = true
+#   3. Reset: selling_price = product_skus.selling_price (re-read), is_price_overridden = false
+#
+# ==============================================================================
+
+displayName:
+  en: Floating Section Product SKU
+  ja: フローティングセクション商品SKU
+  vi: SKU sản phẩm trong khung giờ ưu đãi
+
+kind: object
+
+options:
+  service: false
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    - columns: [floating_section_product_id, product_sku_id]
+      unique: true
+    - columns: [floating_section_product_id]
+    - columns: [product_sku_id]
+
+properties:
+  floatingSectionProduct:
+    type: Association
+    relation: ManyToOne
+    target: FloatingSectionProduct
+    onDelete: CASCADE
+    displayName:
+      en: Floating Section Product
+      ja: フローティングセクション商品
+      vi: Sản phẩm trong khung giờ ưu đãi
+
+  productSku:
+    type: Association
+    relation: ManyToOne
+    target: ProductSku
+    onDelete: CASCADE
+    displayName:
+      en: Product SKU
+      ja: 商品SKU
+      vi: SKU sản phẩm
+
+  is_active:
+    type: Boolean
+    default: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+    description:
+      en: SKU-level toggle. Can deactivate an individual variant (e.g. one size out of stock).
+      ja: SKUレベルのトグル。個別のバリアントを無効にできます（例：特定のサイズが品切れ）。
+      vi: Toggle cấp SKU. Có thể tắt bán 1 biến thể cụ thể (vd hết size lớn).
+
+  selling_price:
+    type: Decimal
+    precision: 15
+    scale: 2
+    displayName:
+      en: Selling Price
+      ja: 販売価格
+      vi: Giá bán
+    description:
+      en: Promotional price for this variant. Initially copied from product_skus.selling_price; HQ/shop can override.
+      ja: このバリアントのプロモーション価格。初期値はproduct_skus.selling_priceからコピー。本部/店舗が上書き可能。
+      vi: Giá ưu đãi cho biến thể này. Ban đầu copy từ product_skus.selling_price; HQ/shop có thể ghi đè.
+
+  is_price_overridden:
+    type: Boolean
+    default: false
+    displayName:
+      en: Price Overridden
+      ja: 価格上書き済み
+      vi: Đã ghi đè giá
+    description:
+      en: Whether selling_price has been customized. False right after create/reset.
+      ja: selling_priceがカスタマイズされたかどうか。作成/リセット直後はFalse。
+      vi: selling_price đã được tùy chỉnh chưa. False ngay sau khi tạo/reset.

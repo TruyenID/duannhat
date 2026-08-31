@@ -1,0 +1,38 @@
+# ==============================================================================
+# Printer Cut Type Enum (カット方式 / Kiểu cắt giấy)
+# ==============================================================================
+#
+# Cách máy in cắt giấy sau khi in xong một phiếu.
+#
+# Giá trị:
+#   - full:    Cắt rời hoàn toàn. Mặc định.
+#   - partial: Cắt gần đứt, còn dính một chút để phiếu không rơi.
+#   - none:    Không cắt (máy không có dao cắt).
+#
+# Nguồn: workstation-app/internal/printer/printer.go (PrinterConfig.CutType).
+#
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: カット方式
+  en: Cut Type
+  vi: Kiểu cắt giấy
+
+values:
+  - value: full
+    label:
+      ja: 全カット
+      en: Full Cut
+      vi: Cắt rời
+  - value: partial
+    label:
+      ja: 部分カット
+      en: Partial Cut
+      vi: Cắt một phần
+  - value: none
+    label:
+      ja: カットなし
+      en: No Cut
+      vi: Không cắt

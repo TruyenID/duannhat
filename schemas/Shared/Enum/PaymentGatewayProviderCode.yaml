@@ -1,0 +1,18 @@
+# Payment gateway adapter identity. Adding a provider requires an adapter, contract tests,
+# capability evidence, and a generated enum migration; display labels never select adapters.
+kind: enum
+
+displayName:
+  en: Payment Gateway Provider
+  ja: 決済ゲートウェイプロバイダー
+  vi: Nhà cung cấp cổng thanh toán
+
+values:
+  - value: internal
+    label: { en: Internal, ja: 内部, vi: Nội bộ }
+  - value: stripe
+    label: { en: Stripe, ja: Stripe, vi: Stripe }
+  - value: paypay
+    label: { en: PayPay, ja: PayPay, vi: PayPay }
+  - value: sbps
+    label: { en: SB Payment Service, ja: SBペイメントサービス, vi: SB Payment Service }

@@ -1,0 +1,11 @@
+{
+  "fixDeposit": false,
+  "transactionId": "20260810212202",
+  "total": 100,
+  "transactionStatus": "beginDeposit",
+  "startDate": "2026-08-10T21:22:02.014",
+  "dispensedCash": 0,
+  "change": 0,
+  "seqNo": 1786364523198,
+  "deposit": 0
+}

@@ -1,0 +1,17 @@
+-- 041: captured_at on payments — device-clock capture instant for correct
+-- cashier-shift attribution (#817 Phase B).
+--
+-- Cloud's OrderPayment gains captured_at (Omnify) and re-attributes a
+-- late-syncing straggler payment to the shift it was CAPTURED in, not the
+-- shift that happens to be open when it finally lands. The workstation is the
+-- capture clock, so it must stamp + forward captured_at on every
+-- workstation-origin payment.
+--
+--   captured_at = device wall-clock at the moment the cashier recorded the
+--                 payment (RFC3339Nano, UTC). NULL for pre-#817 rows.
+--
+-- Distinct from paid_at (set only for auto-confirmed tenders) and created_at
+-- (DB insert time): captured_at is the attribution key and is always the
+-- device's own clock so it compares cleanly against a terminal shift's
+-- device-clock opened_at/closed_at window on Cloud.
+ALTER TABLE payments ADD COLUMN captured_at TEXT;

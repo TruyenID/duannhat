@@ -1,0 +1,190 @@
+# ==============================================================================
+# TillSettlementTenderDetail — Per-tender close reconciliation row
+# ==============================================================================
+#
+# Plan 030 — Cashier Shift.
+# ARTS ODM 7.3: maps to `TillSettlementTenderDetail`.
+#
+# Một row = một tender (theo TillTenderType) được đối soát khi kết ca.
+# Lưu cả số POS expected (Σ OrderPayment), số cashier declared từ slip
+# Stera (gross 売上 + cancel 取消 → net), và variance (signed).
+#
+# Snapshot pattern: tender_key / category / currency_code copy từ
+# TillTenderType tại close để báo cáo lịch sử không bị ảnh hưởng nếu tender
+# master sau này đổi.
+#
+# Reconciliation identity:
+#   declared_amount = declared_gross_amount − declared_cancel_amount        (NET, service-computed)
+#   variance_amount = declared_amount − expected_amount                    (chỉ khi expected non-null)
+#   |variance_amount| > Till.variance_tolerance_amount → bắt buộc variance_reason
+#
+# Anchor vs sub-brand:
+#   - Anchor tenders (cash, credit): expected_amount per-row = Σ OrderPayment
+#     succeeded với payment_method_code khớp.
+#   - Sub-brand (QR/emoney): expected_amount NULL. Variance per-row null.
+#     Đối chiếu ở mức category: Σ net(sub-brands trong category) vs
+#     category_expected[category].
+#
+# Written by: TillSessionService::close() — một row per active TillTenderType
+#             ở thời điểm close, kể cả nếu cashier không nhập (gross=0, cancel=0).
+# Read by: GET /pos/till/sessions/{id} (close report), audit, future báo cáo.
+#
+# Business Rules:
+#   - BR-STD01: (session_id, tender_key) unique — một session chỉ có một row
+#               per tender.
+#   - BR-STD02: declared_gross_amount, declared_cancel_amount ≥ 0 (validation form).
+#   - BR-STD03: declared_amount = gross − cancel, service-computed (NOT user input).
+#   - BR-STD04: variance_amount chỉ tính khi expected_amount non-null.
+#   - BR-STD05: variance_reason BẮT BUỘC khi |variance_amount| > tolerance
+#               (Till.variance_tolerance_amount, default 0).
+#   - BR-STD06: NO soft delete (audit).
+# ==============================================================================
+
+displayName:
+  en: Till Settlement Tender Detail
+  ja: テンダー精算明細
+  vi: Chi tiết đối soát tender
+
+kind: object
+
+options:
+  timestamps: true
+  id: Uuid
+  indexes:
+    - columns: [session_id, tender_key]
+      unique: true
+      name: till_settlement_session_tender_unique
+    - columns: [session_id, category]
+
+properties:
+  tender_key:
+    # Snapshot từ TillTenderType.tender_key tại close.
+    type: String
+    length: 50
+    displayName:
+      en: Tender Key
+      ja: テンダーキー
+      vi: Mã tender
+
+  category:
+    # Snapshot từ TillTenderType.category. UI group close report theo cột này.
+    type: EnumRef
+    enum: TillTenderSystemCategory
+    filterable: true
+    displayName:
+      en: Category
+      ja: 分類
+      vi: Phân loại
+
+  currency_code:
+    type: String
+    length: 3
+    displayName:
+      en: Currency
+      ja: 通貨
+      vi: Tiền tệ
+
+  expected_amount:
+    # POS sum (Σ OrderPayment.amount với payment_method_code khớp). NULL
+    # cho non-anchor sub-brand (Decision 4: category-level rollup).
+    type: Decimal
+    precision: 15
+    scale: 2
+    nullable: true
+    displayName:
+      en: Expected Amount
+      ja: 予定額
+      vi: Số dự kiến
+
+  declared_gross_amount:
+    # 売上 từ slip Stera (gross). Cashier nhập tại close form. Default 0.
+    type: Decimal
+    precision: 15
+    scale: 2
+    default: 0
+    displayName:
+      en: Declared Gross (売上)
+      ja: 売上
+      vi: Doanh thu (gross)
+
+  declared_cancel_amount:
+    # 取消 từ slip Stera (cancel/void). Cashier nhập tại close form.
+    # Default 0 (nhiều shop không có cancel trong ngày).
+    type: Decimal
+    precision: 15
+    scale: 2
+    default: 0
+    displayName:
+      en: Declared Cancel (取消)
+      ja: 取消
+      vi: Huỷ (cancel)
+
+  declared_amount:
+    # NET = gross − cancel, service-computed. Persisted để query/rollup
+    # nhanh (Σ declared_amount per category).
+    type: Decimal
+    precision: 15
+    scale: 2
+    default: 0
+    displayName:
+      en: Declared Net Amount
+      ja: 申告額（純額）
+      vi: Số thực khai
+
+  terminal_batch_total:
+    # 売上合計 grand total in trên slip. Optional — UI hiển thị khi tender
+    # có requires_terminal_total=true. Cross-check rằng cashier không nhập
+    # nhầm con số nào.
+    type: Decimal
+    precision: 15
+    scale: 2
+    nullable: true
+    displayName:
+      en: Terminal Batch Total
+      ja: 端末合計
+      vi: Tổng máy
+
+  variance_amount:
+    # = declared_amount − expected_amount. Null khi expected null. Signed
+    # (<0 short, >0 over).
+    type: Decimal
+    precision: 15
+    scale: 2
+    nullable: true
+    displayName:
+      en: Variance
+      ja: 差額
+      vi: Sai số
+
+  variance_reason:
+    # Bắt buộc khi |variance_amount| > tolerance. Cashier giải thích lý do
+    # (vd: "khách bồi đắp thiếu", "lệch do hoàn tiền không qua slip").
+    type: Text
+    nullable: true
+    displayName:
+      en: Variance Reason
+      ja: 差額理由
+      vi: Lý do sai số
+
+  # Relationships
+  session:
+    type: Association
+    relation: ManyToOne
+    target: TillSession
+    onDelete: CASCADE
+    displayName:
+      en: Session
+      ja: セッション
+      vi: Ca
+
+  tenderType:
+    # ManyToOne RESTRICT — giữ link tới master cho future report; soft-delete
+    # tender master OK, hard delete bị chặn.
+    type: Association
+    relation: ManyToOne
+    target: TillTenderType
+    onDelete: RESTRICT
+    displayName:
+      en: Tender Type
+      ja: テンダー種別
+      vi: Loại tender

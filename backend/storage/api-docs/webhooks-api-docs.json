@@ -1,0 +1,69 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "TempoFast API — Webhooks (inbound)",
+        "description": "## Chiều VÀO từ bên ngoài\n\nĐây KHÔNG phải API để client của mình gọi. Đây là hợp đồng mình cam kết\n**nhận** từ Stripe / PayPay / nhà cung cấp mail.\n\n### Vì sao tài liệu này công khai được\n\nCác endpoint dưới đây được bảo vệ bằng **xác minh chữ ký**, không bằng việc\nkhông ai biết đường dẫn. Hình dạng payload thì chính nhà cung cấp đã công bố\ncông khai. Giấu trang này đi chỉ làm khó người trực sự cố lúc 2 giờ sáng,\nkhông làm khó kẻ tấn công.",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/v1/webhooks/mail/{provider}": {
+            "post": {
+                "tags": [
+                    "Webhooks"
+                ],
+                "summary": "Receive a mail provider webhook (bounce / complaint / delivery / unsubscribe)",
+                "description": "Public endpoint, provider signature is the auth. Returns 202 with the count of events queued for async processing. Unknown event types are logged and counted 0 so the provider stops retrying.",
+                "operationId": "342ad479fbb6c37cdef2cab0f52d9fb8",
+                "parameters": [
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "postmark"
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Provider-specific JSON payload",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": true
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "Accepted"
+                    },
+                    "401": {
+                        "description": "Signature verification failed"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Webhooks",
+            "description": "Webhooks"
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "sanctum": {
+                "type": "http",
+                "description": "Bearer token from login or SSO callback",
+                "scheme": "bearer",
+                "bearerFormat": "Token"
+            }
+        }
+    }
+}

@@ -1,0 +1,67 @@
+# ==============================================================================
+# Expire Reason Enum (期限切れ理由 / Lý do hết hạn)
+# ==============================================================================
+#
+# Plan 032 — Stale Shift Reaper.
+#
+# Categorical reason a TillSession was flipped to status='expired' by the
+# system. NOT used for cashier-driven abandons (those use organic
+# `abandoned` status) and NOT used for manager force-abandons (those use
+# the separate ForceAbandonReasonCode enum). One value per code path that
+# can produce an expire.
+#
+# Decision 9 separates this CATEGORICAL signal from the QUANTITATIVE
+# threshold (stored in `till_sessions.expire_threshold_hours` as an integer).
+# Reporting can `GROUP BY expire_reason` cleanly even after the env-var
+# threshold changes — historical reports stay coherent.
+#
+# Values:
+#
+#   - no_activity: Scheduler `tills:expire-stale-shifts` reaped a session
+#                  whose opened_at < (now - POS_SHIFT_STALE_TIMEOUT_HOURS)
+#                  AND no OrderPayment in the activity window
+#                  (POS_SHIFT_STALE_ACTIVITY_WINDOW_HOURS). This is the
+#                  default and only code path used in v1.
+#
+#   - manual_admin: Reserved for future. Admin/manager triggers a bulk
+#                   expire via CLI (`php artisan tills:expire-stale-shifts
+#                   --force --session=...`) or a sysadmin console endpoint.
+#                   Not exposed via UI in v1 — force-abandon is the v1
+#                   manager exit door.
+#
+#   - device_lost_signal: Reserved for future plan. When the workstation-app
+#                         heartbeat fleet detects a POS device has been
+#                         offline for > N hours, scheduler can expire its
+#                         open session. Requires heartbeat infra not yet
+#                         built. v1 ships the enum value so the column
+#                         doesn't need a later migration to add it.
+#
+# Used in:
+#   - TillSession.expire_reason
+#   - Audit log payload for `till_session_expired` events
+#   - Dashboard `GROUP BY expire_reason` queries
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: 期限切れ理由
+  en: Expire Reason
+  vi: Lý do hết hạn
+
+values:
+  - value: no_activity
+    label:
+      ja: 一定時間操作なし
+      en: No recent activity
+      vi: Không hoạt động đủ lâu
+  - value: manual_admin
+    label:
+      ja: 管理者による強制
+      en: Manual admin trigger
+      vi: Admin chủ động hết hạn
+  - value: device_lost_signal
+    label:
+      ja: 端末オフライン検出
+      en: Device offline detected
+      vi: Thiết bị mất tín hiệu

@@ -1,0 +1,206 @@
+{
+    "version": "tempo-offline-order-v1",
+    "cases": [
+        {
+            "name": "minimal_single_line",
+            "selection": {
+                "lines": [
+                    {
+                        "line_id": "0192aaaa-bbbb-7ccc-8ddd-000000000001",
+                        "menu_product_sku_id": null,
+                        "product_sku_id": "0192aaaa-bbbb-7ccc-8ddd-000000000002",
+                        "quantity": 1,
+                        "toppings": [],
+                        "note": null
+                    }
+                ],
+                "order_type": "spot",
+                "pickup_type": "immediate",
+                "scheduled_pickup_at": null,
+                "contact": null,
+                "customer_id": null,
+                "guest_count": null,
+                "table_ids": [],
+                "locale": "ja",
+                "channel": "api",
+                "device_id": null,
+                "coupon_code": null,
+                "split_mode": null,
+                "split_people_count": null,
+                "note": null
+            },
+            "envelope": {
+                "device_id": "0192aaaa-bbbb-7ccc-8ddd-000000000010",
+                "issuer_id": "0192aaaa-bbbb-7ccc-8ddd-000000000011",
+                "catalog_revision": 1,
+                "issued_at": "2026-07-26T10:00:00Z",
+                "expires_at": "2026-07-29T10:00:00Z",
+                "key_id": "0192aaaa-bbbb-7ccc-8ddd-000000000012"
+            },
+            "expected_selection_digest": "816ec0500e5c889bbffe521d89e74bed9540767b288b36c4dcd4e395e59a3c0d",
+            "expected_message_sha256": "c69f5dd943b72dcc31264962cf53bcab47acd23710f9668d9195c3c6550a1721"
+        },
+        {
+            "name": "full_header_menu_anchored",
+            "selection": {
+                "lines": [
+                    {
+                        "line_id": "0192aaaa-bbbb-7ccc-8ddd-000000000001",
+                        "menu_product_sku_id": "0192aaaa-bbbb-7ccc-8ddd-000000000003",
+                        "product_sku_id": null,
+                        "quantity": 2,
+                        "toppings": [],
+                        "note": "no ice"
+                    }
+                ],
+                "order_type": "takeaway",
+                "pickup_type": "scheduled",
+                "scheduled_pickup_at": "2026-07-26T12:30:00Z",
+                "contact": null,
+                "customer_id": "0192aaaa-bbbb-7ccc-8ddd-000000000004",
+                "guest_count": 3,
+                "table_ids": [
+                    "0192aaaa-bbbb-7ccc-8ddd-000000000005",
+                    "0192aaaa-bbbb-7ccc-8ddd-000000000006"
+                ],
+                "locale": "vi",
+                "channel": "kiosk",
+                "device_id": "0192aaaa-bbbb-7ccc-8ddd-000000000010",
+                "coupon_code": "SAVE10",
+                "split_mode": "by_people",
+                "split_people_count": 2,
+                "note": "line one\nline two"
+            },
+            "envelope": {
+                "device_id": "0192aaaa-bbbb-7ccc-8ddd-000000000010",
+                "issuer_id": "0192aaaa-bbbb-7ccc-8ddd-000000000011",
+                "catalog_revision": 41,
+                "issued_at": "2026-07-26T10:00:00Z",
+                "expires_at": "2026-07-29T10:00:00Z",
+                "key_id": "0192aaaa-bbbb-7ccc-8ddd-000000000012"
+            },
+            "expected_selection_digest": "fae1c73c13233bf73cbb08b00c82f26738c2a051611ed6259f864edc40012201",
+            "expected_message_sha256": "a03a6f3b5929de99a67d7f14b257bf759539fbf707b05548bb8512d327626e2f"
+        },
+        {
+            "name": "toppings_unicode_notes",
+            "selection": {
+                "lines": [
+                    {
+                        "line_id": "0192aaaa-bbbb-7ccc-8ddd-000000000001",
+                        "menu_product_sku_id": "0192aaaa-bbbb-7ccc-8ddd-000000000003",
+                        "product_sku_id": null,
+                        "quantity": 1,
+                        "toppings": [
+                            {
+                                "topping_group_item_id": "0192aaaa-bbbb-7ccc-8ddd-000000000020",
+                                "product_sku_id": "0192aaaa-bbbb-7ccc-8ddd-000000000021",
+                                "quantity": 2,
+                                "note": "ねぎ抜き / no onion"
+                            },
+                            {
+                                "topping_group_item_id": "0192aaaa-bbbb-7ccc-8ddd-000000000022",
+                                "product_sku_id": "0192aaaa-bbbb-7ccc-8ddd-000000000023",
+                                "quantity": 1,
+                                "note": null
+                            }
+                        ],
+                        "note": "ご飯 大盛り — extra rice / phần lớn"
+                    },
+                    {
+                        "line_id": "0192aaaa-bbbb-7ccc-8ddd-000000000007",
+                        "menu_product_sku_id": null,
+                        "product_sku_id": "0192aaaa-bbbb-7ccc-8ddd-000000000008",
+                        "quantity": 5,
+                        "toppings": [],
+                        "note": null
+                    }
+                ],
+                "order_type": "dine_in",
+                "pickup_type": "immediate",
+                "scheduled_pickup_at": null,
+                "contact": null,
+                "customer_id": null,
+                "guest_count": null,
+                "table_ids": [],
+                "locale": "ja",
+                "channel": "api",
+                "device_id": null,
+                "coupon_code": null,
+                "split_mode": null,
+                "split_people_count": null,
+                "note": null
+            },
+            "envelope": {
+                "device_id": "0192aaaa-bbbb-7ccc-8ddd-000000000010",
+                "issuer_id": "0192aaaa-bbbb-7ccc-8ddd-000000000011",
+                "catalog_revision": 7,
+                "issued_at": "2026-01-02T03:04:05Z",
+                "expires_at": "2026-01-05T03:04:05Z",
+                "key_id": "0192aaaa-bbbb-7ccc-8ddd-000000000012"
+            },
+            "expected_selection_digest": "792966c6d71309c13f6195d3587b64ac6c93d92b920acd7c9efc6b382cde7461",
+            "expected_message_sha256": "21f5d534fff992b65de7337f623e549a17a81e63bc81c35b73d75c19678c7ff2"
+        },
+        {
+            "name": "line_order_swapped",
+            "selection": {
+                "lines": [
+                    {
+                        "line_id": "0192aaaa-bbbb-7ccc-8ddd-000000000007",
+                        "menu_product_sku_id": null,
+                        "product_sku_id": "0192aaaa-bbbb-7ccc-8ddd-000000000008",
+                        "quantity": 5,
+                        "toppings": [],
+                        "note": null
+                    },
+                    {
+                        "line_id": "0192aaaa-bbbb-7ccc-8ddd-000000000001",
+                        "menu_product_sku_id": "0192aaaa-bbbb-7ccc-8ddd-000000000003",
+                        "product_sku_id": null,
+                        "quantity": 1,
+                        "toppings": [
+                            {
+                                "topping_group_item_id": "0192aaaa-bbbb-7ccc-8ddd-000000000020",
+                                "product_sku_id": "0192aaaa-bbbb-7ccc-8ddd-000000000021",
+                                "quantity": 2,
+                                "note": "ねぎ抜き / no onion"
+                            },
+                            {
+                                "topping_group_item_id": "0192aaaa-bbbb-7ccc-8ddd-000000000022",
+                                "product_sku_id": "0192aaaa-bbbb-7ccc-8ddd-000000000023",
+                                "quantity": 1,
+                                "note": null
+                            }
+                        ],
+                        "note": "ご飯 大盛り — extra rice / phần lớn"
+                    }
+                ],
+                "order_type": "dine_in",
+                "pickup_type": "immediate",
+                "scheduled_pickup_at": null,
+                "contact": null,
+                "customer_id": null,
+                "guest_count": null,
+                "table_ids": [],
+                "locale": "ja",
+                "channel": "api",
+                "device_id": null,
+                "coupon_code": null,
+                "split_mode": null,
+                "split_people_count": null,
+                "note": null
+            },
+            "envelope": {
+                "device_id": "0192aaaa-bbbb-7ccc-8ddd-000000000010",
+                "issuer_id": "0192aaaa-bbbb-7ccc-8ddd-000000000011",
+                "catalog_revision": 7,
+                "issued_at": "2026-01-02T03:04:05Z",
+                "expires_at": "2026-01-05T03:04:05Z",
+                "key_id": "0192aaaa-bbbb-7ccc-8ddd-000000000012"
+            },
+            "expected_selection_digest": "97148e6c916510358066251fcd7de3221bcda8d6151e8767cb98d3ae0d1f1343",
+            "expected_message_sha256": "419a71c5c4849cad4da93fc964426f0f9c5450e6cb9cccf68210a385714a9097"
+        }
+    ]
+}

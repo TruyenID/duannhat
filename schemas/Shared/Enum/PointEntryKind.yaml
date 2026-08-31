@@ -1,0 +1,39 @@
+# =============================================================================
+# PointEntryKind (ポイント履歴種別 / Loại bút toán điểm)
+# =============================================================================
+#
+# Phân loại một dòng trong sổ cái điểm (`customer_point_entries`). Sổ cái là
+# append-only: số dư = SUM(points), KHÔNG có cột số dư nào để lệch.
+#
+#   earn    (+)  tích khi đơn đóng (OrderPaid). Idempotent theo
+#                (customer_order_id, kind) — unique index ở DB.
+#   redeem  (-)  khách đổi điểm lấy phần thưởng → mint một Coupon cá nhân.
+#   revoke  (-)  thu hồi điểm đã tích khi đơn bị hoàn/huỷ sau khi đã tích.
+#                Cặp với `earn` trên cùng order id (nên unique index gồm cả
+#                `kind`, không chỉ order id).
+#   adjust  (±)  chỉnh tay bởi HQ (bồi thường, sự cố). Luôn kèm `note`.
+#   expire  (-)  điểm hết hạn. CHƯA có job nào phát sinh loại này — giữ chỗ
+#                để khi bật hạn dùng thì không phải sửa enum + migrate lại.
+#
+# Không có loại nào bị xoá khỏi sổ: sửa sai bằng cách ghi thêm bút toán
+# ngược dấu, y như sổ kế toán.
+# =============================================================================
+
+kind: enum
+
+displayName:
+  ja: ポイント履歴種別
+  en: Point Entry Kind
+  vi: Loại bút toán điểm
+
+values:
+  - value: earn
+    label: { ja: 獲得, en: Earned, vi: Tích điểm }
+  - value: redeem
+    label: { ja: 交換, en: Redeemed, vi: Đổi điểm }
+  - value: revoke
+    label: { ja: 取消, en: Revoked, vi: Thu hồi }
+  - value: adjust
+    label: { ja: 調整, en: Adjusted, vi: Điều chỉnh }
+  - value: expire
+    label: { ja: 失効, en: Expired, vi: Hết hạn }

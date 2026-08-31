@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      Content Security Policy. pos-web handles cash payments + customer
+      PII — XSS via any dep CVE would leak the year-long bearer token
+      currently stored in localStorage + a non-HttpOnly cookie (see
+      src/lib/auth.ts:persistSession). CSP is the immediate mitigation;
+      the proper fix is server-issued HttpOnly+Secure cookie at the SSO
+      callback (TODO: open a tracking issue — current state is "comment
+      only" in src/lib/auth.ts, no GitHub issue yet).
+
+      connect-src includes http/https/ws/wss because pos-web speaks to
+      the LAN workstation (mDNS-discovered private IPs, http://) plus
+      the cloud fallback (https://*.godx.jp) plus Pusher/Reverb (wss).
+      img-src likewise includes http: — product gallery images are served
+      from the same LAN workstation gateway and from object storage (MinIO
+      in dev on http://localhost:5490, http object stores in some deploys),
+      so https-only would silently block every menu-card image.
+      The deploy nginx/Caddy must set frame-ancestors at the HTTP-
+      header layer; meta tag is hint-only for that directive.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' http: https: ws: wss:; img-src 'self' data: blob: http: https:; object-src 'none'; base-uri 'self'; form-action 'self'"
+    />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <!--
+      Permissions-Policy: pos-web is a POS terminal — it doesn't need
+      camera, microphone, geolocation, payment-API, USB, or Bluetooth.
+      Deny everything so a compromised dep can't activate sensors.
+    -->
+    <meta
+      http-equiv="Permissions-Policy"
+      content="camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=(), accelerometer=(), gyroscope=()"
+    />
+
+    <!-- M PLUS 2 — mirrors godx-tempo-frontend's design system font.
+         `latin-ext` + `vietnamese` subsets load automatically based on
+         unicode-range when the browser hits Vietnamese characters, so
+         diacritics compose correctly (fixes "bằng" → "bă`ng" on Windows
+         where the fallback Yu Gothic doesn't support combining marks). -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=M+PLUS+2:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <title>godx Checkout Order</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

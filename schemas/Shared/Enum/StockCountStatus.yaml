@@ -1,0 +1,76 @@
+# ==============================================================================
+# Stock Count Status Enum (棚卸ステータス / Trạng thái kiểm kê)
+# ==============================================================================
+#
+# Trạng thái workflow phiên kiểm kê.
+# Quyết định quyền thao tác và giai đoạn kiểm kê.
+#
+# Giá trị (Values):
+#   - draft: Nháp (下書き)
+#     Cho phép: Chỉnh sửa header, thêm/xóa items (partial scope)
+#     Tác động: KHÔNG ảnh hưởng tồn kho
+#     Transition: → in_progress (bắt đầu kiểm kê)
+#
+#   - in_progress: Đang kiểm kê (実施中)
+#     Cho phép: Nhập số đếm thực tế (counted_quantity)
+#     Tác động: KHÔNG ảnh hưởng tồn kho
+#     Transition: → pending_approval (gửi duyệt) hoặc → cancelled (hủy)
+#
+#   - pending_approval: Chờ duyệt (承認待ち)
+#     Cho phép: Chỉ xem
+#     Tác động: KHÔNG ảnh hưởng tồn kho
+#     Transition: → approved (duyệt) hoặc → cancelled (từ chối)
+#
+#   - approved: Đã duyệt (承認済み)
+#     Cho phép: Chỉ xem
+#     Tác động: Tự động tạo phiếu điều chỉnh (adjustment_in/out) + cập nhật tồn kho
+#     Transition: Trạng thái cuối cùng
+#
+#   - cancelled: Đã hủy (キャンセル)
+#     Cho phép: Chỉ xem
+#     Tác động: KHÔNG ảnh hưởng tồn kho
+#     Transition: Trạng thái cuối cùng
+#
+# Workflow:
+#   draft → in_progress → pending_approval → approved
+#                                          ↘ cancelled
+#
+# Sử dụng trong:
+#   - StockCount.status: Trạng thái phiên kiểm kê
+#   - Authorization: Xác định quyền thao tác
+#
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: 棚卸ステータス
+  en: Stock Count Status
+  vi: Trạng thái kiểm kê
+
+values:
+  - value: draft
+    label:
+      ja: 下書き
+      en: Draft
+      vi: Nháp
+  - value: in_progress
+    label:
+      ja: 実施中
+      en: In Progress
+      vi: Đang kiểm kê
+  - value: pending_approval
+    label:
+      ja: 承認待ち
+      en: Pending Approval
+      vi: Chờ duyệt
+  - value: approved
+    label:
+      ja: 承認済み
+      en: Approved
+      vi: Đã duyệt
+  - value: cancelled
+    label:
+      ja: キャンセル
+      en: Cancelled
+      vi: Đã hủy

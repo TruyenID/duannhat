@@ -1,0 +1,21 @@
+# =============================================================================
+# MenuPromotionProduct (プロモーション×商品 ピボット)
+# =============================================================================
+#
+# M2M whitelist between MenuPromotion and Product. Active CHỈ khi
+# MenuPromotion.applies_to ∈ {products, mixed}.
+#
+# Written by:  MenuPromotionService::create()/update() qua sync().
+# Read by:     MenuPromotionService::resolveActivePromotion() (direct
+#              FK match), HQ scope picker.
+# Lifecycle:   CASCADE từ cả 2 phía.
+# =============================================================================
+
+kind: pivot
+pivotFor: [MenuPromotion, Product]
+
+options:
+  indexes:
+    - columns: [menu_promotion_id, product_id]
+      unique: true
+      name: menu_promotion_product_unique

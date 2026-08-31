@@ -1,0 +1,267 @@
+# #2363 — the Omnify guards used to run only in the dev-to-main full suite.
+# A PR changing the guard itself or its state files therefore reported no checks.
+name: omnify-gate
+
+on:
+  push:
+    branches: [dev, main]
+    paths: ['.omnify/**', 'scripts/**', 'schemas/**', 'omnify.yaml', 'package.json', 'package-lock.json', # #2971 — CẢ THƯ MỤC, không phải hai file lẻ. `workflows-parse`
+            # canh cú pháp MỌI workflow, nhưng bộ lọc cũ chỉ cho nó nhìn
+            # thấy hai file — nên `deploy-xserver.yml`, thứ ghi thẳng vào DB
+            # production, sửa được mà không rào nào chạy.
+            '.github/workflows/**',
+            # #3065 — `.github/scripts/**` PHẢI ở đây, không chỉ `workflows/**`.
+            # Bốn rào (`ws-publish`, `ws-manifest*`, `version-single-source`) và
+            # monitor `version-drift` đều đọc script trong thư mục đó, nhưng bộ
+            # lọc chỉ cho chúng thấy file workflow — nên một PR chỉ sửa
+            # `publish-workstation-downloads.sh` đi qua gate với 0 rào chạy.
+            # Cùng hình dạng #2959/#2971, lần thứ tư.
+            '.github/scripts/**',
+            # #2959 — `workstation/**` và `VERSION` PHẢI nằm đây.
+            #
+            # Rào `test:version-fleet` phát biểu: "delta chạm workstation/ thì
+            # VERSION phải đổi". Nhưng bộ lọc paths cũ KHÔNG chứa workstation/,
+            # nên một PR chỉ chạm thư mục đó — tức đúng loại PR rào sinh ra để
+            # canh — không kích hoạt workflow này và rào không chạy.
+            #
+            # Đo được: 23 file workstation/ lên main qua promote #2957 mà không
+            # CI nào đỏ, trong khi chạy tay chính bài test đó thì ĐỎ.
+            #
+            # Cùng hình dạng với #2874 (phép kiểm lease nằm ở đường merge ít bị
+            # dùng nhất): rào ĐÚNG mà KHÔNG CHẠY thì đọc log CI y hệt rào đúng
+            # và có chạy. Một rào phát biểu về thư mục X bắt buộc phải chạy khi
+            # X đổi, nếu không nó chỉ là một câu văn.
+            'workstation/**', 'VERSION',
+            # #3002 — cùng hình dạng, lần thứ NĂM. `test:app-gates` phát biểu
+            # "app có test thì phải có cổng", và nó đọc đúng hai thứ: danh sách
+            # thư mục cấp hai dưới `app/`+`web/` kèm `package.json` của chúng,
+            # và nội dung workflow. Vế sau đã có `.github/workflows/**`; vế
+            # ĐẦU thì không — nên PR thêm một app mới (đúng loại PR rào sinh ra
+            # để canh) không kích hoạt gate này và rào không chạy.
+            #
+            # Đo trực tiếp: một PR chỉ thêm `app/newapp/package.json` khớp 0
+            # workflow có gọi `test:app-gates`.
+            #
+            # Ghim `*/package.json` chứ không phải `app/**`: đó ĐÚNG là thứ rào
+            # đọc (thêm app, xoá app, hay thêm script `test` đều buộc phải chạm
+            # file này), nên gate không phải chạy lại cho mọi thay đổi mã nguồn
+            # của tám app.
+            #
+            # #3133 — MỘT mẫu `*/*/package.json` thay cho hai mẫu ghim nhóm.
+            # `test:app-gates` không còn duyệt `["app", "web"]` gõ cứng (chính
+            # cái đó làm `workstation/frontend` vô hình với nó suốt nhiều
+            # tháng), nó đọc MỌI thư mục cấp hai có `package.json`. Bộ lọc phải
+            # rộng đúng bằng phép liệt kê, nếu không nhóm thứ tư lại lọt y hệt.
+            '*/*/package.json',
+            # #3200 — rào `test:ws-feed-caps` đọc HAI cây: controller Workstation
+            # phía Cloud (nơi `->limit()` sinh ra lớp lỗi) và hai file Go giữ
+            # hằng số phản chiếu. Không có hai mẫu này thì PR thêm một trần mới
+            # — đúng loại PR rào sinh ra để canh — khớp 0 workflow gọi nó, và ta
+            # lặp lại y hệt #2971.
+            'backend/app/Http/Controllers/Api/V1/Workstation/**',
+            'workstation/internal/service/sync_pull*.go',
+            # Rào `test:ws-expected` phát biểu về đường đi của con số "quán nên
+            # ở bản nào": file gốc cây → `.env` production, trước `config:cache`.
+            # File này CỐ Ý không nằm trong `workstation/` (vòng tròn #3145 với
+            # `test:version-fleet`), nên không mẫu nào có sẵn với tới nó — thiếu
+            # dòng dưới thì PR bump fleet, đúng loại PR rào sinh ra để canh,
+            # khớp 0 workflow gọi nó. Cùng hình dạng #2959/#2971/#3200.
+            # #3229 — rào `test:buildspecs-uploaded` phát biểu "mọi buildspec
+            # phải có workflow nạp nó lên Amplify". PR thêm một buildspec mồ côi
+            # — đúng loại PR rào sinh ra để canh — chỉ chạm thư mục này, nên
+            # thiếu mẫu dưới đây thì nó khớp 0 workflow gọi rào. Cùng hình dạng
+            # #2959/#2971/#3200; lần này `test:gate-paths` bắt được ngay lượt đầu.
+            '.github/amplify/**',
+            'WORKSTATION_EXPECTED_VERSION']
+  pull_request:
+    branches: [dev, main]
+    paths: ['.omnify/**', 'scripts/**', 'schemas/**', 'omnify.yaml', 'package.json', 'package-lock.json', # #2971 — CẢ THƯ MỤC, không phải hai file lẻ. `workflows-parse`
+            # canh cú pháp MỌI workflow, nhưng bộ lọc cũ chỉ cho nó nhìn
+            # thấy hai file — nên `deploy-xserver.yml`, thứ ghi thẳng vào DB
+            # production, sửa được mà không rào nào chạy.
+            '.github/workflows/**',
+            # #3065 — `.github/scripts/**` PHẢI ở đây, không chỉ `workflows/**`.
+            # Bốn rào (`ws-publish`, `ws-manifest*`, `version-single-source`) và
+            # monitor `version-drift` đều đọc script trong thư mục đó, nhưng bộ
+            # lọc chỉ cho chúng thấy file workflow — nên một PR chỉ sửa
+            # `publish-workstation-downloads.sh` đi qua gate với 0 rào chạy.
+            # Cùng hình dạng #2959/#2971, lần thứ tư.
+            '.github/scripts/**',
+            # #2959 — `workstation/**` và `VERSION` PHẢI nằm đây.
+            #
+            # Rào `test:version-fleet` phát biểu: "delta chạm workstation/ thì
+            # VERSION phải đổi". Nhưng bộ lọc paths cũ KHÔNG chứa workstation/,
+            # nên một PR chỉ chạm thư mục đó — tức đúng loại PR rào sinh ra để
+            # canh — không kích hoạt workflow này và rào không chạy.
+            #
+            # Đo được: 23 file workstation/ lên main qua promote #2957 mà không
+            # CI nào đỏ, trong khi chạy tay chính bài test đó thì ĐỎ.
+            #
+            # Cùng hình dạng với #2874 (phép kiểm lease nằm ở đường merge ít bị
+            # dùng nhất): rào ĐÚNG mà KHÔNG CHẠY thì đọc log CI y hệt rào đúng
+            # và có chạy. Một rào phát biểu về thư mục X bắt buộc phải chạy khi
+            # X đổi, nếu không nó chỉ là một câu văn.
+            'workstation/**', 'VERSION',
+            # #3002 — xem khối cùng số hiệu ở trigger `push` bên trên. Mỗi
+            # trigger phải TỰ phủ đủ: bản sao bên kia không che cho bản này
+            # (lý do đã ghi trong `gate-paths-cover-its-guards.test.mjs`).
+            #
+            # #3133 — MỘT mẫu `*/*/package.json` thay cho hai mẫu ghim nhóm.
+            # `test:app-gates` không còn duyệt `["app", "web"]` gõ cứng (chính
+            # cái đó làm `workstation/frontend` vô hình với nó suốt nhiều
+            # tháng), nó đọc MỌI thư mục cấp hai có `package.json`. Bộ lọc phải
+            # rộng đúng bằng phép liệt kê, nếu không nhóm thứ tư lại lọt y hệt.
+            '*/*/package.json',
+            # #3200 — rào `test:ws-feed-caps` đọc HAI cây: controller Workstation
+            # phía Cloud (nơi `->limit()` sinh ra lớp lỗi) và hai file Go giữ
+            # hằng số phản chiếu. Không có hai mẫu này thì PR thêm một trần mới
+            # — đúng loại PR rào sinh ra để canh — khớp 0 workflow gọi nó, và ta
+            # lặp lại y hệt #2971.
+            'backend/app/Http/Controllers/Api/V1/Workstation/**',
+            'workstation/internal/service/sync_pull*.go',
+            # Rào `test:ws-expected` phát biểu về đường đi của con số "quán nên
+            # ở bản nào": file gốc cây → `.env` production, trước `config:cache`.
+            # File này CỐ Ý không nằm trong `workstation/` (vòng tròn #3145 với
+            # `test:version-fleet`), nên không mẫu nào có sẵn với tới nó — thiếu
+            # dòng dưới thì PR bump fleet, đúng loại PR rào sinh ra để canh,
+            # khớp 0 workflow gọi nó. Cùng hình dạng #2959/#2971/#3200.
+            # #3229 — rào `test:buildspecs-uploaded` phát biểu "mọi buildspec
+            # phải có workflow nạp nó lên Amplify". PR thêm một buildspec mồ côi
+            # — đúng loại PR rào sinh ra để canh — chỉ chạm thư mục này, nên
+            # thiếu mẫu dưới đây thì nó khớp 0 workflow gọi rào. Cùng hình dạng
+            # #2959/#2971/#3200; lần này `test:gate-paths` bắt được ngay lượt đầu.
+            '.github/amplify/**',
+            'WORKSTATION_EXPECTED_VERSION']
+
+concurrency:
+  group: omnify-gate-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+jobs:
+  omnify:
+    name: version · drift · guard tests
+    runs-on: [self-hosted, Linux, X64]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # #3005 — `test:version-fleet` hỏi "từ lần bump VERSION gần nhất tới
+          # HEAD, có file workstation/ nào đổi không". Với checkout mặc định
+          # (nông 1 commit) thì `git log -1 -- VERSION` trả về CHÍNH HEAD, diff
+          # rỗng, và rào xanh vô điều kiện — nó chưa bao giờ đo được gì trên CI.
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Check Omnify version and generated-state drift
+        run: |
+          npm run omnify:check
+          npm run omnify:drift
+          npm run test:omnify-drift
+          npm run test:omnify-ci
+          # #2557 — cùng lớp rào: ghim ĐIỀU KIỆN chạy của backend-tests.yml.
+          # Lỗi mà nó canh không đụng workflow lần nào — `arch-gate` khoá theo
+          # `base_ref`, bố cục nhánh đổi, job ngừng chạy, không gì đỏ.
+          npm run test:backend-tests-ci
+          # #2660 — MỘT số phiên bản cho cả cây. Rào ở ĐÂY vì job này đã là chỗ
+          # canh "trạng thái sinh ra có khớp nguồn không", và version drift cùng
+          # họ: nó trôi im lặng, không lint nào bắt, và chỉ lộ ra ở trang
+          # download khi đã muộn.
+          npm run test:version
+          # #2898 — số hiệu phải đi theo thứ đã đi: VERSION đứng yên ở 0.8.1
+          # trong khi 25 file workstation/ lên tới production. Fleet là máy
+          # Windows không tự cập nhật nên version→commit là đường tra DUY NHẤT.
+          npm run test:version-fleet
+          # #3057 — VERSION phải TĂNG so với main. `test:version` chỉ đòi chín
+          # app khớp nhau, `test:version-fleet` chỉ đòi nó ĐỔI — không rào nào
+          # hỏi chiều. 0.8.10 đã bị ghi đè thành 0.8.9 mà cả hai đều im.
+          npm run test:version-forward
+          # #2971 — rào cho TẦM VỚI của rào: mỗi guard ở job này khai nó
+          # canh gì, và `paths:` phải cho nó nhìn thấy đúng thứ đó. Ba lần
+          # trong 24h một rào ĐÚNG nằm ở chỗ nó không chạy (#2874, #2959,
+          # #2971) — nhớ bằng tay không đủ.
+          npm run test:gate-paths
+          # #3012 — symlink ghim đường dẫn tuyệt đối của MỘT máy đã lọt vào
+          # `dev` một lần (node_modules → /Users/…). `.gitignore` ghi
+          # `node_modules/` có gạch chéo nên chỉ khớp thư mục, không khớp
+          # symlink cùng tên.
+          npm run test:no-pinned-symlinks
+          npm run test:promote-gate
+          # #2971 — bốn guard dưới đây ĐÃ TỒN TẠI và ĐÃ XANH, nhưng không
+          # workflow nào gọi chúng. Chính `test:gate-paths` bắt được điều đó
+          # ngay lượt chạy đầu tiên của nó.
+          npm run test:workflows-parse
+          # #3229 — `.github/amplify/*-buildspec.yml` nằm trong `paths:` của
+          # workflow deploy nên chúng TRÔNG như nguồn chân lý, nhưng Amplify đọc
+          # bản trong console. Hai file sống nhiều tháng mà sửa vào không đổi
+          # một byte nào của lượt build; ở admin việc đó tốn ba vòng
+          # sửa–deploy–đo, và cả ba vòng đều có CI xanh.
+          npm run test:buildspecs-uploaded
+          # #3231 — smoke test cũ chỉ hỏi `HTTP 200` trên `/`, tức "server còn
+          # thở", nên nó xanh với mọi bundle kể cả bundle sáu tháng tuổi. Đó là
+          # cách `/downloads` trả 500 qua BA lượt deploy xanh liên tiếp.
+          npm run test:deploy-smoke
+          # #3032 — `pnpm/action-setup` mặc định cài vào `~/setup-pnpm`, DÙNG
+          # CHUNG cho mọi job. Trên runner tự dựng, matrix bốn app chạy song
+          # song tranh nhau nó và chết ở bước setup — đọc y hệt một lượt test
+          # đỏ. Rào ở đây vì `paths` của gate này phủ `.github/workflows/**`.
+          npm run test:pnpm-setup
+          # #3002 — app có test mà không workflow nào canh thì PR chạm nó đi
+          # qua CI với 0 cổng, và bảng checks TRỐNG đọc y hệt "đang chờ chạy".
+          npm run test:app-gates
+          # #3200 — trần phía Cloud mà client không biết là cách #3159/#3196 xảy ra.
+          npm run test:ws-feed-caps
+          # Ruling 2026-08-18 — workstation/frontend chỉ được dùng MỘT thư viện
+          # UI (@godxjp/ui); dep UI khác hoặc import @radix-ui/* trực tiếp là đỏ.
+          npm run test:ws-frontend-ui
+          npm run test:omnify-check
+          npm run test:ws-manifest-restore
+          npm run test:ws-publish
+          # #2679 — mọi bước ghi ra production trong workflow phát hành phải nằm
+          # dưới một job có chắn ref. `push: branches: [main]` chỉ chắn đường
+          # push; `workflow_dispatch` chạy được từ nhánh bất kỳ.
+          npm run test:release-gate
+          # #3065 — rào duy nhất đo KẾT QUẢ ("quán đang chạy bản nào") thay vì
+          # quá trình ("lượt chạy này xanh không"). Bản thân nó chạy theo lịch,
+          # nên logic của nó chỉ được kiểm 4 lần/ngày và một lỗi sẽ nằm im giữa
+          # hai lượt cron. Self-test không cần mạng, gọi ở đây là rẻ.
+          npm run test:version-drift
+          # #2699 — không app nào được tải font từ mạng ngoài lúc build.
+          # `next/font/google` gọi ra fonts.googleapis.com trong lúc build và
+          # đã làm chết một lần deploy production thật.
+          npm run test:fonts
+          # #2814 — phát hành không được xoá lịch sử phiên bản. Fleet cài TAY,
+          # nên manifest là thứ duy nhất trả lời "quán đang chạy bản nào".
+          npm run test:ws-manifest
+          # #2778 — job `pest` phải giữ `--parallel` (7–8× nhanh hơn, và deploy
+          # chờ workflow đó). Gỡ cờ ra thì mọi test vẫn xanh, chỉ chậm gấp bảy
+          # lần rồi quay về chuỗi huỷ trên `dev` — không gì báo động.
+          npm run test:parallel-gate
+          # #2740 — hook là bash, và trước đó KHÔNG workflow nào gọi test của
+          # chúng: `pre-push_test.sh` tồn tại từ #1353 mà không ai chạy.
+          # `commit-msg` gỡ trailer ghi công Claude, `pre-push` canh pointer.
+          npm run test:hooks
+          # Rào GIỜ PHỤC VỤ của đường deploy production. Nó chỉ chạy đúng lúc
+          # người ta bực nhất (vừa merge, muốn thấy lên ngay), nên không có gì
+          # canh thì nó sẽ bị gỡ trong một commit "dọn CI" — và cái mất đi
+          # không ai thấy cho tới lần deploy giữa ca trưa kế tiếp.
+          npm run test:deploy-hours
+          # Mọi lời gọi `ssh` của đường deploy phải mang đủ cờ danh tính. Bước
+          # `Setup SSH` ghi khoá vào `$RUNNER_TEMP/ssh`, KHÔNG vào `~/.ssh`, nên
+          # một lời gọi trần chết `Host key verification failed`. Đắt vì THỜI
+          # ĐIỂM: rsync đã đẩy code mới lên xong, còn migrate + dựng lại cache
+          # nằm SAU nên bị bỏ qua — production phục vụ code mới bằng route cache
+          # cũ, và từ ngoài nhìn vào nó trả lời hoàn toàn bình thường.
+          npm run test:deploy-ssh
+          # Con số "quán nên ở bản nào" phải đi được từ repo xuống `.env`
+          # production, và phải đi TRƯỚC `config:cache`. Rào #3173 không bắt
+          # được ca này: nó hỏi "giá trị đang có tải được không", không hỏi
+          # "giá trị đang có đến từ đâu" — nên nó EXIT=0 suốt trong khi `.env`
+          # kẹt ở v0.8.30 và fleet đứng ở v0.6.0.
+          npm run test:ws-expected
+          # #3001 — runner tính tiền phải được KHAI. Budget cạn làm job đỏ sau
+          # 3 giây với 0 step và KHÔNG log, nên chi phí thật của việc lẻn một
+          # `ubuntu-latest` mới vào không phải tiền mà là một buổi tìm nhầm chỗ.
+          npm run test:self-hosted

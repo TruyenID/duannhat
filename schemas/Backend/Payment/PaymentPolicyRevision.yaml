@@ -1,0 +1,111 @@
+# =============================================================================
+# PaymentPolicyRevision — immutable published effective-policy snapshot
+# =============================================================================
+#
+# Publication record for Cloud/client convergence. A new branch revision is appended
+# only when effective output changes. Existing rows are immutable and never contain
+# provider credentials, secret refs, PAN/CVV, or raw provider payloads.
+# =============================================================================
+
+displayName:
+  en: Payment Policy Revision
+  ja: 決済ポリシーリビジョン
+  vi: Phiên bản chính sách thanh toán
+
+kind: object
+
+options:
+  id: Uuid
+  timestamps: true
+  softDelete: false
+  indexes:
+    # Monotonic branch-local publication identity.
+    - columns: [branch_id, revision]
+      unique: true
+      name: payment_policy_revisions_branch_revision_unique
+    # Tenant/brand latest-revision scans.
+    - columns: [organization_id, brand_id, branch_id, published_at]
+      name: payment_policy_revisions_scope_published
+    # Hash lookup supports idempotent no-change publication.
+    - columns: [branch_id, snapshot_hash]
+      name: payment_policy_revisions_branch_hash
+
+properties:
+  organization:
+    # Tempo tenant boundary; must match brand and branch.
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: RESTRICT
+    displayName: { en: Organization, ja: 組織, vi: Tổ chức }
+
+  brand:
+    # Brand scope used to resolve owner/HQ policy and Identity ownership.
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: RESTRICT
+    displayName: { en: Brand, ja: ブランド, vi: Thương hiệu }
+
+  branch:
+    # Branch whose Cloud/devices consume this monotonic revision.
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    onDelete: RESTRICT
+    displayName: { en: Shop, ja: 店舗, vi: Cửa hàng }
+
+  revision:
+    # Positive monotonic branch-local number allocated under lock.
+    type: BigInt
+    unsigned: true
+    rules:
+      min: 1
+    displayName: { en: Revision, ja: リビジョン, vi: Phiên bản }
+
+  ownership_revision:
+    # Opaque Identity ownership token used when publishing this snapshot.
+    type: String
+    length: 32
+    rules:
+      numeric: true
+    displayName: { en: Ownership Revision, ja: 所有権リビジョン, vi: Phiên bản quyền sở hữu }
+
+  snapshot_hash:
+    # SHA-256 hex of canonical non-secret snapshot JSON.
+    type: String
+    length: 64
+    rules:
+      alphaNum: true
+      lowercase: true
+    displayName: { en: Snapshot Hash, ja: スナップショットハッシュ, vi: Hash snapshot }
+
+  snapshot:
+    # Canonical effective option identities/capabilities/reasons only; secret-free by contract.
+    type: Json
+    displayName: { en: Effective Snapshot, ja: 有効スナップショット, vi: Snapshot hiệu lực }
+
+  effective_option_count:
+    # Denormalized safe metric for empty-option checkout blocking and observability.
+    type: Int
+    unsigned: true
+    default: 0
+    displayName: { en: Effective Option Count, ja: 有効オプション数, vi: Số tuỳ chọn hiệu lực }
+
+  source:
+    # Stable publication trigger code, e.g. shop_change/device_change/health_change.
+    type: String
+    length: 80
+    displayName: { en: Publication Source, ja: 公開ソース, vi: Nguồn phát hành }
+
+  published_at:
+    # Immutable publication timestamp used by Cloud/offline convergence.
+    type: Timestamp
+    useCurrent: true
+    displayName: { en: Published At, ja: 公開日時, vi: Phát hành lúc }
+
+policies:
+  - forbid: [edit, delete]
+    desc: Published effective-policy snapshots are append-only and never rewritten
+  - permit: [view, list]
+    desc: Revision history is readable within tenant scope for convergence and audit

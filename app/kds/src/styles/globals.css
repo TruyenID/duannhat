@@ -1,0 +1,186 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --font-size: 16px;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /*
+   * Font stack — Japanese-first (KDS for restaurant kitchen).
+   *
+   * "M PLUS 2" is loaded from Google Fonts with latin-ext + japanese
+   * subsets. It's the same font used across TempoFast UI (admin-web,
+   * pos-web, workstation-app), ensuring consistent typography on kitchen
+   * displays and tablets.
+   *
+   * Fallback order: system-ui → Segoe UI (Windows Vietnamese handling) →
+   * Noto Sans JP → Meiryo for Japanese glyphs.
+   */
+  --font-sans-jp:
+    "M PLUS 2",
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+    "Noto Sans JP", Meiryo,
+    system-ui, sans-serif;
+
+  --text-2xs: 0.6875rem;
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2rem;
+
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-body: 1.7;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
+
+  --radius: 0.5rem;
+
+  /* Neutral / surface */
+  --background: oklch(99% 0.002 60);
+  --foreground: oklch(20% 0.006 60);
+  --card: oklch(99% 0.002 60);
+  --card-foreground: oklch(20% 0.006 60);
+  --popover: oklch(99% 0.002 60);
+  --popover-foreground: oklch(20% 0.006 60);
+
+  /* Primary — SmartHR MAIN in OKLCH (渋み, chroma ≤ 0.15) */
+  --primary: oklch(56% 0.15 240);
+  --primary-foreground: oklch(99% 0.002 60);
+
+  --secondary: oklch(96% 0.004 60);
+  --secondary-foreground: oklch(20% 0.006 60);
+
+  --muted: oklch(96% 0.004 60);
+  --muted-foreground: oklch(50% 0.01 60);
+
+  --accent: oklch(96% 0.004 60);
+  --accent-foreground: oklch(20% 0.006 60);
+
+  /* 茜 (akane) — restrained destructive red per Japanese convention */
+  --destructive: oklch(58% 0.18 25);
+  --destructive-foreground: oklch(99% 0.002 60);
+
+  --border: oklch(92% 0.004 60);
+  --input: oklch(92% 0.004 60);
+  --input-background: oklch(99% 0.002 60);
+  --ring: oklch(56% 0.15 240);
+}
+
+.dark {
+  --background: oklch(18% 0.008 60);
+  --foreground: oklch(96% 0.004 60);
+  --card: oklch(22% 0.008 60);
+  --card-foreground: oklch(96% 0.004 60);
+  --popover: oklch(22% 0.008 60);
+  --popover-foreground: oklch(96% 0.004 60);
+
+  --primary: oklch(70% 0.14 240);
+  --primary-foreground: oklch(18% 0.008 60);
+
+  --secondary: oklch(28% 0.008 60);
+  --secondary-foreground: oklch(96% 0.004 60);
+
+  --muted: oklch(28% 0.008 60);
+  --muted-foreground: oklch(70% 0.008 60);
+
+  --accent: oklch(28% 0.008 60);
+  --accent-foreground: oklch(96% 0.004 60);
+
+  --destructive: oklch(62% 0.18 25);
+  --destructive-foreground: oklch(96% 0.004 60);
+
+  --border: oklch(32% 0.008 60);
+  --input: oklch(32% 0.008 60);
+  --input-background: oklch(22% 0.008 60);
+  --ring: oklch(70% 0.14 240);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: var(--font-sans-jp);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    font-size: var(--font-size);
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans-jp);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: var(--font-weight-medium);
+    line-height: var(--leading-tight);
+    color: var(--foreground);
+  }
+
+  /*
+   * Default pointer affordance for every interactive control. The
+   * @godxjp Button base class doesn't include cursor-pointer (Tailwind v4
+   * dropped browser-default pointer cursor on <button>), so without this
+   * rule every <Button> in the app would render with the I-beam/default
+   * cursor. Disabled buttons get cursor-not-allowed so blocked actions
+   * are visually obvious.
+   */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]):not([data-disabled="true"]) {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [role="button"][aria-disabled="true"],
+  [role="button"][data-disabled="true"] {
+    cursor: not-allowed;
+  }
+}

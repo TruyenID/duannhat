@@ -1,0 +1,20 @@
+-- 042: deferred_until on sync_queue — per-row backoff for RECONCILE_PENDING
+-- till-session closes (#817 Phase B, WS-4).
+--
+-- A workstation shift close carries a manifest of its drawer-affecting rows.
+-- Cloud settles only once every manifest item exists in a terminal status;
+-- until then it replies 503 RECONCILE_PENDING + Retry-After. That is a
+-- ROW-SPECIFIC wait (the close's own payments/cash-events are still draining),
+-- NOT a Cloud-wide outage, so it must NOT:
+--   * burn the row's max_attempts (it's a legitimate wait, not a failure), or
+--   * trip the global cooldown (other sessions/rows must keep draining), or
+--   * head-of-line-block the queue (processQueue SKIPs it, like a dependency
+--     wait, instead of stopping the whole cycle).
+--
+-- deferred_until (RFC3339, UTC) parks the row until the Cloud-supplied
+-- Retry-After elapses so the drain doesn't tight-poll a deferring close every
+-- 5s tick. NULL = not deferred. processQueue's SELECT skips rows whose
+-- deferred_until is still in the future. Unbounded by design: a close defers
+-- as long as its manifest legitimately drains; the server-side defer bound
+-- (Cloud B2) is the terminal backstop, never max_attempts.
+ALTER TABLE sync_queue ADD COLUMN deferred_until TEXT;

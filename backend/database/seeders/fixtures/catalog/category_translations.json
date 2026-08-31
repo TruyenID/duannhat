@@ -1,0 +1,1304 @@
+[
+    {
+        "id": 25,
+        "category_id": "019f6ed5-3f74-733f-b252-edae0d775280",
+        "locale": "ja",
+        "name": "お持ち帰り",
+        "description": null
+    },
+    {
+        "id": 26,
+        "category_id": "019f6ed5-3fbd-723e-97da-d486fa878ee1",
+        "locale": "ja",
+        "name": "フォー",
+        "description": null
+    },
+    {
+        "id": 27,
+        "category_id": "019f6ed5-3fc3-73de-addc-b58d83e92574",
+        "locale": "ja",
+        "name": "お持ち帰り-朝",
+        "description": null
+    },
+    {
+        "id": 28,
+        "category_id": "019f6ed5-3fc8-73d6-977d-0b79519ff6fd",
+        "locale": "ja",
+        "name": "フォー",
+        "description": null
+    },
+    {
+        "id": 29,
+        "category_id": "019f6ed5-4155-7183-8c6d-7ee5c050484c",
+        "locale": "ja",
+        "name": "オプション用",
+        "description": null
+    },
+    {
+        "id": 30,
+        "category_id": "019f6ed5-415e-7227-832b-9541968b9d3a",
+        "locale": "ja",
+        "name": "お持ち帰りソースつき",
+        "description": null
+    },
+    {
+        "id": 31,
+        "category_id": "019f6ed5-4164-735b-aecc-2103e504224b",
+        "locale": "ja",
+        "name": "ブン",
+        "description": null
+    },
+    {
+        "id": 32,
+        "category_id": "019f6ed5-4187-7069-ace5-45cdf1daa4d4",
+        "locale": "ja",
+        "name": "30円容器必要",
+        "description": null
+    },
+    {
+        "id": 33,
+        "category_id": "019f6ed5-418d-735f-a5ab-e351a6a9cbca",
+        "locale": "ja",
+        "name": "BBH",
+        "description": null
+    },
+    {
+        "id": 34,
+        "category_id": "019f6ed5-41b5-70f6-bdff-e4e09753a502",
+        "locale": "ja",
+        "name": "バインミー",
+        "description": null
+    },
+    {
+        "id": 35,
+        "category_id": "019f6ed5-41cc-727b-90b2-ccc29a770ad5",
+        "locale": "ja",
+        "name": "デザート・飲み物",
+        "description": null
+    },
+    {
+        "id": 36,
+        "category_id": "019f6ed5-4209-7218-ada0-b1a3820ef25c",
+        "locale": "ja",
+        "name": "小皿料理・春巻き",
+        "description": null
+    },
+    {
+        "id": 37,
+        "category_id": "019f6ed5-4222-7119-a69f-237c680c0b1b",
+        "locale": "ja",
+        "name": "店内-ランチ",
+        "description": null
+    },
+    {
+        "id": 38,
+        "category_id": "019f6ed5-4228-71d9-8cc8-28a40526fff3",
+        "locale": "ja",
+        "name": "フォー",
+        "description": null
+    },
+    {
+        "id": 39,
+        "category_id": "019f6ed5-422c-70c7-9378-57b7c121d884",
+        "locale": "ja",
+        "name": "店内",
+        "description": null
+    },
+    {
+        "id": 40,
+        "category_id": "019f6ed5-4231-71a2-a108-4e22e72ce0bf",
+        "locale": "ja",
+        "name": "フォー",
+        "description": null
+    },
+    {
+        "id": 41,
+        "category_id": "019f6ed5-4235-7274-8c0d-33965eb1b8a4",
+        "locale": "ja",
+        "name": "店内-ディナー",
+        "description": null
+    },
+    {
+        "id": 42,
+        "category_id": "019f6ed5-423c-70a0-af23-6044473d07b3",
+        "locale": "ja",
+        "name": "フォー",
+        "description": null
+    },
+    {
+        "id": 43,
+        "category_id": "019f6ed5-4241-7153-a309-8ee9b5d0addc",
+        "locale": "ja",
+        "name": "ホームページ用",
+        "description": null
+    },
+    {
+        "id": 44,
+        "category_id": "019f6ed5-424b-70db-b190-1eb7e9cad7e1",
+        "locale": "ja",
+        "name": "ホームページ おすすめ",
+        "description": null
+    },
+    {
+        "id": 45,
+        "category_id": "019f6ed5-4312-72d5-bfb0-a920a64c51cb",
+        "locale": "ja",
+        "name": "期間限定",
+        "description": null
+    },
+    {
+        "id": 46,
+        "category_id": "019f6ed5-4337-7259-b32e-6ea6365910cf",
+        "locale": "ja",
+        "name": "期間限定",
+        "description": null
+    },
+    {
+        "id": 47,
+        "category_id": "019f6ed5-4353-7209-9d21-02eff3ffbbd3",
+        "locale": "ja",
+        "name": "期間限定",
+        "description": null
+    },
+    {
+        "id": 48,
+        "category_id": "019f6ed5-43a2-71e5-994b-28c3639784a2",
+        "locale": "ja",
+        "name": "デザート・飲み物",
+        "description": null
+    },
+    {
+        "id": 49,
+        "category_id": "019f6ed5-43bd-7289-b9f1-627ddd38fd6c",
+        "locale": "ja",
+        "name": "デザート・飲み物",
+        "description": null
+    },
+    {
+        "id": 50,
+        "category_id": "019f6ed5-43fc-7388-a843-fa131a842e75",
+        "locale": "ja",
+        "name": "デザート・飲み物",
+        "description": null
+    },
+    {
+        "id": 51,
+        "category_id": "019f6ed5-45ce-73a4-9269-c89db2f9def6",
+        "locale": "ja",
+        "name": "ブン",
+        "description": null
+    },
+    {
+        "id": 52,
+        "category_id": "019f6ed5-45e4-7300-9693-1da389a52889",
+        "locale": "ja",
+        "name": "ブン",
+        "description": null
+    },
+    {
+        "id": 53,
+        "category_id": "019f6ed5-45f6-70c1-9288-b0ba7b7dab7d",
+        "locale": "ja",
+        "name": "ブン",
+        "description": null
+    },
+    {
+        "id": 54,
+        "category_id": "019f6ed5-4746-713d-9ac5-33aa48189bd0",
+        "locale": "ja",
+        "name": "バインミー",
+        "description": null
+    },
+    {
+        "id": 55,
+        "category_id": "019f6ed5-4754-72f2-a6fd-034adeb39e4b",
+        "locale": "ja",
+        "name": "バインミー",
+        "description": null
+    },
+    {
+        "id": 56,
+        "category_id": "019f6ed5-47bf-721b-b340-9fc1d33d48dc",
+        "locale": "ja",
+        "name": "小皿料理・春巻き",
+        "description": null
+    },
+    {
+        "id": 57,
+        "category_id": "019f6ed5-47cf-70b9-85fc-c324481f5649",
+        "locale": "ja",
+        "name": "小皿料理・春巻き",
+        "description": null
+    },
+    {
+        "id": 58,
+        "category_id": "019f6ed5-47e0-712f-bb06-5c6a9a191cea",
+        "locale": "ja",
+        "name": "春巻き",
+        "description": null
+    },
+    {
+        "id": 59,
+        "category_id": "019f6ed5-4875-7338-814d-243935085f98",
+        "locale": "ja",
+        "name": "サラダ・野菜",
+        "description": null
+    },
+    {
+        "id": 60,
+        "category_id": "019f6ed5-48ac-727e-bbcf-29f55f3abf9e",
+        "locale": "ja",
+        "name": "小皿料理",
+        "description": null
+    },
+    {
+        "id": 61,
+        "category_id": "019f6ed5-4964-7062-a9c2-416b8a43530e",
+        "locale": "ja",
+        "name": "アルコール",
+        "description": null
+    },
+    {
+        "id": 62,
+        "category_id": "019f6ed5-4e0b-71c2-a055-b237a88dca03",
+        "locale": "ja",
+        "name": "お持ち帰りドーム",
+        "description": null
+    },
+    {
+        "id": 63,
+        "category_id": "019f6ed5-4e53-72d1-b3fc-399ce0f19375",
+        "locale": "ja",
+        "name": "店内-朝",
+        "description": null
+    },
+    {
+        "id": 64,
+        "category_id": "019f6ed5-4e5e-7328-80f7-50539c2d8978",
+        "locale": "ja",
+        "name": "バインミー",
+        "description": null
+    },
+    {
+        "id": 65,
+        "category_id": "019f6ed5-4e67-7346-befb-a15e8686da84",
+        "locale": "ja",
+        "name": "バインミー",
+        "description": null
+    },
+    {
+        "id": 66,
+        "category_id": "019f6ed5-4e6c-7294-9cbd-7ff317ff493b",
+        "locale": "ja",
+        "name": "ベト朝",
+        "description": null
+    },
+    {
+        "id": 67,
+        "category_id": "019f6ed5-4f49-7312-810e-67d84c3a6632",
+        "locale": "ja",
+        "name": "フォー",
+        "description": null
+    },
+    {
+        "id": 68,
+        "category_id": "019f6ed5-51b3-729c-bf6d-bb405ff37b58",
+        "locale": "ja",
+        "name": "アルコール",
+        "description": null
+    },
+    {
+        "id": 69,
+        "category_id": "019f6ed5-51d1-7235-ba93-05df23117cd5",
+        "locale": "ja",
+        "name": "オリジナル・グッズ",
+        "description": null
+    },
+    {
+        "id": 70,
+        "category_id": "019f6ed5-51d2-7396-8d8d-5aba684dbd2a",
+        "locale": "ja",
+        "name": "キッチンカー",
+        "description": null
+    },
+    {
+        "id": 71,
+        "category_id": "019f6ed5-51d5-716e-8aa8-26a05fa4c5f8",
+        "locale": "ja",
+        "name": "ちょい飲み",
+        "description": null
+    },
+    {
+        "id": 72,
+        "category_id": "019f6ed5-51d6-72f5-810b-589ec27e5b5b",
+        "locale": "ja",
+        "name": "おすすめ",
+        "description": null
+    },
+    {
+        "id": 73,
+        "category_id": "019f6ed5-51d9-72aa-9a82-7b62702944aa",
+        "locale": "ja",
+        "name": "おすすめ",
+        "description": null
+    },
+    {
+        "id": 74,
+        "category_id": "019f6ed5-51f8-7025-8701-0836ac284467",
+        "locale": "ja",
+        "name": "Uncategorized",
+        "description": null
+    },
+    {
+        "id": 75,
+        "category_id": "019f6ed5-524c-72ef-91d5-fff44ecec8d9",
+        "locale": "ja",
+        "name": "追加",
+        "description": null
+    },
+    {
+        "id": 76,
+        "category_id": "019f6ed5-562f-7021-b280-be8b0aaa3094",
+        "locale": "ja",
+        "name": "ランチセット",
+        "description": null
+    },
+    {
+        "id": 77,
+        "category_id": "019f6ed5-58f3-73c2-abb4-0f2ac0cd2e86",
+        "locale": "ja",
+        "name": "コーヒータイム",
+        "description": null
+    },
+    {
+        "id": 78,
+        "category_id": "019f6ed5-58f5-71fd-bc75-816cb54d9258",
+        "locale": "ja",
+        "name": "コーヒー",
+        "description": null
+    },
+    {
+        "id": 79,
+        "category_id": "019f6ed5-5a17-73e6-9b6a-58fa50a160b3",
+        "locale": "ja",
+        "name": "事前予約",
+        "description": null
+    },
+    {
+        "id": 80,
+        "category_id": "019f6ed5-5afd-71fe-b7ee-9815aaae8098",
+        "locale": "ja",
+        "name": "PE 店内",
+        "description": null
+    },
+    {
+        "id": 81,
+        "category_id": "019f6ed5-5b97-73fc-a051-33a67467e4cc",
+        "locale": "ja",
+        "name": "PE 持ち帰り",
+        "description": null
+    },
+    {
+        "id": 82,
+        "category_id": "019f6ed5-5c98-7172-be32-4c865e3fd960",
+        "locale": "ja",
+        "name": "無料サービス",
+        "description": null
+    },
+    {
+        "id": 83,
+        "category_id": "019f6ed5-5c9c-71a5-b785-0fb23277efc5",
+        "locale": "ja",
+        "name": "無料サービス",
+        "description": null
+    },
+    {
+        "id": 84,
+        "category_id": "019f6ed5-5d38-7178-ac2b-f8fdafb4ecca",
+        "locale": "ja",
+        "name": "バインミー",
+        "description": null
+    },
+    {
+        "id": 85,
+        "category_id": "019f6ed5-3f74-733f-b252-edae0d775280",
+        "locale": "en",
+        "name": "お持ち帰り",
+        "description": null
+    },
+    {
+        "id": 86,
+        "category_id": "019f6ed5-3f74-733f-b252-edae0d775280",
+        "locale": "vi",
+        "name": "お持ち帰り",
+        "description": null
+    },
+    {
+        "id": 87,
+        "category_id": "019f6ed5-3fbd-723e-97da-d486fa878ee1",
+        "locale": "en",
+        "name": "フォー",
+        "description": null
+    },
+    {
+        "id": 88,
+        "category_id": "019f6ed5-3fbd-723e-97da-d486fa878ee1",
+        "locale": "vi",
+        "name": "フォー",
+        "description": null
+    },
+    {
+        "id": 89,
+        "category_id": "019f6ed5-3fc3-73de-addc-b58d83e92574",
+        "locale": "en",
+        "name": "お持ち帰り-朝",
+        "description": null
+    },
+    {
+        "id": 90,
+        "category_id": "019f6ed5-3fc3-73de-addc-b58d83e92574",
+        "locale": "vi",
+        "name": "お持ち帰り-朝",
+        "description": null
+    },
+    {
+        "id": 91,
+        "category_id": "019f6ed5-3fc8-73d6-977d-0b79519ff6fd",
+        "locale": "en",
+        "name": "フォー",
+        "description": null
+    },
+    {
+        "id": 92,
+        "category_id": "019f6ed5-3fc8-73d6-977d-0b79519ff6fd",
+        "locale": "vi",
+        "name": "フォー",
+        "description": null
+    },
+    {
+        "id": 93,
+        "category_id": "019f6ed5-4155-7183-8c6d-7ee5c050484c",
+        "locale": "en",
+        "name": "オプション用",
+        "description": null
+    },
+    {
+        "id": 94,
+        "category_id": "019f6ed5-4155-7183-8c6d-7ee5c050484c",
+        "locale": "vi",
+        "name": "オプション用",
+        "description": null
+    },
+    {
+        "id": 95,
+        "category_id": "019f6ed5-415e-7227-832b-9541968b9d3a",
+        "locale": "en",
+        "name": "お持ち帰りソースつき",
+        "description": null
+    },
+    {
+        "id": 96,
+        "category_id": "019f6ed5-415e-7227-832b-9541968b9d3a",
+        "locale": "vi",
+        "name": "お持ち帰りソースつき",
+        "description": null
+    },
+    {
+        "id": 97,
+        "category_id": "019f6ed5-4164-735b-aecc-2103e504224b",
+        "locale": "en",
+        "name": "ブン",
+        "description": null
+    },
+    {
+        "id": 98,
+        "category_id": "019f6ed5-4164-735b-aecc-2103e504224b",
+        "locale": "vi",
+        "name": "ブン",
+        "description": null
+    },
+    {
+        "id": 99,
+        "category_id": "019f6ed5-4187-7069-ace5-45cdf1daa4d4",
+        "locale": "en",
+        "name": "30円容器必要",
+        "description": null
+    },
+    {
+        "id": 100,
+        "category_id": "019f6ed5-4187-7069-ace5-45cdf1daa4d4",
+        "locale": "vi",
+        "name": "30円容器必要",
+        "description": null
+    },
+    {
+        "id": 101,
+        "category_id": "019f6ed5-418d-735f-a5ab-e351a6a9cbca",
+        "locale": "en",
+        "name": "BBH",
+        "description": null
+    },
+    {
+        "id": 102,
+        "category_id": "019f6ed5-418d-735f-a5ab-e351a6a9cbca",
+        "locale": "vi",
+        "name": "BBH",
+        "description": null
+    },
+    {
+        "id": 103,
+        "category_id": "019f6ed5-41b5-70f6-bdff-e4e09753a502",
+        "locale": "en",
+        "name": "バインミー",
+        "description": null
+    },
+    {
+        "id": 104,
+        "category_id": "019f6ed5-41b5-70f6-bdff-e4e09753a502",
+        "locale": "vi",
+        "name": "バインミー",
+        "description": null
+    },
+    {
+        "id": 105,
+        "category_id": "019f6ed5-41cc-727b-90b2-ccc29a770ad5",
+        "locale": "en",
+        "name": "デザート・飲み物",
+        "description": null
+    },
+    {
+        "id": 106,
+        "category_id": "019f6ed5-41cc-727b-90b2-ccc29a770ad5",
+        "locale": "vi",
+        "name": "デザート・飲み物",
+        "description": null
+    },
+    {
+        "id": 107,
+        "category_id": "019f6ed5-4209-7218-ada0-b1a3820ef25c",
+        "locale": "en",
+        "name": "小皿料理・春巻き",
+        "description": null
+    },
+    {
+        "id": 108,
+        "category_id": "019f6ed5-4209-7218-ada0-b1a3820ef25c",
+        "locale": "vi",
+        "name": "小皿料理・春巻き",
+        "description": null
+    },
+    {
+        "id": 109,
+        "category_id": "019f6ed5-4222-7119-a69f-237c680c0b1b",
+        "locale": "en",
+        "name": "店内-ランチ",
+        "description": null
+    },
+    {
+        "id": 110,
+        "category_id": "019f6ed5-4222-7119-a69f-237c680c0b1b",
+        "locale": "vi",
+        "name": "店内-ランチ",
+        "description": null
+    },
+    {
+        "id": 111,
+        "category_id": "019f6ed5-4228-71d9-8cc8-28a40526fff3",
+        "locale": "en",
+        "name": "フォー",
+        "description": null
+    },
+    {
+        "id": 112,
+        "category_id": "019f6ed5-4228-71d9-8cc8-28a40526fff3",
+        "locale": "vi",
+        "name": "フォー",
+        "description": null
+    },
+    {
+        "id": 113,
+        "category_id": "019f6ed5-422c-70c7-9378-57b7c121d884",
+        "locale": "en",
+        "name": "店内",
+        "description": null
+    },
+    {
+        "id": 114,
+        "category_id": "019f6ed5-422c-70c7-9378-57b7c121d884",
+        "locale": "vi",
+        "name": "店内",
+        "description": null
+    },
+    {
+        "id": 115,
+        "category_id": "019f6ed5-4231-71a2-a108-4e22e72ce0bf",
+        "locale": "en",
+        "name": "フォー",
+        "description": null
+    },
+    {
+        "id": 116,
+        "category_id": "019f6ed5-4231-71a2-a108-4e22e72ce0bf",
+        "locale": "vi",
+        "name": "フォー",
+        "description": null
+    },
+    {
+        "id": 117,
+        "category_id": "019f6ed5-4235-7274-8c0d-33965eb1b8a4",
+        "locale": "en",
+        "name": "店内-ディナー",
+        "description": null
+    },
+    {
+        "id": 118,
+        "category_id": "019f6ed5-4235-7274-8c0d-33965eb1b8a4",
+        "locale": "vi",
+        "name": "店内-ディナー",
+        "description": null
+    },
+    {
+        "id": 119,
+        "category_id": "019f6ed5-423c-70a0-af23-6044473d07b3",
+        "locale": "en",
+        "name": "フォー",
+        "description": null
+    },
+    {
+        "id": 120,
+        "category_id": "019f6ed5-423c-70a0-af23-6044473d07b3",
+        "locale": "vi",
+        "name": "フォー",
+        "description": null
+    },
+    {
+        "id": 121,
+        "category_id": "019f6ed5-4241-7153-a309-8ee9b5d0addc",
+        "locale": "en",
+        "name": "ホームページ用",
+        "description": null
+    },
+    {
+        "id": 122,
+        "category_id": "019f6ed5-4241-7153-a309-8ee9b5d0addc",
+        "locale": "vi",
+        "name": "ホームページ用",
+        "description": null
+    },
+    {
+        "id": 123,
+        "category_id": "019f6ed5-424b-70db-b190-1eb7e9cad7e1",
+        "locale": "en",
+        "name": "ホームページ おすすめ",
+        "description": null
+    },
+    {
+        "id": 124,
+        "category_id": "019f6ed5-424b-70db-b190-1eb7e9cad7e1",
+        "locale": "vi",
+        "name": "ホームページ おすすめ",
+        "description": null
+    },
+    {
+        "id": 125,
+        "category_id": "019f6ed5-4312-72d5-bfb0-a920a64c51cb",
+        "locale": "en",
+        "name": "期間限定",
+        "description": null
+    },
+    {
+        "id": 126,
+        "category_id": "019f6ed5-4312-72d5-bfb0-a920a64c51cb",
+        "locale": "vi",
+        "name": "期間限定",
+        "description": null
+    },
+    {
+        "id": 127,
+        "category_id": "019f6ed5-4337-7259-b32e-6ea6365910cf",
+        "locale": "en",
+        "name": "期間限定",
+        "description": null
+    },
+    {
+        "id": 128,
+        "category_id": "019f6ed5-4337-7259-b32e-6ea6365910cf",
+        "locale": "vi",
+        "name": "期間限定",
+        "description": null
+    },
+    {
+        "id": 129,
+        "category_id": "019f6ed5-4353-7209-9d21-02eff3ffbbd3",
+        "locale": "en",
+        "name": "期間限定",
+        "description": null
+    },
+    {
+        "id": 130,
+        "category_id": "019f6ed5-4353-7209-9d21-02eff3ffbbd3",
+        "locale": "vi",
+        "name": "期間限定",
+        "description": null
+    },
+    {
+        "id": 131,
+        "category_id": "019f6ed5-43a2-71e5-994b-28c3639784a2",
+        "locale": "en",
+        "name": "デザート・飲み物",
+        "description": null
+    },
+    {
+        "id": 132,
+        "category_id": "019f6ed5-43a2-71e5-994b-28c3639784a2",
+        "locale": "vi",
+        "name": "デザート・飲み物",
+        "description": null
+    },
+    {
+        "id": 133,
+        "category_id": "019f6ed5-43bd-7289-b9f1-627ddd38fd6c",
+        "locale": "en",
+        "name": "デザート・飲み物",
+        "description": null
+    },
+    {
+        "id": 134,
+        "category_id": "019f6ed5-43bd-7289-b9f1-627ddd38fd6c",
+        "locale": "vi",
+        "name": "デザート・飲み物",
+        "description": null
+    },
+    {
+        "id": 135,
+        "category_id": "019f6ed5-43fc-7388-a843-fa131a842e75",
+        "locale": "en",
+        "name": "デザート・飲み物",
+        "description": null
+    },
+    {
+        "id": 136,
+        "category_id": "019f6ed5-43fc-7388-a843-fa131a842e75",
+        "locale": "vi",
+        "name": "デザート・飲み物",
+        "description": null
+    },
+    {
+        "id": 137,
+        "category_id": "019f6ed5-45ce-73a4-9269-c89db2f9def6",
+        "locale": "en",
+        "name": "ブン",
+        "description": null
+    },
+    {
+        "id": 138,
+        "category_id": "019f6ed5-45ce-73a4-9269-c89db2f9def6",
+        "locale": "vi",
+        "name": "ブン",
+        "description": null
+    },
+    {
+        "id": 139,
+        "category_id": "019f6ed5-45e4-7300-9693-1da389a52889",
+        "locale": "en",
+        "name": "ブン",
+        "description": null
+    },
+    {
+        "id": 140,
+        "category_id": "019f6ed5-45e4-7300-9693-1da389a52889",
+        "locale": "vi",
+        "name": "ブン",
+        "description": null
+    },
+    {
+        "id": 141,
+        "category_id": "019f6ed5-45f6-70c1-9288-b0ba7b7dab7d",
+        "locale": "en",
+        "name": "ブン",
+        "description": null
+    },
+    {
+        "id": 142,
+        "category_id": "019f6ed5-45f6-70c1-9288-b0ba7b7dab7d",
+        "locale": "vi",
+        "name": "ブン",
+        "description": null
+    },
+    {
+        "id": 143,
+        "category_id": "019f6ed5-4746-713d-9ac5-33aa48189bd0",
+        "locale": "en",
+        "name": "バインミー",
+        "description": null
+    },
+    {
+        "id": 144,
+        "category_id": "019f6ed5-4746-713d-9ac5-33aa48189bd0",
+        "locale": "vi",
+        "name": "バインミー",
+        "description": null
+    },
+    {
+        "id": 145,
+        "category_id": "019f6ed5-4754-72f2-a6fd-034adeb39e4b",
+        "locale": "en",
+        "name": "バインミー",
+        "description": null
+    },
+    {
+        "id": 146,
+        "category_id": "019f6ed5-4754-72f2-a6fd-034adeb39e4b",
+        "locale": "vi",
+        "name": "バインミー",
+        "description": null
+    },
+    {
+        "id": 147,
+        "category_id": "019f6ed5-47bf-721b-b340-9fc1d33d48dc",
+        "locale": "en",
+        "name": "小皿料理・春巻き",
+        "description": null
+    },
+    {
+        "id": 148,
+        "category_id": "019f6ed5-47bf-721b-b340-9fc1d33d48dc",
+        "locale": "vi",
+        "name": "小皿料理・春巻き",
+        "description": null
+    },
+    {
+        "id": 149,
+        "category_id": "019f6ed5-47cf-70b9-85fc-c324481f5649",
+        "locale": "en",
+        "name": "小皿料理・春巻き",
+        "description": null
+    },
+    {
+        "id": 150,
+        "category_id": "019f6ed5-47cf-70b9-85fc-c324481f5649",
+        "locale": "vi",
+        "name": "小皿料理・春巻き",
+        "description": null
+    },
+    {
+        "id": 151,
+        "category_id": "019f6ed5-47e0-712f-bb06-5c6a9a191cea",
+        "locale": "en",
+        "name": "春巻き",
+        "description": null
+    },
+    {
+        "id": 152,
+        "category_id": "019f6ed5-47e0-712f-bb06-5c6a9a191cea",
+        "locale": "vi",
+        "name": "春巻き",
+        "description": null
+    },
+    {
+        "id": 153,
+        "category_id": "019f6ed5-4875-7338-814d-243935085f98",
+        "locale": "en",
+        "name": "サラダ・野菜",
+        "description": null
+    },
+    {
+        "id": 154,
+        "category_id": "019f6ed5-4875-7338-814d-243935085f98",
+        "locale": "vi",
+        "name": "サラダ・野菜",
+        "description": null
+    },
+    {
+        "id": 155,
+        "category_id": "019f6ed5-48ac-727e-bbcf-29f55f3abf9e",
+        "locale": "en",
+        "name": "小皿料理",
+        "description": null
+    },
+    {
+        "id": 156,
+        "category_id": "019f6ed5-48ac-727e-bbcf-29f55f3abf9e",
+        "locale": "vi",
+        "name": "小皿料理",
+        "description": null
+    },
+    {
+        "id": 157,
+        "category_id": "019f6ed5-4964-7062-a9c2-416b8a43530e",
+        "locale": "en",
+        "name": "アルコール",
+        "description": null
+    },
+    {
+        "id": 158,
+        "category_id": "019f6ed5-4964-7062-a9c2-416b8a43530e",
+        "locale": "vi",
+        "name": "アルコール",
+        "description": null
+    },
+    {
+        "id": 159,
+        "category_id": "019f6ed5-4e0b-71c2-a055-b237a88dca03",
+        "locale": "en",
+        "name": "お持ち帰りドーム",
+        "description": null
+    },
+    {
+        "id": 160,
+        "category_id": "019f6ed5-4e0b-71c2-a055-b237a88dca03",
+        "locale": "vi",
+        "name": "お持ち帰りドーム",
+        "description": null
+    },
+    {
+        "id": 161,
+        "category_id": "019f6ed5-4e53-72d1-b3fc-399ce0f19375",
+        "locale": "en",
+        "name": "店内-朝",
+        "description": null
+    },
+    {
+        "id": 162,
+        "category_id": "019f6ed5-4e53-72d1-b3fc-399ce0f19375",
+        "locale": "vi",
+        "name": "店内-朝",
+        "description": null
+    },
+    {
+        "id": 163,
+        "category_id": "019f6ed5-4e5e-7328-80f7-50539c2d8978",
+        "locale": "en",
+        "name": "バインミー",
+        "description": null
+    },
+    {
+        "id": 164,
+        "category_id": "019f6ed5-4e5e-7328-80f7-50539c2d8978",
+        "locale": "vi",
+        "name": "バインミー",
+        "description": null
+    },
+    {
+        "id": 165,
+        "category_id": "019f6ed5-4e67-7346-befb-a15e8686da84",
+        "locale": "en",
+        "name": "バインミー",
+        "description": null
+    },
+    {
+        "id": 166,
+        "category_id": "019f6ed5-4e67-7346-befb-a15e8686da84",
+        "locale": "vi",
+        "name": "バインミー",
+        "description": null
+    },
+    {
+        "id": 167,
+        "category_id": "019f6ed5-4e6c-7294-9cbd-7ff317ff493b",
+        "locale": "en",
+        "name": "ベト朝",
+        "description": null
+    },
+    {
+        "id": 168,
+        "category_id": "019f6ed5-4e6c-7294-9cbd-7ff317ff493b",
+        "locale": "vi",
+        "name": "ベト朝",
+        "description": null
+    },
+    {
+        "id": 169,
+        "category_id": "019f6ed5-4f49-7312-810e-67d84c3a6632",
+        "locale": "en",
+        "name": "フォー",
+        "description": null
+    },
+    {
+        "id": 170,
+        "category_id": "019f6ed5-4f49-7312-810e-67d84c3a6632",
+        "locale": "vi",
+        "name": "フォー",
+        "description": null
+    },
+    {
+        "id": 171,
+        "category_id": "019f6ed5-51b3-729c-bf6d-bb405ff37b58",
+        "locale": "en",
+        "name": "アルコール",
+        "description": null
+    },
+    {
+        "id": 172,
+        "category_id": "019f6ed5-51b3-729c-bf6d-bb405ff37b58",
+        "locale": "vi",
+        "name": "アルコール",
+        "description": null
+    },
+    {
+        "id": 173,
+        "category_id": "019f6ed5-51d1-7235-ba93-05df23117cd5",
+        "locale": "en",
+        "name": "オリジナル・グッズ",
+        "description": null
+    },
+    {
+        "id": 174,
+        "category_id": "019f6ed5-51d1-7235-ba93-05df23117cd5",
+        "locale": "vi",
+        "name": "オリジナル・グッズ",
+        "description": null
+    },
+    {
+        "id": 175,
+        "category_id": "019f6ed5-51d2-7396-8d8d-5aba684dbd2a",
+        "locale": "en",
+        "name": "キッチンカー",
+        "description": null
+    },
+    {
+        "id": 176,
+        "category_id": "019f6ed5-51d2-7396-8d8d-5aba684dbd2a",
+        "locale": "vi",
+        "name": "キッチンカー",
+        "description": null
+    },
+    {
+        "id": 177,
+        "category_id": "019f6ed5-51d5-716e-8aa8-26a05fa4c5f8",
+        "locale": "en",
+        "name": "ちょい飲み",
+        "description": null
+    },
+    {
+        "id": 178,
+        "category_id": "019f6ed5-51d5-716e-8aa8-26a05fa4c5f8",
+        "locale": "vi",
+        "name": "ちょい飲み",
+        "description": null
+    },
+    {
+        "id": 179,
+        "category_id": "019f6ed5-51d6-72f5-810b-589ec27e5b5b",
+        "locale": "en",
+        "name": "おすすめ",
+        "description": null
+    },
+    {
+        "id": 180,
+        "category_id": "019f6ed5-51d6-72f5-810b-589ec27e5b5b",
+        "locale": "vi",
+        "name": "おすすめ",
+        "description": null
+    },
+    {
+        "id": 181,
+        "category_id": "019f6ed5-51d9-72aa-9a82-7b62702944aa",
+        "locale": "en",
+        "name": "おすすめ",
+        "description": null
+    },
+    {
+        "id": 182,
+        "category_id": "019f6ed5-51d9-72aa-9a82-7b62702944aa",
+        "locale": "vi",
+        "name": "おすすめ",
+        "description": null
+    },
+    {
+        "id": 183,
+        "category_id": "019f6ed5-51f8-7025-8701-0836ac284467",
+        "locale": "en",
+        "name": "Uncategorized",
+        "description": null
+    },
+    {
+        "id": 184,
+        "category_id": "019f6ed5-51f8-7025-8701-0836ac284467",
+        "locale": "vi",
+        "name": "Uncategorized",
+        "description": null
+    },
+    {
+        "id": 185,
+        "category_id": "019f6ed5-524c-72ef-91d5-fff44ecec8d9",
+        "locale": "en",
+        "name": "追加",
+        "description": null
+    },
+    {
+        "id": 186,
+        "category_id": "019f6ed5-524c-72ef-91d5-fff44ecec8d9",
+        "locale": "vi",
+        "name": "追加",
+        "description": null
+    },
+    {
+        "id": 187,
+        "category_id": "019f6ed5-562f-7021-b280-be8b0aaa3094",
+        "locale": "en",
+        "name": "ランチセット",
+        "description": null
+    },
+    {
+        "id": 188,
+        "category_id": "019f6ed5-562f-7021-b280-be8b0aaa3094",
+        "locale": "vi",
+        "name": "ランチセット",
+        "description": null
+    },
+    {
+        "id": 189,
+        "category_id": "019f6ed5-58f3-73c2-abb4-0f2ac0cd2e86",
+        "locale": "en",
+        "name": "コーヒータイム",
+        "description": null
+    },
+    {
+        "id": 190,
+        "category_id": "019f6ed5-58f3-73c2-abb4-0f2ac0cd2e86",
+        "locale": "vi",
+        "name": "コーヒータイム",
+        "description": null
+    },
+    {
+        "id": 191,
+        "category_id": "019f6ed5-58f5-71fd-bc75-816cb54d9258",
+        "locale": "en",
+        "name": "コーヒー",
+        "description": null
+    },
+    {
+        "id": 192,
+        "category_id": "019f6ed5-58f5-71fd-bc75-816cb54d9258",
+        "locale": "vi",
+        "name": "コーヒー",
+        "description": null
+    },
+    {
+        "id": 193,
+        "category_id": "019f6ed5-5a17-73e6-9b6a-58fa50a160b3",
+        "locale": "en",
+        "name": "事前予約",
+        "description": null
+    },
+    {
+        "id": 194,
+        "category_id": "019f6ed5-5a17-73e6-9b6a-58fa50a160b3",
+        "locale": "vi",
+        "name": "事前予約",
+        "description": null
+    },
+    {
+        "id": 195,
+        "category_id": "019f6ed5-5afd-71fe-b7ee-9815aaae8098",
+        "locale": "en",
+        "name": "PE 店内",
+        "description": null
+    },
+    {
+        "id": 196,
+        "category_id": "019f6ed5-5afd-71fe-b7ee-9815aaae8098",
+        "locale": "vi",
+        "name": "PE 店内",
+        "description": null
+    },
+    {
+        "id": 197,
+        "category_id": "019f6ed5-5b97-73fc-a051-33a67467e4cc",
+        "locale": "en",
+        "name": "PE 持ち帰り",
+        "description": null
+    },
+    {
+        "id": 198,
+        "category_id": "019f6ed5-5b97-73fc-a051-33a67467e4cc",
+        "locale": "vi",
+        "name": "PE 持ち帰り",
+        "description": null
+    },
+    {
+        "id": 199,
+        "category_id": "019f6ed5-5c98-7172-be32-4c865e3fd960",
+        "locale": "en",
+        "name": "無料サービス",
+        "description": null
+    },
+    {
+        "id": 200,
+        "category_id": "019f6ed5-5c98-7172-be32-4c865e3fd960",
+        "locale": "vi",
+        "name": "無料サービス",
+        "description": null
+    },
+    {
+        "id": 201,
+        "category_id": "019f6ed5-5c9c-71a5-b785-0fb23277efc5",
+        "locale": "en",
+        "name": "無料サービス",
+        "description": null
+    },
+    {
+        "id": 202,
+        "category_id": "019f6ed5-5c9c-71a5-b785-0fb23277efc5",
+        "locale": "vi",
+        "name": "無料サービス",
+        "description": null
+    },
+    {
+        "id": 203,
+        "category_id": "019f6ed5-5d38-7178-ac2b-f8fdafb4ecca",
+        "locale": "en",
+        "name": "バインミー",
+        "description": null
+    },
+    {
+        "id": 204,
+        "category_id": "019f6ed5-5d38-7178-ac2b-f8fdafb4ecca",
+        "locale": "vi",
+        "name": "バインミー",
+        "description": null
+    },
+    {
+        "id": 205,
+        "category_id": "019f6f78-2f13-73e3-96fb-8e008fb6545d",
+        "locale": "vi",
+        "name": "ランチセット",
+        "description": null
+    },
+    {
+        "id": 206,
+        "category_id": "019f6f78-2f13-73e3-96fb-8e008fb6545d",
+        "locale": "ja",
+        "name": "ランチセット",
+        "description": null
+    },
+    {
+        "id": 207,
+        "category_id": "019f6f78-2f13-73e3-96fb-8e008fb6545d",
+        "locale": "en",
+        "name": "ランチセット",
+        "description": null
+    },
+    {
+        "id": 208,
+        "category_id": "019f74bd-183d-717f-9bca-34b3b6dddf9b",
+        "locale": "vi",
+        "name": "フォー持ち帰り",
+        "description": null
+    },
+    {
+        "id": 209,
+        "category_id": "019f74bd-183d-717f-9bca-34b3b6dddf9b",
+        "locale": "ja",
+        "name": "フォー持ち帰り",
+        "description": null
+    },
+    {
+        "id": 210,
+        "category_id": "019f74bd-183d-717f-9bca-34b3b6dddf9b",
+        "locale": "en",
+        "name": "フォー持ち帰り",
+        "description": null
+    }
+]

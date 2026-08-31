@@ -1,0 +1,92 @@
+Module,TC_ID,Title,Priority,Type,Precondition,Test_Data,Step_No,Action,Expected_Result,Status,Notes
+B1-Batch-List,TC-B1-01,Smoke: trang Material Batches load,P0,Smoke,"Đăng nhập shop có warehouse + material produced",-,1,Vào /shop/{shopSlug}/production/batches,Trang load; bảng batch hiển thị (batch_code/warehouse/material/multiplier/yield/status/created_at); có nút '+ New',,
+B1-Batch-List,TC-B1-02,Empty state khi chưa có batch,P1,Functional,Shop chưa tạo batch nào,-,1,Vào batches list,Hiện empty state; không có dòng,,
+B1-Batch-List,TC-B1-03,Lọc theo warehouse,P1,Functional,Có batch ở >=2 warehouse,-,1,Chọn filter Warehouse = WH-A,Chỉ hiện batch của WH-A; URL ?warehouse_id=,,
+B1-Batch-List,TC-B1-04,Lọc theo status,P1,Functional,Có batch nhiều trạng thái,-,1,Chọn Status = completed,Chỉ hiện batch completed,,
+B1-Batch-List,TC-B1-05,Lọc theo khoảng ngày,P2,Functional,Có batch ở nhiều ngày,date_from/date_to,1,Đặt date_from = hôm qua; date_to = hôm nay,Chỉ hiện batch tạo trong khoảng,,
+B1-Batch-List,TC-B1-06,Tìm theo batch_code,P1,Functional,Biết 1 batch_code,MB-YYYYMMDD-001,1,Gõ batch_code vào Search,Bảng lọc còn batch khớp,,
+B1-Batch-List,TC-B1-07,per_page biên 100,P2,Boundary,Có >100 batch,per_page=100,1,Đặt per_page=100,Trả tối đa 100 dòng; per_page>100 bị clamp về 100,,BE max 100
+B1-Batch-List,TC-B1-08,Material produced hiện chỉ báo 🏭,P2,UI,Batch của produced material,-,1,Xem cột material,Hiện icon/indicator 🏭 cạnh tên material,,
+B2-Batch-Create,TC-B2-01,Tạo batch draft hợp lệ,P0,Functional,Material produced có recipe active+approved,multiplier=2,1,Vào /production/batches/new,Form hiện: Warehouse/Material/Recipe/Multiplier/Planned Yield(read-only)/Yield Unit(read-only)/Expiry/Note,,
+B2-Batch-Create,TC-B2-01,Tạo batch draft hợp lệ,P0,Functional,,,2,Chọn warehouse + material; recipe tự chọn,Recipe auto-select recipe active+approved mới nhất; yield_unit fill từ recipe,,
+B2-Batch-Create,TC-B2-01,Tạo batch draft hợp lệ,P0,Functional,,,3,Nhập multiplier=2; Save Draft,POST tạo batch status=draft; Planned Yield = base_yield*2; items auto-expand từ recipe,,
+B2-Batch-Create,TC-B2-02,Material combobox chỉ hiện produced,P1,Functional,Có cả raw và produced material,-,1,Mở combobox Material,Chỉ hiện material produced (có yield_unit + recipe); raw bị ẩn,,
+B2-Batch-Create,TC-B2-03,Material không có recipe approved,P1,Negative,Material produced nhưng recipe chưa approved,-,1,Chọn material đó; Save & Submit,BE từ chối (422 ValidationException 'no valid recipe'); báo lỗi recipe,,resolveRecipeForBatch
+B2-Batch-Create,TC-B2-04,Multiplier = 0,P1,Boundary,-,multiplier=0,1,Nhập multiplier=0; Save,422 'multiplier must be gt:0'; báo lỗi inline,,gt:0
+B2-Batch-Create,TC-B2-05,Multiplier âm,P1,Negative,-,multiplier=-1,1,Nhập multiplier=-1; Save,422 gt:0,,
+B2-Batch-Create,TC-B2-06,Multiplier thập phân,P2,Boundary,-,multiplier=1.2345,1,Nhập 1.2345; Save,"Lưu OK; planned_yield = base*1.2345 (decimal 10,4)",,
+B2-Batch-Create,TC-B2-07,Planned Yield read-only,P2,UI,-,-,1,Thử sửa Planned Yield,Field disabled; chỉ tính tự động từ recipe*multiplier,,
+B2-Batch-Create,TC-B2-08,Yield Unit read-only kế thừa recipe,P2,UI,-,-,1,Xem Yield Unit,Hiện yield_unit của recipe/material; không sửa được,,
+B2-Batch-Create,TC-B2-09,Expiry date tùy chọn,P2,Functional,-,expiry tương lai,1,Chọn expiry_date; Save,Lưu expiry_date vào batch (dùng cho output lot),,
+B2-Batch-Create,TC-B2-10,Thiếu warehouse,P1,Negative,-,-,1,Bỏ trống warehouse; Save,422 'warehouse_id required'; nút Save disabled hoặc lỗi inline,,
+B2-Batch-Create,TC-B2-11,Save & Submit auto-approve,P1,Functional,Warehouse có auto_approve_batch=true,-,1,Tạo + Save & Submit,Batch nhảy thẳng draft->approved (bỏ qua pending),,
+B2-Batch-Create,TC-B2-12,Override recipe thủ công,P2,Functional,Material có >=2 recipe approved,-,1,Mở dropdown Recipe chọn recipe khác,Items re-expand theo recipe được chọn,,
+B3-Batch-Workflow,TC-B3-01,submit: draft -> pending,P0,Functional,Batch draft có >=1 item,-,1,Mở detail; click Submit,Status -> pending; nút đổi sang Approve,,
+B3-Batch-Workflow,TC-B3-02,submit batch không có item,P1,Negative,Batch draft 0 item,-,1,Click Submit,422 'must have at least one item',,
+B3-Batch-Workflow,TC-B3-03,approve: pending -> approved,P0,Functional,Batch pending,-,1,Click Approve,Status -> approved; stamp approved_by_id + approved_at,,
+B3-Batch-Workflow,TC-B3-04,start: approved -> in_progress + FEFO preview,P0,Functional,Batch approved; material có lot active,-,1,Click Start,Status -> in_progress; started_at set; mỗi material item được stamp material_lot_id (FEFO preview); chưa trừ kho,,T9.1 non-locking
+B3-Batch-Workflow,TC-B3-05,complete: in_progress -> completed,P0,Functional,Batch in_progress; đủ tồn kho,actual_yield=planned,1,Click Complete; nhập actual_yield,Status -> completed; tạo stock_out (consume) + stock_in (output lot); mint MaterialLot source=production,,
+B3-Batch-Workflow,TC-B3-06,cancel từ draft,P1,Functional,Batch draft,-,1,Click Cancel,Status -> cancelled; không có chuyển động kho,,
+B3-Batch-Workflow,TC-B3-07,cancel từ pending,P1,Functional,Batch pending,-,1,Click Cancel,Status -> cancelled,,
+B3-Batch-Workflow,TC-B3-08,cancel ĐƯỢC phép khi approved,P1,Functional,Batch approved,-,1,Click Cancel,"Status -> cancelled (Plan-022 T7.1 hoàn lại stock đã stamp nếu có)",,verified test
+B3-Batch-Workflow,TC-B3-09,cancel ĐƯỢC phép khi in_progress,P0,Functional,Batch in_progress,-,1,Click Cancel,"Status -> cancelled; reverse stock_out đã consume",,verified test; chỉ completed/cancelled là terminal
+B3-Batch-Workflow,TC-B3-10,delete chỉ cho draft/cancelled,P1,Negative,Batch completed,-,1,Thử Delete,Bị từ chối; nút Delete ẩn ở completed/in_progress,,
+B3-Batch-Workflow,TC-B3-11,delete batch draft,P1,Functional,Batch draft,-,1,Delete,Soft-delete OK,,
+B3-Batch-Workflow,TC-B3-12,update chỉ cho draft,P1,Negative,Batch pending,-,1,Thử PUT đổi multiplier,Bị từ chối; chỉ draft mới update được,,
+B3-Batch-Workflow,TC-B3-13,Double-complete idempotency,P1,Negative,Batch completed,-,1,Gọi complete lần 2,Bị từ chối (đã completed); không tạo lot trùng,,
+B3-Batch-Workflow,TC-B3-14,Skip state (approve khi đang draft),P1,Negative,Batch draft,-,1,Gọi approve trực tiếp,Bị từ chối; approve chỉ từ pending,,
+B4-Batch-Yield-Variance,TC-B4-01,Yield trong dung sai,P0,Functional,recipe tolerance=10%; planned=100,actual=105,1,Complete với actual_yield=105 (variance 5%),Hoàn tất không cần reason; yield_variance_reason set null,,
+B4-Batch-Yield-Variance,TC-B4-02,Yield vượt dung sai thiếu reason,P0,Negative,tolerance=10%; planned=100,actual=80,1,Complete actual=80 (variance 20%) không nhập reason,422 'reason required'; dialog báo lỗi,,
+B4-Batch-Yield-Variance,TC-B4-03,Yield vượt dung sai có reason,P0,Functional,tolerance=10%; planned=100,"actual=80, reason='hao hụt'",1,Complete với reason,Hoàn tất; lưu yield_variance_reason,,
+B4-Batch-Yield-Variance,TC-B4-04,Yield vượt cao hơn (over-yield),P1,Functional,tolerance=10%; planned=100,actual=130,1,Complete actual=130 (variance 30%) có reason,Hoàn tất; variance tính theo |actual-planned|,,abs value
+B4-Batch-Yield-Variance,TC-B4-05,actual_yield = 0,P1,Boundary,-,actual=0,1,Complete actual_yield=0,Hợp lệ (min:0); variance=100% cần reason,,min:0
+B4-Batch-Yield-Variance,TC-B4-06,actual_yield âm,P1,Negative,-,actual=-5,1,Complete actual=-5,422 min:0,,
+B4-Batch-Yield-Variance,TC-B4-07,reason vượt 1000 ký tự,P2,Boundary,-,reason 1001 chars,1,Complete với reason dài,422 max:1000,,
+B4-Batch-Yield-Variance,TC-B4-08,Bỏ trống actual_yield,P1,Functional,planned=100,actual_yield omit,1,Complete không nhập actual_yield,Dùng planned_yield làm actual; variance=0,,nullable
+B4-Batch-Yield-Variance,TC-B4-09,tolerance=0 (mặc định),P1,Boundary,recipe không set tolerance,actual khác planned 0.1%,1,Complete lệch nhỏ,Cần reason vì tolerance=0 nên mọi lệch >0 đều vượt,,default 0
+B5-Batch-FEFO-Consumption,TC-B5-01,FEFO chọn lot hết hạn sớm nhất,P0,Functional,Material có 2 lot khác expiry,-,1,Start batch,Item stamp lot có expiry_date sớm nhất trước (FEFO),,expiry ASC
+B5-Batch-FEFO-Consumption,TC-B5-02,FEFO multi-lot khi 1 lot không đủ,P0,Functional,Cần 10kg; lot A=6 lot B=8,-,1,Start rồi Complete,Tiêu thụ A(6)+B(4); tạo nhiều stock_transaction_item,,multi-lot
+B5-Batch-FEFO-Consumption,TC-B5-03,Thiếu tồn kho khi complete,P0,Negative,Cần 10kg; tổng tồn 5kg,-,1,Complete,InsufficientStockException; batch vẫn in_progress,,strict mode
+B5-Batch-FEFO-Consumption,TC-B5-04,Lot bị depleted sau consume,P1,Functional,Lot A=6 dùng hết 6,-,1,Complete,Lot A qty_on_hand=0 -> status flip Depleted,,
+B5-Batch-FEFO-Consumption,TC-B5-05,Genealogy link parent->output,P1,Functional,Batch complete,-,1,Xem trace output lot,Mỗi consumed lot tạo GenealogyLink tới output lot,,FSMA-204
+B5-Batch-FEFO-Consumption,TC-B5-06,Allergen union trên output lot,P1,Functional,Consumed lots có allergen khác nhau,-,1,Complete; xem output lot,effective_allergens = hợp các allergen consumed lots,,
+B5-Batch-FEFO-Consumption,TC-B5-07,Output lot expiry = min các nguồn,P1,Functional,Parent lots + shelf_life + operator override,-,1,Complete,"expiry = min(override, shelf_life policy, parent min expiry)",,
+B5-Batch-FEFO-Consumption,TC-B5-08,Unit normalize về base unit,P1,Functional,Recipe ingredient unit khác base,-,1,Complete,Output lot received_qty chuẩn hóa base unit (Plan-022 T1.4),,
+B5-Batch-FEFO-Consumption,TC-B5-09,Concurrent complete 2 batch cùng lot,P2,Concurrency,2 batch cùng material/warehouse,-,1,Complete đồng thời,Lock hàng material_lots; không âm kho; serialize đúng,,pickLotsForConsumption locks
+B6-Batch-Cost,TC-B6-01,Cost breakdown sau complete,P1,Functional,Batch completed,-,1,GET cost-breakdown,Trả mảng per-lot: consumed_lot_code/unit_cost/consumed_qty/cost_basis_amount,,
+B6-Batch-Cost,TC-B6-02,Cost breakdown khi chưa complete,P1,Negative,Batch in_progress,-,1,GET cost-breakdown,Trả NULL (output_lot_id null),,
+B6-Batch-Cost,TC-B6-03,Weighted-average unit cost,P1,Functional,Consumed lots khác unit_cost,-,1,Complete; xem output lot,unit_cost = sum(cost_basis)/output_base_qty,,
+B6-Batch-Cost,TC-B6-04,Output cost null khi nguồn thiếu cost,P2,Functional,Consumed lots không có unit_cost,-,1,Complete,Output lot.unit_cost = null,,
+B7-PO-List,TC-B7-01,Smoke: Production Orders list,P0,Smoke,Shop có SKU gắn recipe,-,1,Vào /production/orders,Bảng order (order_code/warehouse/variant/qty/status); nút '+ New',,
+B7-PO-List,TC-B7-02,Lọc theo status/warehouse/ngày,P1,Functional,Có nhiều order,-,1,Áp filter,Lọc đúng; URL phản ánh params,,
+B7-PO-List,TC-B7-03,Tìm theo order_code,P1,Functional,Biết order_code,PO-YYYYMMDD-001,1,Search order_code,Lọc còn order khớp,,
+B8-PO-Create,TC-B8-01,Tạo PO draft hợp lệ,P0,Functional,SKU output có recipe,planned_qty=20,1,Vào /production/orders/new,Form: Warehouse/Output Variant/Planned Qty/Output Unit(read-only)/Note,,
+B8-PO-Create,TC-B8-01,Tạo PO draft hợp lệ,P0,Functional,,,2,Chọn variant; nhập planned_qty=20; Save Draft,POST tạo order draft; items auto-derive từ recipe; output_unit khóa theo recipe,,
+B8-PO-Create,TC-B8-02,Variant không có recipe,P1,Negative,SKU không gắn recipe,-,1,Chọn variant đó; Save & Submit,items rỗng -> submit bị từ chối 'at least one item'; FE chặn nếu không có recipe,,
+B8-PO-Create,TC-B8-03,planned_quantity = 0,P1,Boundary,-,planned_qty=0,1,Nhập 0; Save,422 gt:0,,
+B8-PO-Create,TC-B8-04,planned_quantity âm,P1,Negative,-,-1,1,Nhập -1; Save,422 gt:0,,
+B8-PO-Create,TC-B8-05,recipe_multiplier fallback,P2,Functional,SKU có recipe_multiplier=1.5,multiplier omit,1,Save không nhập recipe_multiplier,Backfill từ SKU (1.5); items scale theo,,
+B8-PO-Create,TC-B8-06,Scaling công thức item,P1,Functional,recipe output_qty=5; ingredient 2; planned=20; mult=1,-,1,Tạo PO,item planned = 2/5*20*1 = 8,,
+B8-PO-Create,TC-B8-07,output_unit max 50 ký tự,P2,Boundary,-,unit 51 chars,1,Gửi output_unit dài,422 max:50,,
+B8-PO-Create,TC-B8-08,component_type ngoài enum,P1,Negative,-,"items.*.component_type='foo'",1,POST với items component_type sai,"422 in:material,variant",,
+B9-PO-Workflow,TC-B9-01,submit -> pending,P0,Functional,PO draft có item,-,1,Submit,Status pending,,
+B9-PO-Workflow,TC-B9-02,approve -> approved,P0,Functional,PO pending,-,1,Approve,Status approved; approved_by/at set,,
+B9-PO-Workflow,TC-B9-03,start -> in_progress + stock_out,P0,Functional,PO approved; đủ tồn,-,1,Start,Status in_progress; tạo stock_out consume item ngay tại start; lưu stock_out_transaction_id,,khác batch (batch trừ ở complete)
+B9-PO-Workflow,TC-B9-04,start thiếu tồn kho,P0,Negative,PO approved; thiếu component,-,1,Start,InsufficientStockException; PO vẫn approved,,
+B9-PO-Workflow,TC-B9-05,complete -> completed + stock_in,P0,Functional,PO in_progress,actual_qty=18,1,Complete nhập actual_qty=18,Status completed; tạo stock_in output SKU=18; lưu stock_in_transaction_id,,
+B9-PO-Workflow,TC-B9-06,complete bỏ trống actual,P1,Functional,PO in_progress; planned=20,actual omit,1,Complete không nhập actual,stock_in = planned_quantity (20),,
+B9-PO-Workflow,TC-B9-07,cancel draft/pending,P1,Functional,PO pending,-,1,Cancel,Status cancelled,,
+B9-PO-Workflow,TC-B9-08,cancel chặn khi in_progress,P0,Negative,PO in_progress,-,1,Cancel,Bị từ chối,,
+B9-PO-Workflow,TC-B9-09,PO không tạo lot output,P2,Functional,PO completed,-,1,Xem kho output SKU,Chỉ tăng stock_level SKU; KHÔNG mint MaterialLot (SKU không FEFO),,khác material batch
+B9-PO-Workflow,TC-B9-10,delete draft/cancelled,P1,Functional,PO cancelled,-,1,Delete,Soft-delete OK; completed không xóa được,,
+B10-Calculator,TC-B10-01,variants liệt kê SKU có recipe,P1,Functional,Có SKU gắn recipe,-,1,GET production-calculator/variants,Trả list SKU có recipe; SKU không recipe bị loại,,
+B10-Calculator,TC-B10-02,calculate max producible,P1,Functional,Warehouse có tồn; chọn variants,-,1,"POST calculate {warehouse_id, variant_ids}",Trả max_producible_quantity mỗi variant theo tồn/ingredient,,
+B10-Calculator,TC-B10-03,calculate thiếu warehouse_id,P1,Negative,-,-,1,POST thiếu warehouse_id,422 required,,
+B10-Calculator,TC-B10-04,shortage tính thiếu hụt,P1,Functional,desired vượt tồn,desired=100,1,"POST shortage {warehouse_id, variant_id, desired_quantity=100}","Trả list ingredient {need, available, shortfall>0}",,
+B10-Calculator,TC-B10-05,shortage desired=0,P1,Boundary,-,desired=0,1,POST desired_quantity=0,422 gt:0,,
+B10-Calculator,TC-B10-06,calculate khi tồn = 0,P2,Boundary,Warehouse trống,-,1,POST calculate,max_producible_quantity=0 cho mọi variant,,
+B11-Batch-Permissions,TC-B11-01,Cross-shop isolation,P0,Security,Batch thuộc shop A,-,1,Truy cập batch A bằng token shop B,403/404; không lộ dữ liệu shop khác,,org/shop scope
+B11-Batch-Permissions,TC-B11-02,warehouse_id không tồn tại,P1,Negative,-,warehouse_id random,1,POST store với warehouse_id sai,422 exists:warehouses,,
+B11-Batch-Permissions,TC-B11-03,material_id không tồn tại,P1,Negative,-,material_id random,1,POST store material_id sai,422 exists:materials,,
+B11-Batch-Permissions,TC-B11-04,recipe_id của material khác,P1,Negative,recipe thuộc material khác,-,1,POST với recipe_id không thuộc material,422 'recipe must belong to material',,resolveRecipeForBatch validate
+B11-Batch-Permissions,TC-B11-05,Unauthenticated,P0,Security,-,-,1,Gọi API không token,401,,

@@ -1,0 +1,146 @@
+# ==============================================================================
+# MenuProductSku Schema (メニュー商品SKU / SKU sản phẩm trong Menu)
+# ==============================================================================
+#
+# MenuProductSku lưu cấu hình chi tiết ở mức SKU cho mỗi MenuProduct.
+# Chỉ tồn tại ở Branch menu (sau khi clone từ master). Brand menu KHÔNG có
+# dữ liệu trong bảng này.
+#
+# Key Features:
+#   - selling_price: Giá bán tại branch (clone từ product_skus.selling_price)
+#   - is_price_overridden: true nếu branch đã tùy chỉnh giá
+#   - is_active: Toggle bán cụ thể 1 SKU tại branch
+#
+# Pricing flow:
+#   1. Clone: selling_price = product_skus.selling_price, is_price_overridden = false
+#   2. Override: branch set giá → is_price_overridden = true
+#   3. Reset: selling_price = product_skus.selling_price (query lại), is_price_overridden = false
+#
+# ==============================================================================
+
+displayName:
+  en: Menu Product SKU
+  ja: メニュー商品SKU
+  vi: SKU sản phẩm trong Menu
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    - columns: [menu_product_id, product_sku_id]
+      unique: true
+    - columns: [menu_product_id]
+    - columns: [product_sku_id]
+
+properties:
+  menuProduct:
+    type: Association
+    relation: ManyToOne
+    target: MenuProduct
+    onDelete: CASCADE
+    displayName:
+      en: Menu Product
+      ja: メニュー商品
+      vi: Sản phẩm trong Menu
+    description:
+      en: Parent menu-product entry
+      ja: 親メニュー商品エントリ
+      vi: MenuProduct cha
+
+  productSku:
+    type: Association
+    relation: ManyToOne
+    target: ProductSku
+    onDelete: CASCADE
+    displayName:
+      en: Product SKU
+      ja: 商品SKU
+      vi: SKU sản phẩm
+    description:
+      en: The specific SKU within the product
+      ja: 商品内の特定のSKU
+      vi: SKU cụ thể trong sản phẩm
+
+  selling_price:
+    type: Decimal
+    precision: 15
+    scale: 2
+    displayName:
+      en: Selling Price
+      ja: 販売価格
+      vi: Giá bán
+    description:
+      en: Branch selling price. Initially copied from product_skus.selling_price during clone. Branch can override.
+      ja: 店舗販売価格。クローン時にproduct_skus.selling_priceからコピー。店舗でオーバーライド可能。
+      vi: Giá bán tại branch. Ban đầu copy từ product_skus.selling_price khi clone. Branch có thể override.
+
+  is_price_overridden:
+    type: Boolean
+    default: false
+    displayName:
+      en: Price Overridden
+      ja: 価格上書き済み
+      vi: Giá đã ghi đè
+    description:
+      en: Whether the branch has customized selling_price. True when branch explicitly sets a price (even if same as default). False after clone or reset.
+      ja: 店舗がselling_priceをカスタマイズしたかどうか。店舗が明示的に価格を設定した場合True（デフォルトと同じ場合でも）。クローンまたはリセット後はFalse。
+      vi: Branch đã tùy chỉnh selling_price chưa. True khi branch tự set giá (kể cả nếu trùng giá gốc). False sau clone hoặc reset.
+
+  is_active:
+    type: Boolean
+    default: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+    description:
+      en: SKU-level toggle. Branch can deactivate individual SKUs (e.g. out of a specific size).
+      ja: SKUレベルのトグル。店舗は個別のSKUを無効にできます（例：特定のサイズが品切れ）。
+      vi: Toggle cấp SKU. Branch có thể tắt bán 1 SKU cụ thể (vd hết size lớn).
+
+  # ==========================================================================
+  # (plan-056) Vì sao biến thể này đang tắt — ảnh chụp trạng thái HIỆN TẠI
+  # ==========================================================================
+  #
+  # Bộ ba giống hệt MenuProduct và có cùng luật: đi thành bộ với `is_active`,
+  # về NULL khi bật lại, lịch sử nằm ở `menu_availability_events`. Đặt lặp ở cả
+  # hai bảng chứ không gom về một bảng phụ dùng chung, vì hai tầng này được TẮT
+  # ĐỘC LẬP nhau — hết size lớn (biến thể) khác hẳn ngừng bán cả món — và mỗi
+  # tầng phải đọc được lý do của CHÍNH NÓ mà không phải suy từ tầng kia.
+
+  disabled_reason:
+    type: String
+    length: 255
+    nullable: true
+    displayName:
+      en: Disabled Reason
+      ja: 停止理由
+      vi: Lý do tắt
+    description:
+      en: Why this variant is currently off. Free text; NO minimum length is enforced at any layer.
+      ja: このバリエーションが現在停止している理由。自由記述で、最小文字数の制約はどの層にもない。
+      vi: Vì sao biến thể đang tắt. Chữ tự do; KHÔNG tầng nào ràng buộc độ dài tối thiểu.
+
+  disabled_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Disabled At
+      ja: 停止日時
+      vi: Thời điểm tắt
+    description:
+      en: When the shop turned it off — the moment the operator tapped, not the moment Cloud received it.
+      ja: 店舗が停止した時刻。クラウド受信時刻ではなく操作者がタップした時刻。
+      vi: Lúc quán tắt — thời điểm NGƯỜI BẤM bấm, không phải lúc Cloud nhận.
+
+  disabled_by_name:
+    type: String
+    length: 100
+    nullable: true
+    displayName:
+      en: Disabled By (snapshot)
+      ja: 停止操作者（スナップショット）
+      vi: Người tắt (ảnh chụp)

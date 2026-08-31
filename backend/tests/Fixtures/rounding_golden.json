@@ -1,0 +1,326 @@
+{
+  "description": "#2082 — hợp đồng CHUNG cho tầng đáy làm tròn giữa Cloud (PHP RoundingMode) và máy trạm (Go pricing.go). Đây là tầng mà priceGroups, stampLineTaxAmounts, writeConditions và công thức trích thuế ngược của chế độ 総額表示 đều gọi xuống — lệch ở đây nạp vào MỌI con số phía trên. Đổi công thức? Đổi file này TRƯỚC, và cả hai phía phải đọc lại.",
+  "cases": [
+    {
+      "kind": "currency_step",
+      "currency": "JPY",
+      "expected": 1.0,
+      "why": "yên không có phần lẻ"
+    },
+    {
+      "kind": "currency_step",
+      "currency": "VND",
+      "expected": 1.0,
+      "why": "đồng không có phần lẻ"
+    },
+    {
+      "kind": "currency_step",
+      "currency": "DJF",
+      "expected": 1.0,
+      "why": "#2082 — Go từng thiếu mã này"
+    },
+    {
+      "kind": "currency_step",
+      "currency": "MGA",
+      "expected": 1.0,
+      "why": "#2082 — Go từng thiếu mã này"
+    },
+    {
+      "kind": "currency_step",
+      "currency": "IDR",
+      "expected": 1.0,
+      "why": "có minor unit nhưng chỉ lưu hành đơn vị nguyên"
+    },
+    {
+      "kind": "currency_step",
+      "currency": "COP",
+      "expected": 1.0,
+      "why": "như trên"
+    },
+    {
+      "kind": "currency_step",
+      "currency": "USD",
+      "expected": 0.01,
+      "why": "đô la có xu"
+    },
+    {
+      "kind": "currency_step",
+      "currency": "EUR",
+      "expected": 0.01,
+      "why": ""
+    },
+    {
+      "kind": "currency_step",
+      "currency": "KWD",
+      "expected": 0.001,
+      "why": "dinar 3 chữ số thập phân"
+    },
+    {
+      "kind": "currency_step",
+      "currency": "BHD",
+      "expected": 0.001,
+      "why": ""
+    },
+    {
+      "kind": "currency_step",
+      "currency": "jpy",
+      "expected": 1.0,
+      "why": "#2082 — PHP viết hoa đầu vào, Go từng không"
+    },
+    {
+      "kind": "currency_step",
+      "currency": "  vnd  ",
+      "expected": 0.01,
+      "why": "CẢ HAI phía chỉ strtoupper, KHÔNG trim — mã có khoảng trắng rơi vào nhánh mặc định. Hình dạng đáng ngờ nhưng là hành vi chung; ghim để không ai 'sửa' một bên và tạo lệch mới (#2082)"
+    },
+    {
+      "kind": "currency_step",
+      "currency": "",
+      "expected": 1.0,
+      "why": "rỗng ⇒ mặc định VND"
+    },
+    {
+      "kind": "tax_step",
+      "decimals": null,
+      "currency": "JPY",
+      "currency_step": 1.0,
+      "expected": 1.0,
+      "why": "decimals null ⇒ theo bước tiền tệ"
+    },
+    {
+      "kind": "tax_step",
+      "decimals": null,
+      "currency": "USD",
+      "currency_step": 0.01,
+      "expected": 0.01,
+      "why": ""
+    },
+    {
+      "kind": "tax_step",
+      "decimals": 0,
+      "currency": "JPY",
+      "currency_step": 1.0,
+      "expected": 1.0,
+      "why": ""
+    },
+    {
+      "kind": "tax_step",
+      "decimals": 0,
+      "currency": "USD",
+      "currency_step": 0.01,
+      "expected": 0.01,
+      "why": "#2082 — KẸP: 10^0 = 1 nhưng tiền tệ có xu ⇒ phải là 0,01"
+    },
+    {
+      "kind": "tax_step",
+      "decimals": 1,
+      "currency": "USD",
+      "currency_step": 0.01,
+      "expected": 0.01,
+      "why": "#2082 — 10^-1 = 0,1 thô hơn xu ⇒ kẹp về 0,01"
+    },
+    {
+      "kind": "tax_step",
+      "decimals": 2,
+      "currency": "USD",
+      "currency_step": 0.01,
+      "expected": 0.01,
+      "why": ""
+    },
+    {
+      "kind": "tax_step",
+      "decimals": 2,
+      "currency": "JPY",
+      "currency_step": 1.0,
+      "expected": 0.01,
+      "why": "decimals mịn hơn tiền tệ ⇒ giữ nguyên phía mịn"
+    },
+    {
+      "kind": "tax_step",
+      "decimals": 3,
+      "currency": "KWD",
+      "currency_step": 0.001,
+      "expected": 0.001,
+      "why": ""
+    },
+    {
+      "kind": "round_half_up",
+      "value": 0.145,
+      "step": 0.01,
+      "expected": 0.15,
+      "why": "#2082 — biên .xx5, thiếu chuẩn hoá thì ra 0,14 (THU THIẾU)"
+    },
+    {
+      "kind": "round_half_up",
+      "value": 1.005,
+      "step": 0.01,
+      "expected": 1.01,
+      "why": "#2082 — như trên"
+    },
+    {
+      "kind": "round_half_up",
+      "value": 0.15,
+      "step": 0.1,
+      "expected": 0.2,
+      "why": "#2082 — như trên"
+    },
+    {
+      "kind": "round_half_up",
+      "value": 2.675,
+      "step": 0.01,
+      "expected": 2.68,
+      "why": "biên .xx5 kinh điển của dấu phẩy động"
+    },
+    {
+      "kind": "round_half_up",
+      "value": 0.144,
+      "step": 0.01,
+      "expected": 0.14,
+      "why": "dưới biên ⇒ xuống"
+    },
+    {
+      "kind": "round_half_up",
+      "value": 0.146,
+      "step": 0.01,
+      "expected": 0.15,
+      "why": "trên biên ⇒ lên"
+    },
+    {
+      "kind": "round_half_up",
+      "value": 123.4,
+      "step": 1.0,
+      "expected": 123.0,
+      "why": "JPY, dưới biên"
+    },
+    {
+      "kind": "round_half_up",
+      "value": 123.5,
+      "step": 1.0,
+      "expected": 124.0,
+      "why": "JPY, đúng biên ⇒ half-up"
+    },
+    {
+      "kind": "round_half_up",
+      "value": 0.0,
+      "step": 1.0,
+      "expected": 0.0,
+      "why": ""
+    },
+    {
+      "kind": "round_half_up",
+      "value": 7.77,
+      "step": 0.0,
+      "expected": 7.77,
+      "why": "#2082 — bước ≤ 0 trả NGUYÊN giá trị (mode none), Go từng thay bằng 0,01"
+    },
+    {
+      "kind": "round_half_up",
+      "value": 7.77,
+      "step": -1.0,
+      "expected": 7.77,
+      "why": "như trên"
+    },
+    {
+      "kind": "round_half_up",
+      "value": -0.145,
+      "step": 0.01,
+      "expected": -0.14,
+      "why": "âm ở biên .xx5 — floor(q+0.5) nghiêng về +∞, nên -0,145 ra -0,14"
+    },
+    {
+      "kind": "round_half_up",
+      "value": -1.005,
+      "step": 0.01,
+      "expected": -1.0,
+      "why": "âm ở biên .xx5"
+    },
+    {
+      "kind": "round_half_up",
+      "value": -123.5,
+      "step": 1.0,
+      "expected": -123.0,
+      "why": "âm, đúng biên, bước JPY/VND"
+    },
+    {
+      "kind": "round_half_up",
+      "value": -7.77,
+      "step": 0.0,
+      "expected": -7.77,
+      "why": "âm + bước ≤ 0 ⇒ trả nguyên giá trị"
+    },
+    {
+      "kind": "round_half_up",
+      "value": 9294.5225,
+      "step": 0.001,
+      "expected": 9294.523000000001,
+      "why": "#2082 — |q| > 2^52/1e9; bản Go cũ THU THIẾU (ra 9294,522)"
+    },
+    {
+      "kind": "round_half_up",
+      "value": -5982.7675,
+      "step": 0.001,
+      "expected": -5982.767,
+      "why": "#2082 phía âm — cũng là ca Cloud CŨ tự mâu thuẫn: round() đẩy q thành -5982767,5000000009 nên floor ra -5982,768, trái luật của chính nó"
+    },
+    {
+      "kind": "round_half_up",
+      "value": -51731.045,
+      "step": 0.01,
+      "expected": -51731.04,
+      "why": "USD/EUR ≥ 45.000 — cùng ngưỡng, cùng mâu thuẫn ở Cloud cũ"
+    },
+    {
+      "kind": "round_half_up",
+      "value": 4500000.5,
+      "step": 1.0,
+      "expected": 4500001.0,
+      "why": "VND/JPY ≥ 4,5 triệu — ngay ngưỡng 2^52/1e9"
+    },
+    {
+      "kind": "round_half_up",
+      "value": -4500000.5,
+      "step": 1.0,
+      "expected": -4500000.0,
+      "why": "ngưỡng, phía âm"
+    },
+    {
+      "kind": "round_half_up",
+      "value": -6642241.5,
+      "step": 1.0,
+      "expected": -6642241.0,
+      "why": "nửa ÂM CHÍNH XÁC ở |q| ≳ 5×10⁶ — Cloud cũ ra -6642242 (xa 0) trong khi cùng luật ấy ở biên độ nhỏ ra -0,14 (về +∞). Một luật, hai chiều"
+    },
+    {
+      "kind": "tax_step",
+      "decimals": -1,
+      "currency": "JPY",
+      "currency_step": 1.0,
+      "expected": 1.0,
+      "why": "min(10^-decimals, bước tiền tệ) — decimals=-1 không được vượt bước của JPY"
+    },
+    {
+      "kind": "tax_step",
+      "decimals": -3,
+      "currency": "VND",
+      "currency_step": 1.0,
+      "expected": 1.0,
+      "why": "min(10^-decimals, bước tiền tệ) — decimals=-3 không được vượt bước của VND"
+    },
+    {
+      "kind": "tax_step",
+      "decimals": 4,
+      "currency": "KWD",
+      "currency_step": 0.001,
+      "expected": 0.0001,
+      "why": "min(10^-decimals, bước tiền tệ) — decimals=4 không được vượt bước của KWD"
+    },
+    {
+      "kind": "tax_step",
+      "decimals": 6,
+      "currency": "USD",
+      "currency_step": 0.01,
+      "expected": 1e-06,
+      "why": "min(10^-decimals, bước tiền tệ) — decimals=6 không được vượt bước của USD"
+    }
+  ]
+}

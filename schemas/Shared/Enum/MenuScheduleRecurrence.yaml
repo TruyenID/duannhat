@@ -1,0 +1,54 @@
+# ==============================================================================
+# Menu Schedule Recurrence (メニュースケジュール繰り返し / Kiểu lặp lịch menu)
+# ==============================================================================
+#
+# HOW a schedule row repeats. One kind per row (#1979).
+#
+# Giá trị (Values):
+#   - Weekly: lặp theo THỨ trong tuần — dùng `days_of_week`.
+#     Đây là hành vi duy nhất tồn tại trước #1979, nên nó là mặc định và mọi
+#     dòng lịch cũ mang giá trị này sau backfill.
+#
+#   - Monthly: lặp theo NGÀY TRONG THÁNG — dùng `days_of_month` (bitmask 1–31).
+#     Ngày 31 ở tháng 30 ngày thì KHÔNG khớp; không tự lùi về ngày cuối tháng.
+#     Cần "ngày cuối tháng" thì mở issue riêng, đừng suy diễn từ đây.
+#
+#   - SpecificDates: danh sách ngày rời rạc, KHÔNG lặp — dùng bảng
+#     `menu_schedule_dates`. Hết những ngày đó là hết; sang tháng sau không tự
+#     chạy lại.
+#
+# Business Rules:
+#   - BR-MSR01: MỘT kind cho mỗi dòng lịch. Muốn vừa lặp hàng tháng vừa có ngày
+#     lẻ thì tạo HAI dòng — các dòng lịch của cùng một menu vốn đã cộng dồn (OR)
+#     ở `getCurrentMenu` / `listActiveBranchMenusForShopByDay`. Gộp nhiều luật
+#     vào một dòng sẽ đẻ ra câu hỏi "thứ Hai VÀ ngày 15" nghĩa là gì, mà không
+#     có câu trả lời nào không gây bất ngờ.
+#   - BR-MSR02: giờ (`start_time`/`end_time`) và khung ngày
+#     (`start_date`/`end_date`, #1970) vẫn áp cho MỌI kind — khung ngày là cận
+#     ngoài, nên "ngày 1 & 15 hàng tháng nhưng chỉ trong quý 4" là hợp lệ.
+#
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: 繰り返し種別
+  en: Recurrence Kind
+  vi: Kiểu lặp
+
+values:
+  - value: Weekly
+    label:
+      ja: 毎週（曜日指定）
+      en: Weekly (by weekday)
+      vi: Hàng tuần (theo thứ)
+  - value: Monthly
+    label:
+      ja: 毎月（日付指定）
+      en: Monthly (by day of month)
+      vi: Hàng tháng (theo ngày)
+  - value: SpecificDates
+    label:
+      ja: 特定日のみ
+      en: Specific dates only
+      vi: Ngày cụ thể

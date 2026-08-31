@@ -1,0 +1,21 @@
+-- 068 — #1392 (phần còn lại của #1380): order_items.floating_section_product_id
+--
+-- Which SURFACE the cashier bought from, recorded on the line itself.
+--
+-- The same SKU genuinely has two prices, two tax tiers and two sets of topping
+-- overrides depending on whether it was tapped on an ordinary menu tile or on a
+-- spotlight ("Khung giờ ưu đãi") tile — see 067_pos_floating_sections.sql. Until
+-- now nothing on the line said which one, so every later re-resolution
+-- (recalcOrderTotals, the lazy tax re-stamp, a selection edit) had to guess, and
+-- guessing means printing one rate and booking another.
+--
+-- Nullable, and NULL is the ordinary case: a line with no value came from a
+-- menu and keeps the menu tiers exactly as before this migration. Nothing
+-- backfills it — a line sold before this column existed has no recorded surface
+-- and inventing one retroactively would be a fabricated tax reference.
+--
+-- Deliberately NOT a foreign key: pos_floating_section_products is a
+-- full-replace replica (wiped and rewritten on every catalog pull), so an FK
+-- would delete or block order history every time a spotlight is retired. The
+-- reading side treats a missing membership as "no attribution" instead.
+ALTER TABLE order_items ADD COLUMN floating_section_product_id TEXT;

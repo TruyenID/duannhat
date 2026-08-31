@@ -1,0 +1,11 @@
+# Omnify generated files — auto-resolve conflicts by taking "ours" then
+# regenerate with `npm run omnify:gen`. Same strategy as package-lock.json.
+#
+# After any merge/rebase that touches schemas:
+#   git checkout --ours .omnify/lock.json .omnify/schemas.json
+#   npm run omnify:gen
+#   git add .omnify/
+.omnify/lock.json            merge=ours
+.omnify/schemas.json         merge=ours
+.omnify/codegen-cache/**     merge=ours
+.omnify/versions/**          merge=ours

@@ -1,0 +1,18 @@
+kind: enum
+
+# Selection mode for a ToppingGroup. Mirrors Square Catalog's
+# `selection_type` and Toast `OptionGroupType` so admin UX can render
+# either a radio (single) or checkbox (multiple) without inferring from
+# `max_select=1`. Phase 2 customer-web reads this directly to pick the
+# correct widget.
+
+displayName:
+  ja: 選択方式
+  en: Selection Type
+  vi: Cách chọn
+
+values:
+  - value: single
+    label: { ja: 1つ選択, en: Single, vi: Chọn 1 }
+  - value: multiple
+    label: { ja: 複数選択, en: Multiple, vi: Chọn nhiều }

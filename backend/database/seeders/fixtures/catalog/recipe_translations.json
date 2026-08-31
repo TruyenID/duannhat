@@ -1,0 +1,83 @@
+[
+    {
+        "id": 19,
+        "recipe_id": "019f408b-12c7-73bd-93d0-f6af72ba0d85",
+        "locale": "ja",
+        "name": "パンケーキミックス v1",
+        "description": null,
+        "instructions": null,
+        "rejection_reason": null
+    },
+    {
+        "id": 20,
+        "recipe_id": "019f408b-12c7-73bd-93d0-f6af72ba0d85",
+        "locale": "en",
+        "name": "Pancake Mix Recipe v1",
+        "description": null,
+        "instructions": null,
+        "rejection_reason": null
+    },
+    {
+        "id": 21,
+        "recipe_id": "019f408b-12c7-73bd-93d0-f6af72ba0d85",
+        "locale": "vi",
+        "name": "Công thức bột pancake v1",
+        "description": null,
+        "instructions": null,
+        "rejection_reason": null
+    },
+    {
+        "id": 22,
+        "recipe_id": "019f408b-12e2-725f-b6a2-32dde15c2a23",
+        "locale": "ja",
+        "name": "ソースベース v1",
+        "description": null,
+        "instructions": null,
+        "rejection_reason": null
+    },
+    {
+        "id": 23,
+        "recipe_id": "019f408b-12e2-725f-b6a2-32dde15c2a23",
+        "locale": "en",
+        "name": "Sauce Base v1",
+        "description": null,
+        "instructions": null,
+        "rejection_reason": null
+    },
+    {
+        "id": 24,
+        "recipe_id": "019f408b-12e2-725f-b6a2-32dde15c2a23",
+        "locale": "vi",
+        "name": "Nền sốt v1",
+        "description": null,
+        "instructions": null,
+        "rejection_reason": null
+    },
+    {
+        "id": 25,
+        "recipe_id": "019f408b-12fe-71c2-acf4-0f9c10469ec2",
+        "locale": "ja",
+        "name": "パッションフルーツソース v1",
+        "description": null,
+        "instructions": null,
+        "rejection_reason": null
+    },
+    {
+        "id": 26,
+        "recipe_id": "019f408b-12fe-71c2-acf4-0f9c10469ec2",
+        "locale": "en",
+        "name": "Passion Fruit Sauce v1",
+        "description": null,
+        "instructions": null,
+        "rejection_reason": null
+    },
+    {
+        "id": 27,
+        "recipe_id": "019f408b-12fe-71c2-acf4-0f9c10469ec2",
+        "locale": "vi",
+        "name": "Sốt chanh leo v1",
+        "description": null,
+        "instructions": null,
+        "rejection_reason": null
+    }
+]

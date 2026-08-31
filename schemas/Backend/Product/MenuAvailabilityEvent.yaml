@@ -1,0 +1,163 @@
+# MenuAvailabilityEvent schema (plan-056 — nhật ký bật/tắt món tại quán)
+#
+# Mỗi lần một quán bật hoặc tắt một món / một biến thể / một topping thì ghi
+# MỘT hàng vào đây. Bảng chỉ-thêm (append-only), không sửa, không xoá mềm.
+#
+# VÌ SAO BẢNG NÀY TỒN TẠI NGAY TỪ ĐẦU, không để bổ sung sau
+#   Câu hỏi vận hành mà quán sẽ hỏi là "tháng này món nào hết hàng nhiều nhất",
+#   và câu đó chỉ trả lời được bằng LỊCH SỬ. Cột `disabled_reason` trên
+#   `menu_products` chỉ giữ trạng thái HIỆN TẠI: bật lại là mất. Luật
+#   "LEGACY KHÔNG TỒN TẠI" của repo CẤM viết lệnh backfill, nên nếu bảng này
+#   ra đời muộn thì quãng thời gian trước đó vĩnh viễn không có dữ liệu —
+#   không phải "khó lấy lại", mà là KHÔNG TỒN TẠI. Một INSERT mỗi lần bấm nút
+#   là cái giá rẻ nhất để không bao giờ phải nói câu đó với người dùng.
+#
+# Business rules:
+#   - BR-MAE01: chỉ-thêm. Không UPDATE, không DELETE. Sửa sai bằng cách ghi
+#     một sự kiện mới.
+#   - BR-MAE02: `is_active` là giá trị MỚI sau thao tác, không phải giá trị cũ.
+#     Với topping, `is_hidden = true` được ĐẢO thành `is_active = false` để cả
+#     ba tầng đọc chung một cột (xem MenuAvailabilityEntityType).
+#   - BR-MAE03: `occurred_at` là lúc NGƯỜI BẤM bấm, không phải lúc Cloud nhận.
+#     Bán offline thì hai mốc này cách nhau hàng giờ; lấy `created_at` để đọc
+#     lịch sử sẽ dồn cả ca vào đúng một phút — phút máy trạm nối lại mạng.
+#   - BR-MAE04: `entity_id` là cột THƯỜNG, cố ý KHÔNG có khoá ngoại. Hàng
+#     override topping bị thay trọn bộ mỗi lần lưu (PUT thay cả nhóm) và
+#     menu_product có thể bị HQ gỡ khỏi menu — một nhật ký biến mất theo đối
+#     tượng nó ghi lại thì không còn là nhật ký. `menuProduct` bên dưới thì CÓ
+#     khoá ngoại vì báo cáo cần gom theo món, và nó nullable + SET NULL.
+#   - BR-MAE05: `actor_name` là ẢNH CHỤP tên người thao tác tại thời điểm bấm,
+#     KHÔNG phải join sang users lúc đọc. Nhân viên nghỉ việc thì báo cáo cũ
+#     vẫn phải đọc được, và tên hiển thị lúc đó là dữ kiện lịch sử.
+
+displayName:
+  en: Menu Availability Event
+  ja: メニュー在庫切れ操作履歴
+  vi: Nhật ký bật/tắt món
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: false
+  id: Uuid
+  indexes:
+    # Truy vấn chính của báo cáo: "chi nhánh này, khoảng thời gian này".
+    - columns: [branch_id, occurred_at]
+    # "Món này bị tắt bao nhiêu lần" — gom theo món, mới nhất trước.
+    - columns: [menu_product_id, occurred_at]
+    # Tra ngược một đối tượng bất kỳ (kể cả topping, thứ không có FK).
+    - columns: [entity_type, entity_id]
+
+properties:
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    nullable: false
+    onDelete: CASCADE
+    displayName:
+      en: Branch
+      ja: 店舗
+      vi: Chi nhánh
+    description:
+      en: Branch whose staff made the change. Server-resolved from the menu, never from the request body.
+      ja: 操作した店舗。リクエストボディではなくメニューからサーバー側で解決。
+      vi: Chi nhánh thực hiện thao tác. Server tự suy từ menu, KHÔNG nhận từ body.
+
+  # Gom báo cáo theo món. Nullable vì một sự kiện topping vẫn ghi được kể cả
+  # khi hàng menu_product đã bị HQ gỡ sau đó; SET NULL giữ lại sự kiện.
+  menuProduct:
+    type: Association
+    relation: ManyToOne
+    target: MenuProduct
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Menu Product
+      ja: メニュー商品
+      vi: Món trong menu
+
+  entity_type:
+    type: EnumRef
+    enum: MenuAvailabilityEntityType
+    nullable: false
+    displayName:
+      en: Entity Type
+      ja: 対象種別
+      vi: Loại đối tượng
+
+  # BR-MAE04 — cột thường, KHÔNG khoá ngoại. Xem docblock đầu file.
+  entity_id:
+    type: String
+    length: 36
+    nullable: false
+    displayName:
+      en: Entity ID
+      ja: 対象ID
+      vi: ID đối tượng
+
+  is_active:
+    type: Boolean
+    nullable: false
+    displayName:
+      en: New Active State
+      ja: 変更後の状態
+      vi: Trạng thái sau thao tác
+    description:
+      en: The value AFTER the change (BR-MAE02). For toppings this is the inverse of is_hidden.
+      ja: 操作後の値（BR-MAE02）。トッピングは is_hidden の反転。
+      vi: Giá trị SAU thao tác (BR-MAE02). Với topping đây là giá trị đảo của is_hidden.
+
+  reason:
+    type: String
+    length: 255
+    nullable: true
+    displayName:
+      en: Reason
+      ja: 理由
+      vi: Lý do
+    description:
+      en: Free text, only meaningful when is_active is false. No minimum length is enforced anywhere.
+      ja: 自由記述。is_active が false のときのみ意味を持つ。最小文字数の制約は一切なし。
+      vi: Chữ tự do, chỉ có nghĩa khi is_active = false. KHÔNG có ràng buộc độ dài tối thiểu ở bất kỳ tầng nào.
+
+  source:
+    type: EnumRef
+    enum: MenuAvailabilitySource
+    nullable: false
+    displayName:
+      en: Source
+      ja: 出所
+      vi: Nguồn
+
+  # BR-MAE03 — lúc người bấm bấm, do client gửi lên và server kẹp trong khoảng
+  # hợp lý. KHÁC created_at (lúc Cloud ghi hàng này).
+  occurred_at:
+    type: Timestamp
+    nullable: false
+    displayName:
+      en: Occurred At
+      ja: 操作日時
+      vi: Thời điểm thao tác
+
+  actedByUser:
+    type: Association
+    relation: ManyToOne
+    target: User
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Acted By
+      ja: 操作者
+      vi: Người thao tác
+
+  # BR-MAE05 — ảnh chụp, không join lúc đọc.
+  actor_name:
+    type: String
+    length: 100
+    nullable: true
+    displayName:
+      en: Actor Name (snapshot)
+      ja: 操作者名（スナップショット）
+      vi: Tên người thao tác (ảnh chụp)

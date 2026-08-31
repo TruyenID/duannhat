@@ -1,0 +1,101 @@
+# #1199 — godx-kiosk test gate. This repo had NO workflows at all: 165 vitest
+# assertions across 19 files had never run anywhere but a developer's laptop,
+# on the app that takes the customer's order and their money.
+#
+# RUNNER: self-hosted ONLY. GitHub-hosted runners are forbidden for this org
+# (no Actions billing — a hosted job dies in ~4s with "recent account payments
+# have failed"). Do NOT introduce ubuntu-latest.
+name: tests
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    branches: [dev, main]
+
+# One self-hosted runner serves this org. Without this, three pushes queue
+# three full runs and the last one reports on code that is already stale.
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: [self-hosted, Linux, X64]
+    timeout-minutes: 30
+    steps:
+      # SELF-HOSTED RUNNER HYGIENE: ~/.gitconfig is SHARED by every job and
+      # every repo on this machine. A leftover url.insteadOf rewrite makes
+      # actions/checkout try SSH and fail with "Permission denied (publickey)"
+      # for unrelated repos. Strip any inherited rewrite before doing anything.
+      - name: Sanitize inherited git config
+        run: |
+          git config --global --unset-all url."git@github.com:".insteadOf || true
+          git config --global --unset-all url."https://github.com/".insteadOf || true
+
+      - uses: actions/checkout@v4
+
+      - name: Assert Node toolchain
+        run: |
+          node -v
+          node -e 'process.exit(parseInt(process.versions.node) >= 20 ? 0 : 1)' \
+            || { echo "::error::runner needs Node >= 20"; exit 1; }
+          npm --version
+
+      # @godxjp/ui-native is a PRIVATE GitHub dependency
+      # (github:godx-jp/godx-tempo-ui-native#main). Auth is a READ-ONLY DEPLOY
+      # KEY scoped to that ONE repo — deliberately not a personal PAT, which
+      # would hand CI the whole account's scope, and a key of its own so
+      # revoking this consumer cannot break another.
+      # Revoke: gh repo deploy-key list --repo godx-jp/godx-tempo-ui-native
+      - name: Authenticate the private UI-native dependency
+        env:
+          UI_NATIVE_DEPLOY_KEY: ${{ secrets.UI_NATIVE_DEPLOY_KEY }}
+        run: |
+          if [ -z "$UI_NATIVE_DEPLOY_KEY" ]; then
+            echo "::error::secret UI_NATIVE_DEPLOY_KEY is missing — add the read-only deploy key for godx-jp/godx-tempo-ui-native"
+            exit 1
+          fi
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$UI_NATIVE_DEPLOY_KEY" > ~/.ssh/ui_native_deploy_key
+          chmod 600 ~/.ssh/ui_native_deploy_key
+          ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts 2>/dev/null
+          # The runner's ~/.gitconfig carries a token-embedded rewrite
+          #   url.https://<TOKEN>@github.com/.insteadOf = git@github.com:
+          # whose token cannot read the private UI repos — which is why an
+          # npm `git clone git@github.com:…` reports an https auth failure. Its
+          # key name embeds the token so `--unset` never matches it, and a
+          # shared runner's config must not be rewritten anyway.
+          #
+          # GIT_CONFIG_GLOBAL points git at an EMPTY global config for THIS job
+          # only: the rewrite disappears for our process, nothing on the machine
+          # changes, and the deploy key gets to authenticate.
+          : > "$RUNNER_TEMP/empty-gitconfig"
+          {
+            echo "GIT_CONFIG_GLOBAL=$RUNNER_TEMP/empty-gitconfig"
+            echo "GIT_SSH_COMMAND=ssh -i $HOME/.ssh/ui_native_deploy_key -o IdentitiesOnly=yes"
+            echo "GIT_CONFIG_COUNT=1"
+            echo "GIT_CONFIG_KEY_0=url.ssh://git@github.com/.insteadOf"
+            echo "GIT_CONFIG_VALUE_0=https://github.com/"
+          } >> "$GITHUB_ENV"
+
+      - run: npm ci
+
+      # THE gate. vitest does not typecheck, so this is the only step that
+      # actually exercises the code.
+      - name: Vitest
+        run: npm test
+
+      # BLOCKING as of #1202. It was advisory while 40 errors sat here, 33 of
+      # them from Omnify emitting references to models it never generated for
+      # this project — hand-editing those files is pointless, codegen
+      # overwrites them, so the fix was to regenerate. At 0 errors there is no
+      # backlog to grandfather and the gate can hold the line.
+      - name: TypeScript
+        run: npm run typecheck
+
+      # Advisory: 1 error, 115 warnings today. Same deal — visible, then
+      # ratcheted. godx-kds gates both of these for real because it is clean.
+      - name: ESLint (advisory)
+        continue-on-error: true
+        run: npm run lint

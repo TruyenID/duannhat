@@ -1,0 +1,83 @@
+# #1199 — customer-web test gate.
+#
+# Before this file the repo had `deploy.yml` and nothing else: the DEPLOY was
+# gated, the tests were not, so a broken suite still shipped to production.
+# 142 node:test assertions had never run in CI.
+#
+# RUNNER: self-hosted ONLY. GitHub-hosted runners are forbidden for this org
+# (no Actions billing — a hosted job dies in ~4s with "recent account payments
+# have failed"), and deploy.yml already targets [self-hosted, Linux, X64].
+# Do NOT reintroduce ubuntu-latest.
+#
+# Node is asserted, not installed: the runner provides it.
+#
+# customer-web has NO private dependency, so unlike admin-web and pos-web this
+# needs no deploy key — nothing here has to authenticate to GitHub.
+name: tests
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    branches: [dev, main]
+
+# One self-hosted runner serves this org. Without this, three pushes queue
+# three full runs and the last reports on code that is already stale.
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: [self-hosted, Linux, X64]
+    timeout-minutes: 30
+    steps:
+      # SELF-HOSTED RUNNER HYGIENE: ~/.gitconfig is SHARED by every job and
+      # every repo on this machine. A leftover url.insteadOf rewrite makes
+      # actions/checkout try SSH and fail with "Permission denied (publickey)"
+      # for unrelated repos. Strip any inherited rewrite before doing anything.
+      - name: Sanitize inherited git config
+        run: |
+          git config --global --unset-all url."git@github.com:".insteadOf || true
+          git config --global --unset-all url."https://github.com/".insteadOf || true
+
+      - uses: actions/checkout@v4
+
+      - name: Assert Node toolchain
+        run: |
+          node -v
+          node -e 'process.exit(parseInt(process.versions.node) >= 20 ? 0 : 1)' \
+            || { echo "::error::runner needs Node >= 20 (the suite runs on node:test with native TS)"; exit 1; }
+          # No corepack: enabling it needs write access to the runner's global
+          # node_modules (EACCES) and pnpm is already installed there.
+          pnpm --version
+
+      # pnpm, NOT npm. The repo carries BOTH lockfiles: pnpm-lock.yaml was last
+      # touched 2026-07-13, package-lock.json 2026-07-05. Installing from the
+      # npm one would gate a dependency tree eight days behind the maintained
+      # one, and every sibling repo here uses pnpm.
+      #
+      # Worth confirming with whoever owns the Amplify build settings: deploy.yml
+      # only triggers Amplify (app godx-tempo-customer), whose install command
+      # lives in the AWS console and is not visible from this repo. If Amplify
+      # installs with npm then CI and production resolve from DIFFERENT
+      # lockfiles. The stale package-lock.json is left in place deliberately —
+      # deleting it would break the deploy if Amplify is the thing using it.
+      - run: pnpm install --frozen-lockfile
+
+      - name: TypeScript
+        run: npx tsc --noEmit
+
+      # `npm test` is `node --test 'lib/**/*.test.ts'`. Node's test runner does
+      # not cache results, so unlike `go test` this cannot silently report a
+      # stale verdict (see #1186 for where that bit us).
+      - name: Tests
+        run: npm test
+
+      # Lint is reported but does NOT fail the build: this repo carries 22
+      # pre-existing errors and 50 warnings, and turning that into a hard gate
+      # today would block every unrelated change. Ratchet it to a failure once
+      # the backlog is cleared — do not silently drop this step instead.
+      - name: Lint (advisory)
+        continue-on-error: true
+        run: npm run lint

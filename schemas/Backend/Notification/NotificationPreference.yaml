@@ -1,0 +1,109 @@
+# =============================================================================
+# NotificationPreference (ユーザー通知設定 / Tuỳ chọn thông báo người dùng)
+# =============================================================================
+#
+# Per-user (type, channel) opt-out + master mute + quiet hours
+# (plan-012 T3.4). Written from `/me/notification-preferences/*`.
+#
+# Special rows:
+#   - master-level:  `type='*' AND channel='*'`  — master mute + quiet
+#                     hours live here. One row per user.
+#   - per-pair:      `type='stock.alert.low' AND channel='email'` —
+#                     individual opt-out.
+#
+# Absent (user, type, channel) row means `enabled=true` by default.
+#
+# Effective-channel resolution (plan-012 DESIGN §Phase C):
+#   1. Start with routes[brand, type] (falls through to org / template)
+#   2. Apply priority_overrides if the notification is urgent/high
+#   3. Remove channels where user has pref.enabled=false for that
+#      (type, channel)
+#   4. If master_mute=true AND priority < urgent:
+#        keep only `in_app` (always inbox-safe)
+#   5. If now() in [quiet_from, quiet_to] (per quiet_timezone) AND
+#      priority < urgent: same as master mute
+# =============================================================================
+
+displayName:
+  en: Notification Preference
+  ja: 通知設定
+  vi: Tuỳ chọn thông báo
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: false
+  id: Uuid
+  indexes:
+    - columns: [user_id, type, channel]
+      unique: true
+    - columns: [user_id]
+
+properties:
+  user:
+    type: Association
+    relation: ManyToOne
+    target: User
+    onDelete: CASCADE
+    displayName: { en: User, ja: ユーザー, vi: Người dùng }
+
+  # String (not enum) so the literal '*' sentinel fits alongside real
+  # dot-namespaced types.
+  type:
+    type: String
+    length: 100
+    displayName: { en: Type, ja: タイプ, vi: Loại }
+    description:
+      en: "Notification type string, or literal `*` for the master-level preference row."
+      ja: "通知タイプ文字列、またはマスター設定行の場合は `*` リテラル。"
+      vi: "Chuỗi loại thông báo, hoặc `*` cho row master."
+
+  channel:
+    type: String
+    length: 20
+    displayName: { en: Channel, ja: チャンネル, vi: Kênh }
+    description:
+      en: "NotificationChannel case value, or literal `*` for the master-level row."
+      ja: "NotificationChannel 値、またはマスター行の場合は `*` リテラル。"
+      vi: "Giá trị NotificationChannel, hoặc `*` cho row master."
+
+  enabled:
+    type: Boolean
+    default: true
+    displayName: { en: Enabled, ja: 有効, vi: Bật }
+
+  master_mute:
+    type: Boolean
+    default: false
+    displayName: { en: Master Mute, ja: マスターミュート, vi: Tắt tất cả }
+
+  quiet_from:
+    type: String
+    length: 5
+    nullable: true
+    displayName: { en: Quiet From, ja: 静音開始, vi: Im lặng từ }
+    description:
+      en: "HH:MM 24h local time. Only set on the master-level row."
+      ja: "HH:MM 24時間表記。マスター行のみ設定される。"
+      vi: "HH:MM 24h giờ địa phương. Chỉ set trên row master."
+
+  quiet_to:
+    type: String
+    length: 5
+    nullable: true
+    displayName: { en: Quiet To, ja: 静音終了, vi: Im lặng đến }
+    description:
+      en: "HH:MM 24h local time. Wraps across midnight when `quiet_to` < `quiet_from`."
+      ja: "HH:MM 24時間表記。`quiet_to` < `quiet_from` のとき深夜をまたぐ。"
+      vi: "HH:MM 24h. Quấn qua nửa đêm khi `quiet_to` < `quiet_from`."
+
+  quiet_timezone:
+    type: String
+    length: 60
+    nullable: true
+    displayName: { en: Quiet Timezone, ja: 静音タイムゾーン, vi: Múi giờ im lặng }
+    description:
+      en: "IANA tz id (e.g. Asia/Tokyo). Falls back to user.timezone then Asia/Tokyo when null."
+      ja: "IANA タイムゾーン ID（例：Asia/Tokyo）。null の場合は user.timezone → Asia/Tokyo にフォールバック。"
+      vi: "ID IANA tz (VD: Asia/Tokyo). Null → fallback user.timezone → Asia/Tokyo."

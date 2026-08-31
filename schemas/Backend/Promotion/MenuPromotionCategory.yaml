@@ -1,0 +1,23 @@
+# =============================================================================
+# MenuPromotionCategory (プロモーション×カテゴリ ピボット)
+# =============================================================================
+#
+# M2M whitelist between MenuPromotion and Category. Active CHỈ khi
+# MenuPromotion.applies_to ∈ {categories, mixed}. Resolve query JOIN
+# với CategoryProduct để biết promotion áp lên product nào.
+#
+# Written by:  MenuPromotionService::create()/update() qua sync()
+#              attach/detach trong DB::transaction.
+# Read by:     MenuPromotionService::resolveActivePromotion() (JOIN
+#              CategoryProduct ON category_id), HQ scope picker.
+# Lifecycle:   CASCADE từ cả 2 phía. Pivot không có business data.
+# =============================================================================
+
+kind: pivot
+pivotFor: [MenuPromotion, Category]
+
+options:
+  indexes:
+    - columns: [menu_promotion_id, category_id]
+      unique: true
+      name: menu_promotion_category_unique

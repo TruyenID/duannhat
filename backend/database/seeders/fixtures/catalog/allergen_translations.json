@@ -1,0 +1,920 @@
+[
+    {
+        "id": 1,
+        "allergen_id": "019f408b-0369-72ef-8bb2-3c4e0d31e5d4",
+        "locale": "ja",
+        "name": "えび"
+    },
+    {
+        "id": 2,
+        "allergen_id": "019f408b-0369-72ef-8bb2-3c4e0d31e5d4",
+        "locale": "en",
+        "name": "Shrimp"
+    },
+    {
+        "id": 3,
+        "allergen_id": "019f408b-0369-72ef-8bb2-3c4e0d31e5d4",
+        "locale": "vi",
+        "name": "Tôm"
+    },
+    {
+        "id": 4,
+        "allergen_id": "019f408b-036d-700b-8eff-62ae147337f6",
+        "locale": "ja",
+        "name": "かに"
+    },
+    {
+        "id": 5,
+        "allergen_id": "019f408b-036d-700b-8eff-62ae147337f6",
+        "locale": "en",
+        "name": "Crab"
+    },
+    {
+        "id": 6,
+        "allergen_id": "019f408b-036d-700b-8eff-62ae147337f6",
+        "locale": "vi",
+        "name": "Cua"
+    },
+    {
+        "id": 7,
+        "allergen_id": "019f408b-036f-735c-be78-0929fc8564bd",
+        "locale": "ja",
+        "name": "小麦"
+    },
+    {
+        "id": 8,
+        "allergen_id": "019f408b-036f-735c-be78-0929fc8564bd",
+        "locale": "en",
+        "name": "Wheat"
+    },
+    {
+        "id": 9,
+        "allergen_id": "019f408b-036f-735c-be78-0929fc8564bd",
+        "locale": "vi",
+        "name": "Lúa mì"
+    },
+    {
+        "id": 10,
+        "allergen_id": "019f408b-0371-7061-86d5-336721d02a96",
+        "locale": "ja",
+        "name": "そば"
+    },
+    {
+        "id": 11,
+        "allergen_id": "019f408b-0371-7061-86d5-336721d02a96",
+        "locale": "en",
+        "name": "Buckwheat"
+    },
+    {
+        "id": 12,
+        "allergen_id": "019f408b-0371-7061-86d5-336721d02a96",
+        "locale": "vi",
+        "name": "Kiều mạch"
+    },
+    {
+        "id": 13,
+        "allergen_id": "019f408b-0373-72a8-b990-b8b2b2a0253b",
+        "locale": "ja",
+        "name": "卵"
+    },
+    {
+        "id": 14,
+        "allergen_id": "019f408b-0373-72a8-b990-b8b2b2a0253b",
+        "locale": "en",
+        "name": "Egg"
+    },
+    {
+        "id": 15,
+        "allergen_id": "019f408b-0373-72a8-b990-b8b2b2a0253b",
+        "locale": "vi",
+        "name": "Trứng"
+    },
+    {
+        "id": 16,
+        "allergen_id": "019f408b-0375-72ac-9b54-d34e8e39c34c",
+        "locale": "ja",
+        "name": "乳"
+    },
+    {
+        "id": 17,
+        "allergen_id": "019f408b-0375-72ac-9b54-d34e8e39c34c",
+        "locale": "en",
+        "name": "Milk"
+    },
+    {
+        "id": 18,
+        "allergen_id": "019f408b-0375-72ac-9b54-d34e8e39c34c",
+        "locale": "vi",
+        "name": "Sữa"
+    },
+    {
+        "id": 19,
+        "allergen_id": "019f408b-0377-708b-ad05-4af0bc98c004",
+        "locale": "ja",
+        "name": "落花生"
+    },
+    {
+        "id": 20,
+        "allergen_id": "019f408b-0377-708b-ad05-4af0bc98c004",
+        "locale": "en",
+        "name": "Peanut"
+    },
+    {
+        "id": 21,
+        "allergen_id": "019f408b-0377-708b-ad05-4af0bc98c004",
+        "locale": "vi",
+        "name": "Đậu phộng"
+    },
+    {
+        "id": 22,
+        "allergen_id": "019f408b-0378-7017-baef-e2125697d9d3",
+        "locale": "ja",
+        "name": "くるみ"
+    },
+    {
+        "id": 23,
+        "allergen_id": "019f408b-0378-7017-baef-e2125697d9d3",
+        "locale": "en",
+        "name": "Walnut"
+    },
+    {
+        "id": 24,
+        "allergen_id": "019f408b-0378-7017-baef-e2125697d9d3",
+        "locale": "vi",
+        "name": "Quả óc chó"
+    },
+    {
+        "id": 25,
+        "allergen_id": "019f408b-037a-7349-9f01-4641087beb02",
+        "locale": "ja",
+        "name": "アーモンド"
+    },
+    {
+        "id": 26,
+        "allergen_id": "019f408b-037a-7349-9f01-4641087beb02",
+        "locale": "en",
+        "name": "Almond"
+    },
+    {
+        "id": 27,
+        "allergen_id": "019f408b-037a-7349-9f01-4641087beb02",
+        "locale": "vi",
+        "name": "Hạnh nhân"
+    },
+    {
+        "id": 28,
+        "allergen_id": "019f408b-037c-70a2-b4f9-a78e57a2d935",
+        "locale": "ja",
+        "name": "あわび"
+    },
+    {
+        "id": 29,
+        "allergen_id": "019f408b-037c-70a2-b4f9-a78e57a2d935",
+        "locale": "en",
+        "name": "Abalone"
+    },
+    {
+        "id": 30,
+        "allergen_id": "019f408b-037c-70a2-b4f9-a78e57a2d935",
+        "locale": "vi",
+        "name": "Bào ngư"
+    },
+    {
+        "id": 31,
+        "allergen_id": "019f408b-037e-7308-846f-8b7c1773efc6",
+        "locale": "ja",
+        "name": "いか"
+    },
+    {
+        "id": 32,
+        "allergen_id": "019f408b-037e-7308-846f-8b7c1773efc6",
+        "locale": "en",
+        "name": "Squid"
+    },
+    {
+        "id": 33,
+        "allergen_id": "019f408b-037e-7308-846f-8b7c1773efc6",
+        "locale": "vi",
+        "name": "Mực"
+    },
+    {
+        "id": 34,
+        "allergen_id": "019f408b-037f-722b-ad2a-6561b0e57d3c",
+        "locale": "ja",
+        "name": "いくら"
+    },
+    {
+        "id": 35,
+        "allergen_id": "019f408b-037f-722b-ad2a-6561b0e57d3c",
+        "locale": "en",
+        "name": "Salmon Roe"
+    },
+    {
+        "id": 36,
+        "allergen_id": "019f408b-037f-722b-ad2a-6561b0e57d3c",
+        "locale": "vi",
+        "name": "Trứng cá hồi"
+    },
+    {
+        "id": 37,
+        "allergen_id": "019f408b-0381-72ef-9347-0aced045f0eb",
+        "locale": "ja",
+        "name": "オレンジ"
+    },
+    {
+        "id": 38,
+        "allergen_id": "019f408b-0381-72ef-9347-0aced045f0eb",
+        "locale": "en",
+        "name": "Orange"
+    },
+    {
+        "id": 39,
+        "allergen_id": "019f408b-0381-72ef-9347-0aced045f0eb",
+        "locale": "vi",
+        "name": "Cam"
+    },
+    {
+        "id": 40,
+        "allergen_id": "019f408b-0382-7355-bfb9-ab664413ae6c",
+        "locale": "ja",
+        "name": "カシューナッツ"
+    },
+    {
+        "id": 41,
+        "allergen_id": "019f408b-0382-7355-bfb9-ab664413ae6c",
+        "locale": "en",
+        "name": "Cashew Nut"
+    },
+    {
+        "id": 42,
+        "allergen_id": "019f408b-0382-7355-bfb9-ab664413ae6c",
+        "locale": "vi",
+        "name": "Hạt điều"
+    },
+    {
+        "id": 43,
+        "allergen_id": "019f408b-0384-72d6-ade1-f222f588b34d",
+        "locale": "ja",
+        "name": "キウイフルーツ"
+    },
+    {
+        "id": 44,
+        "allergen_id": "019f408b-0384-72d6-ade1-f222f588b34d",
+        "locale": "en",
+        "name": "Kiwifruit"
+    },
+    {
+        "id": 45,
+        "allergen_id": "019f408b-0384-72d6-ade1-f222f588b34d",
+        "locale": "vi",
+        "name": "Kiwi"
+    },
+    {
+        "id": 46,
+        "allergen_id": "019f408b-0386-7213-9fb3-f60a4d18f2e7",
+        "locale": "ja",
+        "name": "牛肉"
+    },
+    {
+        "id": 47,
+        "allergen_id": "019f408b-0386-7213-9fb3-f60a4d18f2e7",
+        "locale": "en",
+        "name": "Beef"
+    },
+    {
+        "id": 48,
+        "allergen_id": "019f408b-0386-7213-9fb3-f60a4d18f2e7",
+        "locale": "vi",
+        "name": "Thịt bò"
+    },
+    {
+        "id": 49,
+        "allergen_id": "019f408b-0388-7147-b723-6c9c92966004",
+        "locale": "ja",
+        "name": "ごま"
+    },
+    {
+        "id": 50,
+        "allergen_id": "019f408b-0388-7147-b723-6c9c92966004",
+        "locale": "en",
+        "name": "Sesame"
+    },
+    {
+        "id": 51,
+        "allergen_id": "019f408b-0388-7147-b723-6c9c92966004",
+        "locale": "vi",
+        "name": "Vừng"
+    },
+    {
+        "id": 52,
+        "allergen_id": "019f408b-038a-72cf-9de9-0a403c5efda9",
+        "locale": "ja",
+        "name": "さけ"
+    },
+    {
+        "id": 53,
+        "allergen_id": "019f408b-038a-72cf-9de9-0a403c5efda9",
+        "locale": "en",
+        "name": "Salmon"
+    },
+    {
+        "id": 54,
+        "allergen_id": "019f408b-038a-72cf-9de9-0a403c5efda9",
+        "locale": "vi",
+        "name": "Cá hồi"
+    },
+    {
+        "id": 55,
+        "allergen_id": "019f408b-038c-7321-8528-0912c3c60853",
+        "locale": "ja",
+        "name": "さば"
+    },
+    {
+        "id": 56,
+        "allergen_id": "019f408b-038c-7321-8528-0912c3c60853",
+        "locale": "en",
+        "name": "Mackerel"
+    },
+    {
+        "id": 57,
+        "allergen_id": "019f408b-038c-7321-8528-0912c3c60853",
+        "locale": "vi",
+        "name": "Cá thu"
+    },
+    {
+        "id": 58,
+        "allergen_id": "019f408b-038e-7376-b25f-a8cb25490d21",
+        "locale": "ja",
+        "name": "大豆"
+    },
+    {
+        "id": 59,
+        "allergen_id": "019f408b-038e-7376-b25f-a8cb25490d21",
+        "locale": "en",
+        "name": "Soybean"
+    },
+    {
+        "id": 60,
+        "allergen_id": "019f408b-038e-7376-b25f-a8cb25490d21",
+        "locale": "vi",
+        "name": "Đậu nành"
+    },
+    {
+        "id": 61,
+        "allergen_id": "019f408b-0390-72ef-ba62-244315c8a076",
+        "locale": "ja",
+        "name": "鶏肉"
+    },
+    {
+        "id": 62,
+        "allergen_id": "019f408b-0390-72ef-ba62-244315c8a076",
+        "locale": "en",
+        "name": "Chicken"
+    },
+    {
+        "id": 63,
+        "allergen_id": "019f408b-0390-72ef-ba62-244315c8a076",
+        "locale": "vi",
+        "name": "Thịt gà"
+    },
+    {
+        "id": 64,
+        "allergen_id": "019f408b-0391-72d5-abd2-b405bc6fad55",
+        "locale": "ja",
+        "name": "バナナ"
+    },
+    {
+        "id": 65,
+        "allergen_id": "019f408b-0391-72d5-abd2-b405bc6fad55",
+        "locale": "en",
+        "name": "Banana"
+    },
+    {
+        "id": 66,
+        "allergen_id": "019f408b-0391-72d5-abd2-b405bc6fad55",
+        "locale": "vi",
+        "name": "Chuối"
+    },
+    {
+        "id": 67,
+        "allergen_id": "019f408b-0393-71c1-afee-6efbc600458c",
+        "locale": "ja",
+        "name": "豚肉"
+    },
+    {
+        "id": 68,
+        "allergen_id": "019f408b-0393-71c1-afee-6efbc600458c",
+        "locale": "en",
+        "name": "Pork"
+    },
+    {
+        "id": 69,
+        "allergen_id": "019f408b-0393-71c1-afee-6efbc600458c",
+        "locale": "vi",
+        "name": "Thịt heo"
+    },
+    {
+        "id": 70,
+        "allergen_id": "019f408b-0398-733b-9088-78d649b4bf96",
+        "locale": "ja",
+        "name": "まつたけ"
+    },
+    {
+        "id": 71,
+        "allergen_id": "019f408b-0398-733b-9088-78d649b4bf96",
+        "locale": "en",
+        "name": "Matsutake Mushroom"
+    },
+    {
+        "id": 72,
+        "allergen_id": "019f408b-0398-733b-9088-78d649b4bf96",
+        "locale": "vi",
+        "name": "Nấm matsutake"
+    },
+    {
+        "id": 73,
+        "allergen_id": "019f408b-039a-72ab-9094-e3f620f2b3e3",
+        "locale": "ja",
+        "name": "もも"
+    },
+    {
+        "id": 74,
+        "allergen_id": "019f408b-039a-72ab-9094-e3f620f2b3e3",
+        "locale": "en",
+        "name": "Peach"
+    },
+    {
+        "id": 75,
+        "allergen_id": "019f408b-039a-72ab-9094-e3f620f2b3e3",
+        "locale": "vi",
+        "name": "Đào"
+    },
+    {
+        "id": 76,
+        "allergen_id": "019f408b-039c-709d-b19a-27d252f8d0b4",
+        "locale": "ja",
+        "name": "やまいも"
+    },
+    {
+        "id": 77,
+        "allergen_id": "019f408b-039c-709d-b19a-27d252f8d0b4",
+        "locale": "en",
+        "name": "Yam"
+    },
+    {
+        "id": 78,
+        "allergen_id": "019f408b-039c-709d-b19a-27d252f8d0b4",
+        "locale": "vi",
+        "name": "Khoai mỡ"
+    },
+    {
+        "id": 79,
+        "allergen_id": "019f408b-039d-726a-b177-0d5081a4bbab",
+        "locale": "ja",
+        "name": "りんご"
+    },
+    {
+        "id": 80,
+        "allergen_id": "019f408b-039d-726a-b177-0d5081a4bbab",
+        "locale": "en",
+        "name": "Apple"
+    },
+    {
+        "id": 81,
+        "allergen_id": "019f408b-039d-726a-b177-0d5081a4bbab",
+        "locale": "vi",
+        "name": "Táo"
+    },
+    {
+        "id": 82,
+        "allergen_id": "019f408b-039f-71b7-b7e9-1c8350f3be33",
+        "locale": "ja",
+        "name": "ゼラチン"
+    },
+    {
+        "id": 83,
+        "allergen_id": "019f408b-039f-71b7-b7e9-1c8350f3be33",
+        "locale": "en",
+        "name": "Gelatin"
+    },
+    {
+        "id": 84,
+        "allergen_id": "019f408b-039f-71b7-b7e9-1c8350f3be33",
+        "locale": "vi",
+        "name": "Gelatin"
+    },
+    {
+        "id": 85,
+        "allergen_id": "019f408b-03a1-7071-bc61-72cb8ea293f1",
+        "locale": "ja",
+        "name": "グルテン含有穀物"
+    },
+    {
+        "id": 86,
+        "allergen_id": "019f408b-03a1-7071-bc61-72cb8ea293f1",
+        "locale": "en",
+        "name": "Cereals containing gluten"
+    },
+    {
+        "id": 87,
+        "allergen_id": "019f408b-03a1-7071-bc61-72cb8ea293f1",
+        "locale": "vi",
+        "name": "Ngũ cốc chứa gluten"
+    },
+    {
+        "id": 88,
+        "allergen_id": "019f408b-03a3-7217-93e4-edf992c1f1c0",
+        "locale": "ja",
+        "name": "甲殻類"
+    },
+    {
+        "id": 89,
+        "allergen_id": "019f408b-03a3-7217-93e4-edf992c1f1c0",
+        "locale": "en",
+        "name": "Crustaceans"
+    },
+    {
+        "id": 90,
+        "allergen_id": "019f408b-03a3-7217-93e4-edf992c1f1c0",
+        "locale": "vi",
+        "name": "Giáp xác"
+    },
+    {
+        "id": 91,
+        "allergen_id": "019f408b-03a4-7082-90e5-d46f8a60bf8f",
+        "locale": "ja",
+        "name": "卵"
+    },
+    {
+        "id": 92,
+        "allergen_id": "019f408b-03a4-7082-90e5-d46f8a60bf8f",
+        "locale": "en",
+        "name": "Eggs"
+    },
+    {
+        "id": 93,
+        "allergen_id": "019f408b-03a4-7082-90e5-d46f8a60bf8f",
+        "locale": "vi",
+        "name": "Trứng"
+    },
+    {
+        "id": 94,
+        "allergen_id": "019f408b-03a6-716c-b246-068f72c02a18",
+        "locale": "ja",
+        "name": "魚"
+    },
+    {
+        "id": 95,
+        "allergen_id": "019f408b-03a6-716c-b246-068f72c02a18",
+        "locale": "en",
+        "name": "Fish"
+    },
+    {
+        "id": 96,
+        "allergen_id": "019f408b-03a6-716c-b246-068f72c02a18",
+        "locale": "vi",
+        "name": "Cá"
+    },
+    {
+        "id": 97,
+        "allergen_id": "019f408b-03a8-71f9-9dac-196fb02fff81",
+        "locale": "ja",
+        "name": "落花生"
+    },
+    {
+        "id": 98,
+        "allergen_id": "019f408b-03a8-71f9-9dac-196fb02fff81",
+        "locale": "en",
+        "name": "Peanuts"
+    },
+    {
+        "id": 99,
+        "allergen_id": "019f408b-03a8-71f9-9dac-196fb02fff81",
+        "locale": "vi",
+        "name": "Đậu phộng"
+    },
+    {
+        "id": 100,
+        "allergen_id": "019f408b-03a9-7051-9475-341e048ad754",
+        "locale": "ja",
+        "name": "大豆"
+    },
+    {
+        "id": 101,
+        "allergen_id": "019f408b-03a9-7051-9475-341e048ad754",
+        "locale": "en",
+        "name": "Soybeans"
+    },
+    {
+        "id": 102,
+        "allergen_id": "019f408b-03a9-7051-9475-341e048ad754",
+        "locale": "vi",
+        "name": "Đậu nành"
+    },
+    {
+        "id": 103,
+        "allergen_id": "019f408b-03ab-7061-803d-a3d793547f4a",
+        "locale": "ja",
+        "name": "乳"
+    },
+    {
+        "id": 104,
+        "allergen_id": "019f408b-03ab-7061-803d-a3d793547f4a",
+        "locale": "en",
+        "name": "Milk"
+    },
+    {
+        "id": 105,
+        "allergen_id": "019f408b-03ab-7061-803d-a3d793547f4a",
+        "locale": "vi",
+        "name": "Sữa"
+    },
+    {
+        "id": 106,
+        "allergen_id": "019f408b-03ad-7085-8342-9b55c0eedfd5",
+        "locale": "ja",
+        "name": "ナッツ類"
+    },
+    {
+        "id": 107,
+        "allergen_id": "019f408b-03ad-7085-8342-9b55c0eedfd5",
+        "locale": "en",
+        "name": "Tree Nuts"
+    },
+    {
+        "id": 108,
+        "allergen_id": "019f408b-03ad-7085-8342-9b55c0eedfd5",
+        "locale": "vi",
+        "name": "Các loại hạt cây"
+    },
+    {
+        "id": 109,
+        "allergen_id": "019f408b-03ae-713b-a6c1-cd304dda0f6a",
+        "locale": "ja",
+        "name": "セロリ"
+    },
+    {
+        "id": 110,
+        "allergen_id": "019f408b-03ae-713b-a6c1-cd304dda0f6a",
+        "locale": "en",
+        "name": "Celery"
+    },
+    {
+        "id": 111,
+        "allergen_id": "019f408b-03ae-713b-a6c1-cd304dda0f6a",
+        "locale": "vi",
+        "name": "Cần tây"
+    },
+    {
+        "id": 112,
+        "allergen_id": "019f408b-03b0-733a-af7d-5b03e1fb3562",
+        "locale": "ja",
+        "name": "マスタード"
+    },
+    {
+        "id": 113,
+        "allergen_id": "019f408b-03b0-733a-af7d-5b03e1fb3562",
+        "locale": "en",
+        "name": "Mustard"
+    },
+    {
+        "id": 114,
+        "allergen_id": "019f408b-03b0-733a-af7d-5b03e1fb3562",
+        "locale": "vi",
+        "name": "Mù tạt"
+    },
+    {
+        "id": 115,
+        "allergen_id": "019f408b-03b2-72b4-9c33-5c552b6b1fea",
+        "locale": "ja",
+        "name": "ごま"
+    },
+    {
+        "id": 116,
+        "allergen_id": "019f408b-03b2-72b4-9c33-5c552b6b1fea",
+        "locale": "en",
+        "name": "Sesame Seeds"
+    },
+    {
+        "id": 117,
+        "allergen_id": "019f408b-03b2-72b4-9c33-5c552b6b1fea",
+        "locale": "vi",
+        "name": "Vừng"
+    },
+    {
+        "id": 118,
+        "allergen_id": "019f408b-03b3-716e-9c59-be6b92a00327",
+        "locale": "ja",
+        "name": "亜硫酸塩"
+    },
+    {
+        "id": 119,
+        "allergen_id": "019f408b-03b3-716e-9c59-be6b92a00327",
+        "locale": "en",
+        "name": "Sulphur Dioxide and Sulphites"
+    },
+    {
+        "id": 120,
+        "allergen_id": "019f408b-03b3-716e-9c59-be6b92a00327",
+        "locale": "vi",
+        "name": "Sulfit"
+    },
+    {
+        "id": 121,
+        "allergen_id": "019f408b-03b5-7205-b933-5bb2c94ee2d9",
+        "locale": "ja",
+        "name": "ルピナス"
+    },
+    {
+        "id": 122,
+        "allergen_id": "019f408b-03b5-7205-b933-5bb2c94ee2d9",
+        "locale": "en",
+        "name": "Lupin"
+    },
+    {
+        "id": 123,
+        "allergen_id": "019f408b-03b5-7205-b933-5bb2c94ee2d9",
+        "locale": "vi",
+        "name": "Đậu lupin"
+    },
+    {
+        "id": 124,
+        "allergen_id": "019f408b-03b7-72ec-8ae1-e4bc564657dc",
+        "locale": "ja",
+        "name": "軟体動物"
+    },
+    {
+        "id": 125,
+        "allergen_id": "019f408b-03b7-72ec-8ae1-e4bc564657dc",
+        "locale": "en",
+        "name": "Molluscs"
+    },
+    {
+        "id": 126,
+        "allergen_id": "019f408b-03b7-72ec-8ae1-e4bc564657dc",
+        "locale": "vi",
+        "name": "Động vật thân mềm"
+    },
+    {
+        "id": 127,
+        "allergen_id": "019f408b-03b9-73c5-bc29-be6c686bbcd5",
+        "locale": "ja",
+        "name": "乳"
+    },
+    {
+        "id": 128,
+        "allergen_id": "019f408b-03b9-73c5-bc29-be6c686bbcd5",
+        "locale": "en",
+        "name": "Milk"
+    },
+    {
+        "id": 129,
+        "allergen_id": "019f408b-03b9-73c5-bc29-be6c686bbcd5",
+        "locale": "vi",
+        "name": "Sữa"
+    },
+    {
+        "id": 130,
+        "allergen_id": "019f408b-03ba-7135-938b-a0a56653bd2f",
+        "locale": "ja",
+        "name": "卵"
+    },
+    {
+        "id": 131,
+        "allergen_id": "019f408b-03ba-7135-938b-a0a56653bd2f",
+        "locale": "en",
+        "name": "Eggs"
+    },
+    {
+        "id": 132,
+        "allergen_id": "019f408b-03ba-7135-938b-a0a56653bd2f",
+        "locale": "vi",
+        "name": "Trứng"
+    },
+    {
+        "id": 133,
+        "allergen_id": "019f408b-03bc-7176-9401-91555e854455",
+        "locale": "ja",
+        "name": "魚"
+    },
+    {
+        "id": 134,
+        "allergen_id": "019f408b-03bc-7176-9401-91555e854455",
+        "locale": "en",
+        "name": "Fish"
+    },
+    {
+        "id": 135,
+        "allergen_id": "019f408b-03bc-7176-9401-91555e854455",
+        "locale": "vi",
+        "name": "Cá"
+    },
+    {
+        "id": 136,
+        "allergen_id": "019f408b-03be-722c-a4ba-21f7760c0fe3",
+        "locale": "ja",
+        "name": "甲殻類"
+    },
+    {
+        "id": 137,
+        "allergen_id": "019f408b-03be-722c-a4ba-21f7760c0fe3",
+        "locale": "en",
+        "name": "Crustacean Shellfish"
+    },
+    {
+        "id": 138,
+        "allergen_id": "019f408b-03be-722c-a4ba-21f7760c0fe3",
+        "locale": "vi",
+        "name": "Hải sản giáp xác"
+    },
+    {
+        "id": 139,
+        "allergen_id": "019f408b-03bf-72a3-b3c4-09cd1c0ee1c6",
+        "locale": "ja",
+        "name": "ナッツ類"
+    },
+    {
+        "id": 140,
+        "allergen_id": "019f408b-03bf-72a3-b3c4-09cd1c0ee1c6",
+        "locale": "en",
+        "name": "Tree Nuts"
+    },
+    {
+        "id": 141,
+        "allergen_id": "019f408b-03bf-72a3-b3c4-09cd1c0ee1c6",
+        "locale": "vi",
+        "name": "Các loại hạt cây"
+    },
+    {
+        "id": 142,
+        "allergen_id": "019f408b-03c1-7006-b7b9-97c7b0505681",
+        "locale": "ja",
+        "name": "落花生"
+    },
+    {
+        "id": 143,
+        "allergen_id": "019f408b-03c1-7006-b7b9-97c7b0505681",
+        "locale": "en",
+        "name": "Peanuts"
+    },
+    {
+        "id": 144,
+        "allergen_id": "019f408b-03c1-7006-b7b9-97c7b0505681",
+        "locale": "vi",
+        "name": "Đậu phộng"
+    },
+    {
+        "id": 145,
+        "allergen_id": "019f408b-03c3-719d-833a-e5ca225d501e",
+        "locale": "ja",
+        "name": "小麦"
+    },
+    {
+        "id": 146,
+        "allergen_id": "019f408b-03c3-719d-833a-e5ca225d501e",
+        "locale": "en",
+        "name": "Wheat"
+    },
+    {
+        "id": 147,
+        "allergen_id": "019f408b-03c3-719d-833a-e5ca225d501e",
+        "locale": "vi",
+        "name": "Lúa mì"
+    },
+    {
+        "id": 148,
+        "allergen_id": "019f408b-03c5-705d-abc9-ebc22dd2ede0",
+        "locale": "ja",
+        "name": "大豆"
+    },
+    {
+        "id": 149,
+        "allergen_id": "019f408b-03c5-705d-abc9-ebc22dd2ede0",
+        "locale": "en",
+        "name": "Soybeans"
+    },
+    {
+        "id": 150,
+        "allergen_id": "019f408b-03c5-705d-abc9-ebc22dd2ede0",
+        "locale": "vi",
+        "name": "Đậu nành"
+    },
+    {
+        "id": 151,
+        "allergen_id": "019f408b-03c7-70d4-a828-db7cdea64d92",
+        "locale": "ja",
+        "name": "ごま"
+    },
+    {
+        "id": 152,
+        "allergen_id": "019f408b-03c7-70d4-a828-db7cdea64d92",
+        "locale": "en",
+        "name": "Sesame"
+    },
+    {
+        "id": 153,
+        "allergen_id": "019f408b-03c7-70d4-a828-db7cdea64d92",
+        "locale": "vi",
+        "name": "Vừng"
+    }
+]

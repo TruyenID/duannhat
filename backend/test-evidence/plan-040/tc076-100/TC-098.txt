@@ -1,0 +1,4 @@
+tpl -> HTTP 200
+﻿id,sku,name,description,yield_quantity,yield_unit,calculated_cost,is_active
+,MA-001,"Espresso Shot","Single shot of espresso",1,SHOT,15.00,true
+,MA-002,"Steamed Milk","Steamed whole milk",240,ML,10.00,true

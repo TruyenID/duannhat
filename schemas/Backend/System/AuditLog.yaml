@@ -1,0 +1,100 @@
+# =============================================================================
+# AuditLog (監査ログ / Nhật ký kiểm tra)
+# =============================================================================
+#
+# Append-only audit trail written by `App\Traits\AuditsActivity::logAudit`.
+#
+# Design is intentionally generic (polymorphic pointer + free-form JSON) so
+# any model can opt into auditing without schema changes:
+#   - `auditable_type` + `auditable_id` — polymorphic pointer to the subject
+#   - `action`        — event name (e.g. `recipe.approved`, `product.created`)
+#   - `user_id`       — actor UUID (nullable; system jobs log without a user)
+#   - `metadata`      — free-form JSON context (approver_id, changed_fields…)
+#
+# No soft-delete: audit rows are never deleted (compliance requirement).
+# No audit columns (created_by/updated_by): the table IS the audit.
+# No CRUD service needed — rows are written directly via logAudit() and
+# queried via assertDatabaseHas / Eloquent in tests/admin reporting.
+# =============================================================================
+
+displayName:
+  en: Audit Log
+  ja: 監査ログ
+  vi: Nhật ký kiểm tra
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: false
+  id: Uuid
+  indexes:
+    # Polymorphic lookup — primary access pattern: "all events for this record"
+    - columns: [auditable_type, auditable_id]
+    # Action-type filter — secondary pattern: "all approve events"
+    - columns: [action]
+
+properties:
+  # Polymorphic subject (plain strings — no FK, no hard model coupling).
+  auditable_type:
+    type: String
+    length: 255
+    displayName:
+      en: Auditable Type
+      ja: 監査対象タイプ
+      vi: Loại đối tượng
+    description:
+      en: Eloquent model class short name (e.g. "Recipe", "Product").
+      ja: Eloquentモデルの短縮クラス名（例："Recipe"、"Product"）
+      vi: Tên ngắn class Eloquent (vd. "Recipe", "Product").
+
+  auditable_id:
+    type: String
+    length: 36
+    displayName:
+      en: Auditable ID
+      ja: 監査対象ID
+      vi: ID đối tượng
+    description:
+      en: Primary key of the audited record (UUID string).
+      ja: 監査対象レコードの主キー（UUID文字列）。
+      vi: Khóa chính của bản ghi được kiểm tra (UUID string).
+
+  # Event identifier — free-form namespaced string.
+  action:
+    type: String
+    length: 100
+    displayName:
+      en: Action
+      ja: アクション
+      vi: Hành động
+    description:
+      en: "Dot-namespaced event name. Examples: recipe.approved, product.created."
+      ja: "ドット区切りのイベント名。例：recipe.approved、product.created。"
+      vi: "Tên sự kiện phân cách bằng dấu chấm. VD: recipe.approved, product.created."
+
+  # Actor — nullable so background jobs / system events can log without a user.
+  user_id:
+    type: Uuid
+    nullable: true
+    displayName:
+      en: User ID
+      ja: ユーザーID
+      vi: ID người dùng
+    description:
+      en: UUID of the acting user. Null for system/background job events.
+      ja: 操作ユーザーのUUID。システム/バックグラウンドジョブは null。
+      vi: UUID người thực hiện. Null với sự kiện hệ thống / background job.
+
+  # Free-form context payload — each action defines its own shape.
+  metadata:
+    type: Json
+    nullable: true
+    displayName:
+      en: Metadata
+      ja: メタデータ
+      vi: Dữ liệu bổ sung
+    description:
+      en: "Action-specific context (e.g. {approver_id, rejection_reason})."
+      ja: "アクション固有のコンテキスト（例：{approver_id、rejection_reason}）。"
+      vi: "Ngữ cảnh theo từng hành động (VD: {approver_id, rejection_reason})."

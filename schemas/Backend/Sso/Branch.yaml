@@ -1,0 +1,349 @@
+# ==============================================================================
+# Branch (支店 / Chi nhánh)
+# ==============================================================================
+#
+# Branch rows mirror the Console/SSO branch list, plus the storefront fields
+# customer-web renders (address / phone / banners / hours / seats).
+#
+# Owned here since the Platform SSO cutover (bbc3a538) deleted
+# backend/packages/dxs-sso — the package that used to define this table. The
+# replacement package (dxs/laravel-auth) only touches `users`, so without this
+# file `branches` has no schema at all and Omnify silently refuses to generate
+# migrations for it (issue hit while adding the #936 banner columns).
+#
+# The existing table is created by
+# backend/database/migrations/omnify/0001_01_01_000100_create_branches_table.php
+# plus the alter_branches migrations moved in during the cutover; the field set
+# below reproduces that end state, so codegen only emits future deltas.
+# ==============================================================================
+
+kind: object
+
+displayName:
+  ja: 支店
+  en: Branch
+  vi: Chi nhánh
+
+options:
+  service: false
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    - columns: [console_organization_id]
+    - columns: [console_organization_id, slug]
+      unique: true
+    - columns: [console_organization_id, is_active]
+    - columns: [console_organization_id, is_headquarters]
+
+properties:
+  console_branch_id:
+    type: Uuid
+    unique: true
+    displayName:
+      ja: Console Branch ID
+      en: Console Branch ID
+      vi: Console Branch ID
+
+  console_organization_id:
+    type: Uuid
+    displayName:
+      ja: Console Organization ID
+      en: Console Organization ID
+      vi: Console Organization ID
+
+  code:
+    type: String
+    length: 20
+    nullable: true
+    displayName:
+      ja: 支店コード
+      en: Branch Code
+      vi: Mã chi nhánh
+
+  slug:
+    type: String
+    length: 100
+    displayName:
+      ja: スラッグ
+      en: Slug
+      vi: Slug
+
+  name:
+    type: String
+    length: 100
+    translatable: true
+    displayName:
+      ja: 支店名
+      en: Branch Name
+      vi: Tên chi nhánh
+
+  is_headquarters:
+    type: Boolean
+    default: false
+    displayName:
+      ja: 本社
+      en: Is Headquarters
+      vi: Là trụ sở chính
+
+  is_active:
+    type: Boolean
+    default: true
+    displayName:
+      ja: 有効
+      en: Active
+      vi: Hoạt động
+
+  # #1673 — chi nhánh có đọc kèm bộ FAQ cấp HQ (`posts.branch_id IS NULL`)
+  # bên cạnh câu hỏi riêng của mình hay không.
+  #
+  # Mặc định TRUE, và đó là phần load-bearing: 17 chi nhánh đang chạy chưa có
+  # câu hỏi riêng nào, nên default false sẽ làm trang FAQ của khách trống rỗng
+  # ngay khi migration chạy xong — một thay đổi schema không được phép làm mất
+  # nội dung đang hiển thị.
+  faq_inherit_hq:
+    type: Boolean
+    default: true
+    displayName:
+      ja: 本部のFAQを継承
+      en: Inherit HQ FAQ
+      vi: Kế thừa FAQ từ HQ
+
+  timezone:
+    type: String
+    length: 50
+    nullable: true
+    displayName:
+      ja: タイムゾーン
+      en: Timezone
+      vi: Múi giờ
+
+  currency:
+    type: String
+    length: 3
+    nullable: true
+    displayName:
+      ja: 通貨
+      en: Currency
+      vi: Tiền tệ
+
+  locale:
+    type: String
+    length: 10
+    nullable: true
+    displayName:
+      ja: ロケール
+      en: Locale
+      vi: Ngôn ngữ
+
+  console_brand_id:
+    type: Uuid
+    nullable: true
+    displayName:
+      ja: Console Brand ID
+      en: Console Brand ID
+      vi: Console Brand ID
+
+  # Project-specific extension fields (customer-facing shop detail)
+  # #1152 — インボイス T+13 registration number override for THIS branch
+  # (franchise = separate legal entity = own number). Resolution:
+  # #1127 — adopted from the plan-038 hand migration (2026_06_20_174544, now
+  # hasColumn-guarded): per-branch invoice number prefix used by
+  # InvoiceNumberAllocator ({prefix}-{YYYYMM}-{NNNN}).
+  invoice_prefix:
+    type: String
+    length: 8
+    nullable: true
+    displayName:
+      ja: 請求書番号プレフィックス
+      en: Invoice Prefix
+      vi: Tiền tố số hóa đơn
+
+  # branch.invoice_registration_number ?? brand.invoice_registration_number
+  # (SellerRegistrationResolver). Snapshotted onto 適格請求書 + 赤伝 at
+  # issuance; printed on receipts when
+  # shop_order_settings.show_seller_registration_on_receipt (default ON).
+  invoice_registration_number:
+    type: String
+    length: 14
+    nullable: true
+    displayName:
+      ja: 適格請求書発行事業者登録番号
+      en: Invoice Registration Number
+      vi: Số đăng ký hóa đơn (T+13)
+
+  address:
+    type: String
+    length: 500
+    nullable: true
+    displayName:
+      ja: 住所
+      en: Address
+      vi: Địa chỉ
+
+  phone:
+    type: String
+    length: 30
+    nullable: true
+    displayName:
+      ja: 電話番号
+      en: Phone
+      vi: Số điện thoại
+
+  img_branches:
+    type: String
+    length: 500
+    nullable: true
+    displayName:
+      ja: カバー画像URL
+      en: Cover Image URL
+      vi: URL hình bìa
+
+  # #936 — per-breakpoint storefront banners. img_branches above stays the
+  # legacy/fallback banner; these win for the viewport they target.
+  banner_desktop:
+    type: String
+    length: 500
+    nullable: true
+    displayName:
+      ja: バナー画像URL（デスクトップ）
+      en: Desktop Banner URL
+      vi: URL banner desktop
+
+  banner_tablet:
+    type: String
+    length: 500
+    nullable: true
+    displayName:
+      ja: バナー画像URL（タブレット）
+      en: Tablet Banner URL
+      vi: URL banner tablet
+
+  banner_mobile:
+    type: String
+    length: 500
+    nullable: true
+    displayName:
+      ja: バナー画像URL（モバイル）
+      en: Mobile Banner URL
+      vi: URL banner mobile
+
+  logo:
+    type: String
+    length: 500
+    nullable: true
+    displayName:
+      ja: ロゴURL
+      en: Logo URL
+      vi: URL logo
+
+  seat_capacity:
+    type: Int
+    nullable: true
+    displayName:
+      ja: 席数
+      en: Seat Capacity
+      vi: Số chỗ ngồi
+
+  business_hours:
+    type: String
+    length: 100
+    nullable: true
+    displayName:
+      ja: 営業時間
+      en: Business Hours
+      vi: Giờ làm việc
+
+  weekly_hours:
+    type: Json
+    nullable: true
+    displayName:
+      ja: 週次営業時間
+      en: Weekly Hours
+      vi: Giờ làm việc hàng tuần
+
+  cart_timeout_minutes:
+    type: Int
+    unsigned: true
+    nullable: true
+    displayName:
+      en: Cart Timeout (minutes)
+      ja: カートタイムアウト（分）
+      vi: Timeout giỏ hàng (phút)
+    description:
+      en: Override cart timeout for this branch. Null = inherit from brand default.
+      ja: この支店のカートタイムアウトを上書き。Null = ブランドのデフォルトを継承。
+      vi: Ghi đè timeout giỏ hàng cho branch. Null = kế thừa từ brand.
+
+  takeaway_payment_timeout_minutes:
+    type: Int
+    unsigned: true
+    nullable: true
+    displayName:
+      en: Takeaway Payment Timeout (minutes)
+      ja: テイクアウト支払いタイムアウト（分）
+      vi: Timeout thanh toán Takeaway (phút)
+    description:
+      en: Override takeaway payment timeout for this branch. Null = inherit from brand default.
+      ja: この支店のテイクアウト支払いタイムアウトを上書き。Null = ブランドのデフォルトを継承。
+      vi: Ghi đè timeout thanh toán takeaway cho branch. Null = kế thừa từ brand.
+
+  # #1674 — ghi đè tỉ lệ tích điểm cho riêng chi nhánh này. Cùng khuôn với
+  # `cart_timeout_minutes` ngay trên: null = kế thừa mặc định của brand.
+  #
+  # Đây là tầng ĐÚNG để một chi nhánh ở nước khác đặt tỉ lệ của mình: đơn vị
+  # tiền sống ở `shop_order_settings.currency_code`, tức ở CHI NHÁNH, nên chi
+  # nhánh VN của một brand Nhật ghi đè ở đây thay vì kéo cả brand lệch theo.
+  #
+  # Cặp nguyên tử như bên Brand: cả hai cùng null (kế thừa) hoặc cả hai cùng
+  # dương (ghi đè). Nửa cặp bị 422 ở API và bị bỏ qua khi tính điểm.
+  point_earn_amount:
+    type: Decimal
+    precision: 12
+    scale: 2
+    nullable: true
+    displayName:
+      en: Point Earn Amount
+      ja: ポイント付与の金額単位
+      vi: Số tiền để tích điểm
+    description:
+      en: Override the point-earn money unit for this branch. Null = inherit from brand default.
+      ja: この支店のポイント付与の金額単位を上書き。Null = ブランドのデフォルトを継承。
+      vi: Ghi đè số tiền để tích điểm cho chi nhánh. Null = kế thừa từ brand.
+
+  point_earn_points:
+    type: Int
+    unsigned: true
+    nullable: true
+    displayName:
+      en: Point Earn Points
+      ja: 付与ポイント数
+      vi: Số điểm nhận được
+    description:
+      en: Override the points granted per money unit for this branch. Null = inherit from brand default.
+      ja: この支店の付与ポイント数を上書き。Null = ブランドのデフォルトを継承。
+      vi: Ghi đè số điểm nhận được cho chi nhánh. Null = kế thừa từ brand.
+
+  # Denormalized review aggregate — updated atomically on BranchReview submit.
+  # NULL when no reviews exist; 1.00–5.00 range (star rating average).
+  # Read by: customer menu API, admin branch detail.
+  review_avg_rating:
+    type: Decimal
+    precision: 3
+    scale: 2
+    nullable: true
+    displayName:
+      en: Review Average Rating
+      ja: レビュー平均評価
+      vi: Điểm đánh giá trung bình
+
+  # Total number of branch reviews. Incremented on each new review.
+  # Read by: customer menu API ("N reviews"), admin branch detail.
+  review_total_count:
+    type: Int
+    unsigned: true
+    default: 0
+    displayName:
+      en: Review Total Count
+      ja: レビュー総数
+      vi: Tổng số đánh giá

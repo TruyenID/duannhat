@@ -1,0 +1,286 @@
+# =============================================================================
+# MenuPromotion (メニュープロモーション / Khuyến mãi menu)
+# =============================================================================
+#
+# Shop-scoped, time-of-day + weekday + scope filtered, % off per item.
+# Auto-apply tại addItems — staff/customer KHÔNG nhập code, chỉ thấy
+# strikethrough giá gốc + Badge "Happy Hour" trên menu/cart.
+#
+# Decision B1: shop-scoped (1 promotion bind 1 branch). Brand muốn
+# happy hour cho nhiều shops → shop manager mỗi shop tự setup. Lý do:
+# shop manager có quyền quyết định time-of-day theo nhu cầu địa
+# phương (giờ thấp điểm khác nhau theo khu vực, holiday calendar
+# khác nhau).
+#
+# Decision B2: auto-apply tại addItems, không tại checkout. Hiển
+# thị giá đã giảm ngay khi khách thấy món → trải nghiệm tốt hơn,
+# không bất ngờ ở payment. Snapshot vào CustomerOrderItem.unit_price
+# (giá đã giảm) + original_unit_price (giá gốc strikethrough).
+#
+# Decision B3: multi-promotion match cùng món → áp DUY NHẤT promotion
+# có discount_percent CAO NHẤT (best-for-customer). Không cộng dồn 2
+# promotion. tiebreak ổn định: cao nhất → created_at sớm nhất.
+#
+# Decision B4: pivot 2 bảng (menu_promotion_category + _product) thay
+# vì 1 polymorphic. Lý do: query JOIN đơn giản hơn, type safety hơn,
+# applies_to enum làm validation rõ ràng hơn.
+#
+# Decision B6: snapshot unit_price ghi đè giá gốc, giá gốc lưu ở
+# original_unit_price. Lý do: BR-O04 + BR-OI02 không đổi (subtotal
+# = sum(unit_price * qty)), report đã có sẵn dùng unit_price không
+# cần update.
+#
+# Daily window evaluation (BR-MP-WIN):
+#   Dùng branch.timezone — wall clock time tại quán. So sánh:
+#     daily_time_from <= now_local_time <= daily_time_to (normal)
+#     OR (daily_time_to < daily_time_from) AND
+#        (now >= daily_time_from OR now <= daily_time_to)  (cross midnight)
+#   weekdays: nếu null/empty ⇒ mọi ngày; non-empty ⇒ now.dayOfWeek
+#     phải nằm trong array (1=Mon, 7=Sun ISO 8601).
+#   valid_from <= now <= valid_until (overall range, UTC).
+#
+# Written by:  Shop Manager qua MenuPromotionService::create()/update()/
+#              toggle()/delete(); seeder (MenuPromotionSeeder).
+# Read by:     POS menu render, customer-web menu render,
+#              CustomerOrderService::addItems() auto-apply hook,
+#              HQ cross-shop reporting (read-only).
+# Lifecycle:   soft-deletable; in-use guard — chỉ xóa được khi 0
+#              customer_order_items.applied_promotion_id = id.
+#              Update có locked-fields rule: discount_percent +
+#              applies_to + scope pivots locked nếu đã có item áp.
+#              valid_until cho phép kéo dài; daily_time/weekdays cho
+#              phép thay đổi (audit trail có).
+#
+# Cache (Decision Q6 - planner default):
+#   Redis key   : `branch:{branch_id}:active_promotions`
+#   TTL         : 60s
+#   Invalidate  : trên CRUD/toggle. config('promotion.cache_enabled')
+#                 cho phép disable trong test.
+# =============================================================================
+
+displayName:
+  en: Menu Promotion
+  ja: メニュープロモーション
+  vi: Khuyến mãi menu
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  audit:
+    createdBy: true
+    updatedBy: true
+  indexes:
+    # Hot resolve query - tìm promotion ON tại branch hiện tại
+    - columns: [branch_id, is_active]
+    # Range scan cho overall-active filter
+    - columns: [valid_from, valid_until]
+    # Composite optimize cho hot path resolveActivePromotion
+    - columns: [branch_id, valid_from, valid_until, is_active]
+      name: menu_promotions_branch_window_active
+    # Cross-shop HQ list filter
+    - columns: [brand_id]
+  service: false
+
+properties:
+  name:
+    # Tên promotion hiển thị Badge trên menu + admin list. Translatable.
+    type: String
+    length: 255
+    translatable: true
+    searchable: true
+    sortable: true
+    displayName:
+      en: Name
+      ja: 名称
+      vi: Tên
+
+  description:
+    # Mô tả dài cho admin (vd: "Giảm 20% đồ uống và tráng miệng từ
+    # 21h-23h cuối ngày để đẩy hàng"). Customer KHÔNG thấy field này
+    # ở v1 — Badge "HH -X%" + countdown đủ rồi.
+    type: Text
+    nullable: true
+    translatable: true
+    displayName:
+      en: Description
+      ja: 説明
+      vi: Mô tả
+
+  discount_percent:
+    # Tỷ lệ giảm (0 < x <= 100, BR-MP-PERCENT). Decimal(5,2) hỗ trợ
+    # tới 2 chữ số thập phân (vd: 12.50%). Khi áp:
+    #   discounted_unit_price = round(original * (100-percent)/100,
+    #                                 2, PHP_ROUND_HALF_UP)
+    # Locked sau khi đã có item áp (BR-MP-LOCK).
+    type: Decimal
+    precision: 5
+    scale: 2
+    displayName:
+      en: Discount Percent
+      ja: 割引率
+      vi: Phần trăm giảm
+
+  applies_to:
+    # Drive resolve query path + FE scope picker. Xem
+    # MenuPromotionAppliesTo enum docs. Locked sau khi đã có item áp
+    # (vì đổi scope ⇒ thay đổi tập items → reporting bị lệch).
+    type: EnumRef
+    enum: MenuPromotionAppliesTo
+    filterable: true
+    displayName:
+      en: Applies To
+      ja: 適用範囲
+      vi: Phạm vi áp dụng
+
+  daily_time_from:
+    # Wall-clock time tại branch (TZ = branch.timezone). Nullable ⇒
+    # không giới hạn time-of-day (chỉ cần valid_from..valid_until +
+    # weekdays match). Hỗ trợ midnight cross khi to < from.
+    type: Time
+    nullable: true
+    displayName:
+      en: Daily Time From
+      ja: 日次開始時刻
+      vi: Giờ bắt đầu trong ngày
+
+  daily_time_to:
+    # Pair với from. Cả 2 phải null hoặc cả 2 non-null (request layer
+    # validate). Khi to < from ⇒ window cross midnight (vd: 21:00 →
+    # 02:00). Resolve query check OR-pattern.
+    type: Time
+    nullable: true
+    displayName:
+      en: Daily Time To
+      ja: 日次終了時刻
+      vi: Giờ kết thúc trong ngày
+
+  weekdays:
+    # JSON int array [1..7] ISO 8601 (1=Mon, 7=Sun). Null/empty =
+    # mọi ngày. Non-empty = chỉ chạy promotion vào những thứ trong
+    # array (vd: chỉ T2-T6 [1,2,3,4,5]).
+    type: Json
+    nullable: true
+    displayName:
+      en: Weekdays
+      ja: 曜日
+      vi: Ngày trong tuần
+
+  valid_from:
+    # Overall start (UTC). Inclusive. Outside ⇒ resolve không match.
+    type: Timestamp
+    displayName:
+      en: Valid From
+      ja: 有効開始
+      vi: Bắt đầu
+
+  valid_until:
+    # Overall end (UTC). Inclusive. Update có thể kéo dài (allowed),
+    # rút ngắn dưới max(now, current) ⇒ request layer reject.
+    type: Timestamp
+    displayName:
+      en: Valid Until
+      ja: 有効終了
+      vi: Kết thúc
+
+  stacking_mode:
+    # Per-promotion flag (Decision B5). Xem MenuPromotionStackingMode
+    # enum docs. Default stackable_with_coupons để happy hour không
+    # block coupon vô tình.
+    type: EnumRef
+    enum: MenuPromotionStackingMode
+    default: stackable_with_coupons
+    filterable: true
+    displayName:
+      en: Stacking Mode
+      ja: スタッキングモード
+      vi: Chế độ cộng dồn
+
+  is_active:
+    # Manual toggle bởi shop manager (toggle endpoint). Khác với derived
+    # "currently_active" (check time window). UI list filter cho phép
+    # cả 2: is_active=true (admin còn bật) + currently_active=true
+    # (đang trong window).
+    type: Boolean
+    default: true
+    filterable: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+
+  # === Relationships ===
+
+  branch:
+    # Hard scope (Decision B1). CASCADE: xóa branch ⇒ promotion biến
+    # mất (rare; branch thường soft-delete).
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    onDelete: CASCADE
+    displayName:
+      en: Branch
+      ja: 店舗
+      vi: Chi nhánh
+
+  brand:
+    # Denormalized từ branch.brand cho HQ cross-shop list query.
+    # CASCADE đồng bộ với branch.
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: CASCADE
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu
+
+  organization:
+    # Denormalized cho policy check. CASCADE.
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  categories:
+    # M2M qua menu_promotion_category. Used khi applies_to ∈
+    # {categories, mixed}. Ignored khi applies_to ∈ {all_items,
+    # products}.
+    type: Association
+    relation: ManyToMany
+    target: Category
+    joinTable: menu_promotion_category
+    displayName:
+      en: Applicable Categories
+      ja: 対象カテゴリ
+      vi: Danh mục áp dụng
+
+  products:
+    # M2M qua menu_promotion_product. Used khi applies_to ∈ {products,
+    # mixed}. Ignored khác.
+    type: Association
+    relation: ManyToMany
+    target: Product
+    joinTable: menu_promotion_product
+    displayName:
+      en: Applicable Products
+      ja: 対象商品
+      vi: Món áp dụng
+
+  customerOrderItems:
+    # OneToMany ngược từ CustomerOrderItem.applied_promotion_id.
+    # Used cho report() + delete-guard (in-use check).
+    type: Association
+    relation: OneToMany
+    target: CustomerOrderItem
+    mappedBy: appliedPromotion
+    displayName:
+      en: Applied Order Items
+      ja: 適用注文項目
+      vi: Item đã áp

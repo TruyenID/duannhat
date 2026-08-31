@@ -1,0 +1,184 @@
+# =============================================================================
+# ProductType (商品タイプ / Loại sản phẩm)
+# =============================================================================
+#
+# Phân loại bản chất sản phẩm — quyết định hành vi hệ thống cho mỗi Product.
+# Ví dụ: FOOD, BEVERAGE, RAW_MATERIAL, PACKAGING, SERVICE...
+#
+# Vai trò chính:
+#   - Quyết định Product có Recipe không (has_recipe)
+#   - Quyết định Product có theo dõi tồn kho không (is_inventory_tracked)
+#   - Phân biệt physical vs digital (product_form)
+#
+# Hierarchy:
+#   Organization
+#     └── Brand
+#           └── ProductType ← schema này
+#                 └── Product (n..1) — mỗi Product thuộc 1 ProductType
+#
+# Multi-tenancy:
+#   - code unique theo brand (mỗi brand có bộ ProductType riêng)
+#   - Cùng organization có thể có FOOD ở brand A và FOOD ở brand B
+#
+# Soft delete:
+#   - Product reference ProductType bằng RESTRICT → không xoá được
+#     ProductType nếu còn Product đang dùng.
+#
+# =============================================================================
+
+displayName:
+  en: Product Type
+  ja: 商品タイプ
+  vi: Loại sản phẩm
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    # Tenant scope — mọi query đều WHERE organization_id
+    - columns: [organization_id]
+    # Brand-scoped queries cho UI
+    - columns: [brand_id]
+    # Code unique trong scope brand (mỗi brand có bộ code riêng)
+    - columns: [brand_id, code]
+      unique: true
+
+properties:
+  # ===========================================================================
+  # Scalar fields
+  # ===========================================================================
+
+  # Mã định danh ngắn gọn, do admin nhập (vd: FOOD, BEVERAGE, RAW).
+  # Unique trong scope organization — xem index ở trên.
+  # Dùng trong import/export CSV, API filter, và hiển thị nhanh trên UI.
+  code:
+    type: String
+    length: 50
+    displayName:
+      en: Code
+      ja: コード
+      vi: Mã
+    description:
+      en: "Unique code per organization (e.g., BEVERAGE, FOOD)"
+      ja: "組織ごとの一意コード（例：BEVERAGE、FOOD）"
+      vi: "Mã duy nhất theo tổ chức (VD: BEVERAGE, FOOD)"
+
+  # Tên hiển thị cho end-user (vd: "Đồ uống", "食べ物").
+  name:
+    type: String
+    length: 100
+    translatable: true
+    displayName:
+      en: Name
+      ja: 名前
+      vi: Tên
+
+  # Mô tả chi tiết (optional). Hiển thị tooltip / help text trên admin UI.
+  description:
+    type: Text
+    nullable: true
+    translatable: true
+    displayName:
+      en: Description
+      ja: 説明
+      vi: Mô tả
+
+  # ===========================================================================
+  # Behavior flags — quyết định hệ thống xử lý Product thuộc type này thế nào
+  # ===========================================================================
+
+  # physical = hàng hoá vật lý (food, packaging), cần warehouse / shipping.
+  # digital = dịch vụ / voucher, không cần kho.
+  product_form:
+    type: Enum
+    enum: [physical, digital]
+    default: physical
+    displayName:
+      en: Product Form
+      ja: 商品形態
+      vi: Hình thức sản phẩm
+
+  # true → Product thuộc type này có thể tạo Recipe (công thức sản xuất).
+  # false → ẩn tab Recipe trên admin UI, block API tạo recipe cho Product này.
+  # Ví dụ: FOOD → true, PACKAGING → false.
+  has_recipe:
+    type: Boolean
+    default: true
+    displayName:
+      en: Has Recipe
+      ja: レシピあり
+      vi: Có công thức
+
+  # true → Product tham gia StockLevel, StockMovement, StockAlert.
+  # false → không tạo stock record, ẩn tab tồn kho trên UI.
+  # Ví dụ: FOOD → true, SERVICE → false.
+  is_inventory_tracked:
+    type: Boolean
+    default: true
+    displayName:
+      en: Track Inventory
+      ja: 在庫追跡
+      vi: Theo dõi tồn kho
+
+  # Icon class hiển thị trên admin UI (vd: "mdi-food", "mdi-cup").
+  # Nullable — nếu không set thì UI dùng icon mặc định.
+  icon:
+    type: String
+    length: 50
+    nullable: true
+    displayName:
+      en: Icon
+      ja: アイコン
+      vi: Biểu tượng
+
+  # Cờ active/inactive. Khi inactive:
+  #   - Không cho tạo Product mới thuộc type này
+  #   - Product hiện tại vẫn giữ nguyên (không bị ẩn/xoá)
+  is_active:
+    type: Boolean
+    default: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+
+  # ===========================================================================
+  # Associations
+  # ===========================================================================
+
+  # Reverse: danh sách Product thuộc type này.
+  # Dùng cho admin UI "xem tất cả sản phẩm của type FOOD".
+  products:
+    type: Association
+    relation: OneToMany
+    target: Product
+    mappedBy: productType
+    displayName:
+      en: Products
+      ja: 商品
+      vi: Sản phẩm
+
+  # Tổ chức sở hữu. CASCADE — xoá org thì xoá type theo.
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  # Brand scope. CASCADE — xoá brand thì xoá type theo.
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: CASCADE
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu

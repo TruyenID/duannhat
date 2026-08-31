@@ -1,0 +1,86 @@
+[
+    {
+        "id": 19,
+        "product_type_id": "019f408b-024e-71b9-98e2-cd48f3f271d0",
+        "locale": "ja",
+        "name": "フード",
+        "description": null
+    },
+    {
+        "id": 20,
+        "product_type_id": "019f408b-024e-71b9-98e2-cd48f3f271d0",
+        "locale": "en",
+        "name": "Food",
+        "description": null
+    },
+    {
+        "id": 21,
+        "product_type_id": "019f408b-024e-71b9-98e2-cd48f3f271d0",
+        "locale": "vi",
+        "name": "Đồ ăn",
+        "description": null
+    },
+    {
+        "id": 22,
+        "product_type_id": "019f408b-0253-7374-843e-67e70061ee27",
+        "locale": "ja",
+        "name": "ドリンク",
+        "description": null
+    },
+    {
+        "id": 23,
+        "product_type_id": "019f408b-0253-7374-843e-67e70061ee27",
+        "locale": "en",
+        "name": "Drink",
+        "description": null
+    },
+    {
+        "id": 24,
+        "product_type_id": "019f408b-0253-7374-843e-67e70061ee27",
+        "locale": "vi",
+        "name": "Đồ uống",
+        "description": null
+    },
+    {
+        "id": 25,
+        "product_type_id": "019f408b-0259-72bc-9616-38554a76ad87",
+        "locale": "ja",
+        "name": "トッピング",
+        "description": null
+    },
+    {
+        "id": 26,
+        "product_type_id": "019f408b-0259-72bc-9616-38554a76ad87",
+        "locale": "en",
+        "name": "Topping",
+        "description": null
+    },
+    {
+        "id": 27,
+        "product_type_id": "019f408b-0259-72bc-9616-38554a76ad87",
+        "locale": "vi",
+        "name": "Topping",
+        "description": null
+    },
+    {
+        "id": 28,
+        "product_type_id": "019f408b-0344-7187-89cb-913bf2ca8408",
+        "locale": "ja",
+        "name": "コンボ",
+        "description": null
+    },
+    {
+        "id": 29,
+        "product_type_id": "019f408b-0344-7187-89cb-913bf2ca8408",
+        "locale": "en",
+        "name": "Combo",
+        "description": null
+    },
+    {
+        "id": 30,
+        "product_type_id": "019f408b-0344-7187-89cb-913bf2ca8408",
+        "locale": "vi",
+        "name": "Combo",
+        "description": null
+    }
+]

@@ -1,0 +1,215 @@
+# StockTransaction schema
+# Stock transaction header (phiếu kho).
+# Each transaction represents a single stock in/out operation with approval workflow.
+# Contains line items (StockTransactionItem) and generates movements (StockMovement).
+#
+# Business Rules:
+#   - BR-02: Completed transactions are immutable (no edit/delete)
+#   - BR-03: Inactive warehouse cannot create new transactions
+#   - BR-06: Auto-approve only when Manager/Admin creates transaction
+#   - transaction_code auto-generated: SI-YYYYMMDD-XXX (in) / SO-YYYYMMDD-XXX (out)
+#
+# Workflow:
+#   draft → pending → approved → completed
+#                  ↘ cancelled
+#          ↗ cancelled
+#
+# Key Design:
+#   - reference_type + reference_id: polymorphic link to source (F4-F9)
+#   - created_by_id / approved_by_id: SSO user IDs (no hard FK)
+#   - Soft delete enabled for audit trail
+
+displayName:
+  en: Stock Transaction
+  ja: 在庫取引
+  vi: Phiếu kho
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    # plan-040 C5/M13: transaction_code is unique PER-ORG (was a global single-column
+    # unique — two orgs could not mint the same SI-YYYYMMDD-001 on the same day), and
+    # scoped by deleted_at so a soft-deleted transaction's code can be reused. NOTE:
+    # deleted_at is a softDelete auto-column; if omnify cannot reference it inside an
+    # index (see the created_at note below) this falls back to a hand-written
+    # non-omnify migration carrying the full (organization_id, transaction_code, deleted_at).
+    - columns: [organization_id, transaction_code, deleted_at]
+      unique: true
+      # Explicit short name — the auto-generated name exceeds MySQL's 64-char limit.
+      name: uq_stock_tx_org_code
+    - columns: [organization_id, status]
+    - columns: [warehouse_id, type, sub_type]
+    - columns: [reference_type, reference_id]
+    # Note: idx(organization_id, created_at) added via custom migration
+    # because timestamps: true auto-columns can't be referenced in Omnify indexes
+
+properties:
+  transaction_code:
+    type: String
+    length: 50
+    displayName:
+      en: Transaction Code
+      ja: 取引コード
+      vi: Mã phiếu
+    description:
+      en: "Auto-generated code: SI-YYYYMMDD-XXX (stock_in) / SO-YYYYMMDD-XXX (stock_out)"
+      ja: "自動生成コード：SI-YYYYMMDD-XXX（入庫）/ SO-YYYYMMDD-XXX（出庫）"
+      vi: "Mã tự động: SI-YYYYMMDD-XXX (nhập) / SO-YYYYMMDD-XXX (xuất)"
+
+  type:
+    type: EnumRef
+    enum: StockTransactionType
+    displayName:
+      en: Type
+      ja: タイプ
+      vi: Loại
+    description:
+      en: "stock_in (increase stock) or stock_out (decrease stock)"
+      ja: "stock_in（在庫増加）またはstock_out（在庫減少）"
+      vi: "stock_in (tăng tồn) hoặc stock_out (giảm tồn)"
+
+  sub_type:
+    type: EnumRef
+    enum: StockTransactionSubType
+    displayName:
+      en: Sub Type
+      ja: サブタイプ
+      vi: Loại chi tiết
+    description:
+      en: "Detailed classification: purchase, sales, production, transfer, disposal, adjustment, other"
+      ja: "詳細分類：仕入、販売、生産、転送、廃棄、調整、その他"
+      vi: "Phân loại chi tiết: mua hàng, bán hàng, sản xuất, chuyển kho, hủy, điều chỉnh, khác"
+
+  warehouse:
+    type: Association
+    relation: ManyToOne
+    target: Warehouse
+    onDelete: RESTRICT
+    displayName:
+      en: Warehouse
+      ja: 倉庫
+      vi: Kho hàng
+    description:
+      en: Target warehouse for this transaction
+      ja: この取引の対象倉庫
+      vi: Kho hàng của phiếu này
+
+  status:
+    type: EnumRef
+    enum: StockTransactionStatus
+    default: draft
+    displayName:
+      en: Status
+      ja: ステータス
+      vi: Trạng thái
+    description:
+      en: "Workflow status: draft → pending → approved → completed / cancelled"
+      ja: "ワークフローステータス：下書き → 承認待ち → 承認済み → 完了 / キャンセル"
+      vi: "Trạng thái workflow: nháp → chờ duyệt → đã duyệt → hoàn thành / đã hủy"
+
+  reference_type:
+    type: String
+    length: 50
+    nullable: true
+    displayName:
+      en: Reference Type
+      ja: 参照タイプ
+      vi: Loại tham chiếu
+    description:
+      en: "Source type: production_order, stock_transfer, stock_count, material_batch"
+      ja: "ソースタイプ：production_order、stock_transfer、stock_count、material_batch"
+      vi: "Loại nguồn: production_order, stock_transfer, stock_count, material_batch"
+
+  reference_id:
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Reference ID
+      ja: 参照ID
+      vi: ID tham chiếu
+    description:
+      en: ID of the source record (polymorphic, no hard FK)
+      ja: ソースレコードのID（ポリモーフィック、ハードFKなし）
+      vi: ID bản ghi nguồn (polymorphic, không dùng FK cứng)
+
+  note:
+    type: Text
+    nullable: true
+    displayName:
+      en: Note
+      ja: 備考
+      vi: Ghi chú
+
+  created_by_id:
+    type: Uuid
+    displayName:
+      en: Created By
+      ja: 作成者
+      vi: Người tạo
+    description:
+      en: "SSO user who created this transaction (user_caches.id). No hard FK."
+      ja: "この取引を作成したSSOユーザー（user_caches.id）。ハードFKなし。"
+      vi: "User SSO tạo phiếu (user_caches.id). Không dùng FK cứng."
+
+  approved_by_id:
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Approved By
+      ja: 承認者
+      vi: Người duyệt
+    description:
+      en: "SSO user who approved this transaction. Null if not yet approved."
+      ja: "この取引を承認したSSOユーザー。未承認の場合はNull。"
+      vi: "User SSO duyệt phiếu. Null nếu chưa duyệt."
+
+  approved_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Approved At
+      ja: 承認日時
+      vi: Ngày duyệt
+
+  completed_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Completed At
+      ja: 完了日時
+      vi: Ngày hoàn thành
+
+  # Relationships
+  items:
+    type: Association
+    relation: OneToMany
+    target: StockTransactionItem
+    mappedBy: stockTransaction
+    displayName:
+      en: Items
+      ja: 明細
+      vi: Chi tiết
+
+  movements:
+    type: Association
+    relation: OneToMany
+    target: StockMovement
+    mappedBy: stockTransaction
+    displayName:
+      en: Movements
+      ja: 変動
+      vi: Biến động
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức

@@ -1,0 +1,14 @@
+kind: enum
+
+displayName:
+  ja: 注文タイプ
+  en: Order Type
+  vi: Loại đơn hàng
+
+values:
+  - value: spot
+    label: { ja: スポット, en: Spot, vi: Tại chỗ }
+  - value: dine_in
+    label: { ja: 店内, en: Dine In, vi: Dùng bữa }
+  - value: takeaway
+    label: { ja: テイクアウト, en: Takeaway, vi: Mang về }

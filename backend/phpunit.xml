@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+>
+    <testsuites>
+        <testsuite name="Unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Feature">
+            <directory>tests/Feature</directory>
+        </testsuite>
+        <!--
+            tests/Arch was in NO testsuite, so `vendor/bin/pest` and CI never ran
+            its 18 architecture files. Nothing noticed when they broke: the #1217
+            migration renumbering moved every generated file, and these tests
+            pinned filenames INCLUDING the sequence prefix, so 15 assertions had
+            been failing unseen. One of them was a characterisation test whose
+            whole job was to fail the day codegen emitted RESTRICT — codegen did,
+            and the prompt never arrived.
+
+            tests/Contracts is deliberately NOT listed: it holds base classes and
+            helpers (PaymentGatewayContractTestCase, ProviderScenario), not
+            tests — a support directory like tests/Support and tests/Fakes.
+        -->
+        <testsuite name="Arch">
+            <directory>tests/Arch</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>app</directory>
+        </include>
+    </source>
+    <php>
+        <!-- 2026-07-27: the full suite (6300+ tests) crossed 1G peak; 1G OOMed mid-run. -->
+        <ini name="memory_limit" value="2G"/>
+        <env name="APP_ENV" value="testing" force="true"/>
+        <!-- Never load the dev container's bootstrap/cache/config.php. A
+             separate, intentionally absent path makes Laravel rebuild config
+             from the forced test environment before RefreshDatabase runs. -->
+        <env name="APP_CONFIG_CACHE" value="bootstrap/cache/config-testing.php" force="true"/>
+        <env name="APP_KEY" value="base64:dGVzdC1vbmx5LWFwcC1rZXktMzItYnl0ZXMtMTIzNDU="/>
+        <env name="APP_TIMEZONE" value="UTC"/>
+        <env name="APP_MAINTENANCE_DRIVER" value="file"/>
+        <env name="BCRYPT_ROUNDS" value="4"/>
+        <env name="BROADCAST_CONNECTION" value="null"/>
+        <!-- #1232 — deliberately NO STRIPE_SECRET here. The gateway builds its
+             StripeClient on first use, so a suite that never calls Stripe never
+             needs a key; leaving one set would hide a re-introduced eager
+             construction. Tests that need Stripe behaviour set the config
+             themselves and inject a client double. -->
+        <env name="CACHE_STORE" value="array"/>
+        <!-- force=true is deliberate: a cached local config must never override
+             the isolated in-memory database and point RefreshDatabase at dev. -->
+        <env name="DB_CONNECTION" value="sqlite" force="true"/>
+        <env name="DB_DATABASE" value=":memory:" force="true"/>
+        <env name="DB_URL" value="" force="true"/>
+        <!-- Disable SQLite FK enforcement: factories generate random uuid FKs without
+             creating parent rows; the test suite was originally designed for FK=off. -->
+        <env name="DB_FOREIGN_KEYS" value="false"/>
+        <env name="MAIL_MAILER" value="array"/>
+        <env name="QUEUE_CONNECTION" value="sync"/>
+        <env name="SESSION_DRIVER" value="array"/>
+        <env name="REVERB_APP_KEY" value="test-reverb-key"/>
+        <env name="REVERB_APP_SECRET" value="test-reverb-secret"/>
+        <env name="PULSE_ENABLED" value="false"/>
+        <env name="TELESCOPE_ENABLED" value="false"/>
+        <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <!-- Test-only transport bypass: actingAs() supplies the already-authenticated
+             user while production still requires a verified Platform bearer. -->
+        <env name="SSO_DEV_BYPASS" value="true"/>
+    </php>
+</phpunit>

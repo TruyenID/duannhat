@@ -1,0 +1,36 @@
+# =============================================================================
+# NotificationChannel (通知チャンネル / Kênh thông báo)
+# =============================================================================
+#
+# Delivery channel taxonomy (plan-012 T3.1). Every `notification_deliveries`
+# row carries a `channel` enum value; each channel corresponds 1:1 to an
+# implementation of `NotificationChannelContract` (registered in
+# `NotificationChannelResolver`) and a per-channel queue name
+# (`notifications-<value>`).
+#
+# Cases:
+#   - in_app    — bell + /inbox (always produced when routing resolves it)
+#   - realtime  — per-brand Reverb (M4 T4.9 implements the channel impl)
+#   - email     — rendered template → Mail::to()
+#   - push      — stub in Phase C (M3 T3.6); real FCM/APNs is a follow-up
+#
+# SMS deliberately NOT included — Decision 17 (compliance + cost). Adding
+# SMS later is additive: one enum case + one contract impl.
+# =============================================================================
+
+kind: enum
+
+displayName:
+  ja: 通知チャンネル
+  en: Notification Channel
+  vi: Kênh thông báo
+
+values:
+  - value: in_app
+    label: { ja: アプリ内, en: In-app, vi: Trong ứng dụng }
+  - value: realtime
+    label: { ja: リアルタイム, en: Realtime, vi: Realtime }
+  - value: email
+    label: { ja: メール, en: Email, vi: Email }
+  - value: push
+    label: { ja: プッシュ, en: Push, vi: Push }

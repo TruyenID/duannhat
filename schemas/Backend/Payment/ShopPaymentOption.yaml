@@ -1,0 +1,101 @@
+# =============================================================================
+# ShopPaymentOption — shop preference and permitted merchant connection
+# =============================================================================
+#
+# One row per branch/catalog option. It records a preference, not effective truth:
+# provider catalog, verified connection capability, owner/HQ policy, environment,
+# currency, channel, health, and Identity ownership must all still pass.
+# =============================================================================
+
+displayName:
+  en: Shop Payment Option
+  ja: 店舗決済オプション
+  vi: Tuỳ chọn thanh toán cửa hàng
+
+kind: object
+
+options:
+  id: Uuid
+  timestamps: true
+  softDelete: false
+  indexes:
+    # Deterministic one preference per shop and catalog option.
+    - columns: [branch_id, option_id]
+      unique: true
+      name: shop_payment_options_branch_option_unique
+    # Tenant-scoped settings/resolver scan.
+    - columns: [organization_id, brand_id, branch_id, preference]
+      name: shop_payment_options_scope_lookup
+    - columns: [connection_id]
+
+properties:
+  organization:
+    # Tempo tenant boundary; must match brand, branch, and selected connection.
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: RESTRICT
+    displayName: { en: Organization, ja: 組織, vi: Tổ chức }
+
+  brand:
+    # Local synchronized brand used with Identity's authoritative projection.
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: RESTRICT
+    displayName: { en: Brand, ja: ブランド, vi: Thương hiệu }
+
+  branch:
+    # Shop/branch whose effective option is being narrowed.
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    onDelete: RESTRICT
+    displayName: { en: Shop, ja: 店舗, vi: Cửa hàng }
+
+  option:
+    # Provider capability option; uniqueness prevents conflicting shop preferences.
+    type: Association
+    relation: ManyToOne
+    target: PaymentGatewayOption
+    onDelete: RESTRICT
+    displayName: { en: Gateway Option, ja: ゲートウェイオプション, vi: Tuỳ chọn cổng }
+
+  connection:
+    # Selected eligible connection. Null means inherit/resolve; never triggers merchant fallback.
+    type: Association
+    relation: ManyToOne
+    target: PaymentGatewayConnection
+    nullable: true
+    onDelete: RESTRICT
+    displayName: { en: Selected Connection, ja: 選択接続, vi: Kết nối được chọn }
+
+  preference:
+    # Cannot widen provider/connection/HQ deny. Blocked is upstream-owned, not shop-settable.
+    type: EnumRef
+    enum: PaymentPolicyPreference
+    default: inherit
+    filterable: true
+    displayName: { en: Preference, ja: 設定, vi: Tuỳ chọn }
+
+  change_reason:
+    # Safe operator reason for audit/support; no provider payload or credential.
+    type: String
+    length: 500
+    nullable: true
+    displayName: { en: Change Reason, ja: 変更理由, vi: Lý do thay đổi }
+
+  version:
+    # Optimistic concurrency version; policy publication creates a separate immutable revision.
+    type: BigInt
+    unsigned: true
+    default: 1
+    rules:
+      min: 1
+    displayName: { en: Version, ja: バージョン, vi: Phiên bản }
+
+policies:
+  - forbid: [create, delete]
+    desc: Shop option rows are upserted through scoped admin flows; hard delete is forbidden
+  - permit: [view, list, edit]
+    desc: Shop preference narrowing is allowed within tenant/branch authorization wrapper

@@ -1,0 +1,367 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://omnify.dev/schemas/omnify-config-schema.json",
+  "title": "Omnify Configuration",
+  "description": "Configuration file for Omnify (omnify.yaml)",
+  "type": "object",
+  "properties": {
+    "schemasDir": {
+      "type": "string",
+      "default": "./schemas",
+      "description": "Directory containing schema YAML files"
+    },
+    "packages": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/PackageConfig"
+      },
+      "description": "External schema packages to consume (short form: path only, long form: explicit schemasDir + lockFile)"
+    },
+    "lockFilePath": {
+      "type": "string",
+      "default": ".omnify/lock.json",
+      "description": "Path to the lock file for tracking migration state"
+    },
+    "connections": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/Connection"
+      },
+      "description": "Database connection configurations"
+    },
+    "default": {
+      "type": "string",
+      "default": "default",
+      "description": "Default connection name"
+    },
+    "locale": {
+      "$ref": "#/definitions/Locale",
+      "description": "Locale settings for multi-language support"
+    },
+    "compoundTypes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["japan"]
+      },
+      "description": "Built-in compound type packs to enable (e.g., 'japan' for JapaneseName, JapaneseAddress)"
+    },
+    "codegen": {
+      "$ref": "#/definitions/Codegen",
+      "description": "Code generation configuration (connection-independent, reads schemas.json)"
+    },
+    "file": {
+      "$ref": "#/definitions/FileConfig",
+      "description": "File upload configuration for polymorphic file attachments"
+    },
+    "verbose": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enable verbose output during generation"
+    }
+  },
+  "definitions": {
+    "FileConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tempFlow": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable temporary → permanent file upload flow"
+        },
+        "tempTtl": {
+          "type": "string",
+          "description": "Temporary file TTL (e.g., '24h', '12h')"
+        },
+        "cleanupSchedule": {
+          "type": "string",
+          "description": "Phase 1 schedule: soft-delete expired temp records (e.g., 'hourly')"
+        },
+        "purgeAfter": {
+          "type": "string",
+          "description": "Grace period before physical file deletion (e.g., '72h')"
+        },
+        "purgeSchedule": {
+          "type": "string",
+          "description": "Phase 2 schedule: force-delete + remove physical files (e.g., 'daily')"
+        },
+        "defaultDisk": {
+          "type": "string",
+          "description": "Default storage disk (e.g., 'public', 's3', 'local')"
+        }
+      }
+    },
+    "PackageConfig": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Path to the package root directory (short form: auto-discovers omnify.yaml inside)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Package identifier. Defaults to directory basename (short form) or required (long form)"
+        },
+        "schemasDir": {
+          "type": "string",
+          "description": "Path to schemas directory (long form only, required when path is not set)"
+        },
+        "lockFile": {
+          "type": "string",
+          "description": "Path to package lock file (long form only, required when path is not set)"
+        },
+        "codegen": {
+          "$ref": "#/definitions/Codegen",
+          "description": "Codegen overrides for this package (merged with package's own codegen config)"
+        }
+      }
+    },
+    "Connection": {
+      "type": "object",
+      "required": ["driver"],
+      "properties": {
+        "driver": {
+          "type": "string",
+          "enum": ["mysql", "pgsql", "postgres", "sqlite"],
+          "description": "Database driver"
+        },
+        "migrations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Migration"
+          },
+          "description": "Migration output configurations"
+        }
+      }
+    },
+    "Migration": {
+      "type": "object",
+      "required": ["type", "path"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["laravel", "sql"],
+          "description": "Migration output type"
+        },
+        "path": {
+          "type": "string",
+          "description": "Output directory for migration files"
+        },
+        "schemasPath": {
+          "type": "string",
+          "description": "Path for exported schemas JSON (laravel only)"
+        },
+        "dialect": {
+          "type": "string",
+          "enum": ["mysql", "postgresql", "sqlite"],
+          "description": "SQL dialect for generated migrations (sql only)"
+        },
+        "options": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enumStrategy": {
+              "type": "string",
+              "enum": ["string", "native", "conditional"],
+              "default": "string",
+              "description": "Enum column strategy: 'string' (cross-DB, default), 'native' (MySQL ENUM), or 'conditional' (runtime if/else)"
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "type": { "const": "laravel" } }
+          },
+          "then": {
+            "properties": {
+              "schemasPath": { "type": "string" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "sql" } }
+          },
+          "then": {
+            "properties": {
+              "dialect": { "type": "string", "enum": ["mysql", "postgresql", "sqlite"] }
+            }
+          }
+        }
+      ]
+    },
+    "Codegen": {
+      "type": "object",
+      "properties": {
+        "typescript": {
+          "description": "TypeScript codegen configuration. Single-target legacy form (object) or multi-target form (array of named targets). Issue #43.",
+          "oneOf": [
+            { "$ref": "#/definitions/CodegenTypeScript" },
+            {
+              "type": "array",
+              "items": { "$ref": "#/definitions/CodegenTypeScript" }
+            }
+          ]
+        },
+        "laravel": {
+          "description": "Laravel PHP codegen configuration. Single-target legacy form (object) or multi-target form (array of named targets). Issue #43.",
+          "oneOf": [
+            { "$ref": "#/definitions/CodegenLaravel" },
+            {
+              "type": "array",
+              "items": { "$ref": "#/definitions/CodegenLaravel" }
+            }
+          ]
+        }
+      }
+    },
+    "CodegenTypeScript": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Target identifier (used by --target CLI flag in v2). Defaults to 'default' when omitted in legacy single-object form."
+        },
+        "enable": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable this TypeScript target. Defaults to false."
+        },
+        "modelsPath": {
+          "type": "string",
+          "description": "Output directory for generated TypeScript model files"
+        },
+        "includeGroups": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Schema groups to include in this target (e.g. ['Inventory', 'Product']). Combined with includeSchemas / excludeSchemas. Issue #43."
+        },
+        "includeSchemas": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Allow-list of schema names to include in this target. Combined with includeGroups."
+        },
+        "excludeSchemas": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Deny-list of schema names to exclude from this target (always overrides includes)."
+        }
+      }
+    },
+    "CodegenLaravel": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Target identifier (used by --target CLI flag in v2). Defaults to 'default' when omitted in legacy single-object form."
+        },
+        "includeGroups": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Schema groups to include in this target. Issue #43."
+        },
+        "includeSchemas": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Allow-list of schema names to include in this target."
+        },
+        "excludeSchemas": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Deny-list of schema names to exclude (overrides includes)."
+        },
+        "enable": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable Laravel PHP codegen. Defaults to false."
+        },
+        "rootPath": {
+          "type": "string",
+          "description": "Filesystem prefix applied to all generated paths. Use this for monorepo setups where Laravel lives in a subdirectory (e.g. 'backend' makes everything write under backend/app/...)."
+        },
+        "structure": {
+          "type": "string",
+          "enum": ["legacy", "modular"],
+          "default": "legacy",
+          "description": "Directory layout for generated base files. 'modular' uses app/Modules/{Schema}/."
+        },
+        "model": {
+          "$ref": "#/definitions/CodegenLaravelPath",
+          "description": "Model output configuration (default: app/Models/Omnify)"
+        },
+        "request": {
+          "$ref": "#/definitions/CodegenLaravelPath",
+          "description": "Request output configuration (default: app/Http/Requests)"
+        },
+        "resource": {
+          "$ref": "#/definitions/CodegenLaravelPath",
+          "description": "Resource output configuration (default: app/Http/Resources)"
+        },
+        "factory": {
+          "$ref": "#/definitions/CodegenLaravelPath",
+          "description": "Factory output configuration (default: database/factories)"
+        },
+        "provider": {
+          "$ref": "#/definitions/CodegenLaravelPath",
+          "description": "Provider output configuration (default: app/Providers)"
+        },
+        "policy": {
+          "$ref": "#/definitions/CodegenLaravelPath",
+          "description": "Policy output configuration (default: app/Policies/Omnify)"
+        },
+        "controller": {
+          "$ref": "#/definitions/CodegenLaravelPath",
+          "description": "Controller output configuration (default: app/Http/Controllers)"
+        },
+        "service": {
+          "$ref": "#/definitions/CodegenLaravelPath",
+          "description": "Service output configuration (default: app/Services)"
+        },
+        "route": {
+          "$ref": "#/definitions/CodegenLaravelPath",
+          "description": "Route file output configuration (default: routes/api/omnify)"
+        },
+        "config": {
+          "$ref": "#/definitions/CodegenLaravelPath",
+          "description": "Path for the omnify-schemas.php config file (default: config/omnify-schemas.php)"
+        }
+      }
+    },
+    "CodegenLaravelPath": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Output directory path"
+        },
+        "namespace": {
+          "type": "string",
+          "description": "PHP namespace (default: derived from path)"
+        }
+      }
+    },
+    "Locale": {
+      "type": "object",
+      "properties": {
+        "locales": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of supported locale codes (e.g., ['ja', 'en', 'vi'])"
+        },
+        "defaultLocale": {
+          "type": "string",
+          "description": "Default locale code"
+        },
+        "fallbackLocale": {
+          "type": "string",
+          "description": "Fallback locale when translation is missing"
+        }
+      }
+    }
+  }
+}

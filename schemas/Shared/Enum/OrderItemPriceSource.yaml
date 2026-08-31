@@ -1,0 +1,28 @@
+# =============================================================================
+# OrderItemPriceSource (#2618, ruling #2132 §B)
+# =============================================================================
+# Nguồn đã QUYẾT giá cuối của một dòng món — snapshot bất biến, engine-stamped
+# tại chính chỗ giá được resolve (WritesCustomerOrders::addItems /
+# CustomerOrderPricingResolution::resolveLineEntry / OfflineOrderEvidenceVerifier).
+#
+# Precedence (đúng thứ tự code):
+#   menu | sku_base  →  floating CHỈ KHI floating THẤP HƠN (min() — floating
+#   cao hơn giá menu thì nguồn vẫn là menu)  →  menu_promotion khi promotion
+#   áp vào (giá cuối = raw × (100 − percent)/100).
+
+kind: enum
+
+displayName:
+  ja: 明細価格ソース
+  en: Order Item Price Source
+  vi: Nguồn giá dòng món
+
+values:
+  - value: sku_base
+    label: { ja: SKU基本価格, en: SKU base price, vi: Giá gốc SKU }
+  - value: menu
+    label: { ja: メニュー価格, en: Menu price, vi: Giá menu }
+  - value: floating
+    label: { ja: フローティング価格, en: Floating-section price, vi: Giá khu floating }
+  - value: menu_promotion
+    label: { ja: メニュープロモーション, en: Menu promotion, vi: Khuyến mãi thực đơn }

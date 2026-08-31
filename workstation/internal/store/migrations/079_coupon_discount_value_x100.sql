@@ -1,0 +1,15 @@
+-- 079 — #2186 (tầng 2 của #2118): giá trị giảm CHÍNH XÁC của coupon, nhân 100.
+--
+-- Cloud lưu `discount_value` là decimal(12,2) nhưng feed cũ emit
+-- `(int) round(...)` — coupon 12,5% tới máy trạm thành 13%. Tầng 1 (#2118)
+-- thêm `discount_value_x100` vào feed `/workstation/coupons` (12,5 → 1250);
+-- cột này là bản sao SQLite của trường đó.
+--
+-- NULLABLE CÓ CHỦ ĐÍCH: NULL = hàng ingest từ feed cũ (Cloud chưa deploy tầng
+-- 1), phân biệt được với coupon 0% thật (x100 = 0). Engine rơi về
+-- `discount_value` khi NULL — xem computeDiscount trong coupon_service.go.
+--
+-- PHẠM VI: chỉ nhánh `percent` đọc cột này. `fixed` vẫn dùng `discount_value`
+-- vì mô hình tiền phía Go là SỐ NGUYÊN đơn vị tiền tệ — coupon cố định $5,25
+-- cần đổi mô hình sang minor-unit, một việc riêng và lớn hơn.
+ALTER TABLE coupons ADD COLUMN discount_value_x100 INTEGER;

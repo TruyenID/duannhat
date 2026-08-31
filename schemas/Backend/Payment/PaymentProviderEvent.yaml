@@ -1,0 +1,166 @@
+# =============================================================================
+# PaymentProviderEvent — verified durable webhook/event inbox
+# =============================================================================
+#
+# Verification happens before insert. The table stores event identity, body hash,
+# and allowlisted redacted summary only—never signature secrets or raw payload/body.
+# =============================================================================
+
+displayName: { en: Payment Provider Event, ja: 決済プロバイダーイベント, vi: Sự kiện nhà cung cấp thanh toán }
+kind: object
+
+options:
+  id: Uuid
+  timestamps: true
+  softDelete: false
+  indexes:
+    - columns: [connection_id, environment, provider_event_id]
+      unique: true
+      name: payment_provider_events_identity_unique
+    - columns: [state, next_retry_at]
+      name: payment_provider_events_retry_due
+    - columns: [state, lease_expires_at]
+      name: payment_provider_events_claimable
+    - columns: [provider_object_id, received_at]
+    - columns: [organization_id, received_at]
+
+properties:
+  organization:
+    # Tenant copied from the signature-resolved connection, never request metadata.
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: RESTRICT
+    displayName: { en: Organization, ja: 組織, vi: Tổ chức }
+  connection:
+    # Connection whose versioned webhook secret verified the raw request.
+    type: Association
+    relation: ManyToOne
+    target: PaymentGatewayConnection
+    onDelete: RESTRICT
+    displayName: { en: Connection, ja: 接続, vi: Kết nối }
+  provider:
+    # Immutable adapter code snapshot from the verified connection.
+    type: EnumRef
+    enum: PaymentGatewayProviderCode
+    displayName: { en: Provider, ja: プロバイダー, vi: Nhà cung cấp }
+  environment:
+    # Immutable verified event environment; participates in deduplication.
+    type: EnumRef
+    enum: PaymentGatewayEnvironment
+    displayName: { en: Environment, ja: 環境, vi: Môi trường }
+  state:
+    # Durable inbox processing lifecycle from STATE-MACHINES.md.
+    type: EnumRef
+    enum: PaymentProviderEventState
+    default: received_verified
+    filterable: true
+    displayName: { en: State, ja: 状態, vi: Trạng thái }
+  provider_event_id:
+    # Provider-issued event identity; duplicate deliveries reuse this row.
+    type: String
+    length: 191
+    displayName: { en: Provider Event ID, ja: プロバイダーイベントID, vi: ID sự kiện nhà cung cấp }
+  event_type:
+    # Provider raw event type/name, mapped by the adapter to normalized commands.
+    type: String
+    length: 160
+    displayName: { en: Event Type, ja: イベントタイプ, vi: Loại sự kiện }
+  provider_object_id:
+    # Safe referenced payment/refund object identity when present.
+    type: String
+    length: 191
+    nullable: true
+    displayName: { en: Provider Object ID, ja: プロバイダーオブジェクトID, vi: ID đối tượng nhà cung cấp }
+  payload_hash:
+    # SHA-256 of exact verified raw bytes; same ID/different hash is a conflict.
+    type: String
+    length: 64
+    rules: { alphaNum: true, lowercase: true }
+    displayName: { en: Payload Hash, ja: ペイロードハッシュ, vi: Hash payload }
+  signature_version:
+    # Non-secret verification key/version identifier used for rotation audit.
+    type: String
+    length: 80
+    nullable: true
+    hidden: true
+    displayName: { en: Signature Version, ja: 署名バージョン, vi: Phiên bản chữ ký }
+  redacted_payload:
+    # Allowlisted normalized summary only. Raw verified bytes are not persisted here.
+    type: Json
+    nullable: true
+    hidden: true
+    displayName: { en: Redacted Payload, ja: 編集済みペイロード, vi: Payload đã che }
+  outcome:
+    # Safe processing result such as applied, ignored_stale, or duplicate.
+    type: String
+    length: 100
+    nullable: true
+    displayName: { en: Outcome, ja: 結果, vi: Kết quả }
+  delivery_count:
+    # Number of verified duplicate deliveries observed for this identity.
+    type: Int
+    unsigned: true
+    default: 1
+    rules: { min: 1 }
+    displayName: { en: Delivery Count, ja: 配信回数, vi: Số lần nhận }
+  processing_attempts:
+    # Worker processing claims; separate from delivery_count.
+    type: Int
+    unsigned: true
+    default: 0
+    displayName: { en: Processing Attempts, ja: 処理試行回数, vi: Số lần xử lý }
+  lease_token:
+    # Opaque worker claim token; not a provider secret.
+    type: String
+    length: 80
+    nullable: true
+    hidden: true
+    displayName: { en: Lease Token, ja: リーストークン, vi: Token lease }
+  lease_expires_at:
+    # Claim expiry permits safe recovery after worker crash.
+    type: Timestamp
+    nullable: true
+    displayName: { en: Lease Expires At, ja: リース期限, vi: Lease hết hạn }
+  next_retry_at:
+    # Bounded backoff due time; null outside retryable/queued recovery.
+    type: Timestamp
+    nullable: true
+    displayName: { en: Next Retry At, ja: 次回再試行日時, vi: Thử lại lúc }
+  last_error_code:
+    # Stable typed code; no raw exception/provider message.
+    type: String
+    length: 100
+    nullable: true
+    displayName: { en: Last Error Code, ja: 最終エラーコード, vi: Mã lỗi gần nhất }
+  redacted_error:
+    # Allowlisted diagnostic fields after redaction; hidden from client resources.
+    type: Json
+    nullable: true
+    hidden: true
+    displayName: { en: Redacted Error, ja: 編集済みエラー, vi: Lỗi đã che }
+  received_at:
+    # First verified receipt/commit timestamp.
+    type: Timestamp
+    useCurrent: true
+    displayName: { en: Received At, ja: 受信日時, vi: Nhận lúc }
+  verified_at:
+    # Signature/account/environment verification timestamp.
+    type: Timestamp
+    displayName: { en: Verified At, ja: 検証日時, vi: Xác minh lúc }
+  processed_at:
+    # Terminal processing timestamp; null while active/dead-letter unresolved.
+    type: Timestamp
+    nullable: true
+    displayName: { en: Processed At, ja: 処理日時, vi: Xử lý lúc }
+  operator_resolution:
+    # Authorized resolution reason/evidence; never a hidden ledger edit.
+    type: String
+    length: 1000
+    nullable: true
+    displayName: { en: Operator Resolution, ja: 運用者解決内容, vi: Xử lý của vận hành }
+  operator_resolved_at:
+    # Timestamp of authorized terminal operator resolution.
+    type: Timestamp
+    nullable: true
+    displayName: { en: Operator Resolved At, ja: 運用者解決日時, vi: Vận hành xử lý lúc }

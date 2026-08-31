@@ -1,0 +1,254 @@
+# Customer schema
+# Thông tin khách hàng — khách quen, khách cần xuất hoá đơn công ty.
+# Khách vãng lai không cần tạo record (customer_order.customer_id = null).
+#
+# Scope: Organization.
+# Không có workflow — chỉ lưu thông tin liên hệ và thuế.
+#
+# Business Rules:
+#   - BR-C01: phone không bắt buộc nhưng nên có để tìm khách
+#   - BR-C02: tax_code dùng cho xuất hoá đơn công ty (VAT invoice)
+#   - BR-C03: Soft-delete — không xoá cứng để giữ lịch sử đơn hàng
+
+displayName:
+  en: Customer
+  ja: 顧客
+  vi: Khách hàng
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    - columns: [organization_id, phone]
+    - columns: [organization_id, first_name]
+    - columns: [organization_id, brand_id]
+    - columns: [branch_id]
+
+properties:
+  first_name:
+    type: String
+    length: 100
+    displayName:
+      en: First Name
+      ja: 名
+      vi: Tên
+    description:
+      en: "First name (given name) of the customer"
+      ja: "顧客の名（ファーストネーム）"
+      vi: "Tên (tên gọi) của khách hàng"
+
+  last_name:
+    type: String
+    length: 100
+    nullable: true
+    displayName:
+      en: Last Name
+      ja: 姓
+      vi: Họ
+    description:
+      en: "Last name (family name) of the customer or company name (for VAT invoice)"
+      ja: "顧客の姓（ファミリーネーム）または会社名（VAT請求書用）"
+      vi: "Họ của khách hàng hoặc tên công ty (cho hoá đơn VAT)"
+
+  phone:
+    type: String
+    length: 20
+    nullable: true
+    displayName:
+      en: Phone
+      ja: 電話番号
+      vi: Số điện thoại
+    description:
+      en: "Primary contact phone number. Used to look up returning customers (BR-C01)"
+      ja: "主要連絡先電話番号。リピーター検索に使用（BR-C01）"
+      vi: "SĐT liên hệ chính. Dùng để tìm khách quay lại (BR-C01)"
+
+  email:
+    type: String
+    length: 255
+    nullable: true
+    displayName:
+      en: Email
+      ja: メールアドレス
+      vi: Email
+    description:
+      en: "Email for sending VAT invoices"
+      ja: "VAT請求書送信用メール"
+      vi: "Email nhận hoá đơn"
+
+  address:
+    type: Text
+    nullable: true
+    displayName:
+      en: Address
+      ja: 住所
+      vi: Địa chỉ
+    description:
+      en: "Full address for delivery or VAT invoice"
+      ja: "配送またはVAT請求書用の住所"
+      vi: "Địa chỉ giao hàng hoặc xuất hoá đơn"
+
+  birthday:
+    # Ngày sinh dân sự, KHÔNG phải mốc giao dịch — không đi qua BusinessClock.
+    # Nullable: khách đăng ký trước khi có trường này, và khai sinh nhật là tự nguyện.
+    type: Date
+    nullable: true
+    displayName:
+      en: Birthday
+      ja: 生年月日
+      vi: Ngày sinh
+    description:
+      en: "Date of birth, self-declared by the customer"
+      ja: "顧客が自己申告した生年月日"
+      vi: "Ngày sinh do khách tự khai"
+
+  gender:
+    # Nullable vì khách cũ chưa khai — KHÔNG có default, "chưa khai" khác "nữ".
+    type: EnumRef
+    enum: CustomerGender
+    nullable: true
+    displayName:
+      en: Gender
+      ja: 性別
+      vi: Giới tính
+    description:
+      en: "Gender, self-declared by the customer"
+      ja: "顧客が自己申告した性別"
+      vi: "Giới tính do khách tự khai"
+
+  tax_code:
+    type: String
+    length: 20
+    nullable: true
+    displayName:
+      en: Tax Code
+      ja: 税コード
+      vi: Mã số thuế
+    description:
+      en: "Company tax identification number for VAT invoices (BR-C02)"
+      ja: "VAT請求書用の法人税番号（BR-C02）"
+      vi: "Mã số thuế công ty cho hoá đơn VAT (BR-C02)"
+
+  note:
+    type: Text
+    nullable: true
+    displayName:
+      en: Note
+      ja: 備考
+      vi: Ghi chú
+    description:
+      en: "Internal note about this customer (e.g., allergies, preferences)"
+      ja: "この顧客に関する内部メモ（例：アレルギー、好み）"
+      vi: "Ghi chú nội bộ về khách (VD: dị ứng, sở thích)"
+
+  loyalty_opted_in:
+    # Khách có đồng ý tham gia chương trình thành viên hay không (#1780).
+    #
+    # `default: true` là BẮT BUỘC, không phải tuỳ chọn thẩm mỹ: trước cột này
+    # mọi khách đã đăng ký đều tích điểm (hạng suy ra từ điểm, #1441). Default
+    # `false` sẽ tắt tích điểm của toàn bộ khách cũ ngay khi migration chạy —
+    # im lặng, và chỉ lộ ra khi có người thắc mắc sao điểm đứng yên.
+    #
+    # Khách staff tạo tay (POS) cũng nhận `true`: họ vẫn tích điểm như trước.
+    type: Boolean
+    default: true
+    filterable: true
+    displayName:
+      en: Loyalty Opted In
+      ja: 会員プログラム参加
+      vi: Tham gia thành viên
+    description:
+      en: "Whether the customer joined the membership programme (points + tiers)"
+      ja: "会員プログラム（ポイント・ランク）に参加しているか"
+      vi: "Khách có tham gia chương trình thành viên (tích điểm + hạng) hay không"
+
+  # Self-registration auth fields — null for staff-created customers
+  password:
+    type: String
+    nullable: true
+    hidden: true
+    displayName:
+      en: Password
+      ja: パスワード
+      vi: Mật khẩu
+
+  # #1784 — định danh Google (`sub` trong ID token), null nếu khách chưa nối.
+  #
+  # Lưu `sub` chứ KHÔNG lưu email: email Google đổi được, `sub` thì không. Nối
+  # tài khoản theo email rồi lần sau người ta đổi email Google là mất tài khoản.
+  #
+  # KHÔNG unique ở tầng schema: `customers` là bảng đa-tenant dùng chung, và một
+  # người có thể là khách của nhiều tổ chức — cùng `sub`, nhiều hàng. Ràng buộc
+  # thật là "một `sub` ứng với tối đa một hàng ĐĂNG NHẬP ĐƯỢC", việc mà service
+  # cưỡng chế; unique ở DB sẽ chặn nhầm cả hàng CRM hợp lệ.
+  google_id:
+    type: String
+    length: 255
+    nullable: true
+    displayName:
+      en: Google ID
+      ja: Google ID
+      vi: Google ID
+
+  remember_token:
+    type: String
+    length: 100
+    nullable: true
+    hidden: true
+    displayName:
+      en: Remember Token
+      ja: Remember Token
+      vi: Remember Token
+
+  email_verified_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Email Verified At
+      ja: メール認証日時
+      vi: Thời gian xác minh email
+
+  # Relationships
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu
+    description:
+      en: "Brand this customer belongs to (null for self-registered customers)"
+      ja: "この顧客が属するブランド（自己登録顧客はnull）"
+      vi: "Thương hiệu mà khách hàng thuộc về (null với khách tự đăng ký)"
+
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Branch
+      ja: 店舗
+      vi: Chi nhánh
+    description:
+      en: "Branch (shop) where this customer was registered (null for self-registered)"
+      ja: "この顧客が登録された店舗（自己登録顧客はnull）"
+      vi: "Chi nhánh nơi khách hàng được đăng ký (null với khách tự đăng ký)"
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức

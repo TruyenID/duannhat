@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body>
+<script>
+var vescajs = function() {
+var cls=null;
+const CHECK_INTERVAL=1E3,MAX_AC_RETRY=3,MAX_POLLING_RETRY=5,MAX_NAK_RETRY=3,ACK="ACK",NAK="NAK",RESPONSE_CODE_OK="0000",RESPONSE_CODE_PROCESSING="0001",RESPONSE_CODE_UNDEFINED="0100",RESPONSE_CODE_INVALID_SEQUENCE="0101",RESPONSE_CODE_INVALID_PARAMETER="0102",RESPONSE_CODE_CANCEL="0110",RESPONSE_CODE_DEVICE_ERROR="0129",RESPONSE_CODE_UNACCEPTABLE="0130",RESPONSE_CODE_RECEIPT_TROUBLE="0140",RESPONSE_CODE_BEFORE_REBOOT="1001",STEP_NONE=0,STEP_START=1,STEP_PREPROCESS=2,STEP_BUILDREQUEST=3,STEP_COMMUNICATE=
+4,STEP_CONNECTED=5,STEP_SENT_REQUEST=6,STEP_WAIT_SEND_AP=7,STEP_WAIT_ACK_NAK=8,STEP_WAIT_RESPONSE=9,STEP_RECEIVEDRESULT=10,STEP_PARSERESULT=11,STEP_FINISHED=12,STEP_ERRORFINISHED=13,STEP_RECONNECT=14,TIMEOUT_PREPROCESS=1E3,TIMEOUT_BUILDREQUEST=1E3,TIMEOUT_COMMUNICATE=1E3,TIMEOUT_CONNECTED=5E3,TIMEOUT_ACK_NAK_A1=5E3,TIMEOUT_ACK_NAK_AP=4E3,TIMEOUT_ACK_NAK_AC=1E3,TIMEOUT_RESPONSE=3E3,TIMEOUT_AP=500,TIMEOUT_RECONNECT=3E3,RESULT_SUCCESS="OutputCompleteEvent",RESULT_ERROR="ErrorEvent",CAUSE_CMD_RETRY_COUNT=
+"RetryOver",CAUSE_CMD_FORMAT="CommandFormat",CAUSE_CMD_SEQ_ERR="IllegalSequence",CAUSE_RES_TIMEOUT="ResponseTimeout",CAUSE_POS_FORCE_CANCEL="POSForceCancelled",CAUSE_RES_CD_ERROR="ErrorResponseCode",CAUSE_DEVICE_BUSY="DeviceBusy",CAUSE_JSON_PARSE="ParseJSONError",CAUSE_ACK_TIMEOUT="AckTimeout",CAUSE_CONNECTION="ConnectionError",CAUSE_SEND_CMD="SendCommandError",CAUSE_SEND_ACK="SendAckError",CAUSE_SEND_NAK="SendNakError",CAUSE_SEND_AP="SendAPError",CAUSE_SEND_AC="SendACError",CAUSE_NET_DOWN="NetworkDown",
+CAUSE_NET_ERROR="NetworkError";var CancelStatus={none:0,pending:1,rejected:2,accepted:3},ResponseCodeType={unknown:0,request_accepted:1,request_rejected:2,terminal_status:3,cancel_accepted:4,cancel_rejected:5,pending:6,completed:7,error:9};function log(a){null!=a&&console.log("["+(new Date).toISOString()+"] "+a)}function error(a){null!=a&&console.error("["+(new Date).toISOString()+"] "+a)}
+function ErrorInfo(a,b,c=!0){c=c?990:900;this._resultData=null==b?{ErrorEvent:{ErrorCode:c,ErrorCodeExtended:-1,Errorcodedetail:a}}:{ErrorEvent:{ErrorCode:c,ErrorCodeExtended:-1,Errorcodedetail:a,Message:b}}}function Base64Decode(a){return(new TextDecoder).decode(Uint8Array.from(atob(a),b=>b.charCodeAt(0)))}function Base64Encode(a){var b=(new TextEncoder).encode(a);a=[];b=new Uint8Array(b);for(var c=0,d=b.byteLength;c<d;c++)a.push(String.fromCharCode(b[c]));return btoa(a.join(""))}
+class VescaJSFullFeaturedWS{constructor(a,b){this._host=a;this._port=b;this._lastCommand=this._responseStr=this._resultData=this._requestStr=null;this._cmdRetryCount=this._nakRetryCount=0;this._cancelStatus=CancelStatus.none;this._isA1Accepted=!1;this._lastTerminalStatus="";this._listener=this._client=null;this._lastStepTimestamp=Date.now();this._intervalId=setInterval(this._checkProcessing.bind(this),CHECK_INTERVAL);this._lastStep=this._step=STEP_NONE;this._timer=null;this._setStep(STEP_START)}_clearData(){this._lastCommand=
+this._responseStr=this._resultData=this._requestStr=null;this._cmdRetryCount=this._nakRetryCount=0;this._cancelStatus=CancelStatus.none;this._isA1Accepted=!1}_requestCancel(){this._cancelStatus=CancelStatus.pending;log("Request Cancel Received.")}_setStep(a){this._step=a;switch(a){case STEP_START:log("Start");break;case STEP_PREPROCESS:log("PreProcess");break;case STEP_BUILDREQUEST:log("Build request");break;case STEP_COMMUNICATE:log("Communicate");break;case STEP_CONNECTED:log("Connected");break;
+case STEP_SENT_REQUEST:log("Sent request");break;case STEP_WAIT_ACK_NAK:log("Wait Ack/Nak");break;case STEP_WAIT_RESPONSE:log("Wait Response");break;case STEP_WAIT_SEND_AP:log("Wait Send AP");break;case STEP_RECEIVEDRESULT:log("Received Result");break;case STEP_PARSERESULT:log("Parse Result");break;case STEP_FINISHED:log("Finished");break;case STEP_ERRORFINISHED:log("Error Finished");break;default:log("Unknown Step")}}_buildRequest(a){this._setStep(STEP_BUILDREQUEST);if(null==a.request)return!1;try{var b=
+JSON.stringify(a.request);if("{}"==b)return!1;this._requestStr=Base64Encode(b)}catch(c){return error(c),!1}return!0}_parseResult(a){this._setStep(STEP_PARSERESULT);this._responseStr=a;log("Receive DataLength="+this._responseStr.length);try{var b=Base64Decode(this._responseStr.substring(6));this._resultData=JSON.parse(b)}catch(c){return error(c.Message),!1}return!0}_parseResponseCode(a){return null==a||6>a.length?ResponseCodeType.unknown:0<=a.indexOf("0000AP")?ResponseCodeType.completed:0<=a.indexOf("0000AC")?
+ResponseCodeType.cancel_accepted:0<=a.indexOf("0001AC")?ResponseCodeType.cancel_rejected:0<=a.indexOf("0001AP")?ResponseCodeType.pending:a.startsWith("S")&&4<=a.indexOf("AP")?ResponseCodeType.terminal_status:0<=a.indexOf("0000A1")?ResponseCodeType.request_accepted:0<=a.indexOf("A1")?ResponseCodeType.request_rejected:ResponseCodeType.error}_clearTimer(){null!=this._timer&&(clearTimeout(this._timer),this._timer=null)}_setTimer(a,b){this._clearTimer();this._timer=setTimeout(b.bind(this),a)}_sendLastCommand(a){try{if("AC"==
+this._lastCommand&&this._cmdRetryCount>MAX_AC_RETRY){log("Stop ["+this._lastCommand+"] AC RetryOver ["+this._cmdRetryCount+"]");this._client.close();return}if("AP"==this._lastCommand&&0<=MAX_POLLING_RETRY&&this._cmdRetryCount>MAX_POLLING_RETRY){log("Stop ["+this._lastCommand+"] AP RetryOver ["+this._cmdRetryCount+"]");this._client.close();return}log("Send ["+this._lastCommand+"]");this._client.send(this._lastCommand)}catch(b){return error(b),!1}this._setTimer(a,this._recvTimeout);return!0}_sendRequest(){this._lastCommand=
+"A1"+this._requestStr;this._sendLastCommand(TIMEOUT_ACK_NAK_A1)?this._setStep(STEP_WAIT_ACK_NAK):this._onErrorFinished(new ErrorInfo(RESPONSE_CODE_DEVICE_ERROR,CAUSE_SEND_CMD))}_sendPollingCommand(){if(this._cancelStatus==CancelStatus.pending){this._lastCommand="AC";var a=TIMEOUT_ACK_NAK_AC}else this._lastCommand="AP",a=TIMEOUT_ACK_NAK_AP;this._sendLastCommand(a)?this._setStep(STEP_WAIT_ACK_NAK):"AC"==this._lastCommand?this._onErrorFinished(new ErrorInfo(RESPONSE_CODE_CANCEL,CAUSE_POS_FORCE_CANCEL)):
+this._onErrorFinished(new ErrorInfo(RESPONSE_CODE_DEVICE_ERROR,CAUSE_NET_ERROR))}_waitToSendPollingCommand(){this._setStep(STEP_WAIT_SEND_AP);this._setTimer(TIMEOUT_AP,this._sendPollingCommand)}_waitToReceiveCommand(){this._setStep(STEP_WAIT_RESPONSE);this._setTimer(TIMEOUT_RESPONSE,this._recvTimeout)}_sendAck(){try{log("Send [ACK]"),this._client.send("ACK")}catch(a){return error(a),this._onErrorFinished(new ErrorInfo(RESPONSE_CODE_DEVICE_ERROR,CAUSE_SEND_ACK)),!1}this._nakRetryCount=0;return!0}_sendNak(){if(this._nakRetryCount>
+MAX_NAK_RETRY)this._onErrorFinished(new ErrorInfo(RESPONSE_CODE_INVALID_SEQUENCE,CAUSE_JSON_PARSE));else{this._nakRetryCount++;try{log("Send [NAK]"),this._client.send("NAK")}catch(a){return error(a),this._onErrorFinished(new ErrorInfo(RESPONSE_CODE_DEVICE_ERROR,CAUSE_SEND_NAK)),!1}return!0}}_recvTimeout(){this._step==STEP_WAIT_ACK_NAK||this._step==STEP_WAIT_RESPONSE?(this._cmdRetryCount++,this._waitToSendPollingCommand()):log("Timeout ["+this._lastCommand+"] Step="+this._step)}_recvResponse(a){if(null!=
+a.data)if(this._cmdRetryCount=0,this._clearTimer(),3==a.data.length)log("Received ["+a.data+"]"),a.data==ACK?this._waitToReceiveCommand():this._waitToSendPollingCommand();else{this._setStep(STEP_RECEIVEDRESULT);log("Received ["+a.data+"]");var b=this._parseResponseCode(a.data);log("ResponseCodeType:"+b);b==ResponseCodeType.request_accepted?(this._isA1Accepted=!0,this._sendAck()&&this._waitToSendPollingCommand()):b==ResponseCodeType.pending?this._sendAck()&&this._waitToSendPollingCommand():b==ResponseCodeType.terminal_status?
+this._sendAck()&&(this._waitToSendPollingCommand(),this._onAPStatusReceived(a.data)):b==ResponseCodeType.cancel_accepted?(this._cancelStatus=CancelStatus.accepted,this._sendAck()&&this._waitToSendPollingCommand()):b==ResponseCodeType.cancel_rejected?(this._cancelStatus=CancelStatus.rejected,this._sendAck()&&this._waitToSendPollingCommand()):b==ResponseCodeType.completed?this._parseResult(a.data)?this._sendAck()&&this._onFinished():this._sendNak()&&this._waitToReceiveCommand():b==ResponseCodeType.error||
+b==ResponseCodeType.request_rejected?this._sendAck()&&this._onErrorFinished(new ErrorInfo(a.data.substring(0,4),CAUSE_RES_CD_ERROR,!1)):this._sendNak()&&this._waitToReceiveCommand()}}_clearInterval(){null!=this._intervalId&&(clearInterval(this._intervalId),this._intervalId=null)}_onFinished(){this._clearTimer();null==this._resultData?this._onErrorFinished(new ErrorInfo(RESPONSE_CODE_INVALID_SEQUENCE,CAUSE_JSON_PARSE)):(this._setStep(STEP_FINISHED),null!=this._listener&&(this._listener.postMessage(this._resultData),
+this._clearInterval()),null!=this._client&&(this._client.close(),this._client=null),cls=null)}_onErrorFinished(a){this._clearTimer();this._setStep(STEP_ERRORFINISHED);null!=this._client&&(this._client.close(),cls=this._client=null);null==this._listener?error(JSON.stringify(a._resultData)):(this._listener.postMessage(a._resultData),this._clearInterval())}_onAPStatusReceived(a){log("Received AP Status:"+a);null==this._listener||"undefined"===a||4>a.length||this._lastTerminalStatus==a||(this._lastTerminalStatus=
+a,log("PostMessage:StatusEvent"),this._listener.postMessage({StatusEvent:{ResponseCode:a.substring(0,4)}}))}_preProcess(a){this._setStep(STEP_PREPROCESS);this._clearData();this._listener=a;return null!=this._client?(this._onErrorFinished(new ErrorInfo(RESPONSE_CODE_PROCESSING,CAUSE_DEVICE_BUSY)),!1):!0}_communicateError(a){log("Sockt Error:"+a);null!=this._client&&(this._step==STEP_RECONNECT?this._client.close():this._isA1Accepted?this._onErrorFinished(new ErrorInfo(RESPONSE_CODE_DEVICE_ERROR,CAUSE_NET_ERROR)):
+this._onErrorFinished(new ErrorInfo(RESPONSE_CODE_DEVICE_ERROR,CAUSE_CONNECTION)))}_communicateClose(a){log("Socket Closed:"+a);if(null!=this._client){if(this._step!=STEP_FINISHED&&this._step!=STEP_ERRORFINISHED){if("AC"==this._lastCommand||this._cancelStatus==CancelStatus.pending){log("Force Canceled");this._onErrorFinished(new ErrorInfo(RESPONSE_CODE_CANCEL,CAUSE_POS_FORCE_CANCEL));return}if("AP"==this._lastCommand&&(0>MAX_POLLING_RETRY||this._cmdRetryCount<=MAX_POLLING_RETRY)){log("Wait reconnect..");
+this._setTimer(TIMEOUT_RECONNECT,this._recommunicate);return}}this._isA1Accepted?this._onErrorFinished(new ErrorInfo(RESPONSE_CODE_DEVICE_ERROR,CAUSE_NET_DOWN)):this._onErrorFinished(new ErrorInfo(RESPONSE_CODE_DEVICE_ERROR,CAUSE_CONNECTION))}}_recommunicate(){this._cmdRetryCount++;this._setStep(STEP_RECONNECT);var a="";a=this._host.startsWith("wss")||this._host.startsWith("ws")?this._host:"ws://"+this._host+":"+this._port;log("Connect to "+a);this._client=new WebSocket(a);this._client.onopen=function(b){this._waitToSendPollingCommand()}.bind(this);
+this._client.onerror=this._communicateError.bind(this);this._client.onmessage=this._recvResponse.bind(this);this._client.onclose=this._communicateClose.bind(this)}_communicate(){this._setStep(STEP_COMMUNICATE);var a="";a=this._host.startsWith("wss")||this._host.startsWith("ws")?this._host:"ws://"+this._host+":"+this._port;log("Connect to "+a);this._client=new WebSocket(a);this._client.onopen=function(b){this._setStep(STEP_CONNECTED);this._sendRequest()}.bind(this);this._client.onerror=this._communicateError.bind(this);
+this._client.onmessage=this._recvResponse.bind(this);this._client.onclose=this._communicateClose.bind(this)}_checkProcessing(){if(this._lastStep!=this._step)this._lastStepTimestamp=Date.now(),this._lastStep=this._step;else if(this._step>STEP_CONNECTED)this._clearInterval();else{var a=Date.now()-this._lastStepTimestamp,b=!1,c=CAUSE_CONNECTION;switch(this._step){case STEP_START:b=a>TIMEOUT_PREPROCESS;break;case STEP_PREPROCESS:b=a>TIMEOUT_BUILDREQUEST;break;case STEP_BUILDREQUEST:b=a>TIMEOUT_COMMUNICATE;
+break;case STEP_COMMUNICATE:b=a>TIMEOUT_CONNECTED;c=CAUSE_CONNECTION;break;case STEP_CONNECTED:b=a>TIMEOUT_ACK_NAK_A1,c=CAUSE_SEND_CMD,this._clearInterval()}b&&this._onErrorFinished(new ErrorInfo(RESPONSE_CODE_DEVICE_ERROR,c))}}doRequest(a,b){this._preProcess(b)&&(this._buildRequest(a)?this._communicate():this._onErrorFinished(new ErrorInfo(RESPONSE_CODE_INVALID_PARAMETER,CAUSE_CMD_FORMAT)))}}function isAcceptable(){return null==cls?!0:!1}
+self.onmessage=function(a){null==a.data||1>a.data.length?self.postMessage((new ErrorInfo(RESPONSE_CODE_UNDEFINED,CAUSE_CMD_FORMAT))._resultData):isAcceptable()?a.data.request.Cancel?self.postMessage((new ErrorInfo(RESPONSE_CODE_INVALID_SEQUENCE,CAUSE_CMD_SEQ_ERR))._resultData):(cls=new VescaJSFullFeaturedWS(a.data.host,a.data.port),cls.doRequest(a.data,self)):a.data.request.Cancel?cls._requestCancel():self.postMessage((new ErrorInfo(RESPONSE_CODE_PROCESSING,CAUSE_DEVICE_BUSY))._resultData)};
+self.postMessage({type:'WORKER_INIT'});
+}
+
+var FullFeaturedWorker;
+
+function createWorker(workerFunc) {
+  var functionString = workerFunc.toString();
+  var functionBody = functionString.trim().match(
+    /^function\s*\w*\s*\([\w\s,]*\)\s*\{([\w\W]*?)\}$/
+  )[1];
+  var blob = new Blob([functionBody], { type: "text/javascript" });
+  var url = URL.createObjectURL(blob);
+  return new Worker(url);
+}
+
+function sendToRN(msg) {
+  if (window.ReactNativeWebView) {
+    window.ReactNativeWebView.postMessage(JSON.stringify(msg));
+  }
+}
+
+function doRequestWorker(host, port, request) {
+  FullFeaturedWorker.postMessage({ host: host, port: port, request: request });
+}
+
+function doCancelWorker() {
+  if (FullFeaturedWorker) {
+    FullFeaturedWorker.postMessage({ request: { Cancel: true } });
+  }
+}
+
+function attachWorkerHandlers(worker) {
+  worker.onmessage = function(e) {
+    // Worker sends WORKER_INIT when its code has actually executed
+    if (e.data && e.data.type === 'WORKER_INIT') {
+      sendToRN({ type: 'READY' });
+      return;
+    }
+    if (e.data !== "undefined") {
+      if (e.data.StatusEvent != null) {
+        sendToRN({ type: 'STATUS_EVENT', data: e.data.StatusEvent });
+        return;
+      }
+    }
+    if (e.data.OutputCompleteEvent != null) {
+      sendToRN({ type: 'RESULT', data: e.data });
+    } else if (e.data.ErrorEvent != null) {
+      sendToRN({ type: 'ERROR', data: e.data });
+    }
+  };
+
+  worker.onerror = function(e) {
+    sendToRN({ type: 'INIT_ERROR', message: e.message || 'Worker error' });
+  };
+}
+
+function initWorker() {
+  FullFeaturedWorker = createWorker(vescajs);
+  attachWorkerHandlers(FullFeaturedWorker);
+}
+
+// Hard-reset the bridge: terminate the current worker (killing a stuck `cls`
+// singleton that rejects new requests with DeviceBusy) and spin up a fresh one.
+// The new worker re-emits WORKER_INIT, so RN gets a fresh READY. This only
+// clears app-side state — it does NOT settle a transaction held open on the
+// physical terminal (use PrintRetry for that).
+function doForceReset() {
+  try {
+    if (FullFeaturedWorker) { FullFeaturedWorker.terminate(); }
+  } catch (e) { /* terminate is best-effort */ }
+  try {
+    initWorker();
+  } catch (e) {
+    sendToRN({ type: 'INIT_ERROR', message: 'Force reset failed: ' + e.message });
+  }
+}
+
+try {
+  initWorker();
+} catch (e) {
+  sendToRN({ type: 'INIT_ERROR', message: 'Failed to initialize VescaJS: ' + e.message });
+}
+
+document.addEventListener('message', function(e) {
+  try {
+    var msg = JSON.parse(e.data);
+    if (msg.type === 'REQUEST') {
+      doRequestWorker(msg.host, msg.port, msg.request);
+    } else if (msg.type === 'CANCEL') {
+      doCancelWorker();
+    } else if (msg.type === 'FORCE_RESET') {
+      doForceReset();
+    }
+  } catch (err) {
+    sendToRN({ type: 'ERROR', data: { ErrorEvent: { ErrorCode: 990, ErrorCodeExtended: -1, Errorcodedetail: '0102', Message: 'ParseError: ' + err.message } } });
+  }
+});
+window.addEventListener('message', function(e) {
+  try {
+    var msg = JSON.parse(e.data);
+    if (msg.type === 'REQUEST') {
+      doRequestWorker(msg.host, msg.port, msg.request);
+    } else if (msg.type === 'CANCEL') {
+      doCancelWorker();
+    } else if (msg.type === 'FORCE_RESET') {
+      doForceReset();
+    }
+  } catch (err) {
+    sendToRN({ type: 'ERROR', data: { ErrorEvent: { ErrorCode: 990, ErrorCodeExtended: -1, Errorcodedetail: '0102', Message: 'ParseError: ' + err.message } } });
+  }
+});
+</script>
+</body>
+</html>

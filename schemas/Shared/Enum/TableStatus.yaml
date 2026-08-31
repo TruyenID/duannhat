@@ -1,0 +1,55 @@
+# ==============================================================================
+# Table Status Enum (テーブル状態 / Trạng thái bàn)
+# ==============================================================================
+#
+# Trạng thái runtime của một bàn ăn trong shop.
+# Chỉ phản ánh tình trạng vật lý hiện tại — không phải trạng thái config.
+# Không có FSM cứng: mọi transition đều cho phép, mỗi lần đổi log vào
+# table_status_changes (xem schemas/Shop/TableStatusChange.yaml).
+#
+# Giá trị (Values):
+#   - free: Trống, sẵn sàng tiếp khách
+#   - occupied: Đang có khách
+#   - reserved: Đã được đặt trước (chưa khách tới)
+#   - cleaning: Đang được dọn dẹp
+#   - out_of_service: Tạm khoá (hư, sửa chữa, v.v.)
+#
+# Sử dụng trong:
+#   - Table.status: trạng thái hiện tại
+#   - TableStatusChange.from_status / to_status: lịch sử transition
+#
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: テーブル状態
+  en: Table Status
+  vi: Trạng thái bàn
+
+values:
+  - value: free
+    label:
+      ja: 空席
+      en: Free
+      vi: Trống
+  - value: occupied
+    label:
+      ja: 使用中
+      en: Occupied
+      vi: Đang phục vụ
+  - value: reserved
+    label:
+      ja: 予約済み
+      en: Reserved
+      vi: Đã đặt trước
+  - value: cleaning
+    label:
+      ja: 清掃中
+      en: Cleaning
+      vi: Đang dọn
+  - value: out_of_service
+    label:
+      ja: 利用不可
+      en: Out of Service
+      vi: Tạm ngưng

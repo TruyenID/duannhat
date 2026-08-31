@@ -1,0 +1,143 @@
+# MaterialSubstitutionRule schema
+# Defines which materials can substitute for others during lot picking.
+# When pickLotsForConsumption cannot find enough stock for the primary
+# material, it checks for active substitution rules (if auto_substitute=true).
+#
+# Business Rules:
+#   - BS-01: Only one active rule per (primary, substitute) pair per org
+#   - BS-02: Priority determines fallback order (lower = preferred)
+#   - BS-03: conversion_factor adjusts qty (e.g. 1.1 means 10% more substitute needed)
+#   - BS-04: auto_substitute=false requires explicit user confirmation before substitution
+
+displayName:
+  en: Material Substitution Rule
+  ja: 材料代替ルール
+  vi: Quy tắc thay thế nguyên liệu
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    - columns: [organization_id, primary_material_id, substitute_material_id]
+      unique: true
+    - columns: [primary_material_id, is_active, priority]
+
+properties:
+  # The material that needs a substitute
+  primaryMaterial:
+    type: Association
+    relation: ManyToOne
+    target: Material
+    onDelete: CASCADE
+    displayName:
+      en: Primary Material
+      ja: 主材料
+      vi: Nguyên liệu chính
+    description:
+      en: "The material that may run out of stock and need substitution."
+
+  # The material that can replace the primary
+  substituteMaterial:
+    type: Association
+    relation: ManyToOne
+    target: Material
+    onDelete: CASCADE
+    displayName:
+      en: Substitute Material
+      ja: 代替材料
+      vi: Nguyên liệu thay thế
+    description:
+      en: "The material that can be used in place of the primary."
+
+  # Conversion factor: how much substitute is needed per unit of primary
+  conversion_factor:
+    type: Decimal
+    precision: 10
+    scale: 4
+    default: 1.0000
+    displayName:
+      en: Conversion Factor
+      ja: 換算係数
+      vi: Hệ số quy đổi
+    description:
+      en: "Qty multiplier. 1.0 = 1:1 replacement. 1.1 = need 10% more substitute."
+
+  priority:
+    type: Int
+    default: 0
+    displayName:
+      en: Priority
+      ja: 優先度
+      vi: Ưu tiên
+    description:
+      en: "Lower number = higher priority. Used to order fallback candidates."
+
+  is_active:
+    type: Boolean
+    default: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+
+  # BS-04: per-rule opt-in. A rule may exist (is_active) yet still require
+  # explicit user confirmation before automatic fallback. Only rules with
+  # auto_substitute=true are consulted by the FEFO auto-fallback path.
+  auto_substitute:
+    type: Boolean
+    default: false
+    displayName:
+      en: Auto Substitute
+      ja: 自動代替
+      vi: Tự động thay thế
+    description:
+      en: "Off by default. When true, pickLotsForConsumption falls back to the substitute automatically once the primary is exhausted."
+
+  # Temporal validity window. NULL = open-ended. A rule only participates in
+  # auto-fallback while now() is within [valid_from, valid_until].
+  valid_from:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Valid From
+      ja: 有効開始
+      vi: Hiệu lực từ
+
+  valid_until:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Valid Until
+      ja: 有効終了
+      vi: Hiệu lực đến
+
+  notes:
+    type: Text
+    nullable: true
+    displayName:
+      en: Notes
+      ja: メモ
+      vi: Ghi chú
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: CASCADE
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu

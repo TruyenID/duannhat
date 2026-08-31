@@ -1,0 +1,199 @@
+# =============================================================================
+# WorkstationLogRecord (#2901) — một dòng log máy trạm đã được kéo về Cloud
+# =============================================================================
+#
+# ## Vì sao bảng này tồn tại
+#
+# Đo được ngày 2026-08-15: log máy trạm KHÔNG rời khỏi quán. `slog` mặc định ra
+# stderr, không ghi file, không endpoint nào của Cloud nhận log. Điều tra một
+# sự cố phải ngồi trước chính máy đó — mà fleet production là hai máy Windows ở
+# hai quán, không ai ngồi cạnh. Để trả lời một câu hỏi vận hành bình thường
+# ("ba cảnh báo lệch tiền đang treo là đơn nào") mất nửa buổi lần ngược
+# `audit_logs`.
+#
+# ## Bốn quyết định thiết kế, theo thứ tự sức nặng
+#
+# 1. **KÉO THEO YÊU CẦU, không đẩy liên tục** (chủ dự án chốt 2026-08-15). Log
+#    ở lại quán cho tới khi có người bấm điều tra ⇒ ít PII nằm sẵn ở Cloud
+#    nhất, và đó là lý lẽ chính. Nên bảng này chỉ có hàng khi ai đó đã tạo một
+#    `workstation_log_requests`; trạng thái bình thường của nó là RỖNG.
+#
+# 2. **Lọc ALLOWLIST tại NGUỒN, và Cloud kiểm LẠI.** Nguồn chân lý là
+#    `docs/reference/workstation-log-allowlist.md` — bảng `message → attr được
+#    phép`, hai đầu cùng đọc. Máy trạm lọc trước khi gửi; Cloud **không tin**
+#    máy trạm lọc đúng và lọc lần nữa lúc nhận. Blocklist bị loại thẳng: máy
+#    trạm có 305 thông điệp log và các trường đính kèm gồm `name` (348 chỗ),
+#    `note` (77), `customer_id` (20), `email` (17), `address` (17), `phone`
+#    (15), `qr_token` (11). Thêm một trường PII mới ở bất kỳ đâu trong 305 chỗ
+#    đó thì blocklist **fail-open** — nó tự chảy lên Cloud, không ai biết. Repo
+#    này đã trả giá đúng kiểu đó ở #2220 (11 cặp token còn sống + 287
+#    `qr_token` + PII khách vào git; revert KHÔNG thu hồi được).
+#
+# 3. **Idempotency theo `(device_id, local_id)`, UNIQUE ở tầng DB.** `local_id`
+#    là id autoincrement trong SQLite của chính máy trạm — ổn định, không tái
+#    sinh trên cùng thiết bị. Cùng khuôn `order_money_overwrites` (#2885), và
+#    cùng lý do: kiểm ở tầng ứng dụng không đủ vì hai request song song cùng
+#    lọt qua `exists()` rồi cùng INSERT. Gửi lại y hệt ⇒ `duplicates++`, KHÔNG
+#    hàng mới và **KHÔNG cập nhật hàng cũ**.
+#
+# 4. **KHÔNG FK cứng.** `device_id` / `branch_id` / `organization_id` là Uuid
+#    trần, đúng khuôn `AuditLog.user_id` và `order_money_overwrites`. Log điều
+#    tra phải sống sót khi thiết bị bị revoke/xoá — thiết bị hỏng chính là lúc
+#    người ta cần đọc log của nó nhất. Hệ quả phụ có ích: bảng không có FK vào
+#    aggregate nào nên nó không rơi vào `fk_reachability_exempt` của
+#    `config/domain-mutation-guard.php`.
+#
+# ## Giữ 14 ngày, tính theo `logged_at` — KHÔNG theo lúc nhận
+#
+# Chủ dự án chốt 2026-08-16. Log vận hành không phải chứng từ kế toán; giữ vô
+# hạn là tích luỹ rủi ro PII không có lợi ích tương ứng.
+#
+# Mốc đếm là `logged_at` (lúc dòng log ra đời TRÊN MÁY TRẠM), không phải
+# `created_at` (lúc Cloud nhận). Khác biệt này load-bearing: một quán mất mạng
+# 10 ngày rồi mới đẩy được sẽ làm mọi dòng "trẻ lại" 10 ngày nếu đếm theo lúc
+# nhận, tức hạn 14 ngày thành 24 ngày mà không ai khai. Lệnh
+# `workstation-logs:prune` cưỡng chế mốc đúng.
+#
+# Đây KHÔNG phải vi phạm #1091: hạn lưu trữ là thời gian TRÔI QUA, không phải
+# ngày nghiệp vụ — không múi giờ chi nhánh nào đổi được "14 ngày là bao lâu".
+#
+# ## `attrs` là JSON đã LỌC, không phải bản gốc
+#
+# Chỉ chứa những khoá mà allowlist khai cho đúng `message` này. Attr lạ bị
+# **bỏ**, dòng vẫn giữ (một trường chưa khai không đáng làm mất cả dòng bằng
+# chứng). Khác với `message` lạ — dòng đó bị bỏ hẳn và đếm vào `rejected`.
+# =============================================================================
+
+displayName:
+  en: Workstation Log Record
+  ja: ワークステーションログ
+  vi: Bản ghi log máy trạm
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: false
+  id: Uuid
+  # Bảng chẩn đoán, không phải tài nguyên CRUD — không sinh service layer.
+  service: false
+  indexes:
+    # Quyết định 3 — khoá idempotency, cưỡng chế ở tầng DB.
+    - columns: [device_id, local_id]
+      unique: true
+      name: workstation_log_records_device_local_unique
+    # Phép đọc chính của màn hình điều tra: "lô này trả về những gì".
+    - columns: [request_id]
+    # "Quán X, khoảng thời gian Y" — trục đọc thứ hai.
+    - columns: [branch_id, logged_at]
+    # Trục QUÉT của `workstation-logs:prune`. Không có index này thì lượt xoá
+    # hằng đêm là full scan trên bảng lớn nhất mà tính năng này sinh ra.
+    - columns: [logged_at]
+
+properties:
+  # ── Ai gửi, và dòng nào của họ ────────────────────────────────────────────
+  device_id:
+    type: Uuid
+    displayName:
+      en: Device ID
+      ja: デバイスID
+      vi: ID thiết bị
+    description:
+      en: Workstation that produced the line. Half of the idempotency key. Plain UUID, no FK — logs must outlive the device, because a broken device is exactly when they are read.
+      ja: 行を出力したワークステーション。冪等キーの片方。FKなし（デバイスより長生きする必要がある）。
+      vi: Máy trạm sinh ra dòng log. Một nửa khoá idempotency. Uuid trần, không FK — log phải sống lâu hơn thiết bị, vì thiết bị hỏng chính là lúc cần đọc nó.
+
+  local_id:
+    type: BigInt
+    displayName:
+      en: Local Row ID
+      ja: ローカル行ID
+      vi: ID dòng cục bộ
+    description:
+      en: Autoincrement id of the line in the device's own SQLite buffer. Stable and never reused on one device, which is why it is the idempotency key.
+      ja: デバイス側SQLiteバッファの自動採番ID。同一デバイス内で再利用されないため冪等キーに使う。
+      vi: Id autoincrement của dòng trong vòng đệm SQLite của chính thiết bị. Ổn định, không tái sinh trên cùng thiết bị — vì thế nó là khoá idempotency.
+
+  # ── Quy về đâu ────────────────────────────────────────────────────────────
+  branch_id:
+    type: Uuid
+    displayName:
+      en: Branch ID
+      ja: 店舗ID
+      vi: ID chi nhánh
+    description:
+      en: Branch resolved from the device token, never from the payload — a device cannot file logs against another branch.
+      ja: デバイストークンから解決した店舗。ペイロードからは取らない。
+      vi: Chi nhánh suy ra từ device token, KHÔNG lấy từ payload — thiết bị không ghi được log sang chi nhánh khác.
+
+  organization_id:
+    type: Uuid
+    displayName:
+      en: Organization ID
+      ja: 組織ID
+      vi: ID tổ chức
+    description:
+      en: Local organization mirrored from console_organization_id of the branch (#2847 — branches has no organization_id column; trusting that it does killed 7,523 alerts).
+      ja: 店舗の console_organization_id からミラーした組織（#2847）。
+      vi: Tổ chức local suy qua mirror console của chi nhánh (#2847 — bảng branches KHÔNG có cột organization_id; tin nhầm điều đó đã làm chết 7.523 alert).
+
+  request_id:
+    type: Uuid
+    displayName:
+      en: Request ID
+      ja: 取得要求ID
+      vi: ID yêu cầu
+    description:
+      en: The pull request this batch answered. Plain UUID, no FK — a record must survive its request row being pruned on a different horizon.
+      ja: このバッチが応答した取得要求。FKなし。
+      vi: Yêu cầu kéo mà lô này trả lời. Uuid trần, không FK — bản ghi phải sống sót khi hàng yêu cầu bị dọn theo một mốc khác.
+
+  # ── Nội dung dòng log ─────────────────────────────────────────────────────
+  logged_at:
+    type: DateTime
+    displayName:
+      en: Logged At
+      ja: 記録日時
+      vi: Thời điểm ghi log
+    description:
+      en: When the line was produced ON THE DEVICE (RFC3339 UTC). The retention horizon counts from HERE, not from created_at — otherwise a shop that was offline for 10 days silently gets 24 days of retention.
+      ja: 端末で行が生成された時刻（RFC3339 UTC）。保存期限はこの時刻から数える。
+      vi: Lúc dòng log ra đời TRÊN THIẾT BỊ (RFC3339 UTC). Hạn 14 ngày đếm từ ĐÂY, không từ created_at — nếu không, quán mất mạng 10 ngày sẽ âm thầm được giữ 24 ngày.
+
+  level:
+    type: EnumRef
+    enum: WorkstationLogLevel
+    filterable: true
+    displayName:
+      en: Level
+      ja: ログレベル
+      vi: Mức
+    description:
+      en: info | warn | error. `debug` is refused with 422 at the endpoint — a debug line arriving means the source filter is broken, so the whole batch is suspect.
+      ja: info | warn | error。`debug` はエンドポイントで422。
+      vi: info | warn | error. `debug` bị từ chối 422 ngay ở endpoint — một dòng debug tới nơi nghĩa là bộ lọc ở nguồn đã hỏng, nên cả lô đáng ngờ.
+
+  message:
+    type: String
+    length: 255
+    filterable: true
+    displayName:
+      en: Message
+      ja: メッセージ
+      vi: Thông điệp
+    description:
+      en: The slog message VERBATIM. It is the allowlist key, so it is stored exactly as declared in docs/reference/workstation-log-allowlist.md — never normalised, or the key stops matching.
+      ja: slog のメッセージ原文。allowlist のキーなので正規化しない。
+      vi: Thông điệp slog NGUYÊN VĂN. Nó là khoá allowlist nên lưu đúng như khai trong docs/reference/workstation-log-allowlist.md — không chuẩn hoá, nếu không khoá sẽ thôi khớp.
+
+  attrs:
+    type: Json
+    nullable: true
+    displayName:
+      en: Attributes
+      ja: 属性
+      vi: Thuộc tính
+    description:
+      en: Attributes that SURVIVED the allowlist for this message. Unknown keys are dropped and the line is kept; unknown messages drop the whole line instead. Null when the message declares no attributes.
+      ja: この message に対して allowlist を通過した属性のみ。未知のキーは破棄し行は残す。
+      vi: Các attr ĐÃ QUA allowlist của đúng message này. Attr lạ bị bỏ và dòng vẫn giữ; message lạ thì bỏ cả dòng. Null khi message không khai attr nào.

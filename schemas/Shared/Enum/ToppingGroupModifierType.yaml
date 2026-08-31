@@ -1,0 +1,25 @@
+kind: enum
+
+# Modifier semantics — does the group ADD ingredients (extra cheese, sauce)
+# or REMOVE existing ones (no onion, không hành)?
+#
+# Why explicit: kitchen ticket renders the two completely differently.
+# An ADD shows up as "+ Cheese" in the items list. A REMOVE shows up as
+# bold red "❌ NO ONION" at the top of the line so the chef can't miss it.
+# Mixing them in one group makes the ticket UI ambiguous and we lose 80%
+# of the order-accuracy benefit modifiers were supposed to give.
+#
+# Pricing rule (enforced server-side):
+#   modifier_type=remove → all ToppingGroupItemSku.extra_price MUST be 0.
+#   You don't charge a customer for NOT adding something.
+
+displayName:
+  ja: 修飾タイプ
+  en: Modifier Type
+  vi: Loại điều chỉnh
+
+values:
+  - value: add
+    label: { ja: 追加, en: Add, vi: Thêm }
+  - value: remove
+    label: { ja: 抜き, en: Remove, vi: Bỏ }

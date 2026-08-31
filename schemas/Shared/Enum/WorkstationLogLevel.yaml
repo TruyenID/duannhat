@@ -1,0 +1,34 @@
+# ==============================================================================
+# Workstation Log Level Enum (#2901)
+# ==============================================================================
+#
+# Chủ dự án chốt 2026-08-16: **`info` trở lên**. Ba giá trị, không hơn.
+#
+# `debug` CỐ Ý không có mặt. Đây không phải "chưa cần" — nó là ràng buộc: một
+# giá trị enum tồn tại là một giá trị có đường ghi, và đường ghi đó sẽ được
+# dùng. Đo trên cây Go ngày 2026-08-16: `slog.Debug` chỉ có **7** điểm gọi so
+# với 314 điểm `info+`, nên ngưỡng này gần như không mất gì mà cắt hẳn được
+# nhóm ồn nhất.
+#
+# Cloud KHÔNG tin máy trạm đã lọc đúng: `level: "debug"` trên đường HTTP là
+# **422**, không phải "bỏ dòng đó". Lý do khác nhau và quan trọng — một dòng
+# `debug` lọt lên nghĩa là bộ lọc ở nguồn đã hỏng, tức mọi dòng khác trong lô
+# cũng đáng ngờ. Còn một `message` ngoài allowlist thì chỉ là một dòng chưa
+# được khai (xem `docs/reference/workstation-log-allowlist.md`), và làm rơi cả
+# lô vì nó là mất bằng chứng.
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: ログレベル
+  en: Workstation Log Level
+  vi: Mức log máy trạm
+
+values:
+  - value: info
+    label: { ja: 情報, en: Info, vi: Thông tin }
+  - value: warn
+    label: { ja: 警告, en: Warning, vi: Cảnh báo }
+  - value: error
+    label: { ja: エラー, en: Error, vi: Lỗi }

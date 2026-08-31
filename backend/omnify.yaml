@@ -1,0 +1,78 @@
+# yaml-language-server: $schema=https://cdn.jsdelivr.net/npm/@famgia/omnify-bin@latest/omnify-config-schema.json
+schemasDir: ./schemas
+lockFilePath: .omnify/lock.json
+
+connections:
+  default:
+    driver: mysql                     # mysql | pgsql | sqlite
+    migrations:
+      - type: laravel
+        path: database/migrations/omnify
+        schemasPath: .omnify/schemas.json
+        # options:
+        #   enumStrategy: string      # string (cross-DB, default) | native (MySQL ENUM)
+      # - type: sql
+      #   path: migrations/sql
+      #   dialect: mysql              # mysql | postgresql | sqlite
+
+  # Multi-connection example:
+  # analytics:
+  #   driver: pgsql
+  #   migrations:
+  #     - type: laravel
+  #       path: database/migrations/analytics
+  #       schemasPath: database/analytics/schemas.json
+
+default: default
+
+locale:
+  locales: [ja, en, vi]
+  defaultLocale: ja
+  fallbackLocale: en
+
+# External schema packages
+# packages:
+#   - path: ../packages/sso           # short form: auto-discovers omnify.yaml
+#   - path: ../packages/billing       # short form with codegen override
+#     codegen:
+#       laravel:
+#         model:
+#           namespace: App\Models\Billing
+
+# Built-in compound types (JapaneseName, JapaneseAddress, JapanesePhone)
+# compoundTypes:
+#   - japan
+
+# File upload configuration
+# file:
+#   tempFlow: true                       # enable temporary → permanent flow
+#   tempTtl: 12h                         # temporary file TTL
+#   cleanupSchedule: hourly              # phase 1: soft-delete expired temp records
+#   purgeAfter: 72h                      # grace period before physical file deletion
+#   purgeSchedule: daily                 # phase 2: force-delete + remove physical files
+#   defaultDisk: public                  # default storage disk
+
+# Code generation (enable defaults to false — must be explicitly enabled)
+# codegen:
+#   typescript:
+#     enable: true
+#     modelsPath: resources/js/types/models
+#   laravel:
+#     enable: true
+#     # rootPath: backend                   # monorepo: prefix all output paths
+#     # structure: modular                  # modular | legacy (default)
+#     model:                                # all sub-sections are optional
+#       path: app/Models/Omnify            # default
+#       namespace: App\Models\Omnify       # default: derived from path
+#     request:
+#       path: app/Http/Requests            # default
+#       namespace: App\Http\Requests       # default: derived from path
+#     resource:
+#       path: app/Http/Resources           # default
+#       namespace: App\Http\Resources      # default: derived from path
+#     factory:
+#       path: database/factories           # default
+#       namespace: Database\Factories      # default: derived from path
+#     provider:
+#       path: app/Providers                # default
+#       namespace: App\Providers           # default: derived from path

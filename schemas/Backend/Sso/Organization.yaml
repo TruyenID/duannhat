@@ -1,0 +1,71 @@
+# Tenant gốc của downstream service. `console_organization_id` là khoá đối chiếu
+# sang Platform (nguồn sự thật); mọi bảng nghiệp vụ tham chiếu tenant qua giá trị
+# này chứ không qua `id` cục bộ.
+kind: object
+
+options:
+  id: Uuid
+  timestamps: true
+  softDelete: true
+  indexes:
+    - columns: [slug]
+      unique: true
+
+properties:
+  console_organization_id:
+    type: Uuid
+    unique: true
+    displayName:
+      ja: コンソール組織ID
+      en: Console Organization ID
+      vi: ID tổ chức trên Console
+
+  name:
+    type: String
+    length: 100
+    displayName:
+      ja: 組織名
+      en: Organization Name
+      vi: Tên tổ chức
+
+  slug:
+    type: String
+    length: 100
+    displayName:
+      ja: スラッグ
+      en: Slug
+      vi: Slug
+
+  is_active:
+    type: Boolean
+    default: true
+    displayName:
+      ja: 有効
+      en: Active
+      vi: Hoạt động
+
+  settings:
+    type: Json
+    nullable: true
+    displayName:
+      ja: 設定
+      en: Settings
+      vi: Cấu hình
+
+  # --- Cột riêng của dxs-product (thêm sau khi publish) ---
+
+  # #1153 — quốc gia vận hành của pháp nhân (ISO 3166-1 alpha-2).
+  # BẢN SAO, không phải nguồn sự thật: Platform sở hữu organizations.country,
+  # đặt lúc tạo và bất biến; UserProvisioner nhận lại từ payload
+  # organization-contexts mỗi lần đăng nhập (adopt-if-present — không bao giờ
+  # ghi đè bằng null khi Platform cũ thiếu trường này). Hồ sơ tuân thủ
+  # (JP 適格請求書 / VN hoá đơn điện tử) phân giải từ giá trị này; mặc định JP
+  # phủ mọi tenant có trước #1153.
+  operating_country:
+    type: String
+    length: 2
+    default: JP
+    displayName:
+      ja: 事業国
+      en: Operating Country
+      vi: Quốc gia hoạt động

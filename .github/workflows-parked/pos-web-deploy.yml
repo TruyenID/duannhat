@@ -1,0 +1,71 @@
+# Deploy lên AWS Amplify (mô hình kintai/tempo cũ): GitHub Actions trigger
+# start-job RELEASE rồi chờ kết quả — build chạy trên Amplify.
+# Amplify app: godx-tempo-pos (d3nuz12zp9crpd, account famgia, Tokyo). autoBuild OFF —
+# Actions là đường deploy DUY NHẤT. IAM: gha-godx-tempo-amplify (chỉ StartJob/GetJob).
+name: Deploy to Amplify
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-amplify
+  cancel-in-progress: false
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AMPLIFY_AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AMPLIFY_AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: ap-northeast-1
+  APP_ID: d3nuz12zp9crpd
+
+jobs:
+  deploy:
+    name: Amplify release
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Apply versioned reverse-proxy rules
+        run: |
+          aws amplify update-app \
+            --app-id "$APP_ID" \
+            --custom-rules file://amplify-rewrites.json \
+            --no-cli-pager >/dev/null
+
+      - name: Start Amplify build and wait
+        run: |
+          set +e
+          task_start_output=$(aws amplify start-job --app-id "$APP_ID" --branch-name main --job-type RELEASE --query 'jobSummary.jobId' --output text 2>&1)
+          task_start_code=$?
+          set -e
+
+          if [ "$task_start_code" -eq 0 ]; then
+            task_job_id="$task_start_output"
+            echo "==> job $task_job_id started"
+          elif echo "$task_start_output" | grep -q 'LimitExceededException'; then
+            task_job_id=$(aws amplify list-jobs --app-id "$APP_ID" --branch-name main --max-results 10 --query "jobSummaries[?status=='PENDING' || status=='RUNNING'] | [0].jobId" --output text)
+            if [ -z "$task_job_id" ] || [ "$task_job_id" = "None" ]; then
+              echo "::error::Amplify reported an active job, but no active job could be found"
+              exit 1
+            fi
+            echo "==> following existing job $task_job_id"
+          else
+            echo "::error::$task_start_output"
+            exit "$task_start_code"
+          fi
+
+          while true; do
+            task_job_state=$(aws amplify get-job --app-id "$APP_ID" --branch-name main --job-id "$task_job_id" --query 'job.summary.status' --output text)
+            case "$task_job_state" in
+              SUCCEED) echo "==> deployed: https://main.$APP_ID.amplifyapp.com"; exit 0 ;;
+              FAILED|CANCELLED) echo "::error::Amplify job $task_job_state"; exit 1 ;;
+              *) echo "  $task_job_state…"; sleep 30 ;;
+            esac
+          done
+      - name: Smoke test
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "https://main.$APP_ID.amplifyapp.com/" || echo 000)
+          echo "smoke: HTTP $code"
+          case "$code" in 200|30*) echo OK;; *) echo "::error::smoke $code"; exit 1;; esac

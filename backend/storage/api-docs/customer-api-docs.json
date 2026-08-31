@@ -1,0 +1,1415 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "TempoFast API — Customer-facing",
+        "description": "## TempoFast — Customer-facing APIs\n\nPublic APIs consumed by the customer ordering surfaces (QR menu, takeaway, delivery)\nunder the `/api/v1/customer/...` prefix.\n\nMost read endpoints are public (no authentication required) so a guest customer can\nscan a QR code and immediately view the menu. Order mutations and customer self-service\nendpoints are guarded by the `customer` guard (Sanctum personal access token issued by\n`POST /api/v1/customer/auth/login`).\n\n### Resources\n| Resource | Endpoints |\n|----------|-----------|\n| Customer Menu | `/api/v1/customer/branches/{branchSlug}/menu`, `/api/v1/customer/tables/{qrToken}/menu` |",
+        "contact": {
+            "name": "TempoFast"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:5400",
+            "description": "Local Development"
+        }
+    ],
+    "paths": {
+        "/api/v1/customer/coupons/preview": {
+            "post": {
+                "tags": [
+                    "Coupons"
+                ],
+                "summary": "Preview a coupon — read-only validation, no reservation",
+                "description": "Returns is_valid:true + discount_applied_amount when the coupon would apply to the supplied subtotal under all the same rules as POST apply-coupon. Returns is_valid:false + error_code (+ optional meta) otherwise. Throttled 60/min.",
+                "operationId": "26d2c6cb8debb7bb78f871b71c873b2d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "code",
+                                    "brand_id",
+                                    "branch_id",
+                                    "subtotal"
+                                ],
+                                "properties": {
+                                    "code": {
+                                        "type": "string",
+                                        "maxLength": 50
+                                    },
+                                    "brand_id": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    },
+                                    "branch_id": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    },
+                                    "customer_id": {
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "nullable": true
+                                    },
+                                    "subtotal": {
+                                        "type": "number"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Preview result — is_valid:true with discount_applied_amount, or is_valid:false with error_code"
+                    },
+                    "422": {
+                        "description": "Request payload validation failure (NOT a coupon-domain error — coupon errors come back as is_valid:false)"
+                    },
+                    "429": {
+                        "description": "Throttled"
+                    }
+                }
+            }
+        },
+        "/api/v1/customer/orders/{orderId}/branch-review": {
+            "post": {
+                "tags": [
+                    "Customer Branch Reviews"
+                ],
+                "summary": "Submit a branch review",
+                "description": "Submit a 1-5 star rating with optional comment for the branch associated with a closed order. One review per order.",
+                "operationId": "f022790b3d770e6ef153a27a67d3ad0a",
+                "parameters": [
+                    {
+                        "name": "orderId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "rating"
+                                ],
+                                "properties": {
+                                    "rating": {
+                                        "type": "integer",
+                                        "maximum": 5,
+                                        "minimum": 1
+                                    },
+                                    "service_rating": {
+                                        "type": "integer",
+                                        "maximum": 5,
+                                        "minimum": 1,
+                                        "nullable": true
+                                    },
+                                    "staff_rating": {
+                                        "type": "integer",
+                                        "maximum": 5,
+                                        "minimum": 1,
+                                        "nullable": true
+                                    },
+                                    "space_rating": {
+                                        "type": "integer",
+                                        "maximum": 5,
+                                        "minimum": 1,
+                                        "nullable": true
+                                    },
+                                    "highlights": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "nullable": true
+                                    },
+                                    "photo_file_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "uuid"
+                                        },
+                                        "nullable": true
+                                    },
+                                    "comment": {
+                                        "type": "string",
+                                        "maxLength": 2000,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Review submitted",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "format": "uuid"
+                                                },
+                                                "rating": {
+                                                    "type": "integer"
+                                                },
+                                                "service_rating": {
+                                                    "type": "integer",
+                                                    "nullable": true
+                                                },
+                                                "staff_rating": {
+                                                    "type": "integer",
+                                                    "nullable": true
+                                                },
+                                                "space_rating": {
+                                                    "type": "integer",
+                                                    "nullable": true
+                                                },
+                                                "highlights": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "comment": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "photos": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string",
+                                                                "format": "uuid"
+                                                            },
+                                                            "url": {
+                                                                "type": "string",
+                                                                "nullable": true
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Order not found"
+                    },
+                    "422": {
+                        "description": "Order not closed, already reviewed, or validation error"
+                    }
+                }
+            }
+        },
+        "/api/v1/customer/orders/{orderId}/branch-reviewable": {
+            "get": {
+                "tags": [
+                    "Customer Branch Reviews"
+                ],
+                "summary": "Check if order is eligible for branch review",
+                "description": "Returns whether the order can be reviewed for the branch, including any existing review data.",
+                "operationId": "c8ecafb46d65dbe82f678fe8cdb0c5be",
+                "parameters": [
+                    {
+                        "name": "orderId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Reviewable status",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "can_review": {
+                                                    "type": "boolean"
+                                                },
+                                                "existing_review": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string",
+                                                            "format": "uuid"
+                                                        },
+                                                        "rating": {
+                                                            "type": "integer"
+                                                        },
+                                                        "service_rating": {
+                                                            "type": "integer",
+                                                            "nullable": true
+                                                        },
+                                                        "staff_rating": {
+                                                            "type": "integer",
+                                                            "nullable": true
+                                                        },
+                                                        "space_rating": {
+                                                            "type": "integer",
+                                                            "nullable": true
+                                                        },
+                                                        "highlights": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "comment": {
+                                                            "type": "string",
+                                                            "nullable": true
+                                                        },
+                                                        "photos": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "string",
+                                                                        "format": "uuid"
+                                                                    },
+                                                                    "url": {
+                                                                        "type": "string",
+                                                                        "nullable": true
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "created_at": {
+                                                            "type": "string",
+                                                            "format": "date-time"
+                                                        }
+                                                    },
+                                                    "type": "object",
+                                                    "nullable": true
+                                                },
+                                                "branch": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string",
+                                                            "format": "uuid"
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Order not found"
+                    },
+                    "422": {
+                        "description": "Order not closed"
+                    }
+                }
+            }
+        },
+        "/api/v1/customer/tables/{qrToken}/menu": {
+            "get": {
+                "tags": [
+                    "Customer Menu"
+                ],
+                "summary": "Get the active menu for the table that owns the given QR token",
+                "description": "Public endpoint used by the QR-scan flow. Resolves the table by `qr_token`, derives its branch, and returns the menu currently active for that branch (filtered by server-side time-of-day rules — no client-supplied time accepted).",
+                "operationId": "f6a7d5cd8213e5edbc1541f9adf879f4",
+                "parameters": [
+                    {
+                        "name": "qrToken",
+                        "in": "path",
+                        "description": "Per-table QR token printed on the physical QR code.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Active menu for the table's branch.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/CustomerMenu"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Table not found, inactive, or no active menu for the branch."
+                    }
+                },
+                "security": []
+            }
+        },
+        "/api/v1/customer/branches/{branchSlug}/menu": {
+            "get": {
+                "tags": [
+                    "Customer Menu"
+                ],
+                "summary": "Get the active menu for a branch resolved by slug",
+                "description": "Public endpoint used by the takeaway/delivery flow where there is no QR token. Looks up the branch by `slug`, then returns the menu currently active for that branch (filtered by server-side time-of-day rules — no client-supplied time accepted).",
+                "operationId": "36c876a149003b72c220fd758dbda1ee",
+                "parameters": [
+                    {
+                        "name": "branchSlug",
+                        "in": "path",
+                        "description": "Branch slug (URL-safe identifier).",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Active menu for the branch.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/CustomerMenu"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Branch not found, inactive, or no active menu for the branch."
+                    }
+                },
+                "security": []
+            }
+        },
+        "/api/v1/customer/orders/{id}/paypay-qr": {
+            "post": {
+                "tags": [
+                    "Customer Orders"
+                ],
+                "summary": "Mint a PayPay dynamic QR code for this order (plan-054)",
+                "description": "Public, like the Stripe endpoints beside it — the order id is the opaque token. Every call mints a FRESH code and invalidates whatever was outstanding, so two codes for one order can never both be scannable. Throttled per ORDER ID (10/min), not per IP: every phone in a shop shares one NAT egress address. JPY only; PayPay must be enabled for the branch (see `GET /customer/branches/{slug}/payment-context` → `paypay_enabled`).",
+                "operationId": "3f28258051dc2f331e39629b777d6213",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "amount": {
+                                        "description": "The payer's own share. Omit to ask for whatever is still outstanding, computed server-side under the order row lock. A split-bill caller MUST send its slice — the first of four payers would otherwise be handed a code for the whole bill. The server still caps it at what is outstanding.",
+                                        "type": "number",
+                                        "minimum": 1,
+                                        "nullable": true
+                                    },
+                                    "split_type": {
+                                        "description": "HOW the payer arrived at that share. Not a money input; same names and shapes as the Stripe split-intent endpoint so a dine-in bill reads identically whichever gateway settled it. Sending it is what makes paid dishes disable in the bill and turns `/split-status` from a soft lock into a hard one.",
+                                        "type": "string",
+                                        "enum": [
+                                            "by_people",
+                                            "by_items",
+                                            "custom"
+                                        ],
+                                        "nullable": true
+                                    },
+                                    "split_count": {
+                                        "type": "integer",
+                                        "minimum": 2,
+                                        "nullable": true
+                                    },
+                                    "item_allocations": {
+                                        "type": "array",
+                                        "items": {
+                                            "required": [
+                                                "item_id",
+                                                "units"
+                                            ],
+                                            "properties": {
+                                                "item_id": {
+                                                    "type": "string"
+                                                },
+                                                "units": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "QR minted.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "qr_url": {
+                                                    "description": "Encode this into the QR image shown to the customer.",
+                                                    "type": "string"
+                                                },
+                                                "deeplink": {
+                                                    "description": "Opens the PayPay app directly on the payer's own phone.",
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "merchant_payment_id": {
+                                                    "description": "Prefixed `tempoqr-`. Also the ledger `idempotency_key` once the money is booked.",
+                                                    "type": "string"
+                                                },
+                                                "amount": {
+                                                    "type": "number"
+                                                },
+                                                "expires_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "nullable": true
+                                                },
+                                                "expires_in_seconds": {
+                                                    "description": "Server-anchored — build the countdown from THIS, not from `expires_at`. A client with a skewed clock would otherwise show a code that \"expired\" hours ago.",
+                                                    "type": "integer",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Order not found."
+                    },
+                    "422": {
+                        "description": "PAYPAY_NOT_AVAILABLE — PayPay is off for this branch, the order is already settled, or the amount does not match what is owed."
+                    },
+                    "429": {
+                        "description": "Per-order mint throttle (10/min)."
+                    },
+                    "500": {
+                        "description": "PayPay could not be reached or the deployment is misconfigured. Nothing is marked locally: plan-054 never concludes from local state."
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Customer Orders"
+                ],
+                "summary": "Invalidate the outstanding PayPay QR without minting a new one (#1737)",
+                "description": "ALWAYS 204, including when there is no code to cancel — the caller is an exit button on a screen, so it must be pressable repeatedly without producing an error, and it has nothing different to do between \"just cancelled\" and \"nothing to cancel\". Without this, the dine-in \"change amount\" button only removed the panel from the screen while the old code stayed scannable at PayPay for ~5 minutes with nobody polling — the customer pays at the counter, the code gets scanned, and the shop is paid twice.",
+                "operationId": "12ae92e603e39b36fef5bfd5f0c70d4f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Cancelled, or there was nothing outstanding."
+                    },
+                    "404": {
+                        "description": "Order not found."
+                    },
+                    "500": {
+                        "description": "PayPay refused the invalidation. NOTHING is marked locally — a code marked dead here while PayPay still holds it alive is exactly the case the sweeper (`payments:sweep-paypay-qr`) could no longer save."
+                    }
+                }
+            }
+        },
+        "/api/v1/customer/orders/{id}/paypay-qr/status": {
+            "get": {
+                "tags": [
+                    "Customer Orders"
+                ],
+                "summary": "Is the PayPay QR paid yet? (plan-054)",
+                "description": "Asks PayPay rather than reading local state, and RECORDS the money if it has moved — so the customer's own polling settles the order even when the webhook is delayed or lost. Amounts come from PayPay's response, never from the order. Poll this from the QR screen; 10–15s is the client cadence, plus one immediate poll on `visibilitychange`.",
+                "operationId": "5ec8cafbdd2515dfd7be6e1478d3a5da",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Current status as PayPay reports it.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "status": {
+                                                    "description": "Mapped PayPay QR state. `EXPIRED` maps to canceled.",
+                                                    "type": "string"
+                                                },
+                                                "is_fully_paid": {
+                                                    "type": "boolean"
+                                                },
+                                                "order_status": {
+                                                    "type": "string"
+                                                },
+                                                "expires_in_seconds": {
+                                                    "type": "integer",
+                                                    "nullable": true
+                                                },
+                                                "merchant_payment_id": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Order not found."
+                    },
+                    "502": {
+                        "description": "PayPay could not be read. Deliberately not a conclusion about the money — retry."
+                    }
+                }
+            }
+        },
+        "/api/v1/customer/tables/{qrToken}/orders": {
+            "post": {
+                "tags": [
+                    "Customer Orders"
+                ],
+                "summary": "Create a dine-in order from a table QR token (atomic coupon apply)",
+                "description": "Customer scans a table QR and submits the cart. The endpoint creates the order, adds the items, and (if `coupon_code` is supplied) applies the coupon inside the SAME transaction so an invalid code rolls the whole order back. CustomerService::apply enforces freshness + counter limits + branch eligibility + customer-per-limit at this point regardless of what the preview said.",
+                "operationId": "82ad2000ae6833882cc22949fe067822",
+                "parameters": [
+                    {
+                        "name": "qrToken",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "items"
+                                ],
+                                "properties": {
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "required": [
+                                                "product_sku_id",
+                                                "quantity"
+                                            ],
+                                            "properties": {
+                                                "product_sku_id": {
+                                                    "type": "string",
+                                                    "format": "uuid"
+                                                },
+                                                "quantity": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "note": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "expected_unit_price": {
+                                                    "description": "#1715 — unit price the client is DISPLAYING for this line. Server never prices from it; it only REFUSES with 409 line_unit_price_drift when the resolved price is HIGHER (the customer would be charged more than shown). A lower resolved price is accepted silently — rule #514 lets the server legitimately charge less than the card the guest tapped. Omit it and the order behaves exactly as before.",
+                                                    "type": "number",
+                                                    "nullable": true
+                                                },
+                                                "toppings": {
+                                                    "description": "Plan 015 topping selections; empty/omitted = no toppings.",
+                                                    "type": "array",
+                                                    "items": {
+                                                        "required": [
+                                                            "topping_group_item_id",
+                                                            "product_sku_id",
+                                                            "quantity"
+                                                        ],
+                                                        "properties": {
+                                                            "topping_group_item_id": {
+                                                                "type": "string",
+                                                                "format": "uuid"
+                                                            },
+                                                            "product_sku_id": {
+                                                                "description": "NOT NULL by Phase 2 contract.",
+                                                                "type": "string",
+                                                                "format": "uuid"
+                                                            },
+                                                            "quantity": {
+                                                                "type": "integer",
+                                                                "minimum": 1
+                                                            },
+                                                            "note": {
+                                                                "type": "string",
+                                                                "maxLength": 255,
+                                                                "nullable": true
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "customer_name": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "nullable": true
+                                    },
+                                    "customer_phone": {
+                                        "type": "string",
+                                        "maxLength": 50,
+                                        "nullable": true
+                                    },
+                                    "note": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "payment_method": {
+                                        "type": "string",
+                                        "enum": [
+                                            "counter",
+                                            "transfer",
+                                            "call_staff",
+                                            "qr_pay",
+                                            "card"
+                                        ],
+                                        "nullable": true
+                                    },
+                                    "payment_timing": {
+                                        "type": "string",
+                                        "enum": [
+                                            "before",
+                                            "after"
+                                        ],
+                                        "nullable": true
+                                    },
+                                    "coupon_code": {
+                                        "description": "Plan-019 — optional coupon code applied atomically. Backend re-validates via CouponService::apply; on failure (paused, expired, branch mismatch, …) the whole order create rolls back with a 4xx CouponException.",
+                                        "type": "string",
+                                        "maxLength": 50,
+                                        "example": "WELCOME10",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Order created (and coupon applied if code was supplied).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "format": "uuid"
+                                                },
+                                                "code": {
+                                                    "type": "string"
+                                                },
+                                                "status": {
+                                                    "type": "string"
+                                                },
+                                                "subtotal": {
+                                                    "type": "number"
+                                                },
+                                                "total": {
+                                                    "type": "number"
+                                                },
+                                                "discount_amount": {
+                                                    "description": "0 if no coupon applied.",
+                                                    "type": "number"
+                                                },
+                                                "coupon_code_snapshot": {
+                                                    "description": "Frozen coupon code at apply time; null when no coupon.",
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "items": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Table or coupon not found (coupon_not_found surfaces here when coupon_code is supplied)."
+                    },
+                    "422": {
+                        "description": "Validation or CouponException (coupon_expired, coupon_paused, coupon_branch_not_eligible, …)."
+                    }
+                }
+            }
+        },
+        "/api/v1/customer/branches/{branchSlug}/orders": {
+            "post": {
+                "tags": [
+                    "Customer Orders"
+                ],
+                "summary": "Create a takeaway order for a branch (atomic coupon apply)",
+                "description": "Same transactional flow as the table-QR variant — create + addItems + couponService::apply in a single DB transaction. Adds takeaway-only fields (pickup_type, scheduled_pickup_time, takeaway contact). Same `coupon_code` field; same rollback semantics on failure.",
+                "operationId": "be234a3bdefeeedb9cb1ff3dceb0d458",
+                "parameters": [
+                    {
+                        "name": "branchSlug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "items"
+                                ],
+                                "properties": {
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "required": [
+                                                "product_sku_id",
+                                                "quantity"
+                                            ],
+                                            "properties": {
+                                                "product_sku_id": {
+                                                    "type": "string",
+                                                    "format": "uuid"
+                                                },
+                                                "quantity": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "note": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "expected_unit_price": {
+                                                    "description": "#1715 — unit price the client is DISPLAYING for this line. Server never prices from it; it only REFUSES with 409 line_unit_price_drift when the resolved price is HIGHER (the customer would be charged more than shown). A lower resolved price is accepted silently — rule #514 lets the server legitimately charge less than the card the guest tapped. Omit it and the order behaves exactly as before.",
+                                                    "type": "number",
+                                                    "nullable": true
+                                                },
+                                                "toppings": {
+                                                    "description": "Plan 015 topping selections; empty/omitted = no toppings.",
+                                                    "type": "array",
+                                                    "items": {
+                                                        "required": [
+                                                            "topping_group_item_id",
+                                                            "product_sku_id",
+                                                            "quantity"
+                                                        ],
+                                                        "properties": {
+                                                            "topping_group_item_id": {
+                                                                "type": "string",
+                                                                "format": "uuid"
+                                                            },
+                                                            "product_sku_id": {
+                                                                "description": "NOT NULL by Phase 2 contract.",
+                                                                "type": "string",
+                                                                "format": "uuid"
+                                                            },
+                                                            "quantity": {
+                                                                "type": "integer",
+                                                                "minimum": 1
+                                                            },
+                                                            "note": {
+                                                                "type": "string",
+                                                                "maxLength": 255,
+                                                                "nullable": true
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "customer_takeaway_name": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "nullable": true
+                                    },
+                                    "customer_takeaway_phone": {
+                                        "type": "string",
+                                        "maxLength": 50,
+                                        "nullable": true
+                                    },
+                                    "note": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "payment_method": {
+                                        "type": "string",
+                                        "enum": [
+                                            "counter",
+                                            "transfer",
+                                            "call_staff",
+                                            "qr_pay",
+                                            "card"
+                                        ],
+                                        "nullable": true
+                                    },
+                                    "pickup_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "immediate",
+                                            "scheduled"
+                                        ],
+                                        "nullable": true
+                                    },
+                                    "scheduled_pickup_time": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "nullable": true
+                                    },
+                                    "coupon_code": {
+                                        "description": "Plan-019 — optional coupon code applied atomically inside the order create transaction. Same semantics as the table-QR variant.",
+                                        "type": "string",
+                                        "maxLength": 50,
+                                        "example": "WELCOME10",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Order created."
+                    },
+                    "404": {
+                        "description": "Branch or coupon not found."
+                    },
+                    "422": {
+                        "description": "Validation or CouponException."
+                    }
+                }
+            }
+        },
+        "/api/v1/customer/orders/{orderId}/reviewable": {
+            "get": {
+                "tags": [
+                    "Customer Reviews"
+                ],
+                "summary": "List order items eligible for review",
+                "description": "Returns the items of a closed order with an `already_reviewed` flag. Voided items are excluded.",
+                "operationId": "e4c27943be170512192a439c5aeb7a96",
+                "parameters": [
+                    {
+                        "name": "orderId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Reviewable items list",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "order_id": {
+                                                    "type": "string",
+                                                    "format": "uuid"
+                                                },
+                                                "items": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "order_item_id": {
+                                                                "type": "string",
+                                                                "format": "uuid"
+                                                            },
+                                                            "product_id": {
+                                                                "type": "string",
+                                                                "format": "uuid"
+                                                            },
+                                                            "product_name": {
+                                                                "type": "string"
+                                                            },
+                                                            "product_image": {
+                                                                "type": "string",
+                                                                "format": "uri",
+                                                                "nullable": true
+                                                            },
+                                                            "variant_name": {
+                                                                "type": "string",
+                                                                "nullable": true
+                                                            },
+                                                            "already_reviewed": {
+                                                                "type": "boolean"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Order not found"
+                    },
+                    "422": {
+                        "description": "Order not closed"
+                    }
+                }
+            }
+        },
+        "/api/v1/customer/orders/{orderId}/reviews": {
+            "post": {
+                "tags": [
+                    "Customer Reviews"
+                ],
+                "summary": "Submit batch product reviews",
+                "description": "Batch submit 1-5 star reviews for items in a closed order. A binary recommend sentiment (up when rating >= 3, else down) is derived server-side. Already-reviewed and voided items are skipped; a concurrent duplicate is skipped, not errored.",
+                "operationId": "3020cd7fc188ce6f8bd79b15b93da82c",
+                "parameters": [
+                    {
+                        "name": "orderId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "reviews"
+                                ],
+                                "properties": {
+                                    "reviews": {
+                                        "type": "array",
+                                        "items": {
+                                            "required": [
+                                                "order_item_id",
+                                                "product_id",
+                                                "rating"
+                                            ],
+                                            "properties": {
+                                                "order_item_id": {
+                                                    "type": "string",
+                                                    "format": "uuid"
+                                                },
+                                                "product_id": {
+                                                    "type": "string",
+                                                    "format": "uuid"
+                                                },
+                                                "rating": {
+                                                    "description": "1-5 star rating",
+                                                    "type": "integer",
+                                                    "maximum": 5,
+                                                    "minimum": 1
+                                                },
+                                                "tags": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "maxLength": 50
+                                                    },
+                                                    "maxItems": 10,
+                                                    "nullable": true
+                                                },
+                                                "comment": {
+                                                    "type": "string",
+                                                    "maxLength": 1000,
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Reviews submitted",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "created": {
+                                                    "type": "integer"
+                                                },
+                                                "skipped": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Order not found"
+                    },
+                    "422": {
+                        "description": "Validation error or order not closed"
+                    }
+                }
+            }
+        },
+        "/api/v1/notifications/email/unsubscribe": {
+            "get": {
+                "tags": [
+                    "Notifications - Public"
+                ],
+                "summary": "One-click email unsubscribe (RFC 8058)",
+                "operationId": "2715def86405e00713f00109847ad377",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "expires",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "signature",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Unsubscribed"
+                    },
+                    "403": {
+                        "description": "Invalid or expired signature"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "CustomerMenuVariant": {
+                "description": "A single selectable variant of a product option (e.g. \"Large\"). Price is stored as a DELTA from the parent item price — frontend computes unit price as `item.price + Σ variant.price`.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "sku_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "description": "Price delta vs. parent item price.",
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "image": {
+                        "type": "string",
+                        "format": "uri",
+                        "nullable": true
+                    },
+                    "default": {
+                        "type": "boolean"
+                    }
+                },
+                "type": "object"
+            },
+            "CustomerMenuOption": {
+                "description": "A configurable option group on a menu item (e.g. \"Size\") with one or more selectable variants.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "single"
+                        ]
+                    },
+                    "required": {
+                        "type": "boolean"
+                    },
+                    "variants": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CustomerMenuVariant"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "CustomerMenuItem": {
+                "description": "A single menu item (product) shown in the customer menu.",
+                "properties": {
+                    "id": {
+                        "description": "menu_product id",
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "sku_id": {
+                        "description": "Default product_sku id.",
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "description": "Default SKU selling price.",
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "image": {
+                        "type": "string",
+                        "format": "uri",
+                        "nullable": true
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "available",
+                            "unavailable"
+                        ]
+                    },
+                    "options": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CustomerMenuOption"
+                        },
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "CustomerMenuCategory": {
+                "description": "A menu section (category) grouping one or more items.",
+                "properties": {
+                    "id": {
+                        "description": "menu_section id, or the literal string \"uncategorized\".",
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CustomerMenuItem"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "CustomerMenu": {
+                "description": "The active branch menu transformed for the customer ordering surface.",
+                "properties": {
+                    "categories": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CustomerMenuCategory"
+                        }
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "sanctum": {
+                "type": "http",
+                "description": "Bearer token from login or SSO callback",
+                "scheme": "bearer",
+                "bearerFormat": "Token"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Customer Branch Reviews",
+            "description": "Post-order branch review endpoints. Uses order UUID as opaque access token (no auth required)."
+        },
+        {
+            "name": "Customer Reviews",
+            "description": "Post-order product review endpoints. Uses order UUID as opaque access token (no auth required)."
+        },
+        {
+            "name": "Customer Menu",
+            "description": "Public menu lookup for guest customers — resolves the active menu for a branch (by slug or via a table QR token), filtered by server-side time-of-day rules."
+        },
+        {
+            "name": "Coupons",
+            "description": "Coupons"
+        },
+        {
+            "name": "Customer Orders",
+            "description": "Customer Orders"
+        },
+        {
+            "name": "Notifications - Public",
+            "description": "Notifications - Public"
+        }
+    ]
+}

@@ -1,0 +1,109 @@
+# VariantUnit schema
+# Unit conversion for variants (Lon/Loc/Thung with different ratios)
+
+displayName:
+  en: Variant Unit
+  ja: バリエーション単位
+  vi: Đơn vị biến thể
+
+kind: object
+
+options:
+  timestamps: true
+  id: Uuid
+
+properties:
+  productSku:
+    type: Association
+    relation: ManyToOne
+    target: ProductSku
+    onDelete: CASCADE
+    displayName:
+      en: SKU
+      ja: SKU
+      vi: SKU
+
+  unit:
+    type: String
+    length: 50
+    displayName:
+      en: Unit Name
+      ja: 単位名
+      vi: Tên đơn vị
+    description:
+      en: "e.g., Piece, Can, Pack, Box"
+      ja: "例：個、缶、パック、箱"
+      vi: "VD: Cái, Lon, Lốc, Thùng"
+
+  ratio:
+    type: Decimal
+    precision: 10
+    scale: 4
+    default: 1.0
+    displayName:
+      en: Ratio
+      ja: 換算率
+      vi: Tỷ lệ quy đổi
+    description:
+      en: "Conversion ratio (base unit = 1.0)"
+      ja: "換算率（基本単位 = 1.0）"
+      vi: "Tỷ lệ quy đổi (đơn vị gốc = 1.0)"
+
+  sku:
+    type: String
+    length: 50
+    displayName:
+      en: SKU
+      ja: SKU
+      vi: SKU
+    description:
+      en: Unique SKU for this unit
+      ja: この単位の一意のSKU
+      vi: SKU riêng cho đơn vị này
+
+  barcode:
+    type: String
+    length: 100
+    nullable: true
+    displayName:
+      en: Barcode
+      ja: バーコード
+      vi: Mã vạch
+
+  price:
+    type: Decimal
+    precision: 15
+    scale: 2
+    default: 0
+    displayName:
+      en: List Price
+      ja: 定価
+      vi: Giá niêm yết
+    description:
+      en: List price for this unit
+      ja: この単位の定価
+      vi: Giá niêm yết theo đơn vị này
+
+  is_base:
+    type: Boolean
+    default: false
+    displayName:
+      en: Base Unit
+      ja: 基本単位
+      vi: Đơn vị gốc
+    description:
+      en: True if this is the base unit for calculation
+      ja: 計算の基本単位の場合はtrue
+      vi: True nếu đây là đơn vị gốc để tính toán
+
+  is_sellable:
+    type: Boolean
+    default: true
+    displayName:
+      en: Sellable
+      ja: 販売可能
+      vi: Có thể bán
+    description:
+      en: Allow selling by this unit
+      ja: この単位での販売を許可
+      vi: Cho phép bán theo đơn vị này

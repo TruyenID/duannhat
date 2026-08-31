@@ -1,0 +1,638 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TempoFast — Local Stack</title>
+  <link rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230f766e'/%3E%3Cpath d='M9 20h14M9 14h14M16 8v18' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <style>
+    :root {
+      --bg: #fafafa;
+      --surface: #ffffff;
+      --border: #e5e7eb;
+      --fg: #0f172a;
+      --fg-muted: #475569;
+      --fg-subtle: #94a3b8;
+      --accent: #0f766e;
+      --accent-bg: #ccfbf1;
+      --chip-bg: #f1f5f9;
+      --chip-fg: #334155;
+      --shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0b1120;
+        --surface: #111827;
+        --border: #1f2937;
+        --fg: #f1f5f9;
+        --fg-muted: #cbd5e1;
+        --fg-subtle: #64748b;
+        --accent: #5eead4;
+        --accent-bg: #134e4a;
+        --chip-bg: #1f2937;
+        --chip-fg: #cbd5e1;
+        --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.4);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family:
+        -apple-system, BlinkMacSystemFont, "M PLUS 2", "Inter", "Segoe UI", Roboto,
+        sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 48px 24px 64px;
+    }
+
+    header {
+      margin-bottom: 40px;
+    }
+
+    header .eyebrow {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-bg);
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+
+    header h1 {
+      margin: 14px 0 6px;
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    header p {
+      margin: 0;
+      color: var(--fg-muted);
+      font-size: 15px;
+    }
+
+    section {
+      margin-bottom: 36px;
+    }
+
+    section h2 {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--fg-subtle);
+      margin: 0 0 14px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px;
+    }
+
+    a.card {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 18px 18px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      text-decoration: none;
+      color: inherit;
+      box-shadow: var(--shadow);
+      transition:
+        transform 0.12s ease,
+        border-color 0.12s ease,
+        box-shadow 0.12s ease;
+    }
+
+    a.card:hover {
+      transform: translateY(-1px);
+      border-color: var(--accent);
+      box-shadow:
+        0 4px 6px rgba(15, 23, 42, 0.06),
+        0 10px 15px rgba(15, 23, 42, 0.08);
+    }
+
+    .card .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .card .title {
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .card .chip {
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+      font-size: 12px;
+      background: var(--chip-bg);
+      color: var(--chip-fg);
+      padding: 3px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    .card .desc {
+      color: var(--fg-muted);
+      font-size: 13px;
+    }
+
+    .card .url {
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+      font-size: 12px;
+      color: var(--fg-subtle);
+      word-break: break-all;
+    }
+
+    footer {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      color: var(--fg-subtle);
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    footer code {
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+      background: var(--chip-bg);
+      color: var(--chip-fg);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* Command cards */
+    .commands-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 14px;
+    }
+
+    .cmd-card {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 14px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+    }
+
+    .cmd-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .cmd-title {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--fg);
+    }
+
+    .cmd-code {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--chip-bg);
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
+    .cmd-code code {
+      flex: 1;
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+      font-size: 12px;
+      color: var(--accent);
+      word-break: break-all;
+      background: transparent;
+    }
+
+    .cmd-code button {
+      flex-shrink: 0;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 4px;
+      opacity: 0.6;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+
+    .cmd-code button:hover {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+
+    .cmd-code button:active {
+      transform: scale(0.95);
+    }
+
+    .cmd-desc {
+      color: var(--fg-muted);
+      font-size: 12px;
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--accent);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      animation: slideIn 0.3s ease, slideOut 0.3s ease 2.7s;
+      z-index: 1000;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+  </style>
+  <script>
+    function copyCommand(elementId) {
+      const code = document.getElementById(elementId);
+      const text = code.textContent;
+
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('📋 Copied: ' + text);
+      }).catch(err => {
+        console.error('Failed to copy:', err);
+      });
+    }
+
+    function showToast(message) {
+      // Remove existing toast if any
+      const existing = document.querySelector('.toast');
+      if (existing) existing.remove();
+
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+
+      setTimeout(() => toast.remove(), 3000);
+    }
+  </script>
+</head>
+
+<body>
+  <main>
+    <header>
+      <span class="eyebrow">Local development</span>
+      <h1>TempoFast Stack</h1>
+      <p>One place to jump into every running service. Click a card to open it.</p>
+    </header>
+
+    <section>
+      <h2>🚀 Quick Commands</h2>
+      <div class="commands-grid">
+        <div class="cmd-card">
+          <div class="cmd-header">
+            <span class="cmd-title">🐳 Start Backend Stack</span>
+          </div>
+          <div class="cmd-code">
+            <code id="cmd-backend">docker compose up -d</code>
+            <button onclick="copyCommand('cmd-backend')" title="Copy">📋</button>
+          </div>
+          <div class="cmd-desc">Backend + MySQL + Redis + MinIO + Mailpit</div>
+        </div>
+
+        <div class="cmd-card">
+          <div class="cmd-header">
+            <span class="cmd-title">🌐 Start All Web Apps</span>
+          </div>
+          <div class="cmd-code">
+            <code id="cmd-web">pnpm dev</code>
+            <button onclick="copyCommand('cmd-web')" title="Copy">📋</button>
+          </div>
+          <div class="cmd-desc">Admin + Customer + POS web (parallel)</div>
+        </div>
+
+        <div class="cmd-card">
+          <div class="cmd-header">
+            <span class="cmd-title">🔧 Start with Tools</span>
+          </div>
+          <div class="cmd-code">
+            <code id="cmd-tools">docker compose --profile tools up -d</code>
+            <button onclick="copyCommand('cmd-tools')" title="Copy">📋</button>
+          </div>
+          <div class="cmd-desc">+ phpMyAdmin</div>
+        </div>
+
+        <div class="cmd-card">
+          <div class="cmd-header">
+            <span class="cmd-title">📱 Admin Web Only</span>
+          </div>
+          <div class="cmd-code">
+            <code id="cmd-admin">pnpm dev:admin</code>
+            <button onclick="copyCommand('cmd-admin')" title="Copy">📋</button>
+          </div>
+          <div class="cmd-desc">http://localhost:5430</div>
+        </div>
+
+        <div class="cmd-card">
+          <div class="cmd-header">
+            <span class="cmd-title">🛒 Customer Web Only</span>
+          </div>
+          <div class="cmd-code">
+            <code id="cmd-customer">pnpm dev:customer</code>
+            <button onclick="copyCommand('cmd-customer')" title="Copy">📋</button>
+          </div>
+          <div class="cmd-desc">http://localhost:5450</div>
+        </div>
+
+        <div class="cmd-card">
+          <div class="cmd-header">
+            <span class="cmd-title">💳 POS Web Only</span>
+          </div>
+          <div class="cmd-code">
+            <code id="cmd-pos">pnpm dev:pos</code>
+            <button onclick="copyCommand('cmd-pos')" title="Copy">📋</button>
+          </div>
+          <div class="cmd-desc">http://localhost:5440</div>
+        </div>
+
+        <div class="cmd-card">
+          <div class="cmd-header">
+            <span class="cmd-title">🗄️ Seed Database</span>
+          </div>
+          <div class="cmd-code">
+            <code id="cmd-seed">docker compose exec app php artisan migrate:fresh --seed --force</code>
+            <button onclick="copyCommand('cmd-seed')" title="Copy">📋</button>
+          </div>
+          <div class="cmd-desc">Fresh DB with sample data</div>
+        </div>
+
+        <div class="cmd-card">
+          <div class="cmd-header">
+            <span class="cmd-title">🧪 Run Tests</span>
+          </div>
+          <div class="cmd-code">
+            <code id="cmd-test">cd backend && php -d memory_limit=-1 vendor/bin/pest --compact</code>
+            <button onclick="copyCommand('cmd-test')" title="Copy">📋</button>
+          </div>
+          <div class="cmd-desc">PHP unit/feature tests</div>
+        </div>
+
+        <div class="cmd-card">
+          <div class="cmd-header">
+            <span class="cmd-title">🛑 Stop All</span>
+          </div>
+          <div class="cmd-code">
+            <code id="cmd-stop">docker compose down</code>
+            <button onclick="copyCommand('cmd-stop')" title="Copy">📋</button>
+          </div>
+          <div class="cmd-desc">Stop all containers</div>
+        </div>
+
+        <div class="cmd-card">
+          <div class="cmd-header">
+            <span class="cmd-title">📊 View Logs</span>
+          </div>
+          <div class="cmd-code">
+            <code id="cmd-logs">docker compose logs -f app</code>
+            <button onclick="copyCommand('cmd-logs')" title="Copy">📋</button>
+          </div>
+          <div class="cmd-desc">Follow Laravel logs</div>
+        </div>
+
+        <div class="cmd-card">
+          <div class="cmd-header">
+            <span class="cmd-title">🔄 Restart Backend</span>
+          </div>
+          <div class="cmd-code">
+            <code id="cmd-restart">docker compose restart app</code>
+            <button onclick="copyCommand('cmd-restart')" title="Copy">📋</button>
+          </div>
+          <div class="cmd-desc">Restart Laravel container</div>
+        </div>
+
+        <div class="cmd-card">
+          <div class="cmd-header">
+            <span class="cmd-title">📦 Composer Install</span>
+          </div>
+          <div class="cmd-code">
+            <code id="cmd-composer">docker compose exec app composer install</code>
+            <button onclick="copyCommand('cmd-composer')" title="Copy">📋</button>
+          </div>
+          <div class="cmd-desc">Update PHP dependencies</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Frontend apps</h2>
+      <div class="grid">
+        <a class="card" href="http://localhost:5430" target="_blank" rel="noopener">
+          <div class="row">
+            <span class="title">Admin Web</span>
+            <span class="chip">:5430</span>
+          </div>
+          <div class="desc">Next.js dashboard for HQ + Shop management.</div>
+          <div class="url">http://localhost:5430</div>
+        </a>
+        <a class="card" href="http://localhost:5450" target="_blank" rel="noopener">
+          <div class="row">
+            <span class="title">Customer Web</span>
+            <span class="chip">:5450</span>
+          </div>
+          <div class="desc">Next.js customer-facing menu (QR ordering).</div>
+          <div class="url">http://localhost:5450</div>
+        </a>
+        <a class="card" href="http://localhost:5440" target="_blank" rel="noopener">
+          <div class="row">
+            <span class="title">POS Web</span>
+            <span class="chip">:5440</span>
+          </div>
+          <div class="desc">Vite cashier terminal — checkout + order flow.</div>
+          <div class="url">http://localhost:5440</div>
+        </a>
+      </div>
+    </section>
+
+    <section>
+      <h2>Backend &amp; API docs</h2>
+      <div class="grid">
+        <a class="card" href="http://localhost:5400/up" target="_blank" rel="noopener">
+          <div class="row">
+            <span class="title">Laravel API</span>
+            <span class="chip">:5400</span>
+          </div>
+          <div class="desc">Health probe at <code>/up</code>. REST under <code>/api/v1/*</code>.</div>
+          <div class="url">http://localhost:5400</div>
+        </a>
+        <a class="card" href="http://localhost:5400/docs/auth" target="_blank" rel="noopener">
+          <div class="row">
+            <span class="title">Swagger — Auth</span>
+            <span class="chip">/docs/auth</span>
+          </div>
+          <div class="desc">SSO + standalone authentication endpoints.</div>
+          <div class="url">http://localhost:5400/docs/auth</div>
+        </a>
+        <a class="card" href="http://localhost:5400/docs/hq" target="_blank" rel="noopener">
+          <div class="row">
+            <span class="title">Swagger — HQ</span>
+            <span class="chip">/docs/hq</span>
+          </div>
+          <div class="desc">Brand-scoped: products, categories, menus, materials, devices.</div>
+          <div class="url">http://localhost:5400/docs/hq</div>
+        </a>
+        <a class="card" href="http://localhost:5400/docs/shop" target="_blank" rel="noopener">
+          <div class="row">
+            <span class="title">Swagger — Shop</span>
+            <span class="chip">/docs/shop</span>
+          </div>
+          <div class="desc">Shop-scoped: warehouses, stock levels, transactions.</div>
+          <div class="url">http://localhost:5400/docs/shop</div>
+        </a>
+      </div>
+    </section>
+
+    <section>
+      <h2>Dev tools</h2>
+      <div class="grid">
+        <a class="card" href="http://localhost:5482" target="_blank" rel="noopener">
+          <div class="row">
+            <span class="title">Mailpit</span>
+            <span class="chip">:5482</span>
+          </div>
+          <div class="desc">Catches outgoing email — read mail sent by Laravel here.</div>
+          <div class="url">http://localhost:5482</div>
+        </a>
+        <a class="card" href="http://localhost:5491" target="_blank" rel="noopener">
+          <div class="row">
+            <span class="title">MinIO Console</span>
+            <span class="chip">:5491</span>
+          </div>
+          <div class="desc">S3-compatible object storage. Login: <code>minio</code> / <code>minio123</code>.</div>
+          <div class="url">http://localhost:5491</div>
+        </a>
+        <a class="card" href="http://localhost:5481" target="_blank" rel="noopener">
+          <div class="row">
+            <span class="title">phpMyAdmin</span>
+            <span class="chip">:5481</span>
+          </div>
+          <div class="desc">
+            MySQL browser. Requires <code>--profile tools</code> when starting compose.
+          </div>
+          <div class="url">http://localhost:5481</div>
+        </a>
+      </div>
+    </section>
+
+    <section>
+      <h2>Data &amp; infrastructure</h2>
+      <div class="grid">
+        <a class="card" href="http://localhost:5490/minio/health/live" target="_blank" rel="noopener">
+          <div class="row">
+            <span class="title">MinIO S3 API</span>
+            <span class="chip">:5490</span>
+          </div>
+          <div class="desc">
+            Object storage endpoint. Bucket <code>tempo</code> is public — browser loads images from here.
+          </div>
+          <div class="url">http://localhost:5490</div>
+        </a>
+        <div class="card" style="cursor: default">
+          <div class="row">
+            <span class="title">MySQL</span>
+            <span class="chip">:3307</span>
+          </div>
+          <div class="desc">
+            TCP only. Connect: <code>mysql -h 127.0.0.1 -P 3307 -u root -psecret tempo</code>
+          </div>
+          <div class="url">127.0.0.1:3307 · db=tempo · user=root · pass=secret</div>
+        </div>
+        <div class="card" style="cursor: default">
+          <div class="row">
+            <span class="title">Redis</span>
+            <span class="chip">internal</span>
+          </div>
+          <div class="desc">
+            Cache + session + queue. Not exposed to host — reach via
+            <code>docker compose exec redis redis-cli</code>.
+          </div>
+          <div class="url">redis:6379 (container network only)</div>
+        </div>
+        <a class="card" href="http://localhost:5480" target="_blank" rel="noopener">
+          <div class="row">
+            <span class="title">Portal (this page)</span>
+            <span class="chip">:5480</span>
+          </div>
+          <div class="desc">
+            Static nginx. Edit <code>docker/portal/index.html</code> — bind mount, no restart needed.
+          </div>
+          <div class="url">http://localhost:5480</div>
+        </a>
+      </div>
+    </section>
+
+    <footer>
+      <span>
+        Bring the stack up: <code>docker compose up -d</code> · Web apps:
+        <code>pnpm dev</code>
+      </span>
+      <span>Served by nginx · port 5480</span>
+    </footer>
+  </main>
+</body>
+
+</html>

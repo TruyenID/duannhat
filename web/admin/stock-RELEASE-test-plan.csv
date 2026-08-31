@@ -1,0 +1,88 @@
+Module,TC_ID,Title,Priority,Type,Precondition,Test_Data,Step_No,Action,Expected_Result,Status,Notes
+S1-Warehouses,TC-S1-01,Smoke: danh sách warehouse,P0,Smoke,Shop đã có >=1 warehouse,-,1,Vào /shop/{shopSlug}/warehouses,Bảng warehouse (code/name/type/address/active/members); nút '+ New',,
+S1-Warehouses,TC-S1-02,Tạo warehouse auto-gen code,P0,Functional,-,name='Kho chính',1,Tạo warehouse mới,"POST OK; code auto-gen; unique (organization_id, code)",,
+S1-Warehouses,TC-S1-03,Code trùng trong org,P1,Negative,Đã có code 'WH-001',code='WH-001',1,Tạo trùng code,422/unique violation,,
+S1-Warehouses,TC-S1-04,Lọc theo type/active/search,P1,Functional,Có nhiều warehouse,-,1,Áp filter type + active,Lọc đúng; with_trashed hiện kho đã xóa,,
+S1-Warehouses,TC-S1-05,toggle-active,P1,Functional,Warehouse active,-,1,Click toggle active,is_active đảo; cần policy @toggleActive,,
+S1-Warehouses,TC-S1-06,Soft-delete + restore,P1,Functional,Warehouse chưa dùng,-,1,Delete rồi Restore,Soft-delete; restore trả lại active,,
+S1-Warehouses,TC-S1-07,bulk-delete biên 100,P2,Boundary,Có >100 warehouse,101 ids,1,bulk-delete 101 ids,Từ chối/ chỉ nhận <=100,,max 100
+S2-WH-Settings,TC-S2-01,Cập nhật cờ auto-approve,P1,Functional,-,-,1,PATCH settings auto_approve_stock_in=true,"Lưu các cờ auto_approve_{stock_in,stock_out,batch,disposal}",,
+S2-WH-Settings,TC-S2-02,disposal_approval_threshold,P2,Functional,-,threshold=500,1,Đặt ngưỡng disposal,Lưu disposal_approval_threshold,,
+S2-WH-Settings,TC-S2-03,allow_negative_sales toggle,P1,Functional,-,-,1,Bật allow_negative_sales,Lưu cờ; ảnh hưởng FEFO sales (xem S7),,Plan-024
+S2-WH-Settings,TC-S2-04,Thêm member role manager/staff,P1,Functional,Có user trong org,-,1,Add member role=staff,WarehouseMember tạo; list hiện member,,
+S2-WH-Settings,TC-S2-05,Role ngoài enum,P1,Negative,-,role='admin',1,Add member role='admin',"422 in:manager,staff",,
+S2-WH-Settings,TC-S2-06,Update + remove member,P2,Functional,Có member,-,1,Đổi role rồi remove,Role cập nhật; remove xóa assignment,,
+S3-Stock-Levels,TC-S3-01,Smoke: stock levels list,P0,Smoke,Có stock level,-,1,Vào /stock/levels,Bảng (product/material/warehouse/qty/unit/min/max/alert/status),,
+S3-Stock-Levels,TC-S3-02,Filter stock_status=out,P0,Functional,Có item qty<=0,-,1,Chọn stock_status=out,Chỉ hiện qty<=0,,server-side
+S3-Stock-Levels,TC-S3-03,Filter stock_status=low,P0,Functional,Có item 0<qty<=min_stock,-,1,Chọn stock_status=low,Chỉ hiện low,,
+S3-Stock-Levels,TC-S3-04,Filter stock_status=normal,P1,Functional,Có item qty>min_stock,-,1,Chọn normal,Chỉ hiện normal,,
+S3-Stock-Levels,TC-S3-05,Filter theo warehouse,P1,Functional,Level ở nhiều kho,-,1,Chọn warehouse,Lọc đúng kho,,
+S3-Stock-Levels,TC-S3-06,Search theo tên product/material,P1,Functional,-,keyword,1,Gõ keyword,Lọc theo productSku.name/material.name,,
+S3-Stock-Levels,TC-S3-07,Hiển thị lot_code + expiry,P2,UI,Material tracked per-lot,-,1,Xem dòng material có lot,Hiện lot_code + expiry chip (join materialLot),,
+S3-Stock-Levels,TC-S3-08,No record = qty 0 ngầm định,P2,Functional,Material chưa từng nhập kho,-,1,Xem level,Không có record hoặc qty=0 (không lỗi),,
+S4-Level-Alerts,TC-S4-01,Update min/max/alert_enabled,P1,Functional,Stock level có sẵn,"min=10,max=100",1,PUT cập nhật min/max,Lưu; chỉ field alert được sửa (qty không sửa trực tiếp),,
+S4-Level-Alerts,TC-S4-02,min_stock > max_stock,P1,Negative,-,"min=100,max=10",1,PUT min>max,422 min_stock.lte:max_stock,,cross-field
+S4-Level-Alerts,TC-S4-03,min_stock âm,P1,Negative,-,min=-5,1,PUT min=-5,422 min:0,,
+S4-Level-Alerts,TC-S4-04,Set min cao hơn qty -> fire alert,P0,Functional,qty=8; alert_enabled=true,min=10,1,PUT min_stock=10,reEvaluate tạo low_stock alert ngay,,
+S4-Level-Alerts,TC-S4-05,Tăng qty qua min -> resolve,P0,Functional,Đang có active alert; qty<min,-,1,Nhập kho cho qty>min,Alert active -> resolved,,
+S4-Level-Alerts,TC-S4-06,Tắt alert_enabled -> resolve,P1,Functional,Có active alert,-,1,PUT alert_enabled=false,Alert active -> resolved,,
+S4-Level-Alerts,TC-S4-07,Clear min_stock=null -> resolve,P2,Functional,Có active alert,min=null,1,PUT min_stock=null,Resolve (không còn ngưỡng),,
+S5-Movements,TC-S5-01,Lịch sử movements phân trang,P1,Functional,Item có >=2 chuyển động,-,1,GET stock-levels/{id}/movements,Trả danh sách in/out với quantity_before/after,,immutable
+S5-Movements,TC-S5-02,Mỗi transaction tạo movement,P1,Functional,Hoàn tất 1 transaction,-,1,Approve transaction; xem movements,Tạo >=1 stock_movement; before/after khớp,,
+S6-Transactions,TC-S6-01,Smoke: list transactions,P0,Smoke,Có transaction,-,1,Vào /stock/transactions,Bảng (code/type/sub_type/warehouse/status),,
+S6-Transactions,TC-S6-02,Tạo stock_in purchase draft,P0,Functional,-,sub_type=purchase,1,Tạo transaction stock_in + items,POST status=draft; transaction_code unique,,
+S6-Transactions,TC-S6-03,submit -> pending,P0,Functional,Transaction draft; warehouse không auto-approve,-,1,Submit,Status pending,,
+S6-Transactions,TC-S6-04,submit auto-complete khi auto-approve,P0,Functional,warehouse.auto_approve_stock_in=true,-,1,Submit stock_in,Nhảy thẳng draft->completed; ghi stock_movement + cập nhật level,,
+S6-Transactions,TC-S6-05,approve -> completed + cập nhật kho,P0,Functional,Transaction pending stock_in 10,-,1,Approve,Status completed; stock_level += 10; approved_by/at set,,
+S6-Transactions,TC-S6-06,stock_out trừ kho,P0,Functional,Level=20; stock_out 5,-,1,Approve stock_out,Level=15; movement out ghi nhận,,
+S6-Transactions,TC-S6-07,cancel draft/pending,P1,Functional,Transaction pending,-,1,Cancel,Status cancelled; không ảnh hưởng kho,,
+S6-Transactions,TC-S6-08,delete chỉ draft/cancelled,P1,Negative,Transaction completed,-,1,Delete,Bị từ chối,,
+S6-Transactions,TC-S6-09,update chỉ draft,P1,Negative,Transaction pending,-,1,PUT items,Bị từ chối,,
+S6-Transactions,TC-S6-10,Filter type/sub_type/status/ngày,P1,Functional,Có nhiều transaction,-,1,Áp filter,Lọc đúng; search theo transaction_code,,
+S6-Transactions,TC-S6-11,sub_type ngoài enum,P1,Negative,-,sub_type='foo',1,POST sub_type sai,422,,10+ sub_types hợp lệ
+S7-FEFO-Negative,TC-S7-01,FEFO stock_out chọn lot hết hạn sớm,P0,Functional,Material 2 lot khác expiry,-,1,Approve stock_out (không chỉ định lot),"Phân bổ lot expiry sớm nhất trước (expiry ASC, received ASC, id ASC)",,
+S7-FEFO-Negative,TC-S7-02,FEFO fallback bucket NULL-lot,P1,Functional,Lot active không đủ; có tồn legacy NULL-lot,-,1,Approve stock_out vượt lot active,Phần dư lấy từ material_lot_id=NULL bucket,,
+S7-FEFO-Negative,TC-S7-03,Strict: stock_out vượt tồn bị chặn,P0,Negative,Level=5; stock_out 10 (manual),-,1,Approve,InsufficientStockException; kho không đổi,,default strict
+S7-FEFO-Negative,TC-S7-04,allow_negative_sales: sales đẩy âm,P0,Functional,warehouse.allow_negative_sales=true; sub_type=sales; tồn 5,xuất 8,1,Approve sales stock_out 8,Level=-3; dư 3 ghi material_lot_id=NULL qty âm; out_of_stock alert fire,,Plan-024
+S7-FEFO-Negative,TC-S7-05,allow_negative chỉ áp sales-family,P1,Negative,allow_negative_sales=true; sub_type=disposal; tồn 5,xuất 8,1,Approve disposal 8,Vẫn strict -> InsufficientStockException (disposal không thuộc sales family),,
+S7-FEFO-Negative,TC-S7-06,Lot manual phải Active,P1,Negative,Chỉ định lot status=Depleted,-,1,Approve stock_out với material_lot_id depleted,ValidationException 'lot must be active',,
+S7-FEFO-Negative,TC-S7-07,Lot về 0 -> Depleted,P1,Functional,Lot qty=6 dùng hết,-,1,Approve stock_out 6,qty_on_hand=0; status Active->Depleted,,
+S7-FEFO-Negative,TC-S7-08,Genealogy cho sales consumption,P2,Functional,sales stock_out reference=customer_order,-,1,Approve,GenealogyLink mỗi consumed lot (trace ngược supplier),,Plan-017
+S8-Unit-Conversion,TC-S8-01,Quy đổi unit về base,P0,Functional,Material base=g; unit kg ratio=1000,nhập 2 kg,1,stock_in 2 kg,base_quantity=2000 g; stock_level cộng theo base,,calculateBaseQuantity
+S8-Unit-Conversion,TC-S8-02,Unit không thuộc material,P0,Negative,"Material có units {g,kg}",unit='lb',1,stock_in unit='lb',Throw 'unit not found' (strict),,
+S8-Unit-Conversion,TC-S8-03,Legacy material không có MaterialUnit,P1,Functional,Material không có units rows,nhập 5,1,stock_in 5,Fallback 1:1; base_quantity=5,,legacy
+S8-Unit-Conversion,TC-S8-04,Quy đổi thập phân chính xác,P2,Boundary,base=ml; L ratio=1000,nhập 1.5 L,1,stock_in 1.5 L,base_quantity=1500 ml chính xác,,"decimal 15,4"
+S9-Transfers,TC-S9-01,Smoke: list transfers,P0,Smoke,Có transfer,-,1,Vào /stock/transfers,Bảng (code/source/dest/status/items),,
+S9-Transfers,TC-S9-02,Tạo transfer hợp lệ,P0,Functional,2 warehouse khác nhau,items min 1,1,Tạo transfer source!=dest + items,POST draft; transfer_code unique,,
+S9-Transfers,TC-S9-03,source = destination,P0,Negative,-,source=dest,1,Tạo source=dest,422 different:source_warehouse_id,,
+S9-Transfers,TC-S9-04,items rỗng,P1,Negative,-,items=[],1,Tạo không items,422 items min:1,,
+S9-Transfers,TC-S9-05,sent_quantity <= 0,P1,Negative,-,sent=0,1,Tạo item sent=0,422 gt:0,,
+S9-Transfers,TC-S9-06,approve -> in_transit + stock_out source,P0,Functional,Transfer pending; đủ tồn source,-,1,Approve,Status in_transit; tạo stock_out tại source; lưu stock_out_transaction_id,,
+S9-Transfers,TC-S9-07,approve thiếu tồn source,P0,Negative,Source thiếu tồn,-,1,Approve,InsufficientStockException; transfer vẫn pending,,
+S9-Transfers,TC-S9-08,receive -> completed + stock_in dest,P0,Functional,Transfer in_transit,-,1,Receive,Status completed; stock_in tại dest; received_at/by set,,
+S9-Transfers,TC-S9-09,receive với received_quantity khác sent,P1,Functional,in_transit; sent=10,received=8,1,Receive cập nhật received=8,stock_in theo received_quantity=8 (hao hụt vận chuyển),,
+S9-Transfers,TC-S9-10,cancel draft/pending/in_transit,P1,Functional,Transfer in_transit,-,1,Cancel,Status cancelled,,cancel cho cả in_transit
+S9-Transfers,TC-S9-11,delete chỉ draft,P1,Negative,Transfer pending,-,1,Delete,Bị từ chối,,
+S10-Counts,TC-S10-01,Smoke: list stock counts,P0,Smoke,Có count,-,1,Vào /stock/counts,Bảng (count_code/warehouse/scope/status/items),,
+S10-Counts,TC-S10-02,Tạo full-scope snapshot,P0,Functional,Warehouse có levels qty>0,scope=full,1,Tạo count full,Draft; snapshot toàn bộ level qty>0 vào items; system_quantity captured,,bỏ qua qty=0
+S10-Counts,TC-S10-03,Tạo partial scope rỗng,P1,Functional,-,scope=partial,1,Tạo count partial,Draft; items rỗng (thêm sau qua add-items),,
+S10-Counts,TC-S10-04,scope ngoài enum,P1,Negative,-,scope='block',1,Tạo scope='block',"422 in:full,partial",,
+S10-Counts,TC-S10-05,start -> in_progress freeze qty,P0,Functional,Count draft,-,1,Start,Status in_progress; system_quantity đóng băng,,
+S10-Counts,TC-S10-06,add-items chỉ partial,P1,Functional,Count partial in_progress,-,1,add-items SKU/material,Item thêm; snapshot qty hiện tại,,
+S10-Counts,TC-S10-07,update-items ghi counted_qty + diff,P0,Functional,Count in_progress,counted=18; system=20,1,update-items counted=18,difference = -2 (base unit); lưu counted_quantity nguyên unit,,
+S10-Counts,TC-S10-08,update-items counted âm,P1,Negative,-,counted=-1,1,update counted=-1,422 min:0,,
+S10-Counts,TC-S10-09,update-items quy đổi unit,P1,Functional,Material base=g; đếm theo kg,counted=2 kg; system=1800 g,1,update counted=2 kg,countedBase=2000 g; difference=+200 g,,Plan-022 T1.8
+S10-Counts,TC-S10-10,submit -> pending_approval,P0,Functional,Count in_progress,-,1,Submit,Status pending_approval,,
+S10-Counts,TC-S10-11,approve tạo adjustment transactions,P0,Functional,Có item diff>0 và diff<0,-,1,Approve,diff>0 -> adjustment_in; diff<0 -> adjustment_out; post vào stock_levels,,reference_type=stock_count
+S10-Counts,TC-S10-12,approve khi mọi diff=0,P2,Functional,Count khớp hoàn toàn,-,1,Approve,Không tạo transaction (không variance); status approved,,
+S10-Counts,TC-S10-13,cancel active/pending,P1,Functional,Count in_progress,-,1,Cancel,Status cancelled,,
+S10-Counts,TC-S10-14,update-items khi không in_progress,P1,Negative,Count pending_approval,-,1,update-items,Bị từ chối (chỉ in_progress),,
+S11-Alerts,TC-S11-01,summary đếm theo type,P1,Functional,Có alert low/out,-,1,GET stock-alerts/summary,Trả count active theo loại,,
+S11-Alerts,TC-S11-02,list active/resolved,P1,Functional,Có alert,-,1,GET stock-alerts?status=active,Chỉ hiện active; filter warehouse,,
+S11-Alerts,TC-S11-03,low_stock khi 0<qty<min,P0,Functional,min=10; qty xuống 8,-,1,Trigger stock_out,Tạo alert_type=low_stock,,
+S11-Alerts,TC-S11-04,out_of_stock khi qty<=0,P0,Functional,qty xuống 0,-,1,Trigger stock_out hết,Tạo alert_type=out_of_stock,,
+S11-Alerts,TC-S11-05,allow_negative force out_of_stock,P1,Functional,allow_negative_sales; alert_enabled=false,-,1,Sales đẩy âm,out_of_stock fire dù alert_enabled=false,,Plan-024
+S11-Alerts,TC-S11-06,Click alert -> stock-level detail,P2,UI,Có alert,-,1,Click dòng alert,Điều hướng tới stock-level detail tương ứng,,
+S12-Security,TC-S12-01,Cross-shop isolation stock,P0,Security,Level thuộc shop A,-,1,Truy cập bằng token shop B,403/404,,org scope
+S12-Security,TC-S12-02,Unauthenticated,P0,Security,-,-,1,Gọi API không token,401,,
+S12-Security,TC-S12-03,warehouse_id không thuộc shop,P1,Negative,-,warehouse kho khác,1,Tạo transaction với warehouse ngoài shop,Từ chối/exists fail,,

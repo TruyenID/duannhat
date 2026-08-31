@@ -1,0 +1,56 @@
+# Vai trò. `console_organization_id` null nghĩa là vai trò toàn hệ thống, dùng
+# chung cho mọi tenant.
+kind: object
+
+options:
+  id: Uuid
+  timestamps: true
+  softDelete: true
+  indexes:
+    - columns: [console_organization_id]
+    - columns: [console_organization_id, name]
+      unique: true
+    - columns: [console_organization_id, slug]
+      unique: true
+
+properties:
+  console_organization_id:
+    type: String
+    length: 36
+    nullable: true
+    displayName:
+      ja: 組織ID
+      en: Organization ID
+      vi: ID tổ chức
+
+  name:
+    type: String
+    length: 100
+    displayName:
+      ja: ロール名
+      en: Role Name
+      vi: Tên vai trò
+
+  slug:
+    type: String
+    length: 100
+    displayName:
+      ja: スラッグ
+      en: Slug
+      vi: Slug
+
+  description:
+    type: Text
+    nullable: true
+    displayName:
+      ja: 説明
+      en: Description
+      vi: Mô tả
+
+  level:
+    type: Int
+    default: 0
+    displayName:
+      ja: レベル
+      en: Level
+      vi: Cấp

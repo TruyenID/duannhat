@@ -1,0 +1,146 @@
+# Category schema
+# Nested product categories for menu/display grouping
+
+displayName:
+  en: Category
+  ja: カテゴリー
+  vi: Danh mục
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    - columns: [organization_id]
+    - columns: [organization_id, sku]
+      unique: true
+    - columns: [brand_id]
+    - columns: [brand_id, sku]
+
+properties:
+  sku:
+    type: String
+    length: 50
+    nullable: true
+    displayName:
+      en: SKU
+      ja: SKU
+      vi: Mã danh mục
+    placeholder:
+      en: "e.g., C-001"
+      vi: "VD: C-001"
+      ja: "例：C-001"
+    description:
+      en: Unique SKU with prefix C-
+      ja: プレフィックスC-を持つ一意のSKU
+      vi: SKU duy nhất với tiền tố C-
+
+  name:
+    type: String
+    length: 100
+    translatable: true
+    searchable: true
+    displayName:
+      en: Name
+      ja: 名前
+      vi: Tên
+
+  slug:
+    type: String
+    length: 100
+    nullable: true
+    displayName:
+      en: Slug
+      ja: スラッグ
+      vi: Slug
+
+  description:
+    type: Text
+    nullable: true
+    translatable: true
+    displayName:
+      en: Description
+      ja: 説明
+      vi: Mô tả
+
+  image_url:
+    type: String
+    length: 500
+    nullable: true
+    displayName:
+      en: Image URL
+      ja: 画像URL
+      vi: URL hình ảnh
+
+  is_active:
+    type: Boolean
+    default: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+
+  is_featured:
+    # Highlight trên homepage customer-web (featured carousel / quick-pick row).
+    type: Boolean
+    default: false
+    displayName:
+      en: Featured
+      ja: おすすめ
+      vi: Nổi bật
+
+  # Self-referential for nested categories
+  parent:
+    type: Association
+    relation: ManyToOne
+    target: Category
+    nullable: true
+    onDelete: CASCADE
+    displayName:
+      en: Parent Category
+      ja: 親カテゴリー
+      vi: Danh mục cha
+
+  children:
+    type: Association
+    relation: OneToMany
+    target: Category
+    mappedBy: parent
+    displayName:
+      en: Child Categories
+      ja: 子カテゴリー
+      vi: Danh mục con
+
+  # Many-to-Many with Product
+  products:
+    type: Association
+    relation: ManyToMany
+    target: Product
+    joinTable: product_category
+    mappedBy: categories
+    displayName:
+      en: Products
+      ja: 商品
+      vi: Sản phẩm
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: CASCADE
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu

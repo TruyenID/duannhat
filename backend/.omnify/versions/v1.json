@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "timestamp": "2026-04-26T02:48:21Z",
+  "connections": {
+    "default": "mysql"
+  },
+  "changes": [
+    {
+      "action": "initial"
+    }
+  ],
+  "snapshot": {
+    "User": {
+      "name": "User",
+      "kind": "object",
+      "displayName": "User",
+      "properties": {
+        "email": {
+          "type": "Email",
+          "unique": true
+        },
+        "name": {
+          "type": "String",
+          "length": 100
+        },
+        "password": {
+          "type": "Password"
+        }
+      },
+      "options": {
+        "timestamps": true,
+        "softDelete": true
+      }
+    }
+  },
+  "migrationTimestamps": {
+    "users": "2026_04_26_094821"
+  }
+}

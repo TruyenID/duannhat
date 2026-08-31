@@ -1,0 +1,446 @@
+[
+    {
+        "id": 13,
+        "product_option_value_id": "019f408b-1873-723b-b8c5-3b5807567869",
+        "locale": "ja",
+        "label": "並"
+    },
+    {
+        "id": 14,
+        "product_option_value_id": "019f408b-1873-723b-b8c5-3b5807567869",
+        "locale": "en",
+        "label": "Regular"
+    },
+    {
+        "id": 15,
+        "product_option_value_id": "019f408b-1873-723b-b8c5-3b5807567869",
+        "locale": "vi",
+        "label": "Thường"
+    },
+    {
+        "id": 16,
+        "product_option_value_id": "019f408b-1879-72a3-b481-e6a6977fa224",
+        "locale": "ja",
+        "label": "大盛"
+    },
+    {
+        "id": 17,
+        "product_option_value_id": "019f408b-1879-72a3-b481-e6a6977fa224",
+        "locale": "en",
+        "label": "Large"
+    },
+    {
+        "id": 18,
+        "product_option_value_id": "019f408b-1879-72a3-b481-e6a6977fa224",
+        "locale": "vi",
+        "label": "Lớn"
+    },
+    {
+        "id": 31,
+        "product_option_value_id": "019f408b-18a9-7206-a1d8-9eb96c547fed",
+        "locale": "ja",
+        "label": "並"
+    },
+    {
+        "id": 32,
+        "product_option_value_id": "019f408b-18a9-7206-a1d8-9eb96c547fed",
+        "locale": "en",
+        "label": "Regular"
+    },
+    {
+        "id": 33,
+        "product_option_value_id": "019f408b-18a9-7206-a1d8-9eb96c547fed",
+        "locale": "vi",
+        "label": "Thường"
+    },
+    {
+        "id": 34,
+        "product_option_value_id": "019f408b-18ad-71bf-b892-dba412878bf8",
+        "locale": "ja",
+        "label": "大盛"
+    },
+    {
+        "id": 35,
+        "product_option_value_id": "019f408b-18ad-71bf-b892-dba412878bf8",
+        "locale": "en",
+        "label": "Large"
+    },
+    {
+        "id": 36,
+        "product_option_value_id": "019f408b-18ad-71bf-b892-dba412878bf8",
+        "locale": "vi",
+        "label": "Lớn"
+    },
+    {
+        "id": 49,
+        "product_option_value_id": "019f408b-18d8-727a-825f-69ea2a10cb3c",
+        "locale": "ja",
+        "label": "並"
+    },
+    {
+        "id": 50,
+        "product_option_value_id": "019f408b-18d8-727a-825f-69ea2a10cb3c",
+        "locale": "en",
+        "label": "Regular"
+    },
+    {
+        "id": 51,
+        "product_option_value_id": "019f408b-18d8-727a-825f-69ea2a10cb3c",
+        "locale": "vi",
+        "label": "Thường"
+    },
+    {
+        "id": 52,
+        "product_option_value_id": "019f408b-18dc-7182-9b97-a0649343c675",
+        "locale": "ja",
+        "label": "大盛"
+    },
+    {
+        "id": 53,
+        "product_option_value_id": "019f408b-18dc-7182-9b97-a0649343c675",
+        "locale": "en",
+        "label": "Large"
+    },
+    {
+        "id": 54,
+        "product_option_value_id": "019f408b-18dc-7182-9b97-a0649343c675",
+        "locale": "vi",
+        "label": "Lớn"
+    },
+    {
+        "id": 67,
+        "product_option_value_id": "019f408b-18fe-71bc-b358-c344e0e7c010",
+        "locale": "ja",
+        "label": "ホット"
+    },
+    {
+        "id": 68,
+        "product_option_value_id": "019f408b-18fe-71bc-b358-c344e0e7c010",
+        "locale": "en",
+        "label": "Hot"
+    },
+    {
+        "id": 69,
+        "product_option_value_id": "019f408b-18fe-71bc-b358-c344e0e7c010",
+        "locale": "vi",
+        "label": "Nóng"
+    },
+    {
+        "id": 70,
+        "product_option_value_id": "019f408b-1905-73d1-8877-c4ac52b3bd21",
+        "locale": "ja",
+        "label": "アイス"
+    },
+    {
+        "id": 71,
+        "product_option_value_id": "019f408b-1905-73d1-8877-c4ac52b3bd21",
+        "locale": "en",
+        "label": "Iced"
+    },
+    {
+        "id": 72,
+        "product_option_value_id": "019f408b-1905-73d1-8877-c4ac52b3bd21",
+        "locale": "vi",
+        "label": "Đá"
+    },
+    {
+        "id": 85,
+        "product_option_value_id": "019f408b-1927-7350-8563-b65fe4734833",
+        "locale": "ja",
+        "label": "ホット"
+    },
+    {
+        "id": 86,
+        "product_option_value_id": "019f408b-1927-7350-8563-b65fe4734833",
+        "locale": "en",
+        "label": "Hot"
+    },
+    {
+        "id": 87,
+        "product_option_value_id": "019f408b-1927-7350-8563-b65fe4734833",
+        "locale": "vi",
+        "label": "Nóng"
+    },
+    {
+        "id": 88,
+        "product_option_value_id": "019f408b-197f-7151-891a-f85b37d6dfc7",
+        "locale": "ja",
+        "label": "アイス"
+    },
+    {
+        "id": 89,
+        "product_option_value_id": "019f408b-197f-7151-891a-f85b37d6dfc7",
+        "locale": "en",
+        "label": "Iced"
+    },
+    {
+        "id": 90,
+        "product_option_value_id": "019f408b-197f-7151-891a-f85b37d6dfc7",
+        "locale": "vi",
+        "label": "Đá"
+    },
+    {
+        "id": 109,
+        "product_option_value_id": "019f408b-19a4-7162-9ee3-e0c163c07425",
+        "locale": "ja",
+        "label": "クラシック"
+    },
+    {
+        "id": 110,
+        "product_option_value_id": "019f408b-19a4-7162-9ee3-e0c163c07425",
+        "locale": "en",
+        "label": "Classic"
+    },
+    {
+        "id": 111,
+        "product_option_value_id": "019f408b-19a4-7162-9ee3-e0c163c07425",
+        "locale": "vi",
+        "label": "Cổ điển"
+    },
+    {
+        "id": 112,
+        "product_option_value_id": "019f408b-19a8-719f-b68e-37dc937d5919",
+        "locale": "ja",
+        "label": "スペシャル"
+    },
+    {
+        "id": 113,
+        "product_option_value_id": "019f408b-19a8-719f-b68e-37dc937d5919",
+        "locale": "en",
+        "label": "Special"
+    },
+    {
+        "id": 114,
+        "product_option_value_id": "019f408b-19a8-719f-b68e-37dc937d5919",
+        "locale": "vi",
+        "label": "Đặc biệt"
+    },
+    {
+        "id": 115,
+        "product_option_value_id": "019f408b-19ac-721b-bd6f-49f6b335296b",
+        "locale": "ja",
+        "label": "ベジ"
+    },
+    {
+        "id": 116,
+        "product_option_value_id": "019f408b-19ac-721b-bd6f-49f6b335296b",
+        "locale": "en",
+        "label": "Veggie"
+    },
+    {
+        "id": 117,
+        "product_option_value_id": "019f408b-19ac-721b-bd6f-49f6b335296b",
+        "locale": "vi",
+        "label": "Chay"
+    },
+    {
+        "id": 130,
+        "product_option_value_id": "019f408b-19cd-729f-8d65-62c858432f6d",
+        "locale": "ja",
+        "label": "鶏肉"
+    },
+    {
+        "id": 131,
+        "product_option_value_id": "019f408b-19cd-729f-8d65-62c858432f6d",
+        "locale": "en",
+        "label": "Chicken"
+    },
+    {
+        "id": 132,
+        "product_option_value_id": "019f408b-19cd-729f-8d65-62c858432f6d",
+        "locale": "vi",
+        "label": "Gà"
+    },
+    {
+        "id": 133,
+        "product_option_value_id": "019f408b-19d1-7301-ab20-0b9fe4216a7c",
+        "locale": "ja",
+        "label": "豚スネ"
+    },
+    {
+        "id": 134,
+        "product_option_value_id": "019f408b-19d1-7301-ab20-0b9fe4216a7c",
+        "locale": "en",
+        "label": "Pork"
+    },
+    {
+        "id": 135,
+        "product_option_value_id": "019f408b-19d1-7301-ab20-0b9fe4216a7c",
+        "locale": "vi",
+        "label": "Sườn"
+    },
+    {
+        "id": 154,
+        "product_option_value_id": "019f408b-1a18-7029-915a-231cb18fada2",
+        "locale": "ja",
+        "label": "アボカド"
+    },
+    {
+        "id": 155,
+        "product_option_value_id": "019f408b-1a18-7029-915a-231cb18fada2",
+        "locale": "en",
+        "label": "Avocado"
+    },
+    {
+        "id": 156,
+        "product_option_value_id": "019f408b-1a18-7029-915a-231cb18fada2",
+        "locale": "vi",
+        "label": "Bơ"
+    },
+    {
+        "id": 157,
+        "product_option_value_id": "019f408b-1a1b-73ef-98ba-3ff9a3a8ddc3",
+        "locale": "ja",
+        "label": "ドラゴンフルーツ"
+    },
+    {
+        "id": 158,
+        "product_option_value_id": "019f408b-1a1b-73ef-98ba-3ff9a3a8ddc3",
+        "locale": "en",
+        "label": "Dragon Fruit"
+    },
+    {
+        "id": 159,
+        "product_option_value_id": "019f408b-1a1b-73ef-98ba-3ff9a3a8ddc3",
+        "locale": "vi",
+        "label": "Thanh long"
+    },
+    {
+        "id": 160,
+        "product_option_value_id": "019f408b-1a25-7224-b976-007530511b34",
+        "locale": "ja",
+        "label": "マンゴー"
+    },
+    {
+        "id": 161,
+        "product_option_value_id": "019f408b-1a25-7224-b976-007530511b34",
+        "locale": "en",
+        "label": "Mango"
+    },
+    {
+        "id": 162,
+        "product_option_value_id": "019f408b-1a25-7224-b976-007530511b34",
+        "locale": "vi",
+        "label": "Xoài"
+    },
+    {
+        "id": 163,
+        "product_option_value_id": "aa94622f-0a27-4aaf-a581-b93307871d8b",
+        "locale": "vi",
+        "label": "Cay vừa"
+    },
+    {
+        "id": 164,
+        "product_option_value_id": "5a017047-5946-4573-9696-7d8040c446fd",
+        "locale": "vi",
+        "label": "Cay lắm"
+    },
+    {
+        "id": 165,
+        "product_option_value_id": "1c5b332c-de61-471b-8e42-6fd56cf56c41",
+        "locale": "vi",
+        "label": "400"
+    },
+    {
+        "id": 166,
+        "product_option_value_id": "5646ac97-4964-4e45-9dfd-a4b12b204bbb",
+        "locale": "vi",
+        "label": "1 cây"
+    },
+    {
+        "id": 167,
+        "product_option_value_id": "46ab9672-6064-4426-84e8-e46fd01ec463",
+        "locale": "vi",
+        "label": "2 cây"
+    },
+    {
+        "id": 168,
+        "product_option_value_id": "5646ac97-4964-4e45-9dfd-a4b12b204bbb",
+        "locale": "ja",
+        "label": "1本"
+    },
+    {
+        "id": 169,
+        "product_option_value_id": "46ab9672-6064-4426-84e8-e46fd01ec463",
+        "locale": "ja",
+        "label": "2本"
+    },
+    {
+        "id": 170,
+        "product_option_value_id": "a4ed2590-dfef-44a7-af32-6d2d3b4d2409",
+        "locale": "vi",
+        "label": "1本"
+    },
+    {
+        "id": 171,
+        "product_option_value_id": "e278bf92-2b0c-4379-88e2-549a82b1cf4e",
+        "locale": "vi",
+        "label": "2本"
+    },
+    {
+        "id": 172,
+        "product_option_value_id": "2efd054b-a740-45e2-ae47-7f536e9b789b",
+        "locale": "vi",
+        "label": "2 cuốn"
+    },
+    {
+        "id": 173,
+        "product_option_value_id": "f8169bd1-a885-4a88-b1ff-9fa8510a720e",
+        "locale": "vi",
+        "label": "4 cuốn"
+    },
+    {
+        "id": 174,
+        "product_option_value_id": "84edb9eb-29ec-4b77-8cb5-a42a9e8a5278",
+        "locale": "vi",
+        "label": "cuốn"
+    },
+    {
+        "id": 175,
+        "product_option_value_id": "2efd054b-a740-45e2-ae47-7f536e9b789b",
+        "locale": "ja",
+        "label": "2本"
+    },
+    {
+        "id": 176,
+        "product_option_value_id": "f8169bd1-a885-4a88-b1ff-9fa8510a720e",
+        "locale": "ja",
+        "label": "4本"
+    },
+    {
+        "id": 177,
+        "product_option_value_id": "9bba41d0-3094-4dc9-8693-b121feded590",
+        "locale": "vi",
+        "label": "2本"
+    },
+    {
+        "id": 178,
+        "product_option_value_id": "400586c3-a658-48c9-b06a-5a0cd3a2a7c2",
+        "locale": "vi",
+        "label": "4本"
+    },
+    {
+        "id": 179,
+        "product_option_value_id": "e8f0ae3c-52b1-49ac-9882-963f2ffcb526",
+        "locale": "vi",
+        "label": "Muối"
+    },
+    {
+        "id": 180,
+        "product_option_value_id": "9e59a526-caf5-41f7-833e-3b4b2231ac48",
+        "locale": "vi",
+        "label": "Muối tôm"
+    },
+    {
+        "id": 181,
+        "product_option_value_id": "e8f0ae3c-52b1-49ac-9882-963f2ffcb526",
+        "locale": "ja",
+        "label": "塩"
+    },
+    {
+        "id": 182,
+        "product_option_value_id": "9e59a526-caf5-41f7-833e-3b4b2231ac48",
+        "locale": "ja",
+        "label": "エビ塩"
+    }
+]

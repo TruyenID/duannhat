@@ -1,0 +1,307 @@
+# Cổng CI cho các app JS-TS. Trước #2585 KHÔNG có cái nào: ba app web deploy
+# thẳng lên Amplify khi push `main`, và thứ duy nhất đứng trước chúng là có ai
+# đó tình cờ chạy tay hay không. #2563 merge với 9 file `web/customer` — đúng
+# màn chọn phương thức thanh toán — mà không một kiểm tra tự động nào chạy.
+#
+# ## Vì sao chạy CẢ BỐN app khi bất kỳ file web nào đổi
+#
+# Cách "tiết kiệm" hiển nhiên là lọc theo từng app rồi bỏ qua app không đổi.
+# Đừng làm. Một job bị bỏ qua vẫn báo XANH, và tick xanh không phân biệt được
+# "đã kiểm, sạch" với "không kiểm gì". Đó chính là lỗi mà issue này tồn tại để
+# sửa: `backend-tests.yml` có `web/**` trong `paths`, nên PR chỉ đụng web vẫn
+# làm nó chạy và vẫn xanh — trong khi nó không đọc một dòng nào của thay đổi đó.
+#
+# Bốn app chạy song song qua matrix, mỗi app ~2–4 phút, nên cái giá của việc
+# thành thật ở đây là gần bằng không.
+#
+# ## Vì sao self-hosted (#3001)
+#
+# Đây từng là workflow DUY NHẤT của repo còn chạy trên runner tính tiền:
+# 21/23 job đã self-hosted, chỉ còn nó và `workstation-manifest-restore.yml`
+# (thứ chỉ chạy bằng tay, gần như không bao giờ) dùng `ubuntu-latest`.
+#
+# Nó tốn gấp bốn lần vẻ ngoài, vì hai lý do cộng lại: matrix bốn app là bốn
+# job tính tiền mỗi lượt, và cùng một thay đổi chạy HAI lượt (`pull_request`
+# lúc mở PR, `push` lúc merge). Đo ngày 2026-08-16: **35 lượt × 4 = ~140 job**
+# GitHub-hosted trong một ngày.
+#
+# Rồi nó dừng hẳn, và cách nó dừng mới là phần đắt: bốn job đỏ sau 3–4 giây
+# với **0 step và không một dòng log**. Giao diện không nói gì; sự thật chỉ
+# nằm ở annotation —
+#
+#     gh api repos/godx-jp/godx-tempo/check-runs/<id>/annotations
+#     failure: The job was not started because an Actions budget is preventing further use.
+#
+# — nên nó dễ bị đọc nhầm thành lỗi mã. Ghi lại đây để người sau không mất
+# một buổi đi tìm trong `web/`.
+#
+# ## KHÔNG bỏ trigger `push` để tiết kiệm
+#
+# Cách tiết kiệm hiển nhiên thứ hai là bỏ `push` vì `pull_request` đã kiểm rồi.
+# Đừng làm. Chi phí là lý do DUY NHẤT để bỏ nó, và self-hosted thì miễn phí —
+# nên lý do bốc hơi, còn cái mất thì không: lượt `push` là bằng chứng cho commit
+# ĐÃ MERGE, tức đúng cái cây mà `main` sẽ mang. Cùng lý lẽ với `cancel-in-progress`
+# ngay dưới đây.
+name: web-apps
+
+on:
+  pull_request:
+    branches: [dev, main]
+    paths:
+      - 'web/**'
+      - 'app/kds/**'
+      # #3002 — ba app Expo dùng npm, chạy ở job `native` bên dưới. Thiếu
+      # chúng ở đây thì PR chỉ chạm chúng đi qua CI với ĐÚNG 0 cổng, và bảng
+      # checks trống đọc y hệt "chưa chạy xong" nên không ai để ý.
+      - 'app/pos/**'
+      - 'app/tms/**'
+      - 'app/kiosk/**'
+      # Gói tự làm đã về trong cây (#3002). Đổi chúng là đổi thứ hai app Expo
+      # BIÊN DỊCH VÀO, nên `paths` phải nhìn thấy — nếu không, một PR chỉ sửa
+      # `app/packages/` đi qua với bảng checks trống, đúng lớp lỗi mà chính rào
+      # `test:app-gates` sinh ra để chặn.
+      - 'app/packages/**'
+      # #3133 — app JS thứ năm, xem job `workstation-frontend` bên dưới. Nó là
+      # app duy nhất của repo từng không có test runner nào, và lý do nó lọt là
+      # KHÔNG AI CANH: thiếu dòng này thì PR chỉ chạm nó lại đi qua CI với 0
+      # cổng, đúng hình dạng #3002 đã sửa cho `app/tms`.
+      - 'workstation/frontend/**'
+      - '.github/workflows/web-apps.yml'
+  push:
+    branches: [dev, main]
+    paths:
+      - 'web/**'
+      - 'app/kds/**'
+      # #3002 — ba app Expo dùng npm, chạy ở job `native` bên dưới. Thiếu
+      # chúng ở đây thì PR chỉ chạm chúng đi qua CI với ĐÚNG 0 cổng, và bảng
+      # checks trống đọc y hệt "chưa chạy xong" nên không ai để ý.
+      - 'app/pos/**'
+      - 'app/tms/**'
+      - 'app/kiosk/**'
+      # Gói tự làm đã về trong cây (#3002). Đổi chúng là đổi thứ hai app Expo
+      # BIÊN DỊCH VÀO, nên `paths` phải nhìn thấy — nếu không, một PR chỉ sửa
+      # `app/packages/` đi qua với bảng checks trống, đúng lớp lỗi mà chính rào
+      # `test:app-gates` sinh ra để chặn.
+      - 'app/packages/**'
+      # #3133 — app JS thứ năm, xem job `workstation-frontend` bên dưới. Nó là
+      # app duy nhất của repo từng không có test runner nào, và lý do nó lọt là
+      # KHÔNG AI CANH: thiếu dòng này thì PR chỉ chạm nó lại đi qua CI với 0
+      # cổng, đúng hình dạng #3002 đã sửa cho `app/tms`.
+      - 'workstation/frontend/**'
+      - '.github/workflows/web-apps.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: web-apps-${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  # Trên PR, huỷ lượt cũ là miễn phí. Trên dev/main thì KHÔNG: lượt đang chạy là
+  # bằng chứng DUY NHẤT cho commit đó, và một lượt bị huỷ báo `cancelled` —
+  # đọc lên y như chưa từng chạy. Cùng lý lẽ với `backend-tests.yml` (#2557).
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  check:
+    name: ${{ matrix.app }}
+    # #3001 — cùng runner với mọi cổng khác của repo. `omnify-gate` đã chứng
+    # minh runner này chạy được `actions/setup-node@v4` + Node 22 + cài gói;
+    # `pnpm/action-setup` cũng chỉ là một action Node thuần.
+    runs-on: [self-hosted, Linux, X64]
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false # một app đỏ không được che mất ba app còn lại
+      matrix:
+        include:
+          # `test:coverage`, KHÔNG phải `test`, ở đâu có ngưỡng phủ: `test`
+          # không đọc ngưỡng nên phủ tụt bao nhiêu nó vẫn thoát 0
+          # (luật đã ghi ở `web/pos/CLAUDE.md`).
+          - app: web/admin
+            test: 'test:coverage'
+          - app: web/customer
+            test: 'test'
+          - app: web/pos
+            test: 'test:coverage'
+          - app: app/kds
+            test: 'test'
+
+    defaults:
+      run:
+        working-directory: ${{ matrix.app }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          dest: ${{ runner.temp }}/pnpm
+          version: 10.29.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: ${{ matrix.app }}/pnpm-lock.yaml
+
+      # Các app web KHÔNG phải workspace member (`pnpm-workspace.yaml` chỉ liệt
+      # kê `packages/*`), mỗi app mang lockfile riêng — nên install phải chạy
+      # TRONG thư mục app, không phải ở gốc.
+      - name: install
+        run: pnpm install --frozen-lockfile
+
+      # Ratchet, không phải lint trần: `web/customer` (18) và `web/pos` (3) mang
+      # lỗi ESLint CÓ SẴN trên `main`. Ngân sách của hai app sạch là 0, nên với
+      # chúng đây là lint chặn như bình thường. Chi tiết ở `scripts/lint-budget.mjs`.
+      - name: lint (ratchet — số lỗi không được tăng)
+        working-directory: ${{ github.workspace }}
+        run: node scripts/lint-budget.mjs ${{ matrix.app }}
+
+      # `typecheck` của mỗi app phải khớp tsconfig của chính nó:
+      #   - admin · customer  → không project references, `tsc --noEmit` soi thật
+      #   - pos · kds         → CÓ references, `--noEmit` bỏ qua TOÀN BỘ và
+      #                         thoát 0; lệnh đúng là `tsc -b`
+      # Bước này từng là một cổng rỗng đúng theo kiểu đó, nên khi sửa nó phải
+      # chứng minh lại rằng nó biết đỏ (chèn một lỗi kiểu, thấy nó bắt).
+      - name: typecheck
+        run: pnpm typecheck
+
+      - name: test
+        run: pnpm ${{ matrix.test }}
+
+      # Rào arch của bộ test browser — QUÉT TĨNH, không mở trình duyệt, không
+      # dựng server. Đo: 241ms.
+      #
+      # Vì sao nó phải nằm ở đây chứ không đợi `pnpm test:browser`: workflow
+      # `frontend-browser.yml` bị xoá ở `802c8494b` khi ba web app tách ra
+      # submodule, và #2306 gộp chúng VỀ LẠI monorepo mà không ai khôi phục nó.
+      # Từ đó `git grep -lni playwright .github/` trả về RỖNG trong khi
+      # `plans/plan-023/README.md` vẫn khẳng định "CI invokes `pnpm test:browser`".
+      # 16 file spec mất tiếng, không gì đỏ — cùng hình dạng #3133 và #3002.
+      #
+      # Đây mới là NỬA rẻ. Chạy 15 spec thật cần chromium + `pnpm dev` +
+      # backend trên runner; phần đó theo dõi riêng. Nhưng rào "không spec nào
+      # được `.skip`" thì không cần gì cả, nên để nó tiếp tục im lặng là chọn
+      # mất một cổng miễn phí.
+      - name: browser specs — rào arch (không cần trình duyệt)
+        if: matrix.app == 'web/admin'
+        env:
+          PLAYWRIGHT_REUSE_SERVER: "1"
+        run: pnpm exec playwright test test/browser/_arch/ --reporter=line
+
+      - name: build
+        run: pnpm build
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # #3002 — ba app Expo dùng **npm** (`package-lock.json`), không phải pnpm, nên
+  # chúng không đi chung matrix với job trên được.
+  #
+  # Trước bản này `grep -rln "app/tms" .github/workflows/` trả về RỖNG: mọi PR
+  # chỉ chạm TMS đi qua CI với 0 cổng. Đó là tầng tệ hơn "cổng có mà không
+  # chạy" — không có cổng để mà chạy, và bảng checks trống trơn đọc y hệt
+  # "đang chờ".
+  #
+  # `build` cố ý KHÔNG chạy ở đây: với Expo, build là EAS (ký, tài khoản, hàng
+  # đợi từ xa) — một cổng CI không có tư cách gọi nó.
+  # ───────────────────────────────────────────────────────────────────────────
+  native:
+    name: ${{ matrix.app }}
+    runs-on: [self-hosted, Linux, X64]
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false # một app đỏ không được che hai app còn lại
+      matrix:
+        include:
+          # `app/tms` và `app/kiosk` CHƯA ở đây — không phải vì quên. Cả hai
+          # phụ thuộc repo GitHub **riêng tư** qua `github:` specifier
+          # (`@godxjp/ui-native`, `@godxjp/mobile-shared`), nên `npm ci` trên
+          # runner thoát **128** — mã của `git`, không phải của npm — vì không
+          # có credential để clone. Đo trực tiếp ở PR #3039.
+          #
+          # Mở khoá bằng MỘT quyết định của chủ dự án: cấp secret (PAT hoặc
+          # deploy key) đọc được hai repo đó. `GITHUB_TOKEN` mặc định KHÔNG đủ —
+          # nó chỉ có quyền trên chính repo này.
+          - app: app/pos
+            typecheck: 'yes'
+          # #3002 — `@godxjp/ui-native` + `@godxjp/mobile-shared` nay nằm trong
+          # cây ở `app/packages/` và được trỏ bằng `file:`, nên `npm ci` không
+          # còn phải clone repo riêng tư. Đó là thứ đã giữ hai app này ngoài
+          # cổng từ PR #3039.
+          - app: app/tms
+            typecheck: 'no'
+          - app: app/kiosk
+            typecheck: 'yes'
+
+    defaults:
+      run:
+        working-directory: ${{ matrix.app }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: ${{ matrix.app }}/package-lock.json
+
+      - name: install
+        run: npm ci
+
+      # Chỉ chạy khi app THẬT SỰ có script — gọi một script không tồn tại thì
+      # npm thoát khác 0 và cổng đỏ vì lý do không dính gì tới mã.
+      - name: typecheck
+        if: matrix.typecheck == 'yes'
+        run: npm run typecheck
+
+      - name: test
+        run: npm test
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # #3133 — `workstation/frontend` là app JS thứ NĂM, và tới hôm nay là app JS
+  # duy nhất của repo không có gì chạy test: 33 file `.ts`/`.tsx`, 0 file test,
+  # 0 cổng. Nó không được miễn trừ — nó **vô hình**: rào `test:app-gates` duyệt
+  # hai thư mục gõ cứng (`app/`, `web/`) nên chưa bao giờ nhìn tới `workstation/`.
+  #
+  # Job riêng chứ không nhét vào matrix `check` ở trên, vì hai bước của matrix
+  # đó không áp được ở đây:
+  #   - `lint-budget` cần cấu hình ESLint, app này chưa có;
+  #   - `build` là `vite build` với plugin `@wailsio/runtime` sinh binding từ
+  #     cây Go — thuộc về `workstation-release.yml`, nơi đã dựng nó thật.
+  #
+  # `--ignore-workspace`: app này KHÔNG có `pnpm-workspace.yaml` riêng (khác
+  # `web/pos` và `app/kds`), nên pnpm đi ngược lên tới workspace của umbrella và
+  # ghi vào lockfile GỐC. Cùng cờ mà `workstation/Makefile` và
+  # `workstation-release.yml` đã dùng — một cách cài, một lockfile.
+  # ───────────────────────────────────────────────────────────────────────────
+  workstation-frontend:
+    name: workstation/frontend
+    runs-on: [self-hosted, Linux, X64]
+    timeout-minutes: 20
+
+    defaults:
+      run:
+        working-directory: workstation/frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          dest: ${{ runner.temp }}/pnpm
+          version: 10.29.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: workstation/frontend/pnpm-lock.yaml
+
+      - name: install
+        run: pnpm install --ignore-workspace --frozen-lockfile
+
+      # `tsc` chứ không phải `pnpm build`: bước dựng đi qua vite + plugin wails,
+      # còn thứ cần canh ở đây là KIỂU. Và nó canh thật: `vitest.setup.ts` nằm
+      # ngoài `include` thì test vẫn xanh trong khi `tsc` — bước đầu của
+      # `pnpm build`, tức đường phát hành — đỏ với 9 lỗi TS2339.
+      - name: typecheck
+        run: pnpm exec tsc
+
+      - name: test
+        run: pnpm test

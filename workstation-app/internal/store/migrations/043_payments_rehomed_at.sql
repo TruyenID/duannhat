@@ -1,0 +1,20 @@
+-- Kiosk payment re-home cap (plan-818 K2).
+--
+-- Kiosk-origin payments (sync_target='kiosk') sync UP via /api/v1/kiosk/payments
+-- with the kiosk device's baked token; cloudPost does NOT re-stamp that route, so
+-- once the kiosk token is stale/absent (or the queue row was lost) the payment
+-- can never reach Cloud. reconcileUnsyncedPayments recovers it by RE-HOMING the
+-- push to /api/v1/workstation/payments under the workstation device token (Cloud
+-- accepts a workstation payment on a kiosk order — same branch/org, no channel
+-- guard; dedup is by (order_id, idempotency_key) so no double-charge).
+--
+-- `rehomed_at` marks that a kiosk payment has ALREADY been re-homed once, so the
+-- reconciler re-homes it at most once. Without this cap, a kiosk order still in
+-- `Confirmed` status (common for takeaway) 409s on the workstation route, which
+-- cloudPost currently treats as an idempotent-success and marks the queue row
+-- synced WITHOUT writing cloud_id — leaving the payment cloud_id-NULL with no
+-- live row, which the reconciler would otherwise re-enqueue every tick forever.
+-- Capping at one re-home parks such a payment (still counted by the unpair guard,
+-- never silently lost) until the Cloud-side fix lands (add `Confirmed` to the
+-- workstation PaymentController auto-promotion — see godx-jp/godx-tempo#859).
+ALTER TABLE payments ADD COLUMN rehomed_at TEXT;

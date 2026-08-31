@@ -1,0 +1,200 @@
+[
+    {
+        "id": 7,
+        "product_option_id": "019f408b-1871-7108-814f-1b640098ff70",
+        "locale": "ja",
+        "name": "サイズ"
+    },
+    {
+        "id": 8,
+        "product_option_id": "019f408b-1871-7108-814f-1b640098ff70",
+        "locale": "en",
+        "name": "Size"
+    },
+    {
+        "id": 9,
+        "product_option_id": "019f408b-1871-7108-814f-1b640098ff70",
+        "locale": "vi",
+        "name": "Size"
+    },
+    {
+        "id": 16,
+        "product_option_id": "019f408b-18a7-73ad-9fa7-08af86aea20b",
+        "locale": "ja",
+        "name": "サイズ"
+    },
+    {
+        "id": 17,
+        "product_option_id": "019f408b-18a7-73ad-9fa7-08af86aea20b",
+        "locale": "en",
+        "name": "Size"
+    },
+    {
+        "id": 18,
+        "product_option_id": "019f408b-18a7-73ad-9fa7-08af86aea20b",
+        "locale": "vi",
+        "name": "Size"
+    },
+    {
+        "id": 25,
+        "product_option_id": "019f408b-18d7-7166-b6c7-abd870f16358",
+        "locale": "ja",
+        "name": "サイズ"
+    },
+    {
+        "id": 26,
+        "product_option_id": "019f408b-18d7-7166-b6c7-abd870f16358",
+        "locale": "en",
+        "name": "Size"
+    },
+    {
+        "id": 27,
+        "product_option_id": "019f408b-18d7-7166-b6c7-abd870f16358",
+        "locale": "vi",
+        "name": "Size"
+    },
+    {
+        "id": 34,
+        "product_option_id": "019f408b-18fa-7124-950c-747fe35408b2",
+        "locale": "ja",
+        "name": "温度"
+    },
+    {
+        "id": 35,
+        "product_option_id": "019f408b-18fa-7124-950c-747fe35408b2",
+        "locale": "en",
+        "name": "Temperature"
+    },
+    {
+        "id": 36,
+        "product_option_id": "019f408b-18fa-7124-950c-747fe35408b2",
+        "locale": "vi",
+        "name": "Nhiệt độ"
+    },
+    {
+        "id": 43,
+        "product_option_id": "019f408b-1924-71ff-9a96-df3fce977ee5",
+        "locale": "ja",
+        "name": "温度"
+    },
+    {
+        "id": 44,
+        "product_option_id": "019f408b-1924-71ff-9a96-df3fce977ee5",
+        "locale": "en",
+        "name": "Temperature"
+    },
+    {
+        "id": 45,
+        "product_option_id": "019f408b-1924-71ff-9a96-df3fce977ee5",
+        "locale": "vi",
+        "name": "Nhiệt độ"
+    },
+    {
+        "id": 52,
+        "product_option_id": "019f408b-19a0-7177-8b2f-ea868b80bd5f",
+        "locale": "ja",
+        "name": "スタイル"
+    },
+    {
+        "id": 53,
+        "product_option_id": "019f408b-19a0-7177-8b2f-ea868b80bd5f",
+        "locale": "en",
+        "name": "Style"
+    },
+    {
+        "id": 54,
+        "product_option_id": "019f408b-19a0-7177-8b2f-ea868b80bd5f",
+        "locale": "vi",
+        "name": "Loại"
+    },
+    {
+        "id": 61,
+        "product_option_id": "019f408b-19c9-7386-b5ba-729e35fa73cf",
+        "locale": "ja",
+        "name": "主菜"
+    },
+    {
+        "id": 62,
+        "product_option_id": "019f408b-19c9-7386-b5ba-729e35fa73cf",
+        "locale": "en",
+        "name": "Protein"
+    },
+    {
+        "id": 63,
+        "product_option_id": "019f408b-19c9-7386-b5ba-729e35fa73cf",
+        "locale": "vi",
+        "name": "Thịt"
+    },
+    {
+        "id": 70,
+        "product_option_id": "019f408b-1a11-7379-849b-a964de5cc6f4",
+        "locale": "ja",
+        "name": "フレーバー"
+    },
+    {
+        "id": 71,
+        "product_option_id": "019f408b-1a11-7379-849b-a964de5cc6f4",
+        "locale": "en",
+        "name": "Flavor"
+    },
+    {
+        "id": 72,
+        "product_option_id": "019f408b-1a11-7379-849b-a964de5cc6f4",
+        "locale": "vi",
+        "name": "Hương vị"
+    },
+    {
+        "id": 73,
+        "product_option_id": "3472bb5a-e6ca-49ae-8250-ab4c06eb1d3b",
+        "locale": "vi",
+        "name": "Nhiệt độ"
+    },
+    {
+        "id": 74,
+        "product_option_id": "8a6e2bce-4eba-480b-9d5f-5bf5c6d1c5f9",
+        "locale": "vi",
+        "name": "2 cây"
+    },
+    {
+        "id": 75,
+        "product_option_id": "86e387f7-f855-4b47-9cf1-5d1d62f99045",
+        "locale": "vi",
+        "name": "Số lượng"
+    },
+    {
+        "id": 76,
+        "product_option_id": "86e387f7-f855-4b47-9cf1-5d1d62f99045",
+        "locale": "ja",
+        "name": "量"
+    },
+    {
+        "id": 77,
+        "product_option_id": "647971f8-31f6-4fc2-afdb-9ba39c4619fb",
+        "locale": "vi",
+        "name": "量"
+    },
+    {
+        "id": 78,
+        "product_option_id": "ae78af64-92ef-4e21-bdb9-8f7c6ae0bbbb",
+        "locale": "vi",
+        "name": "số lượng"
+    },
+    {
+        "id": 82,
+        "product_option_id": "1a81d429-4170-4370-b705-f2fc1c49f042",
+        "locale": "vi",
+        "name": "量"
+    },
+    {
+        "id": 83,
+        "product_option_id": "f8cd7e86-1b6d-4363-a2bf-b837f789b339",
+        "locale": "vi",
+        "name": "vị"
+    },
+    {
+        "id": 84,
+        "product_option_id": "f8cd7e86-1b6d-4363-a2bf-b837f789b339",
+        "locale": "ja",
+        "name": "味"
+    }
+]

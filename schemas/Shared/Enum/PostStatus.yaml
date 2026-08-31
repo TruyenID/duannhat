@@ -1,0 +1,45 @@
+# ==============================================================================
+# Post Status Enum (投稿ステータス / Trạng thái Bài viết)
+# ==============================================================================
+#
+# Workflow của bài viết (blog/news/promotion):
+#
+#   - Draft:     Đang soạn thảo, chưa public. published_at có thể null.
+#                Transition: → Published (khi publish), → Archived (khi bỏ)
+#
+#   - Published: Đã xuất bản, hiển thị công khai trên customer-web.
+#                Transition: → Archived (khi gỡ khỏi danh sách public)
+#                            → Draft (khi unpublish để chỉnh sửa)
+#
+#   - Archived:  Đã lưu trữ, không còn hiển thị nhưng giữ data cho SEO history.
+#                Transition: → Draft (khi muốn edit và republish)
+#
+# Business Rules:
+#   - Chỉ post status = Published AND published_at <= now() mới hiển thị public.
+#   - Draft vẫn xem được ở admin preview.
+#   - Archived không trả về API public, nhưng /hq/{brand}/posts vẫn list ra.
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: 投稿ステータス
+  en: Post Status
+  vi: Trạng thái Bài viết
+
+values:
+  - value: Draft
+    label:
+      ja: 下書き
+      en: Draft
+      vi: Bản nháp
+  - value: Published
+    label:
+      ja: 公開
+      en: Published
+      vi: Đã xuất bản
+  - value: Archived
+    label:
+      ja: アーカイブ
+      en: Archived
+      vi: Lưu trữ

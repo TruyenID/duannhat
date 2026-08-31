@@ -1,0 +1,41 @@
+# ==============================================================================
+# Component Type Enum (原材料タイプ / Loại thành phần NVL)
+# ==============================================================================
+#
+# Identifies whether a batch component is a raw material or a product variant.
+# Used to determine which FK (material_id or product_sku_id) is active
+# and which stock_levels record to check.
+#
+# Values:
+#   - material: Nguyên liệu (原材料)
+#     Stock lookup: stock_levels.material_id (BR-04)
+#     Source: materials table
+#
+#   - variant: Biến thể sản phẩm (商品バリエーション)
+#     Stock lookup: stock_levels.product_sku_id (BR-05)
+#     Source: product_skus table
+#
+# Used in:
+#   - MaterialBatchItem.component_type: Identifies component source
+#   - Stock check logic: Determines which FK to use for stock lookup
+#
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: 原材料タイプ
+  en: Component Type
+  vi: Loại thành phần NVL
+
+values:
+  - value: material
+    label:
+      ja: 原材料
+      en: Material
+      vi: Nguyên liệu
+  - value: variant
+    label:
+      ja: 商品バリエーション
+      en: Variant
+      vi: Biến thể sản phẩm

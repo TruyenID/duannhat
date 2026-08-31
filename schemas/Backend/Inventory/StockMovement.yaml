@@ -1,0 +1,183 @@
+# StockMovement schema
+# Immutable audit log for every stock quantity change.
+# Created when a transaction is approved/completed. NEVER updated or deleted.
+#
+# Key Design:
+#   - IMMUTABLE: No updated_at, no deleted_at, no soft delete
+#   - Only created_at with useCurrent (auto-set on insert)
+#   - quantity_before + quantity_after: snapshot for audit trail
+#   - quantity: always in base unit (absolute value, direction from movement_type)
+#   - One of (product_sku_id, material_id) must be NOT NULL (app-level CHECK)
+#
+# Business Rules:
+#   - BR-05: stock_movements is append-only, never modified or deleted
+#   - For movement_type 'in':  quantity_after = quantity_before + quantity
+#   - For movement_type 'out': quantity_after = quantity_before - quantity
+
+displayName:
+  en: Stock Movement
+  ja: 在庫変動
+  vi: Biến động kho
+
+kind: object
+
+options:
+  timestamps: false
+  id: Uuid
+  indexes:
+    - columns: [warehouse_id, product_sku_id, created_at]
+    - columns: [warehouse_id, material_id, created_at]
+    - columns: [stock_transaction_id]
+
+properties:
+  warehouse:
+    type: Association
+    relation: ManyToOne
+    target: Warehouse
+    onDelete: RESTRICT
+    displayName:
+      en: Warehouse
+      ja: 倉庫
+      vi: Kho hàng
+
+  productSku:
+    type: Association
+    relation: ManyToOne
+    target: ProductSku
+    onDelete: RESTRICT
+    nullable: true
+    displayName:
+      en: Product Variant
+      ja: 商品バリエーション
+      vi: Biến thể sản phẩm
+    description:
+      en: "Product variant. Mutually exclusive with material_id"
+      ja: "商品バリエーション。material_idと排他的"
+      vi: "Biến thể sản phẩm. Loại trừ với material_id"
+
+  material:
+    type: Association
+    relation: ManyToOne
+    target: Material
+    onDelete: RESTRICT
+    nullable: true
+    displayName:
+      en: Material
+      ja: 材料
+      vi: Nguyên liệu
+    description:
+      en: "Raw material. Mutually exclusive with product_sku_id"
+      ja: "原材料。product_sku_idと排他的"
+      vi: "Nguyên liệu. Loại trừ với product_sku_id"
+
+  materialLot:
+    type: Association
+    relation: ManyToOne
+    target: MaterialLot
+    onDelete: RESTRICT
+    nullable: true
+    # Plan-017: stamps the lot whose qty_on_hand changed in this movement.
+    # Mirrors the parent StockTransactionItem.material_lot_id. NULL = legacy
+    # movement before lot tracking (nullable preserved for those rows).
+    # plan-040 M23: RESTRICT (was SET NULL) — this is an IMMUTABLE audit row;
+    # nulling the lot link on lot delete would silently corrupt the audit trail
+    # and break recall genealogy. A lot referenced by any movement cannot be
+    # hard-deleted (quarantine/soft-delete instead).
+    displayName:
+      en: Material Lot
+      ja: 材料ロット
+      vi: Lô nguyên liệu
+    description:
+      en: "Lot whose qty_on_hand changed. Mirrors the parent StockTransactionItem. NULL = legacy/pre-lot-tracking. RESTRICT on lot delete — audit rows must keep their lot link (plan-040 M23)."
+      ja: "qty_on_handが変動したロット。親StockTransactionItemをミラー。NULL = レガシー/ロット追跡前。ロット削除時はRESTRICT — 監査行はロット参照を保持必須（plan-040 M23）。"
+      vi: "Lô có qty_on_hand thay đổi. Mirror StockTransactionItem cha. NULL = legacy/trước lot tracking. RESTRICT khi xóa lô — audit phải giữ liên kết lô (plan-040 M23)."
+
+  stockTransaction:
+    type: Association
+    relation: ManyToOne
+    target: StockTransaction
+    onDelete: RESTRICT
+    displayName:
+      en: Stock Transaction
+      ja: 在庫取引
+      vi: Phiếu kho
+    description:
+      en: Source transaction that caused this movement
+      ja: この変動を引き起こした元取引
+      vi: Phiếu kho gây ra biến động này
+
+  movement_type:
+    type: EnumRef
+    enum: MovementType
+    displayName:
+      en: Movement Type
+      ja: 変動タイプ
+      vi: Loại biến động
+    description:
+      en: "in = increase stock, out = decrease stock"
+      ja: "in = 在庫増加、out = 在庫減少"
+      vi: "in = tăng tồn, out = giảm tồn"
+
+  quantity:
+    type: Decimal
+    precision: 15
+    scale: 4
+    displayName:
+      en: Quantity
+      ja: 数量
+      vi: Số lượng
+    description:
+      en: "Amount changed in base unit (always positive)"
+      ja: "基本単位での変動数量（常に正の値）"
+      vi: "Số lượng thay đổi (đơn vị cơ bản, luôn dương)"
+
+  quantity_before:
+    type: Decimal
+    precision: 15
+    scale: 4
+    displayName:
+      en: Quantity Before
+      ja: 変動前数量
+      vi: Tồn trước
+    description:
+      en: Stock quantity before this movement
+      ja: この変動前の在庫数量
+      vi: Số lượng tồn kho trước biến động
+
+  quantity_after:
+    type: Decimal
+    precision: 15
+    scale: 4
+    displayName:
+      en: Quantity After
+      ja: 変動後数量
+      vi: Tồn sau
+    description:
+      en: Stock quantity after this movement
+      ja: この変動後の在庫数量
+      vi: Số lượng tồn kho sau biến động
+
+  unit:
+    type: String
+    length: 50
+    nullable: true
+    displayName:
+      en: Unit
+      ja: 単位
+      vi: Đơn vị
+    description:
+      en: "Base unit of measurement"
+      ja: "基本計量単位"
+      vi: "Đơn vị đo lường cơ bản"
+
+  created_at:
+    type: Timestamp
+    useCurrent: true
+    displayName:
+      en: Created At
+      ja: 作成日時
+      vi: Ngày tạo
+    description:
+      en: "Immutable timestamp. No updated_at or deleted_at by design (BR-05)"
+      ja: "不変のタイムスタンプ。設計上updated_atやdeleted_atなし（BR-05）"
+      vi: "Timestamp bất biến. Không có updated_at, deleted_at theo thiết kế (BR-05)"

@@ -1,0 +1,1 @@
+{"message":"Currency cannot be changed while a cashier shift is open. Close all open shifts at this branch first.","code":"CURRENCY_CHANGE_BLOCKED_OPEN_SHIFT"}

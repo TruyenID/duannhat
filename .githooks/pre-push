@@ -1,0 +1,201 @@
+#!/usr/bin/env bash
+# Pre-push hook — when pushing the umbrella's `dev` or `main`, every submodule
+# must be on that SAME branch, clean, and level with its remote; and the pointer
+# must be REACHABLE from that branch (its tip, or an ancestor of it).
+#
+# Why this exists. The umbrella records a gitlink per submodule, and nothing in
+# git checks that the gitlink is a commit anyone else can reach or that it is
+# the branch tip the team is working on. Three failures have actually happened
+# here:
+#
+#   * A pointer bumped to an UNPUSHED submodule commit. origin/dev broke for
+#     every fresh clone. (#1147 — the pre-commit hook now blocks that half.)
+#   * A pointer left on a submodule commit whose own CI was RED, so cloning
+#     umbrella main gave you a submodule that could not even install.
+#   * A submodule sitting on DETACHED HEAD after `git submodule update`, so a
+#     commit made in it landed on no branch and was orphaned. This is the one
+#     that bites hardest, because everything looks fine until you look.
+#
+# Activated via: git config core.hooksPath .githooks
+#
+# COST: one `git fetch origin <branch>` per submodule, so such a push does real
+# network work. That is the point — "level with the remote" cannot be answered
+# from local state alone.
+#
+# To push anyway, `git push --no-verify`. Do that only when you know why; the
+# checks below are all things that have silently broken the repo before.
+
+set -uo pipefail
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+cd "$REPO_ROOT"
+
+# ─── Only guard pushes of the umbrella's `dev` ───────────────────────────────
+# pre-push gets "<local ref> <local sha> <remote ref> <remote sha>" per line on
+# stdin. Anything else (main, a tag, a delete) is none of our business.
+# Guard whichever long-lived branch is being pushed. `main` used to be skipped
+# entirely, which left the riskiest push unchecked: main is what Amplify
+# deploys, and a dev→main merge is exactly when submodules get hand-moved one
+# by one. A tag or any other branch is still none of our business.
+BRANCH=""
+PUSHED_SHA=""
+while read -r local_ref local_sha _remote_ref _remote_sha; do
+  case "$local_ref" in
+    refs/heads/dev|refs/heads/main)
+      BRANCH="${local_ref#refs/heads/}"
+      PUSHED_SHA="$local_sha"
+      ;;
+  esac
+done
+
+[[ -z "$BRANCH" ]] && exit 0
+
+# A deletion pushes the all-zero sha; there is no tree to inspect.
+if [[ "$PUSHED_SHA" =~ ^0+$ ]]; then
+  exit 0
+fi
+
+SUBMODULES=$(git config --file .gitmodules --get-regexp '^submodule\..*\.path$' 2>/dev/null | awk '{print $2}')
+[[ -z "$SUBMODULES" ]] && exit 0
+
+echo "  Checking submodules are on $BRANCH and level with their remotes…"
+
+PROBLEMS=()
+
+for path in $SUBMODULES; do
+  if [[ ! -d "$path/.git" ]] && [[ ! -f "$path/.git" ]]; then
+    PROBLEMS+=("$path: not initialised — run: git submodule update --init $path")
+    continue
+  fi
+
+  # `git -C <sub>` alone is NOT enough: git exports GIT_DIR to hooks and GIT_DIR
+  # WINS over -C. In the main worktree GIT_DIR is the relative ".git", so -C happens
+  # to resolve it inside the submodule and every check below is correct by luck. From
+  # a LINKED worktree GIT_DIR is absolute, so all of them would inspect the UMBRELLA
+  # instead — reporting the umbrella's branch as the submodule's and blocking with a
+  # message that sends you looking at the wrong repository.
+  sub_git=(env -u GIT_DIR -u GIT_WORK_TREE -u GIT_INDEX_FILE git -C "$path")
+
+  # 1. On branch dev, not detached and not somewhere else.
+  branch=$("${sub_git[@]}" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "?")
+  if [[ "$branch" == "HEAD" ]]; then
+    PROBLEMS+=("$path: DETACHED HEAD — a commit made here would land on no branch. Fix: cd $path && git checkout $BRANCH")
+    continue
+  fi
+  if [[ "$branch" != "$BRANCH" ]]; then
+    PROBLEMS+=("$path: on '$branch', not $BRANCH. Fix: cd $path && git checkout $BRANCH")
+    continue
+  fi
+
+  # 2. Nothing uncommitted. Tracked files only — untracked scratch is fine.
+  #
+  # Refresh the stat cache first. Without this the check fires on files whose
+  # CONTENT is identical to HEAD but whose mtime moved — `go build`, `gofmt -w`
+  # and formatters rewrite files byte-for-byte all the time. The first version
+  # of this hook blocked a push for exactly that, and pointed the developer at
+  # a file with an empty diff, which is a worse failure than not checking:
+  # it sends you looking for a change that does not exist.
+  "${sub_git[@]}" update-index --refresh >/dev/null 2>&1 || true
+  if ! "${sub_git[@]}" diff --quiet HEAD -- 2>/dev/null; then
+    PROBLEMS+=("$path: uncommitted changes. Commit them in the submodule FIRST, then bump the pointer. Fix: cd $path && git status")
+    continue
+  fi
+
+  # 3. Level with origin/dev — neither ahead (unpushed) nor behind (stale).
+  #
+  # #1733 — PHÂN BIỆT "nhánh không còn" với "mạng hỏng". Cả sáu repo con từng
+  # mất nhánh `dev` cùng lúc (GitHub tự xoá head branch sau khi merge PR
+  # dev → main), và thông điệp cũ hỏi "remote có với tới được không" nên người
+  # đọc đi kiểm mạng và quyền — mất trọn một lượt chẩn đoán cho một nhánh đơn
+  # giản là đã biến mất. Hỏi thẳng remote: `ls-remote` trả rỗng nghĩa là nhánh
+  # không tồn tại, còn lỗi kết nối thì `ls-remote` cũng hỏng theo.
+  if ! "${sub_git[@]}" fetch --quiet origin "$BRANCH" 2>/dev/null; then
+    if "${sub_git[@]}" ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+      PROBLEMS+=("$path: $BRANCH TỒN TẠI trên remote nhưng fetch hỏng — nhiều khả năng là mạng hoặc quyền. Fix: cd $path && git fetch origin $BRANCH")
+    elif "${sub_git[@]}" ls-remote --heads origin >/dev/null 2>&1; then
+      PROBLEMS+=("$path: remote KHÔNG CÒN nhánh $BRANCH (#1733 — merge PR dev → main làm GitHub tự xoá head branch). Fix: cd $path && git push origin <commit>:refs/heads/$BRANCH  — đặt bằng main để hai nhánh ngang nhau, đừng đặt bằng commit trước merge")
+    else
+      PROBLEMS+=("$path: không liên lạc được với remote — kiểm mạng/quyền. Fix: cd $path && git ls-remote origin")
+    fi
+    continue
+  fi
+
+  local_head=$("${sub_git[@]}" rev-parse "$BRANCH")
+  remote_head=$("${sub_git[@]}" rev-parse "origin/$BRANCH")
+
+  if [[ "$local_head" != "$remote_head" ]]; then
+    ahead=$("${sub_git[@]}" rev-list --count "origin/$BRANCH..$BRANCH")
+    behind=$("${sub_git[@]}" rev-list --count "$BRANCH..origin/$BRANCH")
+    if (( ahead > 0 )); then
+      PROBLEMS+=("$path: $ahead commit(s) not pushed. The umbrella pointer would reference a commit nobody else can fetch. Fix: cd $path && git push origin $BRANCH")
+    else
+      PROBLEMS+=("$path: $behind commit(s) behind origin/$BRANCH. Fix: cd $path && git pull --ff-only origin $BRANCH")
+    fi
+    continue
+  fi
+
+  # 4. The pointer being pushed must be REACHABLE from that branch — an ancestor
+  #    of the tip, or the tip itself.
+  #
+  #    This used to demand equality, and equality is the wrong rule. The thing
+  #    that breaks a fresh clone is a pointer nobody can fetch; a pointer one or
+  #    two commits behind the tip clones perfectly. Worse, equality is unstable
+  #    by construction: merge a submodule PR and the sub branch moves ahead, so
+  #    the umbrella pointer — correct when it was written, still reachable — is
+  #    suddenly "wrong", and the NEXT person to push umbrella dev is blocked over
+  #    someone else's merge. That is a false block on the common path (#1353).
+  #
+  #    Still blocked, because these are the real breakages:
+  #      * pointer not present in the submodule at all  → unfetchable
+  #      * pointer AHEAD of the branch tip              → an unpushed or
+  #        off-branch commit; this is the #1147 failure the hook exists for
+  #      * pointer DIVERGED from the tip                → someone rewrote history
+  gitlink=$(git rev-parse "$PUSHED_SHA:$path" 2>/dev/null || echo "")
+  if [[ -z "$gitlink" ]]; then
+    PROBLEMS+=("$path: no gitlink recorded in the commit being pushed")
+    continue
+  fi
+  short_link=${gitlink:0:9}
+  short_head=${local_head:0:9}
+
+  if ! "${sub_git[@]}" cat-file -e "${gitlink}^{commit}" 2>/dev/null; then
+    PROBLEMS+=("$path: pointer $short_link is not a commit in this submodule. Fix: cd $path && git fetch origin $BRANCH  (if it is still missing, the pointer references a commit that was never pushed)")
+    continue
+  fi
+
+  if [[ "$gitlink" == "$local_head" ]]; then
+    continue
+  fi
+
+  if "${sub_git[@]}" merge-base --is-ancestor "$gitlink" "$local_head" 2>/dev/null; then
+    # Reachable from the tip: valid. Say how stale it is — a pointer far behind
+    # is usually a forgotten bump, and staying silent is how it stays forgotten.
+    behind_ptr=$("${sub_git[@]}" rev-list --count "$gitlink..$local_head" 2>/dev/null || echo "?")
+    echo "      · $path: pointer $short_link is $behind_ptr commit(s) behind $BRANCH ($short_head) — reachable, so this is allowed. Bump it if that is not deliberate."
+    continue
+  fi
+
+  if "${sub_git[@]}" merge-base --is-ancestor "$local_head" "$gitlink" 2>/dev/null; then
+    PROBLEMS+=("$path: pointer $short_link is AHEAD of $BRANCH ($short_head) — it points at a commit that is not on the branch, so a fresh clone cannot reach it. Fix: cd $path && git push origin $BRANCH  (or bump the pointer back to the branch tip)")
+    continue
+  fi
+
+  PROBLEMS+=("$path: pointer $short_link and $BRANCH ($short_head) have DIVERGED — neither reaches the other. Someone rewrote history in the submodule. Fix: cd $path && git log --oneline --graph $short_link $short_head  and decide which side is real")
+done
+
+if (( ${#PROBLEMS[@]} > 0 )); then
+  echo ""
+  echo "  ✗ PUSH BLOCKED — the umbrella's $BRANCH must agree with every submodule's $BRANCH:"
+  echo ""
+  for p in "${PROBLEMS[@]}"; do
+    echo "      • $p"
+  done
+  echo ""
+  echo "  Order matters: commit and push INSIDE the submodule first, then bump the"
+  echo "  pointer in the umbrella. The reverse leaves origin/$BRANCH unclonable."
+  echo ""
+  exit 1
+fi
+
+echo "  ✓ all submodules on dev, clean, level with origin, and every pointer is reachable"
+exit 0

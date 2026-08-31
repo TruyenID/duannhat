@@ -1,0 +1,456 @@
+# Local server stack for the Mac mini.
+#
+# Usage:
+#   docker compose -f compose.local-server.yml --env-file .env.local-server up -d --build
+#
+# This file is INDEPENDENT of docker-compose.yml (the dev stack). The dev
+# stack ports clash with this one (5400/5430/5450), so don't run both at
+# the same time. To switch back:
+#   docker compose -f compose.local-server.yml down
+#   docker compose up -d
+#
+# Differences from the dev stack:
+#   - admin-web / customer-web / pos-web run as production builds (not pnpm dev)
+#   - Caddy reverse proxy in front exposes :80 — clients access by hostname
+#     (api.tempo.local, admin.tempo.local, ...) instead of port numbers
+#   - app container baked from docker/Dockerfile (same as dev) — Laravel's
+#     built-in server is fine for small team test load
+#   - Mailpit + MinIO + phpMyAdmin reachable through Caddy aliases too
+
+x-laravel-env: &laravel-env
+  APP_NAME: TempoFast
+  APP_ENV: ${APP_ENV:-staging}
+  APP_KEY: ${APP_KEY:-base64:hcA1cL3L1pSLgLMHiHnAKS+4fBH0fH87xj3ognr/SyQ=}
+  APP_DEBUG: ${APP_DEBUG:-false}
+  APP_URL: ${APP_URL:-http://api.tempo.local}
+  FRONTEND_URL: ${ADMIN_WEB_URL:-http://admin.tempo.local}
+  CONSOLE_URL: ${CONSOLE_URL:-https://dev-console.godx.jp}
+  OMNIFY_AUTH_MODE: console
+  # Shared STAGING IdP — id.famsys.net. Fixed credentials seeded by platform's
+  # TempoStagingSsoSeeder so this box logs in with no per-machine setup. Public
+  # on purpose: staging-only, authorises nothing on production. The redirect
+  # allowlist on that instance is wildcarded across `*.famsys.net` and every
+  # localhost port, so a changed tunnel hostname never locks anyone out.
+  SSO_ISSUER: ${SSO_ISSUER:-https://id.famsys.net}
+  SSO_SERVICE_SLUG: ${SSO_SERVICE_SLUG:-tempo-staging}
+  SSO_CLIENT_ID: ${SSO_CLIENT_ID:-si_tempo_famsys_staging}
+  SSO_CLIENT_SECRET: ${SSO_CLIENT_SECRET:-tempo-staging-secret}
+  SSO_REDIRECT_URI: ${SSO_REDIRECT_URI:-https://tempo.famsys.net/auth/callback}
+  SSO_TIMEOUT: "5"
+  SSO_RETRY: "0"
+  # Sanctum + CORS — list every public hostname clients will use. Add your
+  # Cloudflare Tunnel hostname here once it's stable.
+  SANCTUM_STATEFUL_DOMAINS: ${SANCTUM_STATEFUL_DOMAINS:-admin.tempo.local,shop.tempo.local,pos.tempo.local,localhost,localhost:*}
+  SESSION_DOMAIN: ${SESSION_DOMAIN:-.tempo.local}
+  SESSION_SAME_SITE: lax
+  SESSION_SECURE_COOKIE: "false"
+  CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://admin.tempo.local,http://shop.tempo.local,http://pos.tempo.local}
+  # Regex fallback — covers ephemeral trycloudflare URLs that change every
+  # tunnel restart. Override via .env.local-server if you need different.
+  CORS_ALLOWED_ORIGINS_PATTERNS: ${CORS_ALLOWED_ORIGINS_PATTERNS:-#^https?://([a-z0-9-]+\\.)?tempo\\.local$#}
+  CORS_SUPPORTS_CREDENTIALS: "true"
+  LOG_CHANNEL: stack
+  LOG_LEVEL: ${LOG_LEVEL:-info}
+  DB_CONNECTION: mysql
+  DB_HOST: mysql
+  DB_PORT: 3306
+  DB_DATABASE: tempo
+  DB_USERNAME: root
+  DB_PASSWORD: ${DB_PASSWORD:-secret}
+  SESSION_DRIVER: redis
+  QUEUE_CONNECTION: sync
+  CACHE_STORE: redis
+  REDIS_CLIENT: predis
+  REDIS_HOST: redis
+  REDIS_PORT: 6379
+  BROADCAST_CONNECTION: reverb
+  REVERB_APP_ID: ${REVERB_APP_ID:-tempo-local}
+  REVERB_APP_KEY: ${REVERB_APP_KEY:-tempo-local-key}
+  REVERB_APP_SECRET: ${REVERB_APP_SECRET:-tempo-local-secret}
+  REVERB_HOST: reverb
+  REVERB_PORT: 8080
+  REVERB_SCHEME: http
+  REVERB_CLIENT_HOST: ${REVERB_CLIENT_HOST:-ws.tempo.local}
+  REVERB_CLIENT_PORT: ${REVERB_CLIENT_PORT:-80}
+  REVERB_CLIENT_SCHEME: ${REVERB_CLIENT_SCHEME:-http}
+  FILESYSTEM_DISK: s3
+  MAIL_MAILER: smtp
+  MAIL_HOST: mailpit
+  MAIL_PORT: 1025
+  MAIL_FROM_ADDRESS: hello@tempo.local
+  MAIL_FROM_NAME: TempoFast
+  AWS_ACCESS_KEY_ID: minio
+  AWS_SECRET_ACCESS_KEY: minio123
+  AWS_DEFAULT_REGION: us-east-1
+  AWS_BUCKET: tempo
+  AWS_ENDPOINT: http://minio:9000
+  # Public URL the browser uses to load uploaded files. Goes through Caddy.
+  AWS_URL: ${AWS_URL:-http://files.tempo.local/tempo}
+  AWS_USE_PATH_STYLE_ENDPOINT: "true"
+  STRIPE_KEY: ${STRIPE_KEY:-}
+  STRIPE_SECRET: ${STRIPE_SECRET:-}
+  STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+  STRIPE_CURRENCY: ${STRIPE_CURRENCY:-jpy}
+  # Defense-in-depth flag for the local-login endpoint. The controller also
+  # checks APP_ENV is not production; both must agree. Default false so a
+  # stray production deploy doesn't accidentally expose the endpoint.
+  ENABLE_LOCAL_LOGIN: ${ENABLE_LOCAL_LOGIN:-false}
+
+services:
+  # ── Caddy reverse proxy ──────────────────────────────────────────────────
+  caddy:
+    image: caddy:2-alpine
+    container_name: tempo-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      # admin-web BFF origin: Caddy fronts the Next standalone server (:5432)
+      # and rewrites /api/* etc. to Laravel, the job Amplify does in prod.
+      # The admin cloudflared tunnel points here, so keep this port stable.
+      - "5430:5430"
+    environment:
+      # CORS origin allowlist (regex). Default to LAN-only; the tunnels
+      # script overwrites with the current tunnel hosts when public access
+      # is needed.
+      CADDY_CORS_ORIGIN_REGEX: ${CADDY_CORS_ORIGIN_REGEX:-^https?://([a-z0-9-]+\.)?tempo\.local(:[0-9]+)?$$}
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      app:
+        condition: service_started
+      admin-web:
+        condition: service_started
+      customer-web:
+        condition: service_started
+      pos-web:
+        condition: service_started
+
+  # ── Laravel API ──────────────────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: tempo-app
+    restart: unless-stopped
+    init: true
+    ports:
+      - "5400:8000"
+    expose:
+      - "8000"
+    volumes:
+      - ./backend:/var/www/html
+      - app-vendor:/var/www/html/vendor
+      - app-node_modules:/var/www/html/node_modules
+      - app-storage-framework:/var/www/html/storage/framework
+      - app-bootstrap-cache:/var/www/html/bootstrap/cache
+      - ./docker/php/opcache.ini:/usr/local/etc/php/conf.d/opcache.ini:ro
+      - ./docker/php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
+    working_dir: /var/www/html
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *laravel-env
+      # SSO bypass for a box whose IdP (id.godx.jp) is unreachable: the login
+      # page mints a `dev:<console_user_id>` bearer via POST /api/dev/test-login.
+      # Three things must line up before it works — DEV_LOGIN opens the mint
+      # endpoint, SSO_DEV_BYPASS makes AuthenticateSso accept the token, and
+      # APP_ENV must be local/testing (the package refuses to bypass otherwise).
+      #
+      # ALL THREE DEFAULT OFF and must be opted into per-box via the gitignored
+      # `.env.local-server`. They were previously hardcoded on here, which armed
+      # two of the three gates on a box the Cloudflare tunnels serve. Never set
+      # them on anything publicly reachable.
+      APP_ENV: ${APP_ENV:-staging}
+      DEV_LOGIN: ${DEV_LOGIN:-false}
+      SSO_DEV_BYPASS: ${SSO_DEV_BYPASS:-false}
+      PHP_CLI_SERVER_WORKERS: "8"
+    command: >
+      sh -c ' set -e; if [ ! -f storage/framework/.initialized ]; then
+        mkdir -p storage/framework/views storage/framework/cache/data storage/framework/sessions storage/framework/testing storage/logs bootstrap/cache;
+        chmod -R 777 storage bootstrap/cache;
+        touch storage/framework/.initialized;
+      fi; if [ ! -f vendor/autoload.php ]; then
+        composer install --no-interaction --prefer-dist;
+        composer dump-autoload -o;
+      fi; php artisan migrate --force --isolated || true;
+      php artisan config:cache;
+      php artisan route:cache;
+      exec php -S 0.0.0.0:8000 -t public '
+    healthcheck:
+      test: [ "CMD-SHELL", "php -r \"exit(@file_get_contents('http://127.0.0.1:8000/up') !== false ? 0 : 1);\"" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 90s
+
+  # ── Reverb WebSocket ─────────────────────────────────────────────────────
+  reverb:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: tempo-reverb
+    restart: unless-stopped
+    init: true
+    ports:
+      - "5470:8080"
+    expose:
+      - "8080"
+    volumes:
+      - ./backend:/var/www/html
+      - app-vendor:/var/www/html/vendor
+      - app-storage-framework:/var/www/html/storage/framework
+      - app-bootstrap-cache:/var/www/html/bootstrap/cache
+    working_dir: /var/www/html
+    depends_on:
+      app:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *laravel-env
+      QUEUE_CONNECTION: redis
+      REVERB_SERVER_HOST: 0.0.0.0
+      REVERB_SERVER_PORT: 8080
+    command: >
+      sh -c ' until [ -f vendor/autoload.php ]; do sleep 1; done;
+      exec php artisan reverb:start --host=0.0.0.0 --port=8080 '
+
+  # ── admin-web (Next.js prod) ─────────────────────────────────────────────
+  admin-web:
+    build:
+      context: .
+      dockerfile: docker/admin-web.prod.Dockerfile
+      # SSH agent forwarded into the build so pnpm can clone @godxjp/ui
+      # from the private GitHub repo. Host must have `ssh-agent` running
+      # with the key added (`ssh-add ~/.ssh/id_ed25519`).
+      ssh:
+        - default
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://api.tempo.local}
+        NEXT_PUBLIC_CONSOLE_URL: ${NEXT_PUBLIC_CONSOLE_URL:-https://dev-console.godx.jp}
+        NEXT_PUBLIC_SSO_SERVICE_SLUG: ${NEXT_PUBLIC_SSO_SERVICE_SLUG:-tempo}
+        NEXT_PUBLIC_ENABLE_LOCAL_LOGIN: "true"
+    container_name: tempo-admin-web
+    restart: unless-stopped
+    ports:
+      - "5430:5430"
+    expose:
+      - "5430"
+    environment:
+      NODE_ENV: production
+      PORT: "5430"
+      HOSTNAME: "0.0.0.0"
+
+  # ── customer-web (Next.js dev mode với HMR) ──────────────────────────────
+  # Bind-mount source từ host → mỗi lần sửa file .tsx/.ts/.json là Next
+  # tự reload page (không cần rebuild docker). Anonymous volume cho
+  # node_modules + .next để host files không che container's installed
+  # deps + build cache.
+  customer-web:
+    build:
+      context: .
+      dockerfile: docker/customer-web.dev.Dockerfile
+      ssh:
+        - default
+    container_name: tempo-customer-web
+    restart: unless-stopped
+    ports:
+      - "5450:5450"
+    expose:
+      - "5450"
+    volumes:
+      - ./web/customer:/repo/web/customer
+      - ./packages:/repo/packages
+      - ./pnpm-workspace.yaml:/repo/pnpm-workspace.yaml:ro
+      - ./pnpm-lock.yaml:/repo/pnpm-lock.yaml:ro
+      - ./package.json:/repo/package.json:ro
+      # Anonymous volumes — keep container's installed deps + Next cache
+      - /repo/web/customer/node_modules
+      - /repo/node_modules
+      - /repo/web/customer/.next
+    environment:
+      NODE_ENV: development
+      PORT: "5450"
+      HOSTNAME: "0.0.0.0"
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://api.tempo.local}
+      NEXT_PUBLIC_REVERB_APP_KEY: ${NEXT_PUBLIC_REVERB_APP_KEY:-bootstrap-key}
+      NEXT_PUBLIC_REVERB_HOST: ${NEXT_PUBLIC_REVERB_HOST:-localhost}
+      NEXT_PUBLIC_REVERB_PORT: ${NEXT_PUBLIC_REVERB_PORT:-443}
+      NEXT_PUBLIC_REVERB_SCHEME: ${NEXT_PUBLIC_REVERB_SCHEME:-https}
+      # Polling vì FS events qua Docker Desktop / OrbStack đôi khi miss.
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
+
+  # ── pos-web (Vite static) ────────────────────────────────────────────────
+  pos-web:
+    build:
+      context: .
+      dockerfile: docker/pos-web.prod.Dockerfile
+      ssh:
+        - default
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://api.tempo.local}
+    container_name: tempo-pos-web
+    restart: unless-stopped
+    ports:
+      - "5440:5440"
+    expose:
+      - "5440"
+
+  # ── godx-kds (PWA bếp, Vite static) ──────────────────────────────────────
+  kds-web:
+    build:
+      context: .
+      dockerfile: docker/godx-kds.prod.Dockerfile
+      ssh:
+        - default
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://api.tempo.local}
+    container_name: tempo-kds-web
+    restart: unless-stopped
+    ports:
+      - "5460:5460"
+    expose:
+      - "5460"
+
+  # ── godx-kiosk (Expo web export, nginx static) ───────────────────────────
+  # NOTE: This is a web build of a primarily-native app. Some features
+  # (camera scanner, mDNS) only work properly in the Expo Go native build.
+  # See docker/godx-kiosk.prod.Dockerfile for the full caveat list.
+  kiosk-web:
+    build:
+      context: .
+      dockerfile: docker/godx-kiosk.prod.Dockerfile
+      ssh:
+        - default
+      args:
+        EXPO_PUBLIC_API_URL: ${EXPO_PUBLIC_API_URL:-http://api.tempo.local}
+        EXPO_PUBLIC_WORKSTATION_URL: ${EXPO_PUBLIC_WORKSTATION_URL:-}
+    container_name: tempo-kiosk-web
+    restart: unless-stopped
+    # Port 5485 (not 5480/5481) — 5480 had stale routing intercepting traffic,
+    # 5481 conflicts with phpmyadmin from the dev stack. 5485 is free in both
+    # the dev and local-server port maps. Container still listens on 5480
+    # internally so the nginx.conf is unchanged.
+    ports:
+      - "5485:5480"
+    expose:
+      - "5480"
+
+  # ── MySQL ────────────────────────────────────────────────────────────────
+  mysql:
+    image: mysql:8.0
+    container_name: tempo-mysql
+    restart: unless-stopped
+    expose:
+      - "3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_DATABASE: tempo
+    volumes:
+      - mysql-data:/var/lib/mysql
+    # Tuned for ~5-10 concurrent test users on a Mac mini. Bump
+    # innodb-buffer-pool-size to 256-512M if you see DB-bound latency.
+    command:
+      - mysqld
+      - --innodb-buffer-pool-size=128M
+      - --innodb-log-buffer-size=16M
+      - --innodb-redo-log-capacity=64M
+      - --performance-schema=OFF
+      - --max-connections=100
+      - --table-open-cache=128
+      - --thread-cache-size=8
+      - --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_PASSWORD:-secret}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ── Redis ────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: tempo-redis
+    restart: unless-stopped
+    command: redis-server --save "" --appendonly no --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # ── Mailpit (catches all outbound mail) ──────────────────────────────────
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: tempo-mailpit
+    restart: unless-stopped
+    ports:
+      # plan-035 — publish the Mailpit web UI at host port 8125 instead
+      # of the upstream default 8025 because Laravel Herd / brew often
+      # ship a NATIVE mailpit listening on :8025, which on macOS wins
+      # the bind race against the docker port-forward and silently
+      # serves an empty inbox. Hit http://localhost:8125 to see what
+      # the backend really queued.
+      # SMTP (1025) stays internal — backend reaches it via the docker
+      # network using MAIL_HOST=mailpit.
+      - "8125:8025"
+    expose:
+      - "1025"
+      - "8025"
+
+  # ── MinIO (S3-compatible storage) ────────────────────────────────────────
+  minio:
+    image: minio/minio:latest
+    container_name: tempo-minio
+    restart: unless-stopped
+    expose:
+      - "9000"
+      - "9001"
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+    volumes:
+      - minio-data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: tempo-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c " /usr/bin/mc alias set local http://minio:9000 minio minio123; /usr/bin/mc mb --ignore-existing local/tempo; /usr/bin/mc anonymous set download local/tempo; exit 0; "
+
+  # ── Portal (link directory) ──────────────────────────────────────────────
+  portal:
+    image: nginx:alpine
+    container_name: tempo-portal
+    restart: unless-stopped
+    expose:
+      - "80"
+    volumes:
+      - ./docker/portal:/usr/share/nginx/html:ro
+
+volumes:
+  caddy-data:
+  caddy-config:
+  mysql-data:
+  redis-data:
+  minio-data:
+  app-vendor:
+  app-node_modules:
+  app-storage-framework:
+  app-bootstrap-cache:

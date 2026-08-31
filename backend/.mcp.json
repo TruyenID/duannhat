@@ -1,0 +1,30 @@
+{
+  "mcpServers": {
+    "laravel-boost": {
+      "args": [
+        "artisan",
+        "boost:mcp"
+      ],
+      "command": "php"
+    },
+    "godx-mcp": {
+      "command": "npx",
+      "args": [
+        "omnify",
+        "mcp"
+      ]
+    },
+    "omnify-ui": {
+      "args": [
+        "@omnifyjp/ui-mcp"
+      ],
+      "command": "npx"
+    },
+    "playwright": {
+      "args": [
+        "@playwright/mcp@latest"
+      ],
+      "command": "npx"
+    }
+  }
+}

@@ -1,0 +1,327 @@
+# =============================================================================
+# PaymentGatewayConnection — one legal merchant/provider contract
+# =============================================================================
+#
+# Stores explicit tenant, brand, canonical Identity operator, environment, safe
+# provider merchant identifiers, charge model, and opaque server-only secret refs.
+# It never infers ownership from Branch.is_headquarters/is_standalone or user role.
+#
+# Identity contract: GET /org/branches/:branchId/management?brandId=...
+# - Tempo Branch.console_branch_id is exactly Identity org_unit.id.
+# - owner_scope=hq uses the returned brandOwnerOrgUnitId/operatorOrgUnitId.
+# - owner_scope=franchise uses the returned franchise operatorOrgUnitId.
+# - ownership_revision is opaque and compared only for equality/change.
+#
+# Secret refs are hidden opaque locators. Resolved keys/webhook secrets/PAN/CVV are
+# forbidden in this table, API resources, metadata, logs, jobs, and client snapshots.
+# =============================================================================
+
+displayName:
+  en: Payment Gateway Connection
+  ja: 決済ゲートウェイ接続
+  vi: Kết nối cổng thanh toán
+
+kind: object
+
+options:
+  id: Uuid
+  timestamps: true
+  softDelete: true
+  indexes:
+    # #3074 — khoá TỰ NHIÊN của một connection: nó thuộc về AI.
+    #
+    # Thay cho unique cũ trên (provider, environment, merchant_account_id). Cột
+    # merchant khi đó gánh HAI vai xung khắc: khoá phân tenant của bootstrap, VÀ
+    # định danh PSP thật mà ruling #2893 đòi. Một tài khoản PSP dùng CHUNG
+    # (#2864) nên hai vai không thể ở cùng một cột — và đúng lúc #2893 đóng dấu
+    # `acct_…` lên đó thì lời tra của bootstrap trượt, đẻ ra connection trùng và
+    # tách sổ (#3070).
+    #
+    # `owner_branch_key` chứ không phải `owner_branch_id`: hàng HQ để branch
+    # NULL, mà MySQL coi hai NULL là KHÁC NHAU — dùng cột nullable thì hai hàng
+    # HQ vẫn lọt, tức đúng lỗ #3070 vẫn mở.
+    - columns: [provider_id, environment, organization_id, brand_id, owner_scope, owner_branch_key]
+      unique: true
+      name: payment_gateway_connections_tenant_unique
+    # Tenant/brand/owner-scoped resolver lookup.
+    - columns: [organization_id, brand_id, owner_scope, operator_org_unit_id]
+      name: payment_gateway_connections_owner_lookup
+    # Eligible connection scan. Resolver still checks ownership revision and options.
+    - columns: [organization_id, environment, health, is_active]
+      name: payment_gateway_connections_eligibility
+    - columns: [owner_branch_id]
+
+properties:
+  provider:
+    # Catalog provider. Historical merchant contracts prevent provider deletion.
+    type: Association
+    relation: ManyToOne
+    target: PaymentGatewayProvider
+    onDelete: RESTRICT
+    displayName:
+      en: Provider
+      ja: プロバイダー
+      vi: Nhà cung cấp
+
+  organization:
+    # Tempo tenant owning this connection row; never derived from request payload alone.
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: RESTRICT
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  brand:
+    # Local synchronized Brand. identity_brand_id captures the canonical upstream id.
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: RESTRICT
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu
+
+  owner_branch:
+    # Required by service invariant for franchise owner scope; null for HQ scope.
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    nullable: true
+    onDelete: RESTRICT
+    displayName:
+      en: Franchise Owner Branch
+      ja: フランチャイズ所有店舗
+      vi: Chi nhánh sở hữu nhượng quyền
+
+  owner_branch_key:
+    # #3074 — bản chuẩn hoá KHÔNG-NULL của `owner_branch_id`, tồn tại DUY NHẤT
+    # để mang khoá UNIQUE ở trên.
+    #
+    # Không phải dữ liệu mới: nó luôn bằng `owner_branch_id`, hoặc UUID-không
+    # khi cột kia NULL (tức chủ sở hữu là HQ). `PaymentGatewayConnection` đóng
+    # dấu nó ở `saving`, nên không đường ghi nào phải nhớ.
+    #
+    # Vì sao không dùng thẳng `owner_branch_id`: MySQL cho phép NHIỀU NULL trong
+    # một unique index. Mọi hàng HQ đều để branch NULL (đo trên production: 4/4),
+    # nên khoá dựa trên cột nullable sẽ không chặn được hàng HQ thứ hai — đúng
+    # cái #3070 vừa xảy ra.
+    #
+    # `hidden` vì nó DẪN XUẤT: client gửi lên một giá trị thì hook `saving` ghi
+    # đè ngay, nên để nó trong hợp đồng công khai chỉ là mời người ta đặt một
+    # trường không có tác dụng — và một trường như thế sớm muộn sẽ được ai đó
+    # tin là có tác dụng.
+    type: Uuid
+    default: '00000000-0000-0000-0000-000000000000'
+    hidden: true
+    displayName:
+      en: Owner Branch Key
+      ja: 所有店舗キー
+      vi: Khoá chi nhánh sở hữu
+
+  identity_brand_id:
+    # Canonical Identity Brand.id used to obtain the authoritative projection.
+    type: Uuid
+    displayName:
+      en: Identity Brand ID
+      ja: IdentityブランドID
+      vi: ID thương hiệu Identity
+
+  owner_scope:
+    # Legal connection owner class; must match the Identity projection.
+    type: EnumRef
+    enum: PaymentConnectionOwnerScope
+    filterable: true
+    displayName:
+      en: Owner Scope
+      ja: 所有範囲
+      vi: Phạm vi sở hữu
+
+  brand_owner_org_unit_id:
+    # Canonical Identity org_unit.id that owns the Brand asset.
+    type: Uuid
+    displayName:
+      en: Brand Owner Org Unit ID
+      ja: ブランド所有組織ユニットID
+      vi: ID đơn vị sở hữu thương hiệu
+
+  operator_org_unit_id:
+    # Canonical legal operator/merchant owner returned by Identity.
+    type: Uuid
+    displayName:
+      en: Operator Org Unit ID
+      ja: 運営組織ユニットID
+      vi: ID đơn vị vận hành
+
+  ownership_revision:
+    # Opaque TOKEN, compared only for equality — never as a number, never ordered.
+    #
+    # #3087 — this used to declare `rules: numeric: true` while every writer put a
+    # word here (`orchestrator-customer-web-v1`, `legacy-v1`) and both API layers
+    # validated `['required','string','max:32']`. The rule was dormant: nothing
+    # enforced it, so nothing was red. It would have bitten the first time anyone
+    # generated request validation from this schema — at which point every live row
+    # fails `numeric` and the person holding the pager has to choose between
+    # breaking data and deleting a rule they cannot see the reason for.
+    #
+    # The rule was the wrong half. A token does not have to be a number, and making
+    # the writers emit digits would break equality against existing rows AND the
+    # API contract that accepts any string.
+    type: String
+    length: 32
+    displayName:
+      en: Ownership Revision
+      ja: 所有権リビジョン
+      vi: Phiên bản quyền sở hữu
+
+  environment:
+    # Immutable provider environment. Test/live objects and secret refs cannot cross.
+    type: EnumRef
+    enum: PaymentGatewayEnvironment
+    filterable: true
+    displayName:
+      en: Environment
+      ja: 環境
+      vi: Môi trường
+
+  merchant_account_id:
+    # Safe provider account/merchant identifier; required and unique per provider/env.
+    type: String
+    length: 191
+    searchable: true
+    displayName:
+      en: Merchant Account ID
+      ja: 加盟店アカウントID
+      vi: ID tài khoản đơn vị bán hàng
+
+  merchant_store_id:
+    # Safe provider store identifier when the integration requires one.
+    type: String
+    length: 191
+    nullable: true
+    displayName:
+      en: Merchant Store ID
+      ja: 加盟店ストアID
+      vi: ID cửa hàng nhà cung cấp
+
+  merchant_terminal_id:
+    # Safe provider terminal identifier; no terminal secret/key material.
+    type: String
+    length: 191
+    nullable: true
+    displayName:
+      en: Merchant Terminal ID
+      ja: 加盟店端末ID
+      vi: ID thiết bị nhà cung cấp
+
+  merchant_display_name:
+    # Redacted operator-facing identity; safe for admin API/UI, never a credential.
+    type: String
+    length: 191
+    nullable: true
+    displayName:
+      en: Merchant Display Name
+      ja: 加盟店表示名
+      vi: Tên hiển thị đơn vị bán hàng
+
+  charge_model:
+    # Finance/legal-approved settlement model; adapters cannot choose a fallback.
+    type: Enum
+    enum: [direct, destination, separate_charges_and_transfers, provider_native]
+    displayName:
+      en: Charge Model
+      ja: 課金モデル
+      vi: Mô hình thu tiền
+
+  secret_ref:
+    # Opaque server-only locator resolved by GatewaySecretStore; never the secret value.
+    type: String
+    length: 255
+    nullable: true
+    hidden: true
+    displayName:
+      en: Secret Reference
+      ja: シークレット参照
+      vi: Tham chiếu bí mật
+
+  webhook_secret_ref:
+    # Separate opaque locator supports bounded dual-read webhook rotation.
+    type: String
+    length: 255
+    nullable: true
+    hidden: true
+    displayName:
+      en: Webhook Secret Reference
+      ja: Webhookシークレット参照
+      vi: Tham chiếu bí mật webhook
+
+  secret_version:
+    # Non-secret rotation version used for authorization/audit, never key material.
+    type: String
+    length: 80
+    nullable: true
+    hidden: true
+    displayName:
+      en: Secret Version
+      ja: シークレットバージョン
+      vi: Phiên bản bí mật
+
+  key_fingerprint:
+    # Non-secret one-way fingerprint for operators to identify the active key version.
+    type: String
+    length: 128
+    nullable: true
+    hidden: true
+    displayName:
+      en: Key Fingerprint
+      ja: キーフィンガープリント
+      vi: Dấu vân tay khoá
+
+  health:
+    # Persistent connection lifecycle/last validation result; runtime health may narrow it.
+    type: EnumRef
+    enum: PaymentConnectionHealth
+    default: pending_verification
+    filterable: true
+    displayName:
+      en: Health
+      ja: ヘルス
+      vi: Tình trạng
+
+  health_reason_code:
+    # Stable safe reason code only; raw provider error/body is forbidden.
+    type: String
+    length: 100
+    nullable: true
+    displayName:
+      en: Health Reason Code
+      ja: ヘルス理由コード
+      vi: Mã lý do tình trạng
+
+  last_validated_at:
+    # Timestamp of the most recent provider/account validation evidence.
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Last Validated At
+      ja: 最終検証日時
+      vi: Xác minh lần cuối
+
+  is_active:
+    # Administrative lifecycle switch; all other resolver predicates still apply.
+    type: Boolean
+    default: false
+    filterable: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+
+policies:
+  - forbid: [create, edit, delete, restore, forceDelete]
+    desc: Merchant connection mutations require ownership-aware authorization beyond schema policy
+  - permit: [view, list]
+    desc: Safe display identity reads; secret refs remain hidden and are never returned by resources

@@ -1,0 +1,379 @@
+# =============================================================================
+# Product (商品 / Sản phẩm)
+# =============================================================================
+#
+# Entity trung tâm của domain Product. Mỗi Product là một "khái niệm món hàng"
+# (vd: フォー, バインミー) — KHÔNG phải đơn vị stockable thực tế. Đơn vị bán/tồn
+# kho thực sự nằm ở `ProductSku` (mỗi variant là một SKU độc lập, có thể
+# có giá vốn, đơn vị bán, recipe riêng).
+#
+# Hierarchy:
+#   Organization (SSO)
+#     └── Brand (SSO)
+#           └── Product       ← schema này
+#                 ├── ProductSku (1..n) — đơn vị stockable / SKU
+#                 ├── Category   (m..n)     — phân loại để hiển thị / lọc menu
+#                 └── ProductType (n..1)    — loại hình (food/drink/raw/...)
+#
+# Multi-tenancy:
+#   - Mỗi Product thuộc về EXACTLY 1 Organization và 1 Brand.
+#   - Truy vấn ALWAYS phải scope theo `organization_id` (hoặc `brand_id`).
+#   - Slug unique theo brand → 2 brand khác nhau có thể có cùng slug.
+#
+# Status workflow (plan-003 — reconciled via HasApprovalWorkflow trait):
+#   - Product uses the ProductStatus enum (draft/pending/approved/active/
+#     inactive/rejected). The approval subset (draft/pending/approved/
+#     rejected) is shared with Recipe via the generic HasApprovalWorkflow
+#     trait; the extra lifecycle states (active/inactive) are Product-specific.
+#   - Approval columns (approved_by_id, approved_at, rejected_by_id,
+#     rejected_at, rejection_reason) are declared below and consumed by the
+#     ProductController endpoints submitForApproval / approve / reject.
+#   - Service-level guard "cannot approve own submission" lives in
+#     ProductService::approve (not the policy) matching Recipe's idiom.
+#
+# i18n:
+#   - `name` và `description` translatable → lưu ở table `product_translations`
+#     (Astrotomic/laravel-translatable). Locale fallback chain định nghĩa ở
+#     omnify.yaml: ja → en.
+#
+# =============================================================================
+
+displayName:
+  en: Product
+  ja: 商品
+  vi: Sản phẩm
+
+kind: object
+
+options:
+  # Standard timestamps (created_at, updated_at)
+  timestamps: true
+
+  # Soft delete (deleted_at) — Product không bao giờ bị xoá cứng để giữ
+  # lịch sử giao dịch (StockMovement, ProductionOrder...) reference được.
+  softDelete: true
+
+  id: Uuid
+
+  # Auto-populate created_by_id / updated_by_id từ Auth::user() ở
+  # observer omnify generate. Không cần seed/factory set tay.
+  audit:
+    createdBy: true
+    updatedBy: true
+
+  service: false
+
+  indexes:
+    # Tenant scope queries — mọi list/filter đều WHERE organization_id
+    - columns: [organization_id]
+    # Brand-scoped queries — UI chính dùng brand slug → cần index này
+    - columns: [brand_id]
+    # Slug lookup unique theo brand. Cho phép 2 brand có cùng slug.
+    - columns: [brand_id, slug]
+      unique: true
+
+properties:
+  # ===========================================================================
+  # Scalar fields
+  # ===========================================================================
+
+  # Tên sản phẩm hiển thị cho end-user.
+  # - Translatable → mỗi locale có một bản dịch riêng ở `product_translations`.
+  # - Searchable → omnify generate scope `whereSearch($q)` query qua translations.
+  # - Sortable → cho phép orderBy('name') (sort theo locale hiện tại).
+  name:
+    type: String
+    length: 255
+    searchable: true
+    sortable: true
+    defaultSort: asc
+    lookupable: true
+    translatable: true
+    displayName:
+      en: Product Name
+      ja: 商品名
+      vi: Tên sản phẩm
+
+  # Định danh URL-friendly, dùng cho route `/brand/{brandSlug}/products/{slug}`.
+  # - KHÔNG translatable → 1 product chỉ có 1 slug, không đổi theo locale.
+  # - Unique theo brand (xem indexes ở trên).
+  # - Auto-generate từ `name` (locale en/ja chuyển sang ASCII slugify) hoặc
+  #   user nhập tay khi tạo. ProductService::create() chịu trách nhiệm fallback.
+  slug:
+    type: String
+    length: 100
+    searchable: true
+    filterable: true
+    lookupable: true
+    displayName:
+      en: Slug
+      ja: スラッグ
+      vi: Slug
+    description:
+      en: URL-friendly identifier, unique within brand
+      ja: URLフレンドリーな識別子、ブランド内で一意
+      vi: Định danh URL, duy nhất trong brand
+
+  # Mô tả dài (markdown OK). Translatable cùng quy tắc với `name`.
+  description:
+    type: Text
+    nullable: true
+    translatable: true
+    displayName:
+      en: Description
+      ja: 説明
+      vi: Mô tả
+
+  # Trạng thái lifecycle. Enum định nghĩa ở schemas/Shared/Enum/ProductStatus.yaml.
+  # Approval subset (draft/pending/approved/rejected) handled by the generic
+  # HasApprovalWorkflow trait; lifecycle extras (active/inactive) are
+  # Product-specific post-approval states managed by ProductService::activate
+  # / ::deactivate.
+  status:
+    type: EnumRef
+    enum: ProductStatus
+    default: draft
+    filterable: true
+    sortable: true
+    displayName:
+      en: Status
+      ja: ステータス
+      vi: Trạng thái
+
+  # Approver identity for the most recent `approved` transition. Set by
+  # HasApprovalWorkflow::markAsApproved via ProductService. NULL until the
+  # product has passed its first approval.
+  approved_by:
+    type: Association
+    relation: ManyToOne
+    target: User
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Approved By
+      ja: 承認者
+      vi: Người duyệt
+
+  approved_at:
+    type: DateTime
+    nullable: true
+    displayName:
+      en: Approved At
+      ja: 承認日時
+      vi: Thời điểm duyệt
+
+  # Reviewer identity for the most recent `rejected` transition.
+  rejected_by:
+    type: Association
+    relation: ManyToOne
+    target: User
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Rejected By
+      ja: 却下者
+      vi: Người từ chối
+
+  rejected_at:
+    type: DateTime
+    nullable: true
+    displayName:
+      en: Rejected At
+      ja: 却下日時
+      vi: Thời điểm từ chối
+
+  # Free-text rejection reason. Kept across a subsequent approved transition
+  # for history; cleared only on explicit edit.
+  rejection_reason:
+    type: Text
+    nullable: true
+    displayName:
+      en: Rejection Reason
+      ja: 却下理由
+      vi: Lý do từ chối
+
+  # Cờ ẩn khỏi menu/list public. Tự động set true khi tất cả category
+  # gắn với product này đều inactive (xem CategoryObserver). User cũng có
+  # thể manual ẩn từ admin.
+  is_hidden:
+    type: Boolean
+    default: false
+    filterable: true
+    displayName:
+      en: Hidden
+      ja: 非表示
+      vi: Ẩn
+    description:
+      en: Auto-set when all categories are inactive
+      ja: すべてのカテゴリーが無効になると自動設定
+      vi: Tự động đặt khi tất cả danh mục không hoạt động
+
+
+  # ===========================================================================
+  # Associations
+  # ===========================================================================
+
+  # Tổ chức sở hữu (multi-tenant root). CASCADE → xoá org sẽ xoá product.
+  # Trong thực tế org rất hiếm bị xoá; nếu xoá phải có migration tools đi kèm.
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  # Brand (thương hiệu) sở hữu product. CASCADE — khi brand bị xoá thì
+  # product cũng nên đi theo (tránh orphan).
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: CASCADE
+    filterable: true
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu
+
+  # Loại hình sản phẩm (FOOD / DRINK / RAW / PACKAGING / ...).
+  # RESTRICT — không cho xoá ProductType nếu còn product đang dùng,
+  # tránh phá vỡ phân loại UI.
+  productType:
+    type: Association
+    relation: ManyToOne
+    target: ProductType
+    onDelete: RESTRICT
+    filterable: true
+    displayName:
+      en: Product Type
+      ja: 商品タイプ
+      vi: Loại sản phẩm
+
+  # (plan-043) Loại thuế tiêu dùng Nhật của món. NULLABLE = KẾ THỪA — chuỗi
+  # resolve §7: MenuProduct.tax_type_id (override) → ĐÂY → branch default
+  # (ShopOrderSetting.default_tax_type_id) → brand default (is_default).
+  # RESTRICT + 409 TAX_TYPE_IN_USE: không xoá được TaxType còn được tham
+  # chiếu (dữ liệu compliance — đường vận hành là deactivate).
+  # COMBO cũng là Product → gán tax type thủ công theo quy tắc 一体資産
+  # (giá ≤ 1万円 & thực phẩm ≥ 2/3 → 軽減, ngược lại 標準 — ops rule Q9).
+  # Thành phần combo (topping) ăn theo rate của dòng cha, NGOẠI LỆ duy nhất:
+  # thành phần CÓ CỒN kéo cả dòng lên thuế chuẩn (A1, BR-TT03).
+  # Validation write-path: cùng brand + is_active (FormRequest, không phải YAML).
+  taxType:
+    type: Association
+    relation: ManyToOne
+    target: TaxType
+    nullable: true
+    onDelete: RESTRICT
+    filterable: true
+    displayName:
+      en: Tax Type
+      ja: 税区分
+      vi: Loại thuế
+
+  # Danh mục (m..n). Một product có thể nằm trong nhiều category (vd: フォー
+  # vừa thuộc "メイン" vừa thuộc "おすすめ"). Owning side → product chịu
+  # trách nhiệm sync pivot table `product_category`.
+  categories:
+    type: Association
+    relation: ManyToMany
+    target: Category
+    joinTable: product_category
+    owning: true
+    displayName:
+      en: Categories
+      ja: カテゴリー
+      vi: Danh mục
+
+  # Options — tối đa 3 trục option (Size, Color, Material).
+  # Position 1/2/3 cố định, không swap khi đã có SKU.
+  options:
+    type: Association
+    relation: OneToMany
+    target: ProductOption
+    mappedBy: product
+    orderBy: position
+    displayName:
+      en: Options
+      ja: オプション
+      vi: Tùy chọn
+
+  # Ảnh đại diện sản phẩm — temp→permanent flow. Upload qua FileService trước
+  # khi lưu product; `thumbnail()` / `gallery()` accessible qua HasFiles trait.
+  thumbnail:
+    type: File
+    collection: thumbnail
+    accept: [jpg, jpeg, png, webp]
+    maxSize: 5120
+    displayName:
+      en: Thumbnail
+      ja: サムネイル
+      vi: Ảnh đại diện
+
+  gallery:
+    type: File
+    multiple: true
+    maxFiles: 20
+    collection: gallery
+    accept: [jpg, jpeg, png, webp]
+    maxSize: 10240
+    displayName:
+      en: Gallery
+      ja: ギャラリー
+      vi: Thư viện ảnh
+
+  # ===========================================================================
+  # Review aggregate (plan-025)
+  # ===========================================================================
+
+  # Total number of "thumbs up" reviews across all orders for this product.
+  # Incremented atomically in ProductReviewService::submit() with lockForUpdate.
+  # Used to compute recommend_percent = round(up / total * 100).
+  review_up_count:
+    type: Int
+    default: 0
+    displayName:
+      en: Review Up Count
+      ja: おすすめ数
+      vi: Số đề xuất
+
+  # Total number of reviews (up + down) for this product.
+  # Displayed as `reviewCount` on customer menu cards. Badge hidden when 0.
+  review_total_count:
+    type: Int
+    default: 0
+    displayName:
+      en: Review Total Count
+      ja: レビュー総数
+      vi: Tổng số đánh giá
+
+  # Sum of all star ratings (1-5) for this product (plan-026).
+  # Average = review_rating_sum / review_total_count. Incremented atomically
+  # in ProductReviewService::submit() alongside the up/total counters.
+  review_rating_sum:
+    type: Int
+    default: 0
+    displayName:
+      en: Review Rating Sum
+      ja: 評価合計
+      vi: Tổng điểm sao
+
+  # ===========================================================================
+  # SKUs
+  # ===========================================================================
+
+  # SKUs — đơn vị stockable thực tế. Mỗi product PHẢI có ít nhất 1 SKU.
+  # ProductService::create() tự tạo default SKU nếu user không cung cấp.
+  # Cascade delete SKU khi xoá product (xem ProductSku.yaml để biết onDelete).
+  skus:
+    type: Association
+    relation: OneToMany
+    target: ProductSku
+    mappedBy: product
+    displayName:
+      en: SKUs
+      ja: SKU一覧
+      vi: SKU

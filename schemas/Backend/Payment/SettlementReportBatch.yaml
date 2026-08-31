@@ -1,0 +1,71 @@
+# Một lần nhập file đối soát của cổng thanh toán. `file_hash` là SHA-256 của
+# file thô và là duy nhất — nhập lại đúng file đó bị chặn ngay.
+kind: object
+
+options:
+  id: Uuid
+  timestamps: true
+  softDelete: false
+  indexes:
+    - columns: [connection_id, cycle_label]
+    - columns: [status]
+
+properties:
+  connection:
+    type: Association
+    relation: ManyToOne
+    target: PaymentGatewayConnection
+    onDelete: RESTRICT
+    displayName: { ja: 接続, en: Connection, vi: Kết nối }
+
+  provider:
+    type: String
+    length: 50
+    displayName: { ja: プロバイダ, en: Provider, vi: Nhà cung cấp }
+
+  cycle_label:
+    type: String
+    length: 100
+    displayName: { ja: 精算サイクル, en: Cycle Label, vi: Kỳ đối soát }
+
+  file_hash:
+    type: String
+    length: 64
+    unique: true
+    displayName: { ja: ファイルハッシュ, en: File Hash, vi: Hash tệp }
+
+  row_count:
+    type: Int
+    unsigned: true
+    default: 0
+    displayName: { ja: 行数, en: Row Count, vi: Số dòng }
+
+  matched_count:
+    type: Int
+    unsigned: true
+    default: 0
+    displayName: { ja: 突合済, en: Matched Count, vi: Số dòng khớp }
+
+  orphan_count:
+    type: Int
+    unsigned: true
+    default: 0
+    displayName: { ja: 孤立行, en: Orphan Count, vi: Số dòng mồ côi }
+
+  importedBy:
+    type: Association
+    relation: ManyToOne
+    target: User
+    nullable: true
+    onDelete: RESTRICT
+    displayName: { ja: 取込者, en: Imported By, vi: Người nhập }
+
+  imported_at:
+    type: Timestamp
+    displayName: { ja: 取込日時, en: Imported At, vi: Nhập lúc }
+
+  status:
+    type: String
+    length: 50
+    default: imported
+    displayName: { ja: 状態, en: Status, vi: Trạng thái }

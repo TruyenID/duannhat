@@ -1,0 +1,270 @@
+# =============================================================================
+# OrderMoneyOverwrite (#2885) — bằng chứng lệch tiền giữa máy trạm và Cloud
+# =============================================================================
+#
+# Máy trạm đẩy đơn lên kèm CON SỐ CỦA NÓ; Cloud tự tính lại từ ảnh chụp catalog
+# (đúng — "thiết bị không bao giờ tự khai giá", nền của #1092) rồi lưu SỐ CỦA
+# CLOUD. Máy trạm so, thấy khác, ghi trước/sau vào SQLite tại quán rồi kêu alert.
+# Trước issue này, một nửa bằng chứng nằm NGOÀI tầm với của Cloud.
+#
+# Đo được ngày 2026-08-15: để trả lời "ba cảnh báo `cloud_money_overwrite` đang
+# treo là những đơn nào" phải lần ngược `audit_logs` bằng tay + tra Stripe API,
+# và cuối cùng vẫn phải hỏi trí nhớ người. Sổ Cloud quét 464 đơn kết thúc chỉ
+# thấy 1 đơn lệch — nhưng "sổ Cloud cân" KHÔNG chứng minh máy trạm đồng ý, vì
+# cảnh báo đo khoảng lệch giữa HAI hệ.
+#
+# Bảng này là bản nhân bản của `order_money_overwrites` trong SQLite máy trạm
+# (`workstation/internal/store/migrations/080_order_money_overwrites.sql`).
+#
+# ## Bốn quyết định thiết kế, theo thứ tự sức nặng
+#
+# 1. **KHÔNG FK cứng.** Cùng lý lẽ với `audit_logs`: bằng chứng phải sống sót
+#    khi thiết bị bị revoke/xoá và khi đơn được lưu trữ. `device_id`/`order_id`/
+#    `branch_id`/`organization_id` là Uuid trần, đúng khuôn `AuditLog.user_id`.
+#    Hệ quả phụ có ích: bảng không có FK vào aggregate nào nên nó không rơi vào
+#    `fk_reachability_exempt` của `config/domain-mutation-guard.php`.
+#
+# 2. **Idempotency theo `(device_id, local_id)`, CÓ unique index ở tầng DB.**
+#    KHÔNG dùng `(order_id, occurred_at)`: hai lần ghi đè cùng một đơn trong
+#    cùng một giây sẽ gộp làm một, tức mất đúng bằng chứng đang cần. `local_id`
+#    là id autoincrement CỤC BỘ của máy trạm — ổn định, không bao giờ tái sinh
+#    trên cùng một thiết bị. Kiểm ở tầng ứng dụng không đủ: hai request song
+#    song cùng lọt qua `exists()` rồi cùng INSERT.
+#
+# 3. **Append-only, bất biến.** Không `softDelete` (xoá mềm một bằng chứng vẫn
+#    là giấu nó), không đường cập nhật. Đẩy lại cùng khoá là no-op — kể cả khi
+#    SỐ khác: số khác nghĩa là có bug ở đầu kia, và ghi đè sẽ xoá mất dấu vết
+#    của chính bug đó.
+#
+# 4. **Mười trường tiền đều BẮT BUỘC, kể cả khi không đổi.** Một dòng phải tự
+#    đứng được mà không join ngược về `customer_orders` — bảng ấy đã bị ghi đè
+#    rồi, đó chính là sự kiện đang ghi lại.
+#
+# ## Đơn vị tiền: BigInt, ĐƠN VỊ NHỎ NHẤT, cho phép ÂM
+#
+# Lệch có chủ đích với `customer_orders.total_amount` (Decimal 15,2). Đây là
+# bản sao NGUYÊN VĂN con số máy trạm gửi lên (SQLite lưu INTEGER); ép qua
+# Decimal rồi đọc ngược là thêm một phép biến đổi vào giữa bằng chứng và sự
+# thật. Số âm hợp lệ (giảm giá vượt) nên cột phải là bigint CÓ DẤU.
+#
+# ## `occurred_at` vs `created_at`
+#
+# `occurred_at` = `created_at` cục bộ của máy trạm (RFC3339 UTC) — LÚC ghi đè
+# xảy ra. `created_at` (timestamps) = lúc Cloud nhận được. Hai mốc này lệch
+# nhau đúng bằng thời gian quán mất mạng, và khoảng lệch đó tự nó là dữ liệu.
+# =============================================================================
+
+displayName:
+  en: Order Money Overwrite
+  ja: 注文金額上書き記録
+  vi: Bằng chứng ghi đè tiền của đơn
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: false
+  id: Uuid
+  # Bảng bằng chứng, không phải tài nguyên CRUD — không sinh service layer.
+  service: false
+  indexes:
+    # Quyết định 2 — khoá idempotency, cưỡng chế ở tầng DB.
+    - columns: [device_id, local_id]
+      unique: true
+      name: order_money_overwrites_device_local_unique
+    # Phép đọc chính: "đơn này đã từng bị ghi đè chưa, và như thế nào".
+    - columns: [order_id]
+    # Đối soát theo quán trong một khoảng thời gian (màn hình HQ về sau).
+    - columns: [branch_id, occurred_at]
+
+properties:
+  # ── Ai gửi, và dòng nào của họ ────────────────────────────────────────────
+  device_id:
+    type: Uuid
+    displayName:
+      en: Device ID
+      ja: デバイスID
+      vi: ID thiết bị
+    description:
+      en: Workstation device that reported the overwrite. Half of the idempotency key. Plain UUID, no FK — evidence outlives the device.
+      ja: 上書きを報告したワークステーション。冪等キーの片方。FKなし（証跡はデバイスより長生きする）。
+      vi: Máy trạm đã báo cáo lần ghi đè. Một nửa khoá idempotency. Uuid trần, không FK — bằng chứng sống lâu hơn thiết bị.
+
+  local_id:
+    type: BigInt
+    displayName:
+      en: Local Row ID
+      ja: ローカル行ID
+      vi: ID dòng cục bộ
+    description:
+      en: Autoincrement id of the row in the device's own SQLite table. Stable and never reused on one device, which is why it is the idempotency key instead of (order_id, occurred_at).
+      ja: デバイス側SQLiteの自動採番ID。同一デバイス内で再利用されないため冪等キーに使う。
+      vi: Id autoincrement của dòng trong SQLite của chính thiết bị. Ổn định, không tái sinh trên cùng thiết bị — vì thế nó là khoá idempotency thay cho (order_id, occurred_at).
+
+  # ── Quy về đâu ────────────────────────────────────────────────────────────
+  branch_id:
+    type: Uuid
+    displayName:
+      en: Branch ID
+      ja: 店舗ID
+      vi: ID chi nhánh
+    description:
+      en: Branch resolved from the device token, never from the payload — a device cannot write evidence into another branch.
+      ja: デバイストークンから解決した店舗。ペイロードからは取らない。
+      vi: Chi nhánh suy ra từ device token, KHÔNG lấy từ payload — thiết bị không ghi được bằng chứng sang chi nhánh khác.
+
+  organization_id:
+    type: Uuid
+    displayName:
+      en: Organization ID
+      ja: 組織ID
+      vi: ID tổ chức
+    description:
+      en: Local organization mirrored from console_organization_id of the branch (#2847 — branches has no organization_id column).
+      ja: 店舗の console_organization_id からミラーした組織（#2847）。
+      vi: Tổ chức local suy qua mirror console của chi nhánh (#2847 — bảng branches KHÔNG có cột organization_id).
+
+  order_id:
+    type: Uuid
+    displayName:
+      en: Order ID
+      ja: 注文ID
+      vi: ID đơn hàng
+    description:
+      en: The overwritten order. Plain UUID, no FK — evidence must survive order archival, and the order may not exist in Cloud yet.
+      ja: 上書きされた注文。FKなし。
+      vi: Đơn bị ghi đè. Uuid trần, không FK — bằng chứng phải sống sót khi đơn được lưu trữ.
+
+  occurred_at:
+    type: DateTime
+    displayName:
+      en: Occurred At
+      ja: 発生日時
+      vi: Thời điểm xảy ra
+    description:
+      en: When the overwrite happened on the device (RFC3339 UTC). Differs from created_at by however long the shop was offline.
+      ja: デバイス上で上書きが起きた時刻（RFC3339 UTC）。
+      vi: Lúc ghi đè xảy ra TRÊN THIẾT BỊ (RFC3339 UTC). Lệch với created_at đúng bằng thời gian quán mất mạng.
+
+  # ── Tiền đã vào két tại thời điểm ghi đè ──────────────────────────────────
+  paid_locally:
+    type: BigInt
+    displayName:
+      en: Paid Locally
+      ja: 現地収受額
+      vi: Đã thu tại quán
+    description:
+      en: Cash already taken at overwrite time. Decides whether the gap is a real 過不足 or just a slip about to print wrong. Snapshot — never re-read from payments later.
+      ja: 上書き時点で既に収受済みの金額。スナップショットであり、後から payments を読み直さない。
+      vi: Tiền đã vào két TẠI THỜI ĐIỂM ghi đè — quyết định khoảng lệch là 過不足 thật hay mới chỉ là tờ phiếu sắp in sai. Snapshot, không đọc lại từ payments.
+
+  # ── Năm cặp trước/sau ─────────────────────────────────────────────────────
+  total_amount_local:
+    type: BigInt
+    displayName:
+      en: Total (Local)
+      ja: 合計（端末）
+      vi: Tổng (máy trạm)
+    description:
+      en: Order total the workstation was holding, in minor units. Signed.
+      ja: 端末が保持していた合計金額（最小通貨単位、符号あり）。
+      vi: Tổng tiền máy trạm đang giữ, đơn vị nhỏ nhất, có dấu.
+
+  total_amount_cloud:
+    type: BigInt
+    displayName:
+      en: Total (Cloud)
+      ja: 合計（クラウド）
+      vi: Tổng (Cloud)
+    description:
+      en: Order total Cloud re-priced and persisted, in minor units. Signed.
+      ja: クラウドが再計算して保存した合計金額。
+      vi: Tổng tiền Cloud tính lại và đã lưu, đơn vị nhỏ nhất, có dấu.
+
+  subtotal_local:
+    type: BigInt
+    displayName:
+      en: Subtotal (Local)
+      ja: 小計（端末）
+      vi: Tạm tính (máy trạm)
+    description:
+      en: Subtotal the workstation was holding, in minor units. Signed.
+      ja: 端末が保持していた小計。
+      vi: Tạm tính máy trạm đang giữ, đơn vị nhỏ nhất, có dấu.
+
+  subtotal_cloud:
+    type: BigInt
+    displayName:
+      en: Subtotal (Cloud)
+      ja: 小計（クラウド）
+      vi: Tạm tính (Cloud)
+    description:
+      en: Subtotal Cloud re-priced and persisted, in minor units. Signed.
+      ja: クラウドが再計算して保存した小計。
+      vi: Tạm tính Cloud tính lại và đã lưu, đơn vị nhỏ nhất, có dấu.
+
+  tax_amount_local:
+    type: BigInt
+    displayName:
+      en: Tax (Local)
+      ja: 消費税（端末）
+      vi: Thuế (máy trạm)
+    description:
+      en: Tax the workstation was holding, in minor units. Signed.
+      ja: 端末が保持していた消費税額。
+      vi: Thuế máy trạm đang giữ, đơn vị nhỏ nhất, có dấu.
+
+  tax_amount_cloud:
+    type: BigInt
+    displayName:
+      en: Tax (Cloud)
+      ja: 消費税（クラウド）
+      vi: Thuế (Cloud)
+    description:
+      en: Tax Cloud re-priced and persisted, in minor units. Signed.
+      ja: クラウドが再計算して保存した消費税額。
+      vi: Thuế Cloud tính lại và đã lưu, đơn vị nhỏ nhất, có dấu.
+
+  service_charge_local:
+    type: BigInt
+    displayName:
+      en: Service Charge (Local)
+      ja: サービス料（端末）
+      vi: Phí dịch vụ (máy trạm)
+    description:
+      en: Service charge the workstation was holding, in minor units. Signed.
+      ja: 端末が保持していたサービス料。
+      vi: Phí dịch vụ máy trạm đang giữ, đơn vị nhỏ nhất, có dấu.
+
+  service_charge_cloud:
+    type: BigInt
+    displayName:
+      en: Service Charge (Cloud)
+      ja: サービス料（クラウド）
+      vi: Phí dịch vụ (Cloud)
+    description:
+      en: Service charge Cloud re-priced and persisted, in minor units. Signed.
+      ja: クラウドが再計算して保存したサービス料。
+      vi: Phí dịch vụ Cloud tính lại và đã lưu, đơn vị nhỏ nhất, có dấu.
+
+  discount_amount_local:
+    type: BigInt
+    displayName:
+      en: Discount (Local)
+      ja: 割引（端末）
+      vi: Giảm giá (máy trạm)
+    description:
+      en: Discount the workstation was holding, in minor units. Signed — a discount can legitimately be negative here.
+      ja: 端末が保持していた割引額（符号あり）。
+      vi: Giảm giá máy trạm đang giữ, đơn vị nhỏ nhất, có dấu — số âm là hợp lệ.
+
+  discount_amount_cloud:
+    type: BigInt
+    displayName:
+      en: Discount (Cloud)
+      ja: 割引（クラウド）
+      vi: Giảm giá (Cloud)
+    description:
+      en: Discount Cloud re-priced and persisted, in minor units. Signed.
+      ja: クラウドが再計算して保存した割引額。
+      vi: Giảm giá Cloud tính lại và đã lưu, đơn vị nhỏ nhất, có dấu.

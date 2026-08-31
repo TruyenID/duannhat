@@ -1,0 +1,39 @@
+{
+  "_comment": "#2253 — hợp đồng CHUNG cho phân bổ khoản giảm pro-rata trên đơn đa-rate đã hoàn một phần. Bản sinh đôi: backend/tests/Fixtures/discount_weights_golden.json — hai file phải GIỐNG TỪNG BYTE (SharedFixturesAgreeTest). Go: discount_weights_golden_test.go. Cloud: OrderPricingCalculator::priceGroups(discountWeights:) sau #2240. Ca canonical: A ¥1.000 @10% + B ¥1.000 @8%, coupon ¥500, hoàn A — gross THÔ vẫn 2.000 nhưng trọng số còn sống là {10:0, 8:1000}; sau applyRefundLines phải ra thuế 40 · tổng 540, không nhóm thuế âm.",
+  "cases": [
+    {
+      "name": "2240-canonical-a-refunded",
+      "why": "Review PR #2250 vòng 2 — Go cũ chia coupon 250/250 trên gross thô ⇒ thuế 35 · tổng 535 · nhóm 10% = −25. Cloud + Go sau #2253 dồn share sang nhóm 8% còn sống.",
+      "rate_subtotals": {"10": 1000, "8": 1000},
+      "discount_weights": {"10": 0, "8": 1000},
+      "discount": 500,
+      "prices_include_tax": false,
+      "service_charge_rate": 0,
+      "service_charge_tax_rate": 0,
+      "step": 1,
+      "tax_step": 1,
+      "tax_mode": "round",
+      "refund_lines": [{"rate": 10, "subtotal": -1000, "tax_amount": -100}],
+      "expected_tax": 40,
+      "expected_total": 540,
+      "min_group_tax": 0
+    },
+    {
+      "name": "2240-three-rate-survivors",
+      "why": "Ba rate + coupon 600, hoàn nhóm 10% — phần giảm chia lại cho 8% và 5% còn sống.",
+      "rate_subtotals": {"10": 1000, "8": 1000, "5": 1000},
+      "discount_weights": {"10": 0, "8": 1000, "5": 1000},
+      "discount": 600,
+      "prices_include_tax": false,
+      "service_charge_rate": 0,
+      "service_charge_tax_rate": 0,
+      "step": 1,
+      "tax_step": 1,
+      "tax_mode": "round",
+      "refund_lines": [{"rate": 10, "subtotal": -1000, "tax_amount": -100}],
+      "expected_tax": 91,
+      "expected_total": 1491,
+      "min_group_tax": 0
+    }
+  ]
+}

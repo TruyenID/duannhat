@@ -1,0 +1,68 @@
+/**
+ * Font tự host — #2699.
+ *
+ * Trước đây `[locale]/layout.tsx` gọi `next/font/google`, và lời gọi đó **tải
+ * font từ fonts.googleapis.com LÚC BUILD**. Ngày 2026-08-13 container build của
+ * Amplify không với tới Google một lần, và deploy production chết:
+ *
+ *     > src: url(@vercel/turbopack-next/internal/font/google/font?…https://fonts.gs…
+ *     Import trace: [next]/internal/font/google/alumni_sans_….module.css
+ *     !!! Build failed
+ *
+ * Chạy lại thì xanh. Đó chính là vấn đề: build không tất định, hỏng theo mạng
+ * của runner chứ không theo mã, và chạy lại là thao tác TAY.
+ *
+ * `@fontsource/*` là gói npm mang sẵn file .woff2, nên build chỉ cần registry
+ * npm — thứ nó vốn đã cần. Cùng commit ⇒ cùng kết quả.
+ *
+ * Nạp ĐÚNG subset và weight mà cấu hình cũ khai, không hơn không kém.
+ */
+
+/**
+ * Be Vietnam Pro — font thân bài (`--font-sans`), subsets latin + vietnamese.
+ *
+ * Weight 300 nạp cho phần mô tả trong section craft (#2050 — spec thiết kế).
+ * Thiếu nó thì `font-light` không có file thật để dùng và trình duyệt tự làm
+ * mảnh chữ 400 đi — chữ ra đúng "nhạt" nhưng dáng méo so với bản Figma.
+ */
+@import "@fontsource/be-vietnam-pro/latin-300.css";
+@import "@fontsource/be-vietnam-pro/latin-400.css";
+@import "@fontsource/be-vietnam-pro/latin-500.css";
+@import "@fontsource/be-vietnam-pro/latin-600.css";
+@import "@fontsource/be-vietnam-pro/latin-700.css";
+
+@import "@fontsource/be-vietnam-pro/vietnamese-300.css";
+@import "@fontsource/be-vietnam-pro/vietnamese-400.css";
+@import "@fontsource/be-vietnam-pro/vietnamese-500.css";
+@import "@fontsource/be-vietnam-pro/vietnamese-600.css";
+@import "@fontsource/be-vietnam-pro/vietnamese-700.css";
+
+/**
+ * Alumni Sans — font hiển thị của tiêu đề + phụ đề các section trang chủ
+ * (godx-tempo#2050 — spec thiết kế).
+ *
+ * Nạp đúng hai weight đang dùng — 700 cho tiêu đề, 400 cho phụ đề. Nạp cả họ
+ * để dùng hai weight là bắt mọi khách tải thừa.
+ *
+ * KHÔNG có glyph CJK. Tiêu đề bản tiếng Nhật vì thế rơi về font hệ thống —
+ * không phải hồi quy, `Be Vietnam Pro` cũng chỉ nạp latin + vietnamese nên
+ * tiếng Nhật xưa nay vẫn dùng font hệ thống.
+ */
+@import "@fontsource/alumni-sans/latin-400.css";
+@import "@fontsource/alumni-sans/latin-700.css";
+
+@import "@fontsource/alumni-sans/vietnamese-400.css";
+@import "@fontsource/alumni-sans/vietnamese-700.css";
+
+/**
+ * Đặt biến bằng MỘT CLASS gắn lên `<html>`, đúng chỗ mà `.variable` của
+ * next/font từng gắn.
+ *
+ * Không đặt thẳng vào `:root`: `globals.css` có `@theme inline { --font-sans:
+ * var(--font-sans) }` — nó đọc giá trị từ tầng cascade của `<html>`. Đưa biến
+ * xuống `:root` biến dòng đó thành tham chiếu vòng.
+ */
+.font-vars {
+  --font-sans: "Be Vietnam Pro";
+  --font-display: "Alumni Sans";
+}

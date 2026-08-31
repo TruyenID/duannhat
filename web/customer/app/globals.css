@@ -1,0 +1,701 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Prevent horizontal scroll on all devices
+ * NOTE: overflow-x: hidden breaks CSS sticky positioning.
+ * Use overflow-x: clip on specific containers instead. */
+html,
+body {
+  max-width: 100vw;
+}
+
+/* Utility: Hide scrollbar but keep scrolling */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari, Opera */
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-heading: var(--font-sans);
+  /* godx-tempo#2050 — Alumni Sans, chỉ dùng cho tiêu đề section trang chủ
+     (class `font-display`). Fallback về `--font-sans` cho chuỗi không có glyph
+     trong font này, ví dụ tiêu đề bản tiếng Nhật. */
+  --font-display: var(--font-display), var(--font-sans), system-ui, sans-serif;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+body {
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+:root {
+  /* Japanese Enterprise Foundation — Phase B applied
+   * Warm OKLCH neutrals (hue 60 = 墨色/off-black warmth, SmartHR convention)
+   * Primary: muted green for food app, 渋み chroma ≤ 0.14
+   * Destructive: 茜 #b7282e — NOT pure red (JP cultural rule)
+   * Border-radius: 0.5rem (8px) — consumer food app, slightly relaxed from B2B 6px
+   */
+  --background: oklch(0.99 0.002 60);
+  /* warm off-white ≈ SmartHR #f8f7f6 */
+  --foreground: oklch(0.20 0.006 60);
+  /* warm off-black ≈ 墨 #23221e */
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.20 0.006 60);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.20 0.006 60);
+  --primary: oklch(0.54 0.14 145);
+  /* 食 green, 渋み chroma 0.14 */
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.97 0.002 60);
+  /* warm subtle bg */
+  --secondary-foreground: oklch(0.20 0.006 60);
+  --muted: oklch(0.96 0.003 60);
+  /* warm muted surface */
+  --muted-foreground: oklch(0.48 0.008 60);
+  /* SmartHR TEXT_GREY ≈ #706d65 */
+  --accent: oklch(0.96 0.003 60);
+  --accent-foreground: oklch(0.20 0.006 60);
+  --destructive: oklch(0.52 0.18 25);
+  /* 茜 #b7282e — muted red, JP cultural rule */
+  --border: oklch(0.86 0.006 60);
+  /* SmartHR BORDER ≈ #d6d3d0 */
+  --input: oklch(0.86 0.006 60);
+  --ring: oklch(0.54 0.14 145);
+  /* 和色 chart palette — traditional Japanese hue centers */
+  --chart-1: oklch(0.54 0.14 145);
+  /* 食 green (primary) */
+  --chart-2: oklch(0.56 0.12 265);
+  /* 群青 info blue */
+  --chart-3: oklch(0.80 0.17 85);
+  /* 山吹 warning golden */
+  --chart-4: oklch(0.72 0.13 155);
+  /* 若竹 success green */
+  --chart-5: oklch(0.66 0.19 45);
+  /* 朱 attention orange */
+  --radius: 0.5rem;
+  /* 8px base — cards: 8px, modals: 11px */
+  --sidebar: oklch(0.99 0.002 60);
+  --sidebar-foreground: oklch(0.20 0.006 60);
+  --sidebar-primary: oklch(0.54 0.14 145);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.96 0.003 60);
+  --sidebar-accent-foreground: oklch(0.20 0.006 60);
+  --sidebar-border: oklch(0.86 0.006 60);
+  --sidebar-ring: oklch(0.54 0.14 145);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    /* JMDC convergent CJK line-height: 1.7 for body (vs Tailwind default 1.5) */
+    line-height: 1.7;
+  }
+
+  html {
+    @apply font-sans;
+  }
+
+  /* Headings: tight line-height per JP enterprise convention (奥ゆかしさ) */
+  h1,
+  h2,
+  h3,
+  h4 {
+    line-height: 1.25;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Motion — subtle JP enterprise entrance animations
+ * Tôn trọng prefers-reduced-motion: user tắt motion → không chạy animation.
+ * Dùng `opacity:0` + translateY nhẹ để tránh flicker.
+ * ------------------------------------------------------------------------- */
+
+@keyframes anim-enter-kf {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes anim-fade-kf {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes anim-float-kf {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes anim-ken-burns-kf {
+  0% {
+    transform: scale(1) translate(0, 0);
+  }
+
+  100% {
+    transform: scale(1.06) translate(-1%, -1%);
+  }
+}
+
+@keyframes anim-reveal-kf {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .anim-enter {
+    animation: anim-enter-kf 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .anim-fade {
+    animation: anim-fade-kf 320ms ease-out both;
+  }
+
+  /* Gentle float — dùng cho caption, icon trang trí. Không apply cho text block dài. */
+  .anim-float {
+    animation: anim-float-kf 3800ms ease-in-out infinite;
+  }
+
+  /* Ken-burns tĩnh chậm cho cover image. Kết hợp với `overflow-hidden` ở parent. */
+  .anim-ken-burns {
+    animation: anim-ken-burns-kf 12s ease-in-out infinite alternate;
+  }
+
+  /* Scroll-reveal: element có `data-reveal` sẽ bắt đầu invisible, khi cha gắn
+   * `.anim-revealed` (do IntersectionObserver thêm) thì chạy anim-reveal-kf. */
+  [data-reveal],
+  [data-reveal-stagger] {
+    opacity: 0;
+  }
+
+  [data-reveal].anim-revealed,
+  [data-reveal-stagger].anim-revealed {
+    animation: anim-reveal-kf 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* Stagger-on-scroll: children của [data-reveal-stagger] bắt đầu invisible,
+   * khi parent được đánh dấu `.anim-revealed` thì từng child reveal theo delay. */
+  [data-reveal-stagger]>* {
+    opacity: 0;
+  }
+
+  [data-reveal-stagger].anim-revealed>* {
+    animation: anim-reveal-kf 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  [data-reveal-stagger].anim-revealed>*:nth-child(1) {
+    animation-delay: 80ms;
+  }
+
+  [data-reveal-stagger].anim-revealed>*:nth-child(2) {
+    animation-delay: 160ms;
+  }
+
+  [data-reveal-stagger].anim-revealed>*:nth-child(3) {
+    animation-delay: 240ms;
+  }
+
+  [data-reveal-stagger].anim-revealed>*:nth-child(4) {
+    animation-delay: 320ms;
+  }
+
+  [data-reveal-stagger].anim-revealed>*:nth-child(5) {
+    animation-delay: 400ms;
+  }
+
+  [data-reveal-stagger].anim-revealed>*:nth-child(6) {
+    animation-delay: 480ms;
+  }
+
+  [data-reveal-stagger].anim-revealed>*:nth-child(7) {
+    animation-delay: 560ms;
+  }
+
+  [data-reveal-stagger].anim-revealed>*:nth-child(n + 8) {
+    animation-delay: 640ms;
+  }
+
+  /* Stagger: mỗi direct child trễ thêm 60ms, cap ở 8 phần tử để tránh
+   * kéo dài quá mức trên list dài. Parent cần class `anim-stagger`. */
+  .anim-stagger>* {
+    animation: anim-enter-kf 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .anim-stagger>*:nth-child(1) {
+    animation-delay: 40ms;
+  }
+
+  .anim-stagger>*:nth-child(2) {
+    animation-delay: 100ms;
+  }
+
+  .anim-stagger>*:nth-child(3) {
+    animation-delay: 160ms;
+  }
+
+  .anim-stagger>*:nth-child(4) {
+    animation-delay: 220ms;
+  }
+
+  .anim-stagger>*:nth-child(5) {
+    animation-delay: 280ms;
+  }
+
+  .anim-stagger>*:nth-child(6) {
+    animation-delay: 340ms;
+  }
+
+  .anim-stagger>*:nth-child(7) {
+    animation-delay: 400ms;
+  }
+
+  .anim-stagger>*:nth-child(n + 8) {
+    animation-delay: 460ms;
+  }
+
+  /* Slow float cho badges/decorative — biên độ lớn hơn `anim-float` nhẹ. */
+  @keyframes anim-float-slow-kf {
+
+    0%,
+    100% {
+      transform: translateY(0) rotate(0deg);
+    }
+
+    50% {
+      transform: translateY(-6px) rotate(-2deg);
+    }
+  }
+
+  .anim-float-slow {
+    animation: anim-float-slow-kf 5200ms ease-in-out infinite;
+  }
+
+  /* Subtle breathe cho yellow wedge — opacity + scale chậm, không gây
+   * distraction khi đọc nội dung. */
+  @keyframes anim-breathe-kf {
+
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    50% {
+      opacity: 0.92;
+      transform: scale(1.015);
+    }
+  }
+
+  .anim-breathe {
+    animation: anim-breathe-kf 7200ms ease-in-out infinite;
+    transform-origin: center;
+  }
+
+  /* Blur-in: opacity 0 + blur(12px) + translateY → normal. Dùng cho
+   * headline above-the-fold (auto-play trên mount) và từng word của SplitText. */
+  @keyframes anim-blur-in-kf {
+    from {
+      opacity: 0;
+      filter: blur(12px);
+      transform: translateY(14px);
+    }
+
+    to {
+      opacity: 1;
+      filter: blur(0);
+      transform: translateY(0);
+    }
+  }
+
+  /* SplitText: mỗi word là <span> inline-block. Container giữ white-space
+   * bình thường; từng word tự fade-blur-in theo animationDelay inline. */
+  [data-split-text]>span {
+    display: inline-block;
+    animation: anim-blur-in-kf 760ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    /* animation-delay do inline style ghi đè từng word */
+    will-change: filter, transform, opacity;
+  }
+
+  /* Marquee: track gồm 2 bản content giống hệt, translateX 0 → -50% tạo
+   * vòng lặp seamless. Không pause khi hover để giữ flow editorial. */
+  @keyframes anim-marquee-kf {
+    from {
+      transform: translateX(0);
+    }
+
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: anim-marquee-kf var(--marquee-speed, 40s) linear infinite;
+  }
+}
+
+/* Parallax cho ảnh hero: translateY chạy theo tiến độ element quét qua viewport. */
+@keyframes anim-parallax-kf {
+  from {
+    transform: translateY(-36px);
+  }
+
+  to {
+    transform: translateY(36px);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Scroll-driven animations (CSS native — Chrome/Edge 115+, Safari 26+)
+ *
+ * Element chỉ "di chuyển" khi người dùng scroll, không auto-play theo thời gian.
+ *   • `.marquee-track` — translate theo scroll progress của trang
+ *   • `[data-reveal]` / `[data-reveal-stagger]` — opacity + translateY theo
+ *     tiến độ element vào viewport (view() timeline)
+ *   • `[data-parallax]` — translateY ngược chiều scroll cho ảnh hero
+ *
+ * Browser không hỗ trợ (Firefox mặc định) dùng fallback JS trong
+ * `scroll-reveal.tsx` (thêm class `.anim-revealed` qua IntersectionObserver).
+ * ------------------------------------------------------------------------- */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+
+    /* Marquee: một vòng loop = một lần scroll hết trang. Bánh xe ngừng → chữ đứng. */
+    .marquee-track {
+      animation-name: anim-marquee-kf;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-timeline: scroll(root block);
+    }
+
+    /* Section reveal — fade + lift theo tiến độ element vào viewport. */
+    [data-reveal] {
+      animation: anim-reveal-kf linear both;
+      animation-duration: auto;
+      animation-timeline: view();
+      animation-range: entry 10% cover 40%;
+    }
+
+    /* Parent wrapper cũng reveal khi vào khung nhìn */
+    [data-reveal-stagger] {
+      animation: anim-reveal-kf linear both;
+      animation-duration: auto;
+      animation-timeline: view();
+      animation-range: entry 5% cover 30%;
+    }
+
+    /* Các child stagger bằng cách offset animation-range từng nth-child. */
+    [data-reveal-stagger]>* {
+      animation: anim-reveal-kf linear both;
+      animation-duration: auto;
+      animation-timeline: view();
+    }
+
+    [data-reveal-stagger]>*:nth-child(1) {
+      animation-range: entry 5% cover 28%;
+    }
+
+    [data-reveal-stagger]>*:nth-child(2) {
+      animation-range: entry 12% cover 35%;
+    }
+
+    [data-reveal-stagger]>*:nth-child(3) {
+      animation-range: entry 19% cover 42%;
+    }
+
+    [data-reveal-stagger]>*:nth-child(4) {
+      animation-range: entry 26% cover 49%;
+    }
+
+    [data-reveal-stagger]>*:nth-child(5) {
+      animation-range: entry 32% cover 55%;
+    }
+
+    [data-reveal-stagger]>*:nth-child(6) {
+      animation-range: entry 38% cover 60%;
+    }
+
+    [data-reveal-stagger]>*:nth-child(n + 7) {
+      animation-range: entry 44% cover 65%;
+    }
+
+    /* Parallax cho ảnh / lớp decoration — translate ngược chiều scroll. */
+    [data-parallax] {
+      animation: anim-parallax-kf linear both;
+      animation-duration: auto;
+      animation-timeline: view();
+      animation-range: cover;
+    }
+  }
+}
+
+/* prefers-reduced-motion: người dùng tắt motion → marquee đứng yên,
+ * SplitText hiển thị ngay (không blur/translate), blur-in bỏ qua. */
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+
+  [data-split-text]>span {
+    animation: none;
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
+
+  [data-reveal],
+  [data-reveal-stagger],
+  [data-reveal-stagger]>*,
+  [data-parallax] {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* React Day Picker custom styles */
+.rdp {
+  --rdp-accent-color: var(--color-primary);
+  --rdp-accent-background-color: var(--color-primary);
+}
+
+.rdp-day_button:hover:not([disabled]):not(.rdp-day_selected) {
+  background-color: var(--color-accent);
+}
+
+.rdp-day_selected .rdp-day_button {
+  background-color: var(--rdp-accent-background-color) !important;
+  color: white !important;
+}
+
+.rdp-day_today:not(.rdp-day_selected) .rdp-day_button {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+/* plan-037 — order-confirm countdown animation. `flipIn` re-fires on
+ * every digit tick via React `key` change; `pulse-soft` is a calmer
+ * variant of tailwind's default pulse so the urgency reads as urgency
+ * without strobing. */
+@keyframes flipIn {
+  0% {
+    transform: translateY(-100%) scale(0.85);
+    opacity: 0;
+  }
+
+  60% {
+    transform: translateY(8%) scale(1.04);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-soft-kf {
+  0%, 100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.85;
+  }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft-kf 1.6s ease-in-out infinite;
+}
+/* godx-tempo#2050 — nền vân vải của trang chủ, dùng ảnh texture thật do design
+   cấp. Bản trước dệt bằng hai lớp repeating-linear-gradient, cho ra lưới ô
+   vuông đều tăm tắp chứ không ra thớ vải.
+
+   `repeat` ở kích thước GỐC, không `cover`: ảnh rộng 675px mà kéo phủ khung
+   1440+ thì thớ vải phóng to gấp đôi và nhoè. Đã đo tính seamless trước khi
+   chọn cách này — chênh lệch giữa hai mép đối diện ngang bằng nhiễu nội tại
+   của chính tấm texture, nên đường nối không lộ hơn thớ vải quanh nó.
+
+   `background-color` đặt đúng màu trung bình của ảnh: lúc ảnh chưa tải xong
+   nền vẫn là beige đó, không nhảy một nhịp sang màu khác.
+
+   (Carousel bài viết dùng `.scrollbar-hide` có sẵn ở trên.) */
+.bg-linen {
+  background-color: #e8dcce;
+  background-image: url("/images/linen-texture.webp");
+  background-repeat: repeat;
+}
+
+/* godx-tempo#2050 — thang tiêu đề section trang chủ, theo spec thiết kế:
+   Alumni Sans 700 / 60px / line-height 38px / letter-spacing 0.5px.
+
+   Là utility chứ không phải bốn cụm class lặp tay ở bốn file: spec do design
+   cấp và sẽ đổi cả cụm, lặp tay thì chỉ cần sót một chỗ là các tiêu đề lệch
+   nhau mà không ai thấy ngay.
+
+   `line-height` NHỎ HƠN `font-size` là cố ý (Alumni Sans là font condensed
+   cao, thân chữ chỉ chiếm phần dưới của em-box) — nhưng chỉ an toàn khi tiêu
+   đề nằm gọn MỘT dòng. Ở mobile chuỗi luôn xuống dòng, nên dưới md dùng cỡ nhỏ
+   hơn kèm leading dương; giữ 38px ở đó thì hai dòng chữ chồng lên nhau. */
+.heading-display {
+  font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 34px;
+  line-height: 1.05;
+  letter-spacing: 0.5px;
+  /* Mockup 2026-08: MỌI tiêu đề section của trang chủ đều xanh thương hiệu.
+     Đặt màu ở đây chứ không lặp `text-[#00974B]` ở từng file vì utility này
+     chỉ được dùng bởi bốn tiêu đề đó (home-story ×2, home-featured-dishes,
+     blog-excerpt-section) — grep trước khi thêm chỗ dùng thứ năm không muốn
+     màu này. */
+  color: #00974b;
+}
+
+@media (min-width: 768px) {
+  .heading-display {
+    font-size: 60px;
+    line-height: 38px;
+  }
+}
+
+/* godx-tempo#2050 — nền hoa văn 青海波 (seigaiha) của hero.
+   Vẽ bằng SVG inline trong `home-story.tsx` chứ không phải ở đây: mỗi nan quạt
+   là 4 cung tròn đồng tâm, viết tay ra CSS thì thành một chuỗi gradient không
+   ai đọc lại được, còn dựng bằng <pattern> thì hình học nằm ngay cạnh chỗ
+   dùng và sửa được bằng số. */

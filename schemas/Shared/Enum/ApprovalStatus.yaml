@@ -1,0 +1,36 @@
+# =============================================================================
+# ApprovalStatus (承認ステータス / Trạng thái duyệt)
+# =============================================================================
+#
+# Generic 4-state approval workflow shared by Recipe (and future entities) via
+# the `HasApprovalWorkflow` trait. ProductStatus embeds these same 4 values as
+# a strict subset, plus lifecycle states (`active`, `inactive`) Product needs
+# post-approval — each model's trait methods read status through the shared
+# interface, so ProductStatus and ApprovalStatus coexist without merging.
+#
+# State machine:
+#
+#   [draft] --submit--> [pending] --approve--> [approved]
+#                          |
+#                          └--reject--> [rejected] --resubmit--> [pending]
+#
+# Only `HasApprovalWorkflow` trait methods may transition; illegal transitions
+# throw InvalidStatusTransitionException (rendered as 422).
+# =============================================================================
+
+kind: enum
+
+displayName:
+  ja: 承認ステータス
+  en: Approval Status
+  vi: Trạng thái duyệt
+
+values:
+  - value: draft
+    label: { ja: 下書き, en: Draft, vi: Bản nháp }
+  - value: pending
+    label: { ja: 承認待ち, en: Pending Approval, vi: Chờ duyệt }
+  - value: approved
+    label: { ja: 承認済み, en: Approved, vi: Đã duyệt }
+  - value: rejected
+    label: { ja: 却下, en: Rejected, vi: Từ chối }

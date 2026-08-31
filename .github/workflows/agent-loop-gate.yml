@@ -1,0 +1,46 @@
+# #2588 — `tal` là công cụ cả vòng lặp issue chạy trên đó (lease, fencing, cổng
+# merge, rào chặn merge nhầm vào production ở #2573), và nó có 98 ca test. Chưa
+# ca nào từng chạy trong CI: `.claude/**` không nằm trong `paths:` của workflow
+# nào, nên một PR sửa `tal` — kể cả sửa hỏng — báo `no checks reported`.
+#
+# Phát hiện lúc merge #2579, và đúng khuôn #2363 đã sửa cho Omnify: cổng chỉ
+# chạy ở nơi khác, nên PR đụng chính cái cổng đó thì không có gì canh. Cách sửa
+# khi ấy là một workflow nhỏ riêng (`omnify-gate.yml`); đây là bản song sinh.
+#
+# CỐ Ý KHÔNG nhét vào `backend-tests`: thêm `.claude/**` vào `paths:` của nó sẽ
+# kéo `arch-gate` (composer + deptrac) chạy theo mỗi lần ai sửa một dòng Python
+# trong `tal`.
+name: agent-loop-gate
+
+on:
+  push:
+    branches: [dev, main]
+    paths: ['.claude/tools/agent-loop/**', '.github/workflows/agent-loop-gate.yml']
+  pull_request:
+    branches: [dev, main]
+    paths: ['.claude/tools/agent-loop/**', '.github/workflows/agent-loop-gate.yml']
+
+concurrency:
+  group: agent-loop-gate-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+jobs:
+  tal:
+    name: tal test suite
+    runs-on: [self-hosted, Linux, X64]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      # KHÔNG dùng `actions/setup-python`: runner này đã chạy `python3` sẵn —
+      # `.github/scripts/publish-workstation-downloads.sh` gọi nó trong
+      # `workstation-release.yml`, cùng nhãn runner. Bằng chứng, không phải giả
+      # định; in phiên bản ra để lần nào hỏng cũng thấy ngay ở dòng đầu.
+      - name: Assert python toolchain
+        run: python3 --version
+
+      # Suite này không cần mạng, không cần lease, không cần GitHub — nó thay
+      # `gh()` bằng bản ghi lại lời gọi. Chạy được ở runner sạch là một phần
+      # thiết kế của nó (#1342).
+      - name: tal test suite
+        run: python3 .claude/tools/agent-loop/tal_test.py

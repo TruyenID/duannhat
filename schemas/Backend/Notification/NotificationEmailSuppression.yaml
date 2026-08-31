@@ -1,0 +1,142 @@
+# =============================================================================
+# NotificationEmailSuppression (メール抑制 / Danh sách chặn email)
+# =============================================================================
+#
+# Plan-023 M4 — per-organization email-address blocklist. Pre-M4
+# EmailChannel called Mail::to() unconditionally; bounced + complained
+# recipients silently kept receiving mail because no webhook ever
+# updated the delivery status. This table records every (org, email,
+# reason) the platform refuses to mail, so EmailChannel can short-
+# circuit before SMTP and admins can audit / un-suppress via the HQ
+# email-health page.
+#
+# Written by:
+#   - `ApplyEmailEventJob` (T4.6) — upserts on every Postmark bounce /
+#     complaint webhook
+#   - `POST /hq/{brand}/notifications/email-suppressions` (T4.8) — manual
+#     suppression added by an admin
+#
+# Read by:
+#   - `EmailChannel::send` (T4.7) — short-circuits to status='skipped'
+#     when (organization_id, email) hit exists with un_suppressed_at NULL
+#   - `GET /hq/{brand}/notifications/email-suppressions` (T4.8) — admin
+#     audit list
+#
+# Un-suppression: `DELETE /hq/{brand}/notifications/email-suppressions/
+# {id}` writes `un_suppressed_at = now()` rather than deleting the row,
+# so the audit trail of "why this address was blocked in the past"
+# survives. EmailChannel ignores rows whose un_suppressed_at is set.
+#
+# Reasons (snake_case):
+#   - `hard_bounce`    — recipient address rejected by remote MTA
+#                        (permanent, e.g. unknown user)
+#   - `spam_complaint` — recipient flagged the message as spam
+#                        (Feedback Loop / FBL)
+#   - `subscription_change` — provider-side unsubscribe (Postmark's
+#                        SubscriptionChange event)
+#   - `manual`         — admin-added via the HQ page
+#
+# Tenancy: scoped by `organization_id`. The same email can land in two
+# orgs without conflict (uniqueness includes both id + reason).
+# =============================================================================
+
+displayName:
+  en: Notification Email Suppression
+  ja: メール抑制
+  vi: Chặn email
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: false
+  id: Uuid
+  indexes:
+    # EmailChannel pre-send lookup — must be fast.
+    - columns: [organization_id, email]
+    # One row per (org, email, reason) — re-bouncing the same address
+    # for the same reason is a no-op; a complaint + a hard_bounce on the
+    # same address sit as two rows so the audit shows both.
+    - columns: [organization_id, email, reason]
+      unique: true
+    # Admin "recently suppressed" listing sort.
+    - columns: [suppressed_at]
+    # Un-suppression timeline.
+    - columns: [un_suppressed_at]
+
+properties:
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+    description:
+      en: Tenancy boundary. EmailChannel filters by this on every send.
+      ja: テナンシー境界。EmailChannel は送信ごとにこれでフィルタする。
+      vi: Phạm vi tenancy. EmailChannel filter theo cột này mỗi lần gửi.
+
+  email:
+    type: String
+    length: 254
+    filterable: true
+    displayName:
+      en: Email
+      ja: メールアドレス
+      vi: Email
+    description:
+      en: "RFC 5321 max length is 254 chars. Address normalised lower-case at write time so two casings of the same address can't both bypass the suppression check."
+      ja: "RFC 5321 の最大長は254文字。書き込み時にアドレスを小文字に正規化し、同じアドレスの2つの大文字小文字の組み合わせがサプレッションチェックをバイパスできないようにする。"
+      vi: "RFC 5321 độ dài max 254 ký tự. Address normalize chữ thường khi ghi để 2 casing của cùng địa chỉ không thể qua mặt suppression check."
+
+  reason:
+    type: String
+    length: 50
+    filterable: true
+    displayName:
+      en: Reason
+      ja: 理由
+      vi: Lý do
+    description:
+      en: "Why the address is suppressed. Closed enum at the controller layer: `hard_bounce` | `spam_complaint` | `subscription_change` | `manual`. Future providers (SES, Mailgun) emit different event names that the per-driver MailWebhookContract maps onto this enum."
+      ja: "アドレスが抑制される理由。コントローラー層で閉じた enum：`hard_bounce` | `spam_complaint` | `subscription_change` | `manual`。将来のプロバイダ（SES、Mailgun）は異なるイベント名を発行し、ドライバごとの MailWebhookContract がこの enum にマップする。"
+      vi: "Tại sao address bị chặn. Closed enum ở controller layer: `hard_bounce` | `spam_complaint` | `subscription_change` | `manual`. Provider tương lai (SES, Mailgun) emit event name khác, MailWebhookContract per-driver map về enum này."
+
+  source_provider:
+    type: String
+    length: 50
+    nullable: true
+    displayName:
+      en: Source Provider
+      ja: 提供元
+      vi: Nguồn provider
+    description:
+      en: 'Mail provider that surfaced the suppression event (`postmark` / `ses` / `mailgun` / `manual`). Nullable to ease later provider additions without a backfill migration. Useful for diagnostics when ops asks "where did this suppression come from?".'
+      ja: 'サプレッションイベントを発生させたメールプロバイダ（`postmark` / `ses` / `mailgun` / `manual`）。後でプロバイダを追加してもバックフィルマイグレーションが不要なように Nullable。ops が「このサプレッションはどこから来たのか？」と聞いた時の診断に有用。'
+      vi: 'Mail provider phát sinh suppression event (`postmark` / `ses` / `mailgun` / `manual`). Nullable để dễ thêm provider sau không cần backfill migration. Hữu ích cho diagnostics khi ops hỏi "suppression này từ đâu ra?".'
+
+  suppressed_at:
+    type: Timestamp
+    displayName:
+      en: Suppressed At
+      ja: 抑制日時
+      vi: Thời điểm chặn
+    description:
+      en: When the suppression took effect. Set at insert time; never updated after.
+      ja: サプレッションが有効になった時刻。挿入時に設定し、その後は更新しない。
+      vi: Khi suppression có hiệu lực. Set lúc insert; không update sau đó.
+
+  un_suppressed_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Un-Suppressed At
+      ja: 抑制解除日時
+      vi: Bỏ chặn
+    description:
+      en: "When the admin removed the suppression (`DELETE /email-suppressions/{id}`). Writes here rather than deleting the row so the audit trail survives. EmailChannel ignores rows where this is non-null — they're effectively un-suppressed but the history is preserved for diagnostics."
+      ja: "管理者がサプレッションを解除した時刻（`DELETE /email-suppressions/{id}`）。行を削除する代わりにここに書き込み、監査証跡を保持。EmailChannel はこれが non-null の行を無視する — 事実上サプレッション解除されているが、診断のために履歴は保存される。"
+      vi: "Khi admin gỡ suppression (`DELETE /email-suppressions/{id}`). Ghi vào đây thay vì xoá row để giữ audit trail. EmailChannel ignore row có cột này non-null — đã được bỏ chặn nhưng history vẫn còn để diagnostics."

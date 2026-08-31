@@ -1,0 +1,185 @@
+# Device schema
+# Một thiết bị terminal đã đăng ký (tablet, kiosk, etc.).
+# Admin tạo device, hệ thống sinh pairing_code (6 ký tự, short-lived).
+# TMS app quét QR chứa pairing_code → gọi API pair → nhận device_token.
+# Sau khi pair, device dùng device_token để gọi API (thay vì user token).
+#
+# Scope: Branch. Mỗi device gắn với 1 branch cụ thể.
+#
+# Business Rules:
+#   - BR-D01: pairing_code unique globally, 6 ký tự uppercase alphanumeric,
+#             hết hạn sau 15 phút. Regen khi hết hạn hoặc khi admin request.
+#   - BR-D02: device_token unique globally, 64-char URL-safe base62.
+#             Chỉ được set sau khi pair thành công. Nullable trước khi pair.
+#   - BR-D03: Sau khi pair (status → active), pairing_code bị clear.
+#   - BR-D04: Revoke device → clear device_token, set status = revoked.
+#   - BR-D05: Device inactive/revoked không thể gọi API (middleware check).
+#   - BR-D06: name unique per branch (hiển thị friendly).
+#   - BR-D07: paired_at ghi nhận thời điểm pair thành công.
+
+displayName:
+  en: Device
+  ja: デバイス
+  vi: Thiết bị
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  audit:
+    createdBy: true
+    updatedBy: true
+  indexes:
+    - columns: [pairing_code]
+      unique: true
+    - columns: [device_token]
+      unique: true
+    - columns: [branch_id, name]
+      unique: true
+    - columns: [branch_id, status]
+    - columns: [branch_id, type]
+    - columns: [organization_id]
+
+properties:
+  name:
+    type: String
+    length: 255
+    displayName:
+      en: Device Name
+      ja: デバイス名
+      vi: Tên thiết bị
+    description:
+      en: "Friendly name, unique per branch (BR-D06). Example: TMS-Reception, TMS-Floor2."
+      ja: "表示名。店舗内で一意（BR-D06）。例：TMS-受付、TMS-2F。"
+      vi: "Tên hiển thị, unique trong shop (BR-D06). Ví dụ: TMS-Quầy, TMS-Tầng2."
+
+  type:
+    type: EnumRef
+    enum: DeviceType
+    default: tms
+    displayName:
+      en: Device Type
+      ja: デバイスタイプ
+      vi: Loại thiết bị
+    description:
+      en: "Determines API scope after pairing."
+      ja: "ペアリング後のAPIスコープを決定。"
+      vi: "Quyết định scope API sau khi pair."
+
+  status:
+    type: EnumRef
+    enum: DeviceStatus
+    default: pending_activation
+    displayName:
+      en: Status
+      ja: 状態
+      vi: Trạng thái
+
+  pairing_code:
+    type: String
+    length: 6
+    nullable: true
+    displayName:
+      en: Pairing Code
+      ja: ペアリングコード
+      vi: Mã ghép nối
+    description:
+      en: "6-char uppercase alphanumeric. Short-lived (15 min). Cleared after successful pair (BR-D01, BR-D03)."
+      ja: "大文字英数字6文字。有効期限15分。ペアリング成功後にクリア（BR-D01、BR-D03）。"
+      vi: "6 ký tự chữ hoa + số. Hết hạn 15 phút. Xoá sau khi pair thành công (BR-D01, BR-D03)."
+
+  pairing_expires_at:
+    type: DateTime
+    nullable: true
+    displayName:
+      en: Pairing Expires At
+      ja: ペアリング有効期限
+      vi: Hạn ghép nối
+    description:
+      en: "Timestamp when pairing_code expires. Null after pair."
+      ja: "pairing_codeの有効期限。ペアリング後はnull。"
+      vi: "Thời điểm pairing_code hết hạn. Null sau khi pair."
+
+  device_token:
+    type: String
+    length: 64
+    nullable: true
+    displayName:
+      en: Device Token
+      ja: デバイストークン
+      vi: Token thiết bị
+    description:
+      en: "Long-lived auth token. Set on pair, cleared on revoke (BR-D02, BR-D04). Never expose in list endpoints."
+      ja: "長期認証トークン。ペアリング時にセット、取消時にクリア（BR-D02、BR-D04）。一覧APIには含めない。"
+      vi: "Token auth dài hạn. Set khi pair, xoá khi revoke (BR-D02, BR-D04). Không expose trong list API."
+
+  paired_at:
+    type: DateTime
+    nullable: true
+    displayName:
+      en: Paired At
+      ja: ペアリング日時
+      vi: Thời điểm ghép nối
+    description:
+      en: "Timestamp of successful pairing (BR-D07)."
+      ja: "ペアリング成功日時（BR-D07）。"
+      vi: "Thời điểm pair thành công (BR-D07)."
+
+  last_seen_at:
+    type: DateTime
+    nullable: true
+    displayName:
+      en: Last Seen At
+      ja: 最終通信日時
+      vi: Lần hoạt động cuối
+    description:
+      en: "Updated on each API call from device. Used for heartbeat monitoring."
+      ja: "デバイスからのAPI呼び出しごとに更新。ハートビート監視に使用。"
+      vi: "Cập nhật mỗi lần device gọi API. Dùng để monitor heartbeat."
+
+  device_info:
+    type: Json
+    nullable: true
+    displayName:
+      en: Device Info
+      ja: デバイス情報
+      vi: Thông tin thiết bị
+    description:
+      en: "Hardware/OS metadata reported by device on pair. Example: {os: 'iOS 18', model: 'iPad Pro 13', app_version: '0.1.0'}."
+      ja: "ペアリング時にデバイスから報告されるハード/OS情報。"
+      vi: "Metadata phần cứng/OS do device gửi khi pair."
+
+  notes:
+    type: Text
+    nullable: true
+    displayName:
+      en: Notes
+      ja: メモ
+      vi: Ghi chú
+
+  # Relationships
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    onDelete: CASCADE
+    displayName:
+      en: Branch
+      ja: 店舗
+      vi: Chi nhánh
+    description:
+      en: "Device is scoped to a specific branch."
+      ja: "デバイスは特定の店舗にスコープ。"
+      vi: "Thiết bị gắn với 1 chi nhánh cụ thể."

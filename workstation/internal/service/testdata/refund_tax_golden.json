@@ -1,0 +1,193 @@
+{
+  "_comment": "#2133 — hợp đồng LIÊN REPO cho thuế của khoản HOÀN TỪNG PHẦN. #2288: thêm ca CÓ GIẢM GIÁ (stamped_tax_total ≠ tax_total gross basis). Bản sinh đôi: workstation/internal/service/testdata/refund_tax_golden.json — hai file phải GIỐNG TỪNG BYTE (cổng #2089). PHP đọc ở tests/Feature/Tax/RefundTaxGoldenParityTest.php, Go ở internal/service/refund_tax_golden_test.go. Luật: mỗi lần hoàn nhận HIỆU của hai mốc luỹ kế ĐÃ LÀM TRÒN, không làm tròn từng lần. Làm tròn trên TRỊ TUYỆT ĐỐI rồi mới đảo dấu (#2117 — half-up bất đối xứng qua 0). refund_taxes là số DƯƠNG (phần thuế của lần hoàn đó); phía gọi tự đảo dấu.",
+  "cases": [
+    {
+      "name": "three-of-three-jpy-step1",
+      "why": "Ca của chính #2133: thu 302, hoàn ba lần 1 món. Làm tròn từng lần ra 101+101+101=303 — trả DƯ 1.",
+      "tax_total": 302,
+      "original_qty": 3,
+      "tax_step": 1,
+      "tax_mode": "round",
+      "refunds": [
+        1,
+        1,
+        1
+      ],
+      "refund_taxes": [
+        101,
+        100,
+        101
+      ],
+      "sum_refund_tax": 302
+    },
+    {
+      "name": "two-then-one-jpy-step1",
+      "why": "Cùng dòng, chia khác. Σ phải KHÔNG đổi — đó là tính chất, không phải trùng hợp.",
+      "tax_total": 302,
+      "original_qty": 3,
+      "tax_step": 1,
+      "tax_mode": "round",
+      "refunds": [
+        2,
+        1
+      ],
+      "refund_taxes": [
+        201,
+        101
+      ],
+      "sum_refund_tax": 302
+    },
+    {
+      "name": "one-then-two-jpy-step1",
+      "why": "Chia ngược lại.",
+      "tax_total": 302,
+      "original_qty": 3,
+      "tax_step": 1,
+      "tax_mode": "round",
+      "refunds": [
+        1,
+        2
+      ],
+      "refund_taxes": [
+        101,
+        201
+      ],
+      "sum_refund_tax": 302
+    },
+    {
+      "name": "full-line-single-shot",
+      "why": "Hoàn TRỌN một lần phải đảo đúng ảnh chụp — hành vi cũ không được đổi.",
+      "tax_total": 302,
+      "original_qty": 3,
+      "tax_step": 1,
+      "tax_mode": "round",
+      "refunds": [
+        3
+      ],
+      "refund_taxes": [
+        302
+      ],
+      "sum_refund_tax": 302
+    },
+    {
+      "name": "half-boundary-away-from-zero",
+      "why": "#2117: 201×1/2 = 100,5 đúng biên. Phải ra 101 (RA XA 0), không phải 100.",
+      "tax_total": 201,
+      "original_qty": 2,
+      "tax_step": 1,
+      "tax_mode": "round",
+      "refunds": [
+        1
+      ],
+      "refund_taxes": [
+        101
+      ],
+      "sum_refund_tax": 101
+    },
+    {
+      "name": "nine-units-coarsest",
+      "why": "Thô nhất: bước 1 trên tổng thuế 11 — mỗi lần hoàn chỉ ~1,22.",
+      "tax_total": 11,
+      "original_qty": 9,
+      "tax_step": 1,
+      "tax_mode": "round",
+      "refunds": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "refund_taxes": [
+        1,
+        1,
+        2,
+        1,
+        1,
+        1,
+        2,
+        1,
+        1
+      ],
+      "sum_refund_tax": 11
+    },
+    {
+      "name": "seven-units-jpy",
+      "why": "233 chia 7 — không mốc nào tròn.",
+      "tax_total": 233,
+      "original_qty": 7,
+      "tax_step": 1,
+      "tax_mode": "round",
+      "refunds": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "refund_taxes": [
+        33,
+        34,
+        33,
+        33,
+        33,
+        34,
+        33
+      ],
+      "sum_refund_tax": 233
+    },
+    {
+      "name": "partial-stop-midway",
+      "why": "Dừng giữa chừng: lệch tối đa của một dòng hoàn dở là NỬA BƯỚC, đúng biên lý thuyết.",
+      "tax_total": 302,
+      "original_qty": 3,
+      "tax_step": 1,
+      "tax_mode": "round",
+      "refunds": [
+        1
+      ],
+      "refund_taxes": [
+        101
+      ],
+      "sum_refund_tax": 101
+    },
+    {
+      "name": "coupon-two-lines-gross-not-stamped",
+      "why": "#2182/#2232: 2×¥1.000 @10%, coupon ¥500. Thuế dòng SỐNG sau pro-rata = 75; hoàn phải dùng GROSS 100 (allocateLineTaxes discount=0), không ảnh chụp net.",
+      "tax_total": 100,
+      "stamped_tax_total": 75,
+      "original_qty": 1,
+      "tax_step": 1,
+      "tax_mode": "round",
+      "refunds": [
+        1
+      ],
+      "refund_taxes": [
+        100
+      ],
+      "sum_refund_tax": 100
+    },
+    {
+      "name": "manual-discount-gross-not-stamped",
+      "why": "#2182/#2190: 2×¥1.000 @10%, chiết khấu tay ¥300 (kẹp trên giỏ sống). Thuế dòng stamp = 85; hoàn dùng GROSS 100.",
+      "tax_total": 100,
+      "stamped_tax_total": 85,
+      "original_qty": 1,
+      "tax_step": 1,
+      "tax_mode": "round",
+      "refunds": [
+        1
+      ],
+      "refund_taxes": [
+        100
+      ],
+      "sum_refund_tax": 100
+    }
+  ]
+}

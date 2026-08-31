@@ -1,0 +1,28 @@
+# Normalized attempt state machine from plan-047/STATE-MACHINES.md. Provider raw states are
+# stored separately and cannot introduce additional normalized states.
+kind: enum
+
+displayName:
+  en: Payment Attempt State
+  ja: 決済試行ステータス
+  vi: Trạng thái lần thử thanh toán
+
+values:
+  - value: prepared
+    label: { en: Prepared, ja: 準備済み, vi: Đã chuẩn bị }
+  - value: provider_pending
+    label: { en: Provider Pending, ja: プロバイダー待ち, vi: Chờ nhà cung cấp }
+  - value: action_required
+    label: { en: Action Required, ja: 操作が必要, vi: Cần thao tác }
+  - value: processing
+    label: { en: Processing, ja: 処理中, vi: Đang xử lý }
+  - value: reconciliation_required
+    label: { en: Reconciliation Required, ja: 照合が必要, vi: Cần đối soát }
+  - value: succeeded
+    label: { en: Succeeded, ja: 成功, vi: Thành công }
+  - value: failed
+    label: { en: Failed, ja: 失敗, vi: Thất bại }
+  - value: canceled
+    label: { en: Canceled, ja: 取消済み, vi: Đã huỷ }
+  - value: expired
+    label: { en: Expired, ja: 期限切れ, vi: Hết hạn }

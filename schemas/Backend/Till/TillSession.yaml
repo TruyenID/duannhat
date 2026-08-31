@@ -1,0 +1,597 @@
+# ==============================================================================
+# TillSession — One cashier shift (open → close cycle)
+# ==============================================================================
+#
+# Plan 030 — Cashier Shift.
+# ARTS ODM 7.3: maps to ARTS `WorkstationPeriodStart/End` + operating period.
+#
+# Một TillSession = một "ca" (open → settled hoặc abandoned). Vòng đời:
+#
+#   open ──► closing ──► settled
+#     │         │
+#     └─────────┴──────► abandoned (xem TillSessionStatus enum)
+#
+# Mọi OrderPayment tạo trong khoảng "open" được dán till_session_id của
+# session này — đây là cách per-shift revenue split hoạt động (Decision 2:
+# stamp, không phải time-window).
+#
+# Written by: TillSessionService::{open,saveDraft,close,abandon,recordCashEvent}
+#             qua DB::transaction + lockForUpdate(Till row).
+# Read by: TillSessionController, ResolveOpenTillSession middleware,
+#          reconciliation queries.
+#
+# Business Rules:
+#   - BR-TS01: session_code auto-generated SHIFT-YYYYMMDD-NNN unique.
+#   - BR-TS02: Tại một thời điểm, TỐI ĐA 1 session/till có status IN
+#              ('open','closing'). Enforced bằng Till.current_session_id +
+#              lockForUpdate.
+#   - BR-TS03: NO soft delete — audit trail bất biến (mirror StockCount).
+#   - BR-TS04: status transition chỉ qua service; controller không set trực tiếp.
+#   - BR-TS05: opener_name nullable. Required khi opened_by_id null (cashier
+#              mở "trên danh nghĩa" người không có trong user list — option
+#              "Khác…" trên form).
+#   - BR-TS06: abandon cashier-driven chỉ cho phép khi chưa có OrderPayment
+#              (nếu có → 409 SHIFT_HAS_PAYMENTS, đi đường close). Plan-032
+#              MANAGER force-abandon BYPASSES this guard và set
+#              force_abandoned=true + force_abandoned_by_id + reason fields.
+#   - BR-TS07: settled = bất biến. Không có route reopen.
+#   - BR-TS08 (plan-032): expired = system-driven terminal status. Scheduler
+#              flips open/closing → expired khi opened_at quá threshold AND
+#              không có recent payment activity. closed_by_id stays NULL
+#              (system, no human). Manager có thể chuyển expired → settled
+#              qua manual-settle (đường duy nhất ra khỏi expired).
+#   - BR-TS09 (plan-032): mọi đường exit (force-abandon / expire / manual-settle)
+#              đều release Till.current_session_id để unblock cashier kế tiếp
+#              và plan-031 currency guard.
+# ==============================================================================
+
+displayName:
+  en: Till Session
+  ja: レジセッション
+  vi: Ca thu ngân
+
+kind: object
+
+options:
+  timestamps: true
+  id: Uuid
+  indexes:
+    - columns: [session_code]
+      unique: true
+      name: till_sessions_code_unique
+    - columns: [branch_id, status]
+    - columns: [till_id, status]
+    - columns: [business_date]
+    - columns: [organization_id, business_date]
+    # Plan-032 indexes:
+    # - (status, opened_at): scheduler scan `WHERE status IN ('open','closing')
+    #   AND opened_at < threshold`; admin-web stale list `WHERE status='open'`
+    #   ordered by opened_at asc. Without this, hourly scheduler does a full
+    #   table scan.
+    - columns: [status, opened_at]
+    # - (force_abandoned_by_id): dashboard "Force-abandon hoạt động" widget
+    #   groups by manager. T5.5d fraud-signal cron also joins on this.
+    - columns: [force_abandoned_by_id]
+    # - (expired_at): stale-list `filter=expired` query orders by
+    #   expired_at desc for newest-first display.
+    - columns: [expired_at]
+    # Plan-046 indexes (chain-of-shifts):
+    # - (chain_id, chain_sequence): chainSummary loads a chain's members
+    #   ordered by sequence (`WHERE chain_id=? ORDER BY chain_sequence`);
+    #   R1 continuation resolves the prior terminal session per chain.
+    - columns: [chain_id, chain_sequence]
+    # - (branch_id, chain_id): branch-scoped chain summary lookup + the
+    #   404-cross-branch guard (ensureShopMatch) filters on branch_id.
+    - columns: [branch_id, chain_id]
+  service: {}
+
+properties:
+  session_code:
+    # Auto: SHIFT-YYYYMMDD-NNN (NNN = sequence trong ngày).
+    type: String
+    length: 50
+    searchable: true
+    lookupable: true
+    displayName:
+      en: Session Code
+      ja: セッションコード
+      vi: Mã ca
+
+  status:
+    # Workflow trạng thái. Xem TillSessionStatus enum.
+    type: EnumRef
+    enum: TillSessionStatus
+    default: open
+    filterable: true
+    displayName:
+      en: Status
+      ja: ステータス
+      vi: Trạng thái
+
+  business_date:
+    # Ngày kinh doanh của ca (có thể khác với opened_at.date khi ca đêm vắt
+    # qua nửa đêm — service quyết định gán theo policy của shop). Date,
+    # không time.
+    type: Date
+    displayName:
+      en: Business Date
+      ja: 営業日
+      vi: Ngày kinh doanh
+
+  default_currency_code:
+    # Currency snapshot từ Till tại thời điểm open. Không đổi sau open
+    # (Decision 6: one currency per shift v1).
+    type: String
+    length: 3
+    default: JPY
+    displayName:
+      en: Currency
+      ja: 通貨
+      vi: Tiền tệ
+
+  prices_include_tax_at_open:
+    # (plan-043) Tax-mode snapshot từ ShopOrderSetting.prices_include_tax
+    # tại thời điểm open — đúng pattern default_currency_code ở trên.
+    # Nullable: session cũ trước plan-043 không có giá trị. Guard 409
+    # TAX_MODE_CHANGE_BLOCKED_OPEN_SHIFT đã chặn flip flag khi còn ca mở
+    # nên trong 1 ca mode luôn nhất quán — cột này giúp báo cáo ca
+    # tự-chứa, không phải join ngược về settings hiện tại.
+    type: Boolean
+    nullable: true
+    displayName:
+      en: Prices Include Tax (at open)
+      ja: 税込価格（開始時）
+      vi: Giá gồm thuế (lúc mở ca)
+
+  opening_float_amount:
+    # Cache của Σ(value × qty) của tất cả TillCashDenominationCount(opening).
+    # Service set tại open(); không sửa sau đó. Dùng cho reconciliation
+    # mà không phải JOIN lại denomination counts.
+    type: Decimal
+    precision: 15
+    scale: 2
+    default: 0
+    displayName:
+      en: Opening Float
+      ja: 開始金
+      vi: Quỹ đầu ca
+
+  expected_cash_amount:
+    # Tính tại close(): opening_float + cash_sales + Σ paid_in − Σ paid_out.
+    # Nullable cho đến khi close. Persisted để audit (không tính lại từ
+    # payments sau khi close, phòng khi PaymentService backfill).
+    type: Decimal
+    precision: 15
+    scale: 2
+    nullable: true
+    displayName:
+      en: Expected Cash
+      ja: 予定現金
+      vi: Tiền mặt dự kiến
+
+  counted_cash_amount:
+    # Σ(value × qty) của TillCashDenominationCount(closing). Service set
+    # tại close().
+    type: Decimal
+    precision: 15
+    scale: 2
+    nullable: true
+    displayName:
+      en: Counted Cash
+      ja: 実査現金
+      vi: Tiền mặt đã đếm
+
+  cash_variance_amount:
+    # counted_cash_amount − expected_cash_amount (signed: <0 short, >0 over).
+    # Service set tại close().
+    type: Decimal
+    precision: 15
+    scale: 2
+    nullable: true
+    displayName:
+      en: Cash Variance
+      ja: 現金差額
+      vi: Sai số tiền mặt
+
+  closing_cash_adjustment_amount:
+    # "Tiền lẻ / điều chỉnh" khi kết ca — phần tiền mặt KHÔNG biểu diễn được
+    # bằng tổ hợp mệnh giá (vd lẻ dưới mệnh giá nhỏ nhất). Cashier nhập tay ở
+    # màn kết ca; service CỘNG vào counted cash:
+    #   counted_cash_amount = Σ(denomination closing) + closing_cash_adjustment_amount
+    # Non-negative, additive. Null/0 = không có phần lẻ. Set tại saveDraft()/close().
+    type: Decimal
+    precision: 15
+    scale: 2
+    nullable: true
+    displayName:
+      en: Closing Cash Adjustment
+      ja: 締め現金端数調整
+      vi: Tiền lẻ kết ca
+
+  # ===========================================================================
+  # Issue #552 — recognized-revenue snapshot (frozen at settle)
+  # ===========================================================================
+  # Tính tại close()/settleFromWorkstation()/manualSettle() từ reconcile()
+  # (Σ customer_orders behind succeeded|refunded payments dán till_session_id
+  # của ca này). Nullable cho tới khi chốt: reconcile() đọc frozen khi != null,
+  # else tính live. Bất biến hoá Z-report — một payment PENDING confirm sau khi
+  # ca đã settled (không còn ca nào mở) không thể retro-grow gross của ca đã
+  # chốt nữa (song hành với việc confirm() detach till_session_id). Đúng pattern
+  # expected_cash_amount ở trên (persist để audit, không tính lại sau close).
+  settled_gross_amount:
+    # Σ total_amount của các đơn ghi nhận trong ca (trước refund outflow).
+    type: Decimal
+    precision: 15
+    scale: 2
+    nullable: true
+    displayName:
+      en: Settled Gross Revenue
+      ja: 確定総売上
+      vi: Doanh thu gộp đã chốt
+
+  settled_net_amount:
+    # Σ (total_amount − tax_amount) — doanh thu thuần (chưa gồm thuế).
+    type: Decimal
+    precision: 15
+    scale: 2
+    nullable: true
+    displayName:
+      en: Settled Net Revenue
+      ja: 確定純売上
+      vi: Doanh thu thuần đã chốt
+
+  settled_tax_amount:
+    # Σ tax_amount của các đơn trong ca.
+    type: Decimal
+    precision: 15
+    scale: 2
+    nullable: true
+    displayName:
+      en: Settled Tax
+      ja: 確定消費税
+      vi: Thuế đã chốt
+
+  settled_discount_amount:
+    # Σ discount_amount của các đơn trong ca.
+    type: Decimal
+    precision: 15
+    scale: 2
+    nullable: true
+    displayName:
+      en: Settled Discount
+      ja: 確定値引
+      vi: Chiết khấu đã chốt
+
+  opening_note:
+    # Free-text cashier ghi khi mở ca (lí do thay đổi float, etc.).
+    type: Text
+    nullable: true
+    displayName:
+      en: Opening Note
+      ja: 開始メモ
+      vi: Ghi chú đầu ca
+
+  closing_note:
+    # Free-text cashier ghi khi kết ca.
+    type: Text
+    nullable: true
+    displayName:
+      en: Closing Note
+      ja: 締めメモ
+      vi: Ghi chú cuối ca
+
+  opened_by_id:
+    # SSO user id (user_caches.id) — cashier mở ca. Soft FK (no hard FK,
+    # mirrors StockCount.created_by_id pattern). Nullable: kết hợp với
+    # opener_name = "Khác…" cho phép cashier proxy mở ca trên danh nghĩa
+    # người khác.
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Opened By
+      ja: 開いたユーザー
+      vi: Người mở ca
+
+  closed_by_id:
+    # SSO user id — cashier chốt ca. Null cho tới khi close/abandon.
+    # Abandon vẫn set (audit ai huỷ).
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Closed By
+      ja: 締めたユーザー
+      vi: Người kết ca
+
+  opener_name:
+    # Free-text "open on behalf" name. Bắt buộc khi opened_by_id null
+    # (option "Khác… ／ その他" trên form mở ca — port trực tiếp từ HTML
+    # prototype). Validation tại form request.
+    type: String
+    length: 255
+    nullable: true
+    displayName:
+      en: Opener Name
+      ja: 開設者名
+      vi: Tên người mở (tự do)
+
+  opened_at:
+    # Timestamp khi POST /pos/till/sessions thành công.
+    type: Timestamp
+    displayName:
+      en: Opened At
+      ja: 開設日時
+      vi: Thời điểm mở
+
+  closed_at:
+    # Timestamp khi POST …/close thành công. Null trong khi open/closing/abandoned.
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Closed At
+      ja: 締め日時
+      vi: Thời điểm kết ca
+
+  abandoned_at:
+    # Timestamp khi POST …/abandon thành công. Tách rời closed_at để query
+    # "abandoned" sessions không lẫn với "settled".
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Abandoned At
+      ja: 取消日時
+      vi: Thời điểm huỷ
+
+  abandon_reason:
+    # Lý do huỷ (vd: "mở nhầm tài khoản"). Optional khi abandon nhưng nên
+    # khuyến khích nhập (UI required nếu shop policy).
+    type: Text
+    nullable: true
+    displayName:
+      en: Abandon Reason
+      ja: 取消理由
+      vi: Lý do huỷ
+
+  # ===========================================================================
+  # Plan-032 fields — manager force-abandon
+  # ===========================================================================
+
+  force_abandoned:
+    # Discriminator: true ⇔ TillSessionService::forceAbandon() flipped this
+    # session to abandoned (not cashier-driven abandon). Lets reports filter
+    # `force_abandoned=true` cheaply for cashier-discipline KPIs and HR review.
+    # Set by service ONLY — never by user input. Default false so existing
+    # rows are correctly classified as cashier-driven post-migration.
+    type: Boolean
+    default: false
+    filterable: true
+    displayName:
+      en: Force Abandoned
+      ja: 強制終了
+      vi: Bị huỷ cưỡng chế
+
+  force_abandoned_by_id:
+    # SSO user_caches.id of the manager who invoked force-abandon. Soft FK
+    # (mirrors opened_by_id / closed_by_id pattern). Null when this row is
+    # NOT a force-abandon (force_abandoned=false). Indexed (see options.indexes)
+    # to support the per-manager activity dashboard widget (T5.5c).
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Force Abandoned By
+      ja: 強制終了したユーザー
+      vi: Manager huỷ cưỡng chế
+
+  force_abandon_reason_code:
+    # Categorical reason for force-abandon (Decision 8 dual-field). Required
+    # in the FormRequest when force-abandon is invoked; null on rows that
+    # weren't force-abandoned. See ForceAbandonReasonCode enum for value
+    # meanings.
+    type: EnumRef
+    enum: ForceAbandonReasonCode
+    nullable: true
+    filterable: true
+    displayName:
+      en: Force Abandon Reason Code
+      ja: 強制終了理由コード
+      vi: Mã lý do huỷ cưỡng chế
+
+  force_abandon_reason_detail:
+    # Free-text detail accompanying the reason_code. FormRequest enforces
+    # `required|min:20|max:2000` ONLY when reason_code='other'; optional and
+    # max-2000 for the other 5 codes. Persisted as-is for audit; never
+    # surfaced to cashier role.
+    type: Text
+    nullable: true
+    displayName:
+      en: Force Abandon Reason Detail
+      ja: 強制終了理由詳細
+      vi: Chi tiết lý do huỷ cưỡng chế
+
+  # ===========================================================================
+  # Plan-032 fields — system expire
+  # ===========================================================================
+
+  expired_at:
+    # Timestamp when the scheduler / system flipped this session to expired.
+    # Mutually exclusive with closed_at (settled) and abandoned_at (abandoned).
+    # NEVER set by close() / abandon() / forceAbandon() — only by expire().
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Expired At
+      ja: 期限切れ日時
+      vi: Thời điểm hết hạn
+
+  expire_reason:
+    # Categorical code identifying which system path flipped this session
+    # (no_activity / manual_admin / device_lost_signal). See ExpireReason
+    # enum for value meanings. Always set together with expired_at — both
+    # null on non-expired rows.
+    type: EnumRef
+    enum: ExpireReason
+    nullable: true
+    filterable: true
+    displayName:
+      en: Expire Reason
+      ja: 期限切れ理由
+      vi: Lý do hết hạn
+
+  expire_threshold_hours:
+    # SNAPSHOT of POS_SHIFT_STALE_TIMEOUT_HOURS env-var value at the moment
+    # this row was expired. Decision 9: stored separately from expire_reason
+    # (which is categorical) so changing the env var later doesn't fragment
+    # historical reports — `GROUP BY expire_reason` returns 1 bucket;
+    # `GROUP BY expire_threshold_hours` returns N buckets. Integer (Omnify
+    # doesn't surface SmallInteger as a distinct schema type — Integer is
+    # the canonical signed integer here; realistic range is 1..168 (1 week
+    # max), well under INT range).
+    type: Int
+    nullable: true
+    displayName:
+      en: Expire Threshold Hours
+      ja: 期限切れ閾値（時間）
+      vi: Ngưỡng hết hạn (giờ)
+
+  # ===========================================================================
+  # Plan-046 fields — shift handover / chain-of-shifts (引き継ぎ / 精算)
+  # ===========================================================================
+  # Một "chain" = chuỗi ca liên tiếp trên cùng một Till, nối bằng handover và
+  # kết thúc bằng final close. KHÔNG có bảng riêng — bốn cột dưới đây trên
+  # till_sessions là toàn bộ mô hình.
+  #   [ca1 open] --handover--> [ca1 settled(handover)] --open(continue)-->
+  #   [ca2 open] --final--> [ca2 settled(final)]  = chain CLOSED; open kế = chain mới
+  #
+  # Written by: TillSessionService::{open (chain_id/chain_sequence),
+  #             handover + close (settlement_kind + settlement_snapshot)}.
+  # Read by: chainSummary() (Σ immutable snapshots per rate bucket),
+  #          FormatChainReport (workstation ESC/POS aggregate slip).
+  # R-rules: R1 (continue only via handover), R2 (snapshot write-once),
+  #          R4 (grand total = Σ per-shift snapshot per bucket),
+  #          R5 (abandon/expire/manual-settle end the chain, no settlement_kind),
+  #          R8 (currency/rounding invariant for a chain's whole life).
+
+  chain_id:
+    # Nhóm các ca của một chuỗi. Ca đầu chuỗi sinh mới (Str::uuid) tại open();
+    # ca tiếp-chuỗi (prev.settlement_kind=handover) kế thừa chain_id của prev.
+    # Soft FK dạng Uuid (mirror opened_by_id). Null cho session cũ trước
+    # plan-046 → được coi là chuỗi-một-ca đã hoàn tất (backfill-free).
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Chain ID
+      ja: チェーンID
+      vi: Mã chuỗi ca
+  chain_sequence:
+    # Vị trí 1-based trong chuỗi. open() ca đầu = 1; ca tiếp = prev+1.
+    # Stored as an integer so database-side ordering remains numeric once a
+    # chain grows past nine shifts.
+    type: Int
+    default: 1
+    displayName:
+      en: Chain Sequence
+      ja: チェーン順序
+      vi: Thứ tự trong chuỗi
+  settlement_kind:
+    # Đặt tại settle: `handover` giữ chuỗi mở (mở ca kế tiếp cùng chuỗi),
+    # `final` đóng chuỗi. Null khi open/abandoned/expired — và abandon /
+    # expire / manual-settle KHÔNG set cột này (R5): chỉ handover() và
+    # close()=final set, nên chúng là chain-member; các exit khác kết thúc
+    # chuỗi mà không tham gia aggregate. filterable cho report.
+    type: EnumRef
+    enum: TillSettlementKind
+    nullable: true
+    filterable: true
+    displayName:
+      en: Settlement Kind
+      ja: 精算区分
+      vi: Loại kết ca
+  settlement_snapshot:
+    # Snapshot bất biến chụp tại settle (R2 write-once). HAI nguồn (GAP-1):
+    # cash/tenders/revenue từ reconcile(); per-rate tax_breakdown từ
+    # OrderTaxBreakdownAggregator::forOrders (reconcile chỉ trả 1 tổng
+    # revenue.tax, không tách 8%/10%). chainSummary Σ các snapshot này theo
+    # từng rate bucket — không bao giờ tính lại (tránh double-count + tax drift
+    # khi ca sau refund đơn của ca trước). Cloud là authoritative; workstation
+    # ghi bản provisional rồi adopt bản Cloud qua response sync-UP.
+    type: Json
+    nullable: true
+    displayName:
+      en: Settlement Snapshot
+      ja: 精算スナップショット
+      vi: Ảnh chụp kết ca
+
+  # Relationships
+  till:
+    # ManyToOne — Till mà session này thuộc về. onDelete: CASCADE: nếu Till
+    # bị xoá (hard) thì sessions của nó cũng đi. Soft-delete Till (is_active=false
+    # hoặc trashed) KHÔNG ảnh hưởng.
+    type: Association
+    relation: ManyToOne
+    target: Till
+    onDelete: CASCADE
+    displayName:
+      en: Till
+      ja: レジ
+      vi: Két
+
+  openingCounts:
+    # OneToMany — TillCashDenominationCount(opening) thuộc session này.
+    # Filter logic ở model scope (where count_phase = 'opening').
+    type: Association
+    relation: OneToMany
+    target: TillCashDenominationCount
+    mappedBy: session
+    displayName:
+      en: Opening Counts
+      ja: 開始カウント
+      vi: Đếm đầu ca
+
+  cashEvents:
+    type: Association
+    relation: OneToMany
+    target: TillCashEvent
+    mappedBy: session
+    displayName:
+      en: Cash Events
+      ja: 現金イベント
+      vi: Giao dịch tiền
+
+  settlementDetails:
+    type: Association
+    relation: OneToMany
+    target: TillSettlementTenderDetail
+    mappedBy: session
+    displayName:
+      en: Settlement Details
+      ja: 精算詳細
+      vi: Chi tiết đối soát
+
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    onDelete: CASCADE
+    displayName:
+      en: Branch
+      ja: 店舗
+      vi: Chi nhánh
+
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: CASCADE
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức

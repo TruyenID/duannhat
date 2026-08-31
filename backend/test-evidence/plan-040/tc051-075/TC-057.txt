@@ -1,0 +1,2 @@
+POST empty -> HTTP 422
+{"message":"The Yield Quantity field is required. (and 3 more errors)","errors":{"yield_quantity":["The Yield Quantity field is required."],"calculated_cost":["The Calculated Cost field is required."],"brand_id":["The brand_id field is required."],"ja.name":["The name field is required in at least one language (ja, en, or vi)."]}}

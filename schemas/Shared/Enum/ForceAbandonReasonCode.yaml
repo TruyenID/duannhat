@@ -1,0 +1,93 @@
+# ==============================================================================
+# Force Abandon Reason Code Enum (強制終了理由コード / Mã lý do huỷ ca cưỡng chế)
+# ==============================================================================
+#
+# Plan 032 — Stale Shift Reaper.
+#
+# Categorical reason a manager invokes force-abandon on a stuck TillSession.
+# Stored alongside an optional free-text `force_abandon_reason_detail` on the
+# `till_sessions` table (Decision 8 dual-field model). The CODE is required;
+# the DETAIL is required ONLY when code='other' (FormRequest enforces).
+#
+# Why categorical instead of just free text:
+#   - Auditor 3 months later can answer "tại sao tháng này 47 ca force-abandon"
+#     via `GROUP BY force_abandon_reason_code` instead of grepping freeform
+#     strings (which collapse into noise).
+#   - Pattern detection: if 80% of force-abandons in a branch are
+#     `pos_device_failure`, the hardware fleet has a real problem worth
+#     surfacing to operations — not just "manager keeps abandoning ca".
+#   - Categorical also lets the per-manager fraud-signal alert (T5.5d) be
+#     more meaningful — a manager force-abandoning 6 times in 7 days for
+#     `cashier_forgot_to_close` is benign; same count for `other` warrants
+#     a look.
+#
+# Values:
+#
+#   - cashier_forgot_to_close: Hết ca, đi về, không bấm "Kết ca". Most
+#                              common operational reason. `reason_detail`
+#                              optional.
+#
+#   - cashier_unavailable_today: Bệnh / nghỉ phép / vắng mặt — cashier
+#                                không thể quay lại đóng ca hôm nay.
+#                                `reason_detail` optional.
+#
+#   - pos_device_failure: POS hỏng hóc / mất nguồn — cashier không hoàn
+#                         tất được flow đóng ca. `reason_detail` optional
+#                         (e.g. "máy in lỗi power").
+#
+#   - network_outage: Mạng rớt khiến close không hoàn tất (cashier kẹt ở
+#                     close-page với "Đang xử lý" forever). `reason_detail`
+#                     optional.
+#
+#   - end_of_employment: Cashier thôi việc / sa thải — không thể quay lại
+#                        đóng ca cuối. Phải reconcile bằng manual-settle.
+#                        `reason_detail` optional.
+#
+#   - other: Trường hợp khác chưa map vào 5 code trên. FormRequest enforces
+#            `reason_detail: required|min:20|max:2000` cho trường hợp này
+#            để audit log không trống.
+#
+# Used in:
+#   - TillSession.force_abandon_reason_code
+#   - Audit log payload for `till_session_force_abandoned` events
+#   - Dashboard "Force-abandon hoạt động" widget — bar chart by code
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: 強制終了理由コード
+  en: Force Abandon Reason Code
+  vi: Mã lý do huỷ ca cưỡng chế
+
+values:
+  - value: cashier_forgot_to_close
+    label:
+      ja: レジ係が締め忘れ
+      en: Cashier forgot to close
+      vi: Cashier quên đóng ca
+  - value: cashier_unavailable_today
+    label:
+      ja: レジ係不在
+      en: Cashier unavailable today
+      vi: Cashier không có mặt
+  - value: pos_device_failure
+    label:
+      ja: POS機器障害
+      en: POS device failure
+      vi: Thiết bị POS hỏng
+  - value: network_outage
+    label:
+      ja: ネットワーク障害
+      en: Network outage
+      vi: Mạng bị rớt
+  - value: end_of_employment
+    label:
+      ja: 退職・解雇
+      en: End of employment
+      vi: Cashier thôi việc
+  - value: other
+    label:
+      ja: その他
+      en: Other
+      vi: Khác

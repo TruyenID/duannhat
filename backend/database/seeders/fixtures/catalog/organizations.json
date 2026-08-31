@@ -1,0 +1,14 @@
+[
+    {
+        "id": "019fcffa-3281-710b-b17d-f22b411c278f",
+        "console_organization_id": "cb77c7a3-62b0-54c2-b6dd-091429113b31",
+        "name": "ベト屋フーズ株式会社",
+        "slug": "betoya",
+        "is_active": 1,
+        "settings": null,
+        "operating_country": "JP",
+        "created_at": "2026-08-05 03:31:48",
+        "updated_at": "2026-08-05 03:31:48",
+        "deleted_at": null
+    }
+]

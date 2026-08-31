@@ -1,0 +1,12 @@
+-- 047: customer_locale on orders — the language the guest ordered in.
+--
+-- Cloud stamps `customer_orders.customer_locale` at create from the ordering
+-- surface's Accept-Language (customer-web's app_locale). The pull-DOWN mirrors
+-- it here so the auto-printed dine-in slips (kitchen ticket + hold/runner copy)
+-- render in the CUSTOMER's language. Before this the auto-print path had no
+-- request Accept-Language and fell through to the Vietnamese default label set.
+--
+-- NULL/'' for orders created before this migration and for POS/workstation-
+-- created orders — the print layer then keeps its previous fallback (the last
+-- operator locale, then the built-in default).
+ALTER TABLE orders ADD COLUMN customer_locale TEXT;

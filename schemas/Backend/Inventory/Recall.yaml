@@ -1,0 +1,167 @@
+# Recall schema
+# ============================================================================
+# Plan-017 Tier 1.A — recall execution event. One Recall row per recall
+# initiated. Walks the genealogy graph to compute downstream blast radius,
+# auto-quarantines affected lots, snapshots affected customer_orders.
+#
+# Lifecycle: draft → active → completed | cancelled
+#
+# Workflow:
+#   draft     RecallService::preview returns affected counts; no DB write
+#             beyond a placeholder draft Recall row (caller may persist
+#             this if they want to share the preview with another user).
+#
+#   active    RecallService::initiate flips status → active. In one
+#             DB::transaction:
+#               1. Walk genealogy_links from root_lot_id (forward + backward)
+#               2. Collect every reachable lot_id
+#               3. UPDATE material_lots SET status=quarantined where in set
+#               4. Find every customer_order_id reachable through sales edges
+#               5. INSERT one RecallAffectedOrder row per (recall, order)
+#               6. Stamp affected_lots_count + affected_orders_count
+#
+#   completed RecallService::complete — terminal state. Audit log.
+#
+#   cancelled RecallService::cancel — releases auto-quarantined lots back
+#             to active. Audit log captures the reason.
+#
+# Read by:
+#   - HQ Recall list / detail pages
+#   - generateReport() returns FSMA-204-shaped JSON
+#
+# Written by:
+#   - RecallService::initiate / complete / cancel
+# ============================================================================
+
+displayName:
+  en: Recall
+  ja: リコール
+  vi: Thu hồi
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    - columns: [organization_id, status]
+    - columns: [recall_code]
+      unique: true
+    - columns: [root_lot_id]
+
+properties:
+  recall_code:
+    type: String
+    length: 50
+    # Auto-generated: RC-YYYYMMDD-NNN per organization.
+    displayName:
+      en: Recall Code
+      ja: リコールコード
+      vi: Mã thu hồi
+
+  rootLot:
+    type: Association
+    relation: ManyToOne
+    target: MaterialLot
+    onDelete: RESTRICT
+    displayName:
+      en: Root Lot
+      ja: 根ロット
+      vi: Lô gốc
+
+  scope_type:
+    type: EnumRef
+    enum: RecallScopeType
+    default: lot
+    displayName:
+      en: Scope
+      ja: 範囲
+      vi: Phạm vi
+
+  status:
+    type: EnumRef
+    enum: RecallStatus
+    default: draft
+    displayName:
+      en: Status
+      ja: ステータス
+      vi: Trạng thái
+
+  reason:
+    type: Text
+    # Free-form; required at initiate time. Surfaces on the
+    # FSMA-204 report.
+    displayName:
+      en: Reason
+      ja: 理由
+      vi: Lý do
+
+  affected_lots_count:
+    type: Int
+    default: 0
+    displayName:
+      en: Affected Lots
+      ja: 影響ロット数
+      vi: Số lô ảnh hưởng
+
+  affected_orders_count:
+    type: Int
+    default: 0
+    displayName:
+      en: Affected Orders
+      ja: 影響注文数
+      vi: Số đơn ảnh hưởng
+
+  initiated_by_id:
+    type: Uuid
+    nullable: true
+    # SSO user id; soft FK.
+    displayName:
+      en: Initiated By
+      ja: 開始者
+      vi: Người khởi tạo
+
+  initiated_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Initiated At
+      ja: 開始日時
+      vi: Thời điểm khởi tạo
+
+  completed_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Completed At
+      ja: 完了日時
+      vi: Thời điểm hoàn thành
+
+  cancelled_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Cancelled At
+      ja: キャンセル日時
+      vi: Thời điểm hủy
+
+  cancellation_reason:
+    type: Text
+    nullable: true
+    displayName:
+      en: Cancellation Reason
+      ja: キャンセル理由
+      vi: Lý do hủy
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: CASCADE

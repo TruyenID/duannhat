@@ -1,0 +1,416 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: tempo-app
+    restart: unless-stopped
+    init: true
+    ports:
+      - "5400:8000"
+    volumes:
+      - ./backend:/var/www/html
+      # Tách các thư mục "nóng" ra khỏi bind mount Windows.
+      # Chúng nằm trong named volume nội container -> truy cập I/O nhanh
+      # gấp 10-50x so với bind mount qua WSL2/Hyper-V.
+      - app-vendor:/var/www/html/vendor
+      - app-node_modules:/var/www/html/node_modules
+      - app-storage-framework:/var/www/html/storage/framework
+      - app-bootstrap-cache:/var/www/html/bootstrap/cache
+      # OPcache config: mount trực tiếp từ host -> chỉnh xong chỉ cần
+      # `docker compose up -d` lại, không phải rebuild image.
+      # BẮT BUỘC có file này để PHP CLI server chạy nhanh trên Windows.
+      - ./docker/php/opcache.ini:/usr/local/etc/php/conf.d/opcache.ini:ro
+      - ./docker/php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
+    working_dir: /var/www/html
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment: &app-env
+      APP_NAME: TempoFast
+      APP_ENV: local
+      APP_KEY: base64:hcA1cL3L1pSLgLMHiHnAKS+4fBH0fH87xj3ognr/SyQ=
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:5400
+      FRONTEND_URL: http://localhost:5430
+      # `CONSOLE_URL: https://api.godx.jp/auth-test` ĐÃ GỠ (#2036) — không ai
+      # đọc: `grep -rn CONSOLE_URL` trong toàn repo (kể cả `backend/vendor`,
+      # nơi `dxs/laravel-auth` sống) chỉ ra chính các file compose và docs, zero
+      # `env('CONSOLE_URL')`. Comment cũ mô tả SSO server-to-server đi qua API
+      # gateway, nhưng đường đó thật ra do `SSO_ISSUER` + `SSO_*` bên dưới lo.
+      # Gỡ hẳn thay vì đánh dấu chết: để nguyên thì biến vẫn được tiêm vào
+      # container, và một `env('CONSOLE_URL')` viết sau này sẽ lặng lẽ nhận một
+      # host đã lỗi thời thay vì null.
+      #
+      # OMNIFY_AUTH_MODE thì NGƯỢC LẠI — nó SỐNG, đừng gỡ theo quán tính:
+      # `backend/config/l5-swagger.php:40` đọc `env('OMNIFY_AUTH_MODE', 'console')`
+      # để chọn bộ annotation Swagger (console ↔ standalone).
+      OMNIFY_AUTH_MODE: console
+      PHP_CLI_SERVER_WORKERS: "8"
+      # Shared STAGING IdP — id.famsys.net. Zero-config by design: these are the
+      # fixed credentials seeded by platform's TempoStagingSsoSeeder, so a fresh
+      # clone logs in with `docker compose up -d` and nothing else. They are
+      # deliberately public — the instance is staging-only and authorises
+      # nothing on production, whose client is a separate instance with
+      # generated secrets. Override any of them via the gitignored `.env`.
+      # Instance slug (not service slug): the IdP resolves it to an instance.
+      SSO_ISSUER: ${SSO_ISSUER:-https://id.famsys.net}
+      SSO_SERVICE_SLUG: ${SSO_SERVICE_SLUG:-tempo-staging}
+      SSO_TIMEOUT: "5"
+      SSO_CLIENT_ID: ${SSO_CLIENT_ID:-si_tempo_famsys_staging}
+      SSO_CLIENT_SECRET: ${SSO_CLIENT_SECRET:-tempo-staging-secret}
+      SSO_REDIRECT_URI: ${SSO_REDIRECT_URI:-http://localhost:5430/auth/callback}
+      SSO_ORGANIZATION_CONTEXT_ID: ${SSO_ORGANIZATION_CONTEXT_ID:-}
+      SSO_ALLOW_ORGANIZATION_SWITCHING: "true"
+      # LOCAL-only escape hatch for when the Platform IdP is unreachable (the
+      # container cannot resolve the host's platform.test, and no discovery
+      # document is published on dev-console.godx.jp). With this on, a
+      # `dev:<console_user_id>` bearer for an allowlisted seeded persona
+      # authenticates directly — ReadBearerFromCookie promotes the `token`
+      # cookie, so setting that cookie is a full login.
+      # Defaults OFF: opt in per-developer via the gitignored umbrella `.env`.
+      # AuthenticateSso double-gates it on APP_ENV local/testing, so it can
+      # never take effect in production even if the flag leaks.
+      SSO_DEV_BYPASS: ${SSO_DEV_BYPASS:-false}
+      SSO_DEV_BYPASS_SUBJECTS: ${SSO_DEV_BYPASS_SUBJECTS:-}
+      SESSION_DOMAIN: localhost
+      SESSION_SAME_SITE: lax
+      SESSION_SECURE_COOKIE: "false"
+      # Explicit origins for the three known frontends:
+      #   5430 → admin-web    (Next.js admin dashboard)
+      #   5440 → pos-web      (Vite cashier POS)
+      #   5450 → customer-web (Next.js customer-facing menu)
+      # The regex patterns below still match any localhost/127.0.0.1 port
+      # so `pnpm dev` picking an alternate port (e.g. 5431) keeps working.
+      CORS_ALLOWED_ORIGINS: "http://localhost:5430,http://127.0.0.1:5430,http://localhost:5440,http://127.0.0.1:5440,http://localhost:5450,http://127.0.0.1:5450"
+      # localhost/127.0.0.1 on any port, plus RFC1918 private IPs (#1481): a
+      # workstation serving pos-web at http://<lan-ip>:<port>/pos hits this cloud
+      # backend cross-origin in Cloud mode, so its LAN-IP page origin must be
+      # allowed. Dev only; the API is Bearer-token-gated, so allowing an origin
+      # grants nothing without a valid token. NOTE: the octet quantifier is
+      # written \d\d?\d? (1-3 digits) rather than \d{1,3} on purpose — the config
+      # splits this list on ',', so a comma inside {1,3} would shatter the regex.
+      CORS_ALLOWED_ORIGINS_PATTERNS: "#^https?://localhost(:\\d+)?$#,#^https?://127\\.0\\.0\\.1(:\\d+)?$#,#^https?://192\\.168(\\.\\d\\d?\\d?){2}(:\\d+)?$#,#^https?://10(\\.\\d\\d?\\d?){3}(:\\d+)?$#,#^https?://172\\.(1[6-9]|2\\d|3[01])(\\.\\d\\d?\\d?){2}(:\\d+)?$#"
+      CORS_SUPPORTS_CREDENTIALS: "true"
+      LOG_CHANNEL: stack
+      LOG_LEVEL: debug
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: tempo
+      DB_USERNAME: root
+      DB_PASSWORD: secret
+      SESSION_DRIVER: redis
+      QUEUE_CONNECTION: redis
+      CACHE_STORE: redis
+      REDIS_CLIENT: predis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      # #1208 — was `log`, which only writes to laravel.log. Every broadcast
+      # this stack has ever emitted (order.paid, payment.recorded,
+      # order_item.status_changed …) went into a file and nowhere else, so
+      # realtime has never actually run in dev.
+      BROADCAST_CONNECTION: reverb
+      # Server-side: how the PHP process reaches Reverb, over the compose network.
+      REVERB_APP_ID: ${REVERB_APP_ID:-tempo-local}
+      REVERB_APP_KEY: ${REVERB_APP_KEY:-tempo-local-key}
+      REVERB_APP_SECRET: ${REVERB_APP_SECRET:-tempo-local-secret}
+      REVERB_HOST: reverb
+      REVERB_PORT: 8080
+      REVERB_SCHEME: http
+      # Browser-side: what /me/reverb-config and /device/reverb-config hand to
+      # admin-web and KDS. These MUST be set separately — the controllers fall
+      # back to REVERB_HOST, and "reverb" is a name only containers can resolve,
+      # so without these the browser is told to open a socket to a host that
+      # does not exist for it.
+      REVERB_CLIENT_HOST: ${REVERB_CLIENT_HOST:-localhost}
+      REVERB_CLIENT_PORT: ${REVERB_CLIENT_PORT:-5470}
+      REVERB_CLIENT_SCHEME: ${REVERB_CLIENT_SCHEME:-http}
+      FILESYSTEM_DISK: s3
+      MAIL_MAILER: smtp
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      MAIL_FROM_ADDRESS: hello@tempo.local
+      MAIL_FROM_NAME: TempoFast
+      AWS_ACCESS_KEY_ID: minio
+      AWS_SECRET_ACCESS_KEY: minio123
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_BUCKET: tempo
+      AWS_ENDPOINT: http://minio:9000
+      # AWS_URL overrides the base URL used when generating public file URLs.
+      # Must point to the host-accessible port so the browser can load images.
+      AWS_URL: http://localhost:5490/tempo
+      AWS_USE_PATH_STYLE_ENDPOINT: "true"
+    # Entrypoint dùng marker file để skip heavy ops sau lần đầu start.
+    # `exec` ở dòng cuối → SIGTERM tới thẳng PHP → graceful shutdown nhanh.
+    command: >
+      sh -c '
+      set -e;
+      rm -rf /tmp/opcache/* 2>/dev/null || true;
+      if [ ! -f storage/framework/.initialized ]; then
+        mkdir -p storage/framework/views storage/framework/cache/data storage/framework/sessions storage/framework/testing storage/logs bootstrap/cache;
+        chmod -R 777 storage bootstrap/cache;
+        touch storage/framework/.initialized;
+      fi;
+      if [ ! -f vendor/autoload.php ]; then
+        composer install --no-interaction --prefer-dist;
+        composer dump-autoload -o;
+      fi;
+      php artisan config:clear;
+      php artisan migrate --force --isolated || true;
+      if [ ! -f storage/framework/.seeded ]; then
+        php artisan db:seed --force && touch storage/framework/.seeded;
+      fi;
+      exec php -S 0.0.0.0:8000 -t public
+      '
+    healthcheck:
+      test: ["CMD-SHELL", "php -r \"exit(@file_get_contents('http://127.0.0.1:8000/up') !== false ? 0 : 1);\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  # ── Reverb WebSocket (#1208) ────────────────────────────────────────────
+  # The stack had no reverb service at all, which is why BROADCAST_CONNECTION
+  # was pinned to `log`. compose.local-server.yml already ran one; this is the
+  # same shape, published on 5470 so a browser on the host can reach it.
+  reverb:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: tempo-reverb
+    restart: unless-stopped
+    init: true
+    ports:
+      - "5470:8080"
+    volumes:
+      - ./backend:/var/www/html
+      - app-vendor:/var/www/html/vendor
+      - app-storage-framework:/var/www/html/storage/framework
+      - app-bootstrap-cache:/var/www/html/bootstrap/cache
+    working_dir: /var/www/html
+    depends_on:
+      app:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *app-env
+      REVERB_SERVER_HOST: 0.0.0.0
+      REVERB_SERVER_PORT: 8080
+    command: >
+      sh -c '
+      until [ -f vendor/autoload.php ]; do sleep 1; done;
+      exec php artisan reverb:start --host=0.0.0.0 --port=8080
+      '
+
+  # ── Queue worker (#1208) ────────────────────────────────────────────────
+  # QUEUE_CONNECTION is redis and nothing consumed it. Four events
+  # (OrderItemAdded, OrderEditingStarted/Ended, WorkstationSyncPoke) are plain
+  # `ShouldBroadcast`, so they were queued and then sat there forever — they
+  # only ever worked in compose.local-server.yml because that file uses
+  # QUEUE_CONNECTION: sync. Everything else queued (mail, notifications) was
+  # equally stuck.
+  queue:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: tempo-queue
+    restart: unless-stopped
+    init: true
+    volumes:
+      - ./backend:/var/www/html
+      - app-vendor:/var/www/html/vendor
+      - app-storage-framework:/var/www/html/storage/framework
+      - app-bootstrap-cache:/var/www/html/bootstrap/cache
+    working_dir: /var/www/html
+    depends_on:
+      app:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment: *app-env
+    # --tries=1: a dev worker that silently retries hides the failure you are
+    # trying to see. Restart on code change is manual, same as the PHP server.
+    command: >
+      sh -c '
+      until [ -f vendor/autoload.php ]; do sleep 1; done;
+      exec php artisan queue:work --tries=1 --timeout=90
+      '
+
+  mysql:
+    image: mysql:8.0
+    container_name: tempo-mysql
+    restart: unless-stopped
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: tempo
+    volumes:
+      - mysql-data:/var/lib/mysql
+    # Tune MySQL cho dev: cắt buffer pool, tắt perf_schema → ~470MB → ~140MB.
+    # Vẫn đủ chạy migration + test suite, không ảnh hưởng correctness.
+    command:
+      - mysqld
+      - --innodb-buffer-pool-size=64M
+      - --innodb-log-buffer-size=8M
+      - --innodb-redo-log-capacity=32M
+      - --performance-schema=OFF
+      - --max-connections=64
+      - --table-open-cache=64
+      - --thread-cache-size=4
+      - --tmp-table-size=16M
+      - --max-heap-table-size=16M
+      - --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-psecret"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: tempo-redis
+    restart: unless-stopped
+    command: redis-server --save "" --appendonly no --maxmemory 128mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # phpmyadmin opt-in: chỉ chạy khi gọi `docker compose --profile tools up -d`.
+  # Default `docker compose up -d` skip nó → tiết kiệm 40MB RAM cho dev hằng ngày.
+  # Lý do mailpit + minio KHÔNG profile: app cần nó để gửi mail / upload file
+  # không gãy ở runtime.
+  phpmyadmin:
+    image: phpmyadmin:5
+    container_name: tempo-phpmyadmin
+    restart: unless-stopped
+    profiles: ["tools"]
+    ports:
+      - "5481:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: secret
+      UPLOAD_LIMIT: 256M
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: tempo-mailpit
+    restart: unless-stopped
+    ports:
+      - "5482:8025"  # Web UI only; SMTP nội bộ qua mailpit:1025
+
+  minio:
+    image: minio/minio:latest
+    container_name: tempo-minio
+    restart: unless-stopped
+    ports:
+      - "5490:9000"  # S3 API — used by browser to load uploaded files
+      - "5491:9001"  # Web Console
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+    volumes:
+      - minio-data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Portal: tĩnh, luôn-on. Mở http://localhost:5480 thấy hết link của stack
+  # (admin/customer/pos web, swagger 3 nhóm, mailpit, minio, phpmyadmin).
+  # Sửa link: edit docker/portal/index.html — không cần restart container vì là bind mount.
+  portal:
+    image: nginx:alpine
+    container_name: tempo-portal
+    restart: unless-stopped
+    ports:
+      - "5480:80"
+    volumes:
+      - ./docker/portal:/usr/share/nginx/html:ro
+
+  # One-shot init container: creates the `tempo` bucket and makes it public
+  # so `<img src="http://localhost:5490/tempo/...">` loads from the browser.
+  # Runs once on `docker compose up` and exits cleanly.
+  minio-init:
+    image: minio/mc:latest
+    container_name: tempo-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set local http://minio:9000 minio minio123;
+      /usr/bin/mc mb --ignore-existing local/tempo;
+      /usr/bin/mc anonymous set download local/tempo;
+      exit 0;
+      "
+
+  # Admin web (Next.js) opt-in: chỉ chạy khi `docker compose --profile admin-web up -d`.
+  # Lý do KHÔNG bật mặc định: HMR của Next qua bind mount Windows/WSL2 cần
+  # WATCHPACK_POLLING → CPU thrash + hot-reload laggy. Khuyến nghị `npm run dev`
+  # native trên host. Profile này dành cho ai không muốn cài Node trên host
+  # (Windows newbie, demo, QA smoke test).
+  admin-web:
+    profiles: ["admin-web"]
+    build:
+      context: .
+      dockerfile: docker/admin-web.Dockerfile
+    container_name: tempo-admin-web
+    restart: unless-stopped
+    init: true
+    ports:
+      - "5430:5430"
+    volumes:
+      - ./web/admin:/app
+      # node_modules + .next nằm trong named volume → tránh bind mount Windows.
+      - admin-web-node_modules:/app/node_modules
+      - admin-web-next-cache:/app/.next
+    working_dir: /app
+    environment:
+      NODE_ENV: development
+      # Polling cho file watching qua bind mount; tắt nếu chạy trên Linux/macOS native.
+      WATCHPACK_POLLING: "true"
+      CHOKIDAR_USEPOLLING: "true"
+      NEXT_TELEMETRY_DISABLED: "1"
+      NEXT_PUBLIC_API_URL: http://localhost:5400
+    # Marker file pattern giống backend: lần đầu chạy `npm ci`, lần sau skip.
+    command: >
+      sh -c '
+      set -e;
+      if [ ! -f node_modules/.installed ]; then
+        npm ci --prefer-offline --no-audit --no-fund;
+        touch node_modules/.installed;
+      fi;
+      exec npm run dev
+      '
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O- http://127.0.0.1:3000 >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 90s
+
+volumes:
+  mysql-data:
+  minio-data:
+  app-vendor:
+  app-node_modules:
+  app-storage-framework:
+  app-bootstrap-cache:
+  admin-web-node_modules:
+  admin-web-next-cache:
+  redis-data:

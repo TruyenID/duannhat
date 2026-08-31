@@ -1,0 +1,45 @@
+# ==============================================================================
+# Device Status Enum (デバイス状態 / Trạng thái thiết bị)
+# ==============================================================================
+#
+# Trạng thái vòng đời của một thiết bị terminal đã đăng ký.
+#
+# Flow: pending_activation → active ↔ inactive
+#                          → revoked (terminal)
+#
+# Giá trị:
+#   - pending_activation: Mới tạo, chưa được pair. Hiển thị QR/pairing code.
+#   - active: Đã pair thành công, đang hoạt động bình thường.
+#   - inactive: Admin tạm vô hiệu. Device không thể gọi API.
+#   - revoked: Thu hồi vĩnh viễn. Device token bị invalidate.
+#
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: デバイス状態
+  en: Device Status
+  vi: Trạng thái thiết bị
+
+values:
+  - value: pending_activation
+    label:
+      ja: アクティベーション待ち
+      en: Pending Activation
+      vi: Chờ kích hoạt
+  - value: active
+    label:
+      ja: 有効
+      en: Active
+      vi: Hoạt động
+  - value: inactive
+    label:
+      ja: 無効
+      en: Inactive
+      vi: Tạm ngưng
+  - value: revoked
+    label:
+      ja: 取消済み
+      en: Revoked
+      vi: Đã thu hồi

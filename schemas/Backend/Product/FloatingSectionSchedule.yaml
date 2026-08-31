@@ -1,0 +1,136 @@
+# =============================================================================
+# FloatingSectionSchedule (フローティングセクションスケジュール / Lịch trình khung giờ ưu đãi)
+# =============================================================================
+#
+# One FloatingSection → many schedule windows. Same shape and semantics as
+# MenuSchedule (see schemas/Backend/Product/MenuSchedule.yaml), just parented
+# to a FloatingSection instead of a Menu.
+#
+# masterSchedule is a self-referential link — null on HQ master rows, set on
+# a branch clone's own row (see FloatingSectionService::cloneToBranch /
+# syncFromMaster). The branch's row is a full independent copy it can
+# override (see is_time_overridden below), not a pointer read through the
+# master.
+#
+# =============================================================================
+
+displayName:
+  en: Floating Section Schedule
+  ja: フローティングセクションスケジュール
+  vi: Lịch trình khung giờ ưu đãi
+
+kind: object
+
+options:
+  service: false
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    - columns: [floating_section_id, is_active]
+    - columns: [days_of_week, start_time, end_time]
+
+properties:
+  start_time:
+    type: Time
+    displayName:
+      en: Start Time
+      ja: 開始時刻
+      vi: Giờ bắt đầu
+
+  end_time:
+    type: Time
+    displayName:
+      en: End Time
+      ja: 終了時刻
+      vi: Giờ kết thúc
+
+  start_date:
+    type: Date
+    nullable: true
+    displayName:
+      en: Start Date
+      ja: 開始日
+      vi: Ngày bắt đầu
+
+  end_date:
+    type: Date
+    nullable: true
+    displayName:
+      en: End Date
+      ja: 終了日
+      vi: Ngày kết thúc
+
+  days_of_week:
+    type: TinyInt
+    displayName:
+      en: Days of Week
+      ja: 曜日
+      vi: Ngày trong tuần
+    description:
+      en: Bitmask, bit0=Sun...bit6=Sat. Same encoding as menu_schedules.days_of_week.
+      ja: ビットマスク、bit0=日...bit6=土。menu_schedules.days_of_weekと同じエンコーディング。
+      vi: Bitmask, bit0=CN...bit6=T7. Cùng encoding với menu_schedules.days_of_week.
+
+  is_active:
+    type: Boolean
+    default: true
+    filterable: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+
+  # Shop can override start_time/end_time/days_of_week on its own clone row
+  # without a separate override table (unlike Menu's BranchScheduleOverride)
+  # — a floating section clone already owns its schedule row outright. This
+  # flag just tells syncFromMaster() to stop pulling HQ's timing down once
+  # the shop has customized it, mirroring is_price_overridden's semantics.
+  is_time_overridden:
+    type: Boolean
+    default: false
+    displayName:
+      en: Time Overridden
+      ja: 時間上書き済み
+      vi: Đã ghi đè giờ
+
+  priority:
+    type: Int
+    default: 0
+    sortable: true
+    displayName:
+      en: Priority
+      ja: 優先度
+      vi: Độ ưu tiên
+
+  created_by_id:
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Created By
+      ja: 作成者
+      vi: Người tạo
+
+  floatingSection:
+    type: Association
+    relation: ManyToOne
+    target: FloatingSection
+    onDelete: CASCADE
+    displayName:
+      en: Floating Section
+      ja: フローティングセクション
+      vi: Khung giờ ưu đãi
+
+  # Reserved for a future iteration (branch-level clone tracking) — unused
+  # by Iteration 1's HQ-only screens. Kept so the column exists now and no
+  # extra migration is needed when that iteration ships.
+  masterSchedule:
+    type: Association
+    relation: ManyToOne
+    target: FloatingSectionSchedule
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Master Schedule
+      ja: マスタースケジュール
+      vi: Lịch gốc (HQ)

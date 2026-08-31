@@ -1,0 +1,2 @@
+unitcreate -> HTTP 201
+{"data":{"id":"019f1259-c592-707e-afc7-f9b61e2d8ae2","material_id":"019f1163-d040-729e-9cb3-e1dec8537abb","unit":"pallet_t100","ratio":"48.0000","is_base":false,"created_at":"2026-06-29T07:48:21.000000Z","updated_at":"2026-06-29T07:48:21.000000Z"}}

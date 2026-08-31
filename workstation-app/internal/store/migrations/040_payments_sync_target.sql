@@ -1,0 +1,25 @@
+-- Payment origin tag for sync-UP recovery routing (plan-818).
+--
+-- Recovery (reconcileUnsyncedPayments) must know whether a payment originated
+-- from a POS terminal (workstation route, device token — re-stampable by
+-- cloudPost's /api/v1/workstation/* fast-path) or a kiosk (kiosk route,
+-- terminal-baked token that cloudPost deliberately leaves untouched). That
+-- origin is decided at the HTTP handler and was NEVER persisted, so a payment
+-- whose sync_queue row is gone — its enqueue failed (payment committed, Enqueue
+-- errored, request not failed), or the row was kept across a forced unpair —
+-- had no way to pick its route/token on re-push.
+--
+--   sync_target = 'workstation' (POS) | 'kiosk'.
+--
+-- The unpair guard counts unsynced money regardless of origin, so no cash is
+-- ever silently lost. The payment reconciler only re-enqueues 'workstation'
+-- rows; kiosk recovery is a separate follow-up (its baked token can't be
+-- re-stamped), so its rows are left for manual recovery rather than guessed
+-- onto the wrong Cloud route.
+ALTER TABLE payments ADD COLUMN sync_target TEXT;
+
+-- Deliberately NOT backfilled: existing rows predate origin tracking, so their
+-- origin is unknown and stays NULL. The reconciler treats only explicit
+-- 'workstation' rows as auto-recoverable; NULL rows still count toward the
+-- unpair guard (money is never silently lost) but are left for manual/backfill
+-- recovery rather than pushed onto a possibly-wrong Cloud route.

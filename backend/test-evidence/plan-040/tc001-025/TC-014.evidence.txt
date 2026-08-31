@@ -1,0 +1,3 @@
+DELETE /materials/019f1221-8692-73af-bd86-2b106e26ea57
+HTTP=204 (exp 200)
+--- body(head) ---

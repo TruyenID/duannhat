@@ -1,0 +1,468 @@
+# MaterialLot schema
+# ============================================================================
+# Identity row for a discrete lot of a material.
+# Two minting paths:
+#   - source=inbound:    Created by MaterialLotService::receive when a Shop
+#                        manager intakes a supplier delivery via the Shop
+#                        receive form. Carries supplier_name + supplier_lot_code
+#                        + received_at + (optionally) received_temperature.
+#   - source=production: Created by MaterialBatchService::complete when an
+#                        internal production batch finishes. Carries
+#                        produced_by_batch_id; supplier_* fields stay NULL.
+#
+# Why a NEW table (vs columns on stock_levels):
+#   stock_levels grain is (warehouse, material) — once two deliveries land in
+#   the same warehouse for the same material, audit trail to the specific
+#   delivery is GONE. MaterialLot gives every receipt + production run its own
+#   identity, which is what genealogy_links + FEFO + recall need.
+#
+# Lifecycle (see MaterialLotStatus.yaml for full transition matrix):
+#   active → quarantined ⇄ active     (QC release loop)
+#                       ↘ disposed    (force dispose during quarantine)
+#         → depleted                   (qty_on_hand drained by FEFO consumption)
+#         → expired → disposed         (expiry sweeper cron + manual dispose)
+#         → disposed                   (manual ops dispose, force=true)
+#
+# Read by:
+#   - StockTransactionService::pickLotsForConsumption (FEFO eligibility)
+#   - TraceService (forward + backward genealogy walk)
+#   - RecallService::initiate (downstream blast radius from a tainted lot)
+#   - ExpiryAlertService scan + Cron (next-N-days expiry warnings)
+#   - HQ MaterialLotController, Shop MaterialLotController (admin UI)
+#
+# Written by:
+#   - MaterialLotService::{receive, quarantine, release, dispose} (CRUD)
+#   - MaterialBatchService::complete (output lot mint)
+#   - StockTransactionService::completeTransaction (qty_on_hand decrement)
+#   - ExpiryAlertService scan command (status flip → expired)
+#
+# Out of scope for v1 (deferred to plan-018 / plan-019):
+#   - Lot reservation, splitting/merging, returned-lot handling
+#   - Supplier entity FK (plan-019) — supplier kept as plain text
+#   - CoA file upload UI (plan-019) — coa_url is plain string for now
+# ============================================================================
+
+displayName:
+  en: Material Lot
+  ja: 材料ロット
+  vi: Lô nguyên liệu
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    # Lot codes are globally unique within an organization. Two warehouses
+    # in the same org cannot share a lot_code.
+    - columns: [organization_id, lot_code]
+      unique: true
+    # FEFO pick covering index. The single most-hit query in this domain:
+    # "SELECT … WHERE material_id = ? AND status = 'active' ORDER BY expiry_date".
+    - columns: [material_id, status, expiry_date]
+    # Warehouse-scoped FEFO pick (most receipts + production happen in one warehouse).
+    - columns: [warehouse_id, material_id, status]
+    # Daily expiry sweeper cron scans `expiry_date < today` then flips status → expired.
+    - columns: [expiry_date]
+    # HQ list page filters by brand + status (Active / Quarantined / Expiring).
+    - columns: [brand_id, status]
+
+properties:
+  lot_code:
+    type: String
+    length: 100
+    # Inbound:    L-{material.sku}-{YYYYMMDD}-{NNN}    e.g. L-FLOUR-001-20260507-001
+    # Production: reuses parent batch_code               e.g. MB-20260507-007
+    # Globally unique within organization (see indexes).
+    displayName:
+      en: Lot Code
+      ja: ロットコード
+      vi: Mã lô
+    description:
+      en: "Inbound: L-{sku}-{YYYYMMDD}-{NNN}. Production: parent MaterialBatch.batch_code reused. Unique per organization."
+      ja: "仕入：L-{sku}-{YYYYMMDD}-{NNN}。生産：親MaterialBatchのbatch_codeを流用。組織内で一意。"
+      vi: "Nhập NCC: L-{sku}-{YYYYMMDD}-{NNN}. Sản xuất: dùng lại batch_code của MaterialBatch cha. Duy nhất trong tổ chức."
+
+  material:
+    type: Association
+    relation: ManyToOne
+    target: Material
+    onDelete: RESTRICT
+    # RESTRICT (not CASCADE): a lot's material cannot be deleted while the lot
+    # exists. Recall + audit need the material reference forever.
+    displayName:
+      en: Material
+      ja: 材料
+      vi: Nguyên liệu
+    description:
+      en: "FK to materials. RESTRICT delete — lot must be disposed before material can be removed."
+      ja: "materialsへのFK。RESTRICT削除 — 材料を削除する前にロットを廃棄する必要がある。"
+      vi: "FK đến materials. RESTRICT xóa — phải dispose lô trước khi xóa material."
+
+  warehouse:
+    type: Association
+    relation: ManyToOne
+    target: Warehouse
+    onDelete: RESTRICT
+    # Lots are warehouse-scoped, NOT organization-scoped (see Open Question
+    # resolved 2026-05-07): the same supplier_lot_code received at two
+    # warehouses creates two distinct MaterialLot rows.
+    displayName:
+      en: Warehouse
+      ja: 倉庫
+      vi: Kho
+    description:
+      en: "Warehouse holding this lot. Lots do NOT migrate across warehouses — transfer = dispose-and-receive (plan-022)."
+      ja: "このロットを保管する倉庫。ロットは倉庫間を移動しない — 転送は廃棄＋再入荷（plan-022）。"
+      vi: "Kho lưu lô. Lô KHÔNG chuyển kho — transfer = dispose + receive (plan-022)."
+
+  source:
+    type: EnumRef
+    enum: MaterialLotSource
+    # inbound  → supplier_name + supplier_lot_code + received_at populated
+    # production → produced_by_batch_id populated; supplier_* NULL
+    displayName:
+      en: Source
+      ja: 出所
+      vi: Nguồn gốc
+    description:
+      en: "inbound = supplier delivery; production = output from a MaterialBatch."
+      ja: "inbound = 仕入入荷、production = MaterialBatchの出力。"
+      vi: "inbound = nhập NCC; production = đầu ra của MaterialBatch."
+
+  status:
+    type: EnumRef
+    enum: MaterialLotStatus
+    default: active
+    # See MaterialLotStatus.yaml for the full transition matrix + FEFO impact.
+    displayName:
+      en: Status
+      ja: ステータス
+      vi: Trạng thái
+    description:
+      en: "active → quarantined ⇄ active → depleted | expired | disposed. Only `active` is FEFO-eligible."
+      ja: "active → quarantined ⇄ active → depleted | expired | disposed。activeのみFEFO対象。"
+      vi: "active → quarantined ⇄ active → depleted | expired | disposed. Chỉ `active` mới thuộc diện FEFO."
+
+  supplier_name:
+    type: String
+    length: 255
+    nullable: true
+    # Plain text — Supplier master entity is plan-019. Null on production lots.
+    displayName:
+      en: Supplier Name
+      ja: 仕入先名
+      vi: Tên NCC
+    description:
+      en: "Free-text supplier name (no FK; Supplier entity = plan-019). NULL when source=production."
+      ja: "自由記述の仕入先名（FKなし。Supplierエンティティはplan-019）。source=productionではNULL。"
+      vi: "Tên NCC dạng text (chưa có FK; Supplier entity ở plan-019). NULL khi source=production."
+
+  supplier_lot_code:
+    type: String
+    length: 100
+    nullable: true
+    # The code the supplier prints on the box/pallet. Different from our internal lot_code.
+    displayName:
+      en: Supplier Lot Code
+      ja: 仕入先ロットコード
+      vi: Mã lô từ NCC
+    description:
+      en: "Supplier's printed lot code (carton/pallet label). Distinct from our internal lot_code. Helps cross-reference recalls issued by the supplier."
+      ja: "仕入先が印字するロットコード（段ボール/パレットラベル）。当社内部のlot_codeとは別。仕入先発行のリコール照合に使用。"
+      vi: "Mã lô NCC in trên thùng/pallet. Khác lot_code nội bộ. Dùng đối chiếu khi NCC ra thông báo thu hồi."
+
+  received_at:
+    type: Timestamp
+    # Date received — distinct from created_at because lots can be backdated
+    # if a manager records a delivery the next morning.
+    displayName:
+      en: Received At
+      ja: 入荷日時
+      vi: Ngày nhập
+    description:
+      en: "When the lot physically arrived. May predate created_at when entries are backdated. For production lots = MaterialBatch.completed_at."
+      ja: "ロットが物理的に到着した日時。バックデート登録時はcreated_atより前。生産ロットではMaterialBatch.completed_atと同じ。"
+      vi: "Thời điểm lô thực sự đến kho. Có thể trước created_at khi nhập backdate. Lô sản xuất = MaterialBatch.completed_at."
+
+  expiry_date:
+    type: Date
+    nullable: true
+    # Date (not DateTime): FSMA-204 expiry granularity is per-day; using date
+    # also means the FEFO `ORDER BY expiry_date ASC` ties break by received_at.
+    displayName:
+      en: Expiry Date
+      ja: 有効期限
+      vi: Hạn sử dụng
+    description:
+      en: "Day this lot expires. FEFO sorts ASC by this column. NULL allowed (e.g., shelf-stable salt) but discouraged for HACCP-relevant materials."
+      ja: "このロットの有効期限。FEFOはこの列で昇順ソート。NULL可（例：常温保存の塩）だがHACCP対象材料では非推奨。"
+      vi: "Ngày hết hạn lô. FEFO sort ASC theo cột này. Cho phép NULL (VD: muối khô) nhưng không khuyến nghị với nguyên liệu HACCP."
+
+  received_qty:
+    type: Decimal
+    precision: 15
+    scale: 4
+    # Original received quantity. IMMUTABLE after creation — used by recall reports
+    # to compute "how much of this lot was distributed to which downstream batches".
+    displayName:
+      en: Received Quantity
+      ja: 入荷数量
+      vi: Số lượng nhập
+    description:
+      en: "Quantity received at lot creation. Immutable. Used by recall + audit reports to compute distribution percentages."
+      ja: "ロット作成時の入荷数量。不変。リコール／監査レポートで配分比率の計算に使用。"
+      vi: "Số lượng nhập tại thời điểm tạo lô. Bất biến. Dùng tính tỷ lệ phân phối trong báo cáo thu hồi/audit."
+
+  qty_on_hand:
+    type: Decimal
+    precision: 15
+    scale: 4
+    # Cached projection of `received_qty - SUM(stock_transaction_items.qty WHERE material_lot_id=this AND type=stock_out)`.
+    # FEFO `WHERE qty_on_hand > 0` filter relies on this. Updated by
+    # StockTransactionService inside the same DB::transaction as the txn item insert.
+    displayName:
+      en: Quantity On Hand
+      ja: 在庫数量
+      vi: Tồn hiện tại
+    description:
+      en: "Cached qty remaining. Decremented by StockTransactionService on stock_out. When reaches 0, lot status flips to depleted."
+      ja: "残数のキャッシュ。stock_out時にStockTransactionServiceがデクリメント。0到達時にステータス→depleted。"
+      vi: "Cache số lượng còn lại. Giảm bởi StockTransactionService khi stock_out. Về 0 thì status → depleted."
+
+  unit:
+    type: String
+    length: 50
+    # Denormalized base unit (kg / L / piece / …) so reports don't need to join material_units.
+    # Must equal material.base_unit at lot creation time; receive form rejects mismatched units.
+    displayName:
+      en: Unit
+      ja: 単位
+      vi: Đơn vị
+    description:
+      en: "Base unit denormalized from material.base_unit. Receive form converts received qty into this unit before persisting."
+      ja: "material.base_unitから非正規化された基本単位。入荷フォームは保存前にこの単位に変換。"
+      vi: "Đơn vị cơ sở denormalize từ material.base_unit. Form nhập sẽ quy đổi về đơn vị này trước khi lưu."
+
+  # Plan-022 T1.5 — capture the operator's original input alongside the
+  # base-unit normalised qty_on_hand/received_qty. Receive 2 bag_25kg
+  # (ratio=25000, base=g) is persisted as qty_on_hand=50000g + entered_quantity=2 +
+  # entered_unit=bag_25kg, so the receipt slip / lot detail UI can render the
+  # human-meaningful "2 bags" without losing the canonical-grain reporting unit.
+  # Production lots stamp these from MaterialBatchService::complete using the
+  # batch's yield_unit and actualYield (pre-conversion). NULL on legacy lots
+  # created before T1 shipped.
+  entered_quantity:
+    type: Decimal
+    precision: 15
+    scale: 4
+    nullable: true
+    displayName:
+      en: Entered Quantity
+      ja: 入力数量
+      vi: Số lượng nhập (gốc)
+    description:
+      en: "Original quantity as entered by the operator (pre-conversion). NULL for legacy lots before T1."
+      ja: "オペレータ入力時の数量（変換前）。T1以前の旧ロットではNULL。"
+      vi: "Số lượng gốc do người vận hành nhập (trước quy đổi). NULL với lô legacy trước T1."
+
+  entered_unit:
+    type: String
+    length: 50
+    nullable: true
+    displayName:
+      en: Entered Unit
+      ja: 入力単位
+      vi: Đơn vị nhập (gốc)
+    description:
+      en: "Unit operator selected at entry time (e.g., bag_25kg). Resolved to base unit via material_units.ratio. NULL for legacy lots."
+      ja: "入力時にオペレータが選択した単位（例：bag_25kg）。material_units.ratioで基本単位に解決。旧ロットではNULL。"
+      vi: "Đơn vị người vận hành chọn khi nhập (VD: bag_25kg). Quy đổi về đơn vị cơ sở qua material_units.ratio. NULL với lô legacy."
+
+  cost_per_unit:
+    type: Decimal
+    precision: 15
+    scale: 4
+    nullable: true
+    # Plan-017 Tier 1.B: this field is the historical "cost on the lot" —
+    # kept for backward compat. New writes also populate unit_cost +
+    # total_cost + currency + cost_basis below. COGS reads prefer the
+    # newer fields when present.
+    displayName:
+      en: Cost Per Unit
+      ja: 単価
+      vi: Giá/đơn vị
+    description:
+      en: "Lot-grain cost. Stamped on stock_transaction_items.cost_basis_amount during FEFO pick. NULL = falls back to material.calculated_cost in COGS reports."
+      ja: "ロット単位のコスト。FEFO選択時にstock_transaction_items.cost_basis_amountに刻印。NULL=COGSレポートでmaterial.calculated_costにフォールバック。"
+      vi: "Giá vốn theo lô. Stamp vào stock_transaction_items.cost_basis_amount khi FEFO pick. NULL = COGS report fallback về material.calculated_cost."
+
+  unit_cost:
+    type: Decimal
+    precision: 18
+    scale: 4
+    nullable: true
+    # Plan-017 Tier 1.B — primary lot cost basis going forward.
+    # For inbound lots: matches cost_per_unit; populated by receive form.
+    # For production lots: weighted-average of consumed lots' unit_cost
+    # (yield-adjusted). Computed by MaterialBatchService::complete.
+    displayName:
+      en: Unit Cost
+      ja: 単価
+      vi: Giá/đơn vị
+
+  total_cost:
+    type: Decimal
+    precision: 18
+    scale: 4
+    nullable: true
+    # = unit_cost × received_qty. Persisted (denormalized) so reports
+    # don't recompute on every read.
+    displayName:
+      en: Total Cost
+      ja: 総額
+      vi: Tổng giá vốn
+
+  currency:
+    type: String
+    length: 3
+    nullable: true
+    # ISO-4217 code. NULL accepted for legacy lots / production lots in
+    # an org that hasn't enabled multi-currency. Validated in
+    # MaterialLotService::receive against organization's allowed list
+    # (when that allow-list lands).
+    displayName:
+      en: Currency
+      ja: 通貨
+      vi: Tiền tệ
+
+  cost_basis:
+    type: String
+    length: 30
+    nullable: true
+    # Free-form for now (po | manual | production_calculated). Becomes a
+    # proper enum in a follow-up once Supplier/PO entities (plan-019)
+    # define the canonical values.
+    displayName:
+      en: Cost Basis
+      ja: 原価ベース
+      vi: Cơ sở giá vốn
+
+  # Multi-language CoA list (plan-018 D.2).
+  # JSON structure: { "ja": "https://...", "en": "https://...", "vi": "https://..." }
+  # Migrated from coa_url (single string) — existing data preserved as { "default": "<old_url>" }.
+  # Written by HQ admin via lot detail CoA panel. Read by lot detail / reports.
+  coa_urls:
+    type: Json
+    nullable: true
+    displayName:
+      en: CoA URLs
+      ja: 試験成績書URL一覧
+      vi: Danh sách URL CoA
+    description:
+      en: "JSON map of language → CoA document URL. Migrated from single coa_url field."
+      ja: "言語 → CoA文書URLのJSONマップ。単一coa_urlフィールドから移行。"
+      vi: "JSON map ngôn ngữ → URL tài liệu CoA. Di chuyển từ trường coa_url đơn."
+
+  received_temperature:
+    type: Decimal
+    precision: 5
+    scale: 2
+    nullable: true
+    # Plan-017 Tier 1.D — supplier-delivery temperature reading. Required
+    # when material.requires_temperature_check=true. Stored in degrees
+    # Celsius regardless of input — the resource layer formats per locale.
+    displayName:
+      en: Received Temperature (°C)
+      ja: 入荷時温度（°C）
+      vi: Nhiệt độ khi nhập (°C)
+    description:
+      en: "Cold-chain reading at receipt. Compared to material.temperature_min/max for is_temperature_compliant."
+      ja: "入荷時の温度測定値。material.temperature_min/maxと比較してis_temperature_compliantを算出。"
+      vi: "Nhiệt độ đo khi nhập. So với material.temperature_min/max để tính is_temperature_compliant."
+
+  temperature_override_reason:
+    type: Text
+    nullable: true
+    # Plan-017 Tier 1.D — required by the receive form when received_temperature
+    # falls outside material.temperature_min..max. Empty string = compliant.
+    displayName:
+      en: Temperature Override Reason
+      ja: 温度逸脱理由
+      vi: Lý do nhiệt độ ngoài ngưỡng
+
+  quarantine_reason:
+    type: Text
+    nullable: true
+    # Captured when status → quarantined; cleared when released.
+    displayName:
+      en: Quarantine Reason
+      ja: 隔離理由
+      vi: Lý do cách ly
+    description:
+      en: "Free-text reason captured on quarantine. Cleared (or kept for audit) on release. Visible in audit timeline."
+      ja: "隔離時に記録される自由記述の理由。解除時に消去（または監査用に保持）。監査タイムラインに表示。"
+      vi: "Lý do tự do nhập khi cách ly. Xóa (hoặc giữ cho audit) khi release. Hiển thị trên timeline audit."
+
+  effective_allergens:
+    type: Json
+    nullable: true
+    # JSON array of allergen ids snapshotted at lot creation time.
+    # For inbound: copied from material->allergens at receive time.
+    # For production: UNION of all consumed lots' effective_allergens (allergen rollup).
+    # Drift between this and material.allergens triggers SafetyEvent.
+    displayName:
+      en: Effective Allergens
+      ja: 実効アレルゲン
+      vi: Dị nguyên hiệu lực
+    description:
+      en: "JSON array of allergen ids snapshotted at creation. Inbound = material allergens; Production = UNION of consumed lots. Drift vs master triggers SafetyEvent."
+      ja: "作成時のアレルゲンIDのJSON配列。Inbound=材料のアレルゲン、Production=消費ロットのUNION。マスターとの乖離はSafetyEventをトリガー。"
+      vi: "Mảng JSON các allergen id snapshot khi tạo. Inbound = allergen của material; Production = UNION allergen các lô tiêu thụ. Lệch với master sẽ tạo SafetyEvent."
+
+  produced_by_batch:
+    type: Association
+    relation: ManyToOne
+    target: MaterialBatch
+    onDelete: SET NULL
+    nullable: true
+    # Set only when source=production. SET NULL on batch delete because
+    # batches are soft-deletable for audit; the lot survives independently.
+    displayName:
+      en: Produced By Batch
+      ja: 生産バッチ
+      vi: Batch sản xuất
+    description:
+      en: "FK to material_batches when source=production. NULL for inbound lots. SET NULL on batch delete — lot remains for trace."
+      ja: "source=production時のmaterial_batchesへのFK。inboundロットではNULL。バッチ削除時はSET NULL — ロットはトレース用に残る。"
+      vi: "FK đến material_batches khi source=production. NULL với lô inbound. SET NULL khi xóa batch — lô vẫn còn để trace."
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+    description:
+      en: "Owning organization. CASCADE delete — when an org leaves, its lots go with it."
+      ja: "所有組織。CASCADE削除 — 組織離脱時にロットも削除。"
+      vi: "Tổ chức sở hữu. CASCADE xóa — khi tổ chức rời, lô cũng bị xóa."
+
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: CASCADE
+    # Denormalized from material->brand_id so HQ filter `WHERE brand_id = ?` is a single-table scan.
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu
+    description:
+      en: "Brand denormalized from material.brand_id. Enables HQ filter without joining materials. CASCADE consistent with material policy."
+      ja: "material.brand_idから非正規化されたブランド。materials結合なしでHQフィルタを可能にする。CASCADEはmaterialと一貫。"
+      vi: "Brand denormalize từ material.brand_id. Cho phép filter HQ không cần join materials. CASCADE đồng nhất với material."

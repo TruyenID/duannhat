@@ -1,0 +1,83 @@
+# =============================================================================
+# ProductToppingGroup (商品トッピンググループ / Phân công Topping cho Sản phẩm)
+# =============================================================================
+#
+# Pivot M-N: Product ↔ ToppingGroup trong cùng brand. Một product có thể
+# có nhiều nhóm topping; một nhóm topping có thể gắn vào nhiều product.
+#
+# Each attachment carries per-product override fields so the SAME group can
+# behave differently when reused across products:
+#
+#   Group "Sauce" default: 0–3 sauces, multi-select.
+#   Attached to "Burger":     use defaults (0–3 sauces optional).
+#   Attached to "Combo Meal": min/max=1 (must pick exactly 1).
+#   Attached to "Fries":      max=1 (only 1 sauce included).
+#
+# Without per-product overrides admins would clone the same group N times
+# — schema drift, hard to keep prices in sync. NULL override ⇒ inherit
+# group default; SET ⇒ this attachment uses the override value.
+#
+# Phase 2 customer-web computes the effective min/max as
+#   COALESCE(attachment.min_select_override, group.min_select)
+#   COALESCE(attachment.max_select_override, group.max_select)
+#
+# Written by: HQ admin via ProductToppingGroupService::syncForProduct().
+# Read by: HQ admin product edit page, customer-web (Phase 2).
+#
+# Constraints:
+#   - Composite unique (product_id, topping_group_id): 1 group chỉ gắn 1 lần
+#     vào mỗi product.
+#   - Cross-brand guard ở application layer (service validate group.brand_id
+#     = product.brand_id trước khi insert).
+#   - No softDelete — xoá cứng khi unlink (sync replaces all rows).
+#   - Stays kind:pivot. Promoting to kind:object would let it carry id+audit
+#     but the omnify-go pivot→object migration generator currently produces
+#     a broken ALTER (issue tracked separately). Pivot supports the override
+#     fields fine — that's the real value-add anyway.
+# =============================================================================
+
+displayName:
+  en: Product Topping Group
+  ja: 商品トッピンググループ
+  vi: Phân công Topping cho Sản phẩm
+
+kind: pivot
+pivotFor: [Product, ToppingGroup]
+
+options:
+  # No softDelete — sync operation replaces rows entirely
+  softDelete: false
+  indexes:
+    # Composite unique: 1 group chỉ gắn 1 lần vào mỗi product
+    - columns: [product_id, topping_group_id]
+      unique: true
+
+properties:
+  # Thứ tự hiển thị nhóm topping trong product (nhỏ hơn = trước).
+  # Set bởi sort_orders payload trong sync request.
+  sort_order:
+    type: Int
+    default: 0
+    displayName:
+      en: Sort Order
+      ja: 表示順序
+      vi: Thứ tự hiển thị
+
+  # =========================================================================
+  # Per-attachment overrides — NULL ⇒ inherit from the group's default.
+  # =========================================================================
+  min_select_override:
+    type: Int
+    nullable: true
+    displayName:
+      en: Min Select Override
+      ja: 最小選択数（上書き）
+      vi: Số tối thiểu (ghi đè)
+
+  max_select_override:
+    type: Int
+    nullable: true
+    displayName:
+      en: Max Select Override
+      ja: 最大選択数（上書き）
+      vi: Số tối đa (ghi đè)

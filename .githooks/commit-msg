@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# Gỡ trailer ghi công Claude khỏi commit message (#2740).
+#
+# Quy tắc repo: KHÔNG ghi công Claude vào commit/PR/docs. Chủ dự án chốt
+# 2026-08-14 (trước đó luật này chỉ truyền miệng — xem `docs/contributing/work-policy.md`).
+# Đo trên `dev` 2026-08-13: 5 trailer trong 30 commit gần nhất.
+#
+# VÌ SAO Ở ĐÂY, KHÔNG PHẢI TRONG `tal`. `tal` KHÔNG phải nơi commit: vai code
+# chạy `git commit` trực tiếp, và harness của nó tự chèn trailer. Lọc ở `tal`
+# sẽ bỏ sót đúng đường đang rò. `commit-msg` bắt mọi lượt `git commit` và
+# `git merge` trong repo này (`core.hooksPath=.githooks`), bất kể ai gõ.
+#
+# GỠ chứ không TỪ CHỐI. Từ chối thì tác nhân phải soạn lại message và thử lại —
+# tốn một vòng cho một dòng máy tự thêm, và dòng đó không mang thông tin nào của
+# người viết.
+#
+# Chỉ chặn từ nay: KHÔNG rewrite lịch sử, các commit đã merge giữ nguyên.
+set -euo pipefail
+
+MSG_FILE="${1:-}"
+[ -n "$MSG_FILE" ] && [ -f "$MSG_FILE" ] || exit 0
+
+# HAI chiều, và chiều GIỮ mới là chiều nguy hiểm.
+#
+# Chiều GỠ phải bắt được dạng chính tắc của git — `Co-authored-by:` chữ thường.
+# Đó là dạng chiếm ĐA SỐ trong lịch sử thật: đo trên `origin/dev` 30 commit gần
+# nhất, 3/5 trailer máy viết thường. Bản đầu của hook này khớp phân biệt hoa
+# thường nên bỏ lọt đúng 3 cái đó.
+#
+# Chiều GIỮ: `-i` trần thì `Co-authored-by: Claude Dubois <claude@example.com>`
+# cũng khớp ⇒ XOÁ CÔNG MỘT NGƯỜI THẬT. Nên không neo vào chữ `Claude` đứng một
+# mình, mà neo vào thứ chỉ máy mới có: email `noreply@anthropic.com`, hoặc tên
+# model đi sau chữ Claude.
+CLAUDE_CREDIT='(^[[:space:]]*co-authored-by:.*(noreply@anthropic\.com|claude (opus|sonnet|haiku|fable|code))|generated with .*claude code)'
+
+BEFORE=$(grep -ciE "$CLAUDE_CREDIT" "$MSG_FILE" || true)
+if [ "${BEFORE:-0}" -eq 0 ]; then
+  exit 0
+fi
+
+STRIPPED=$(mktemp)
+TRIMMED=$(mktemp)
+trap 'rm -f "$STRIPPED" "$TRIMMED"' EXIT
+
+grep -viE "$CLAUDE_CREDIT" "$MSG_FILE" > "$STRIPPED" || true
+
+# Cắt dòng trống ở CUỐI do việc gỡ để lại — và CHỈ ở cuối. Dòng trống trong
+# thân là của tác giả (đoạn văn, khối code dán vào) nên phải qua nguyên vẹn:
+# hoãn in dòng trống cho tới khi gặp dòng có chữ, dòng trống ở cuối không bao
+# giờ được in ra.
+awk '
+  /^[[:space:]]*$/ { pending++; next }
+  { while (pending > 0) { print ""; pending-- } print }
+' "$STRIPPED" > "$TRIMMED"
+
+# Ghi qua file tạm rồi mới thay: nếu awk chết giữa chừng thì commit message gốc
+# còn nguyên, thay vì bị cắt cụt.
+mv "$TRIMMED" "$MSG_FILE"
+
+echo "[commit-msg] đã gỡ $BEFORE dòng ghi công Claude (#2740 — quy tắc repo)" >&2
+exit 0

@@ -1,0 +1,207 @@
+# StockTransfer schema
+# Moves items from source warehouse to destination warehouse.
+# Each transfer tracks approval at source and receiving at destination.
+#
+# Business Rules:
+#   - BR-01: Source and destination warehouses must be different
+#   - Transfer creates two stock transactions: stock_out at source, stock_in at destination
+#
+# Workflow:
+#   draft → pending → approved → in_transit → completed
+#                  ↘ cancelled
+#
+# Key Design:
+#   - transfer_code auto-generated: TR-YYYYMMDD-XXX
+#   - created_by_id / approved_by_id / received_by_id: SSO user IDs (no hard FK)
+#   - Soft delete enabled for audit trail
+
+displayName:
+  en: Stock Transfer
+  ja: 在庫移動
+  vi: Chuyển kho
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    # plan-040 C5/M13: transfer_code unique PER-ORG + deleted_at-scoped for soft-delete
+    # code reuse (was a global single-column unique). deleted_at is a softDelete
+    # auto-column — falls back to a non-omnify migration if omnify can't index it.
+    - columns: [organization_id, transfer_code, deleted_at]
+      unique: true
+      # Explicit short name to stay under MySQL's 64-char identifier limit.
+      name: uq_stock_transfer_org_code
+    - columns: [organization_id, status]
+    - columns: [source_warehouse_id]
+    - columns: [destination_warehouse_id]
+
+properties:
+  transfer_code:
+    type: String
+    length: 50
+    displayName:
+      en: Transfer Code
+      ja: 移動コード
+      vi: Mã chuyển kho
+    description:
+      en: "Auto-generated code: TR-YYYYMMDD-XXX"
+      ja: "自動生成コード：TR-YYYYMMDD-XXX"
+      vi: "Mã tự động: TR-YYYYMMDD-XXX"
+
+  sourceWarehouse:
+    type: Association
+    relation: ManyToOne
+    target: Warehouse
+    onDelete: RESTRICT
+    displayName:
+      en: Source Warehouse
+      ja: 出庫倉庫
+      vi: Kho xuất
+    description:
+      en: Warehouse sending the items
+      ja: 商品を送る倉庫
+      vi: Kho xuất hàng
+
+  destinationWarehouse:
+    type: Association
+    relation: ManyToOne
+    target: Warehouse
+    onDelete: RESTRICT
+    displayName:
+      en: Destination Warehouse
+      ja: 入庫倉庫
+      vi: Kho nhập
+    description:
+      en: Warehouse receiving the items
+      ja: 商品を受け取る倉庫
+      vi: Kho nhận hàng
+
+  status:
+    type: EnumRef
+    enum: StockTransferStatus
+    default: draft
+    displayName:
+      en: Status
+      ja: ステータス
+      vi: Trạng thái
+
+  stockOutTransaction:
+    type: Association
+    relation: ManyToOne
+    target: StockTransaction
+    onDelete: RESTRICT
+    nullable: true
+    displayName:
+      en: Stock Out Transaction
+      ja: 出庫取引
+      vi: Phiếu xuất kho
+    description:
+      en: Stock out transaction at source warehouse
+      ja: 出庫倉庫での出庫取引
+      vi: Phiếu xuất tại kho nguồn
+
+  stockInTransaction:
+    type: Association
+    relation: ManyToOne
+    target: StockTransaction
+    onDelete: RESTRICT
+    nullable: true
+    displayName:
+      en: Stock In Transaction
+      ja: 入庫取引
+      vi: Phiếu nhập kho
+    description:
+      en: Stock in transaction at destination warehouse
+      ja: 入庫倉庫での入庫取引
+      vi: Phiếu nhập tại kho đích
+
+  note:
+    type: Text
+    nullable: true
+    displayName:
+      en: Note
+      ja: 備考
+      vi: Ghi chú
+
+  created_by_id:
+    type: Uuid
+    displayName:
+      en: Created By
+      ja: 作成者
+      vi: Người tạo
+    description:
+      en: "SSO user who created this transfer (user_caches.id). No hard FK."
+      ja: "この移動を作成したSSOユーザー（user_caches.id）。ハードFKなし。"
+      vi: "User SSO tạo phiếu chuyển kho (user_caches.id). Không dùng FK cứng."
+
+  approved_by_id:
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Approved By
+      ja: 承認者
+      vi: Người duyệt
+    description:
+      en: "Source warehouse manager who approved the transfer."
+      ja: "移動を承認した出庫倉庫のマネージャー。"
+      vi: "Manager kho xuất đã duyệt phiếu."
+
+  approved_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Approved At
+      ja: 承認日時
+      vi: Ngày duyệt
+
+  received_by_id:
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Received By
+      ja: 受領者
+      vi: Người nhận
+    description:
+      en: "Destination warehouse manager who received the transfer."
+      ja: "移動を受領した入庫倉庫のマネージャー。"
+      vi: "Manager kho nhập đã nhận hàng."
+
+  received_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Received At
+      ja: 受領日時
+      vi: Ngày nhận
+
+  completed_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Completed At
+      ja: 完了日時
+      vi: Ngày hoàn thành
+
+  # Relationships
+  items:
+    type: Association
+    relation: OneToMany
+    target: StockTransferItem
+    mappedBy: stockTransfer
+    displayName:
+      en: Items
+      ja: 明細
+      vi: Chi tiết
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức

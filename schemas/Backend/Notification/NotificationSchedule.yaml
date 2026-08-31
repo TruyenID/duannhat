@@ -1,0 +1,295 @@
+# =============================================================================
+# NotificationSchedule (定期通知スケジュール / Lịch thông báo định kỳ)
+# =============================================================================
+#
+# Plan-023 M3 — recurring broadcast schedule. Pre-M3 the broadcast composer
+# could only fire "now" or "send-later (once)" via `notifications.scheduled_for`.
+# This table layers RFC-5545 RRULE recurrence on top: every 5 minutes the
+# tick worker scans schedules whose `next_occurrence_at <= now()`,
+# materialises a fresh Notification row per occurrence, and advances
+# `next_occurrence_at` via `simshaun/recurr`.
+#
+# Written by:
+#   - `POST /hq/{brand}/notifications/schedules` — admin composer step 4
+#   - `PATCH /hq/{brand}/notifications/schedules/{id}` — admin edit / pause /
+#     resume / cancel actions
+#   - `RecurringNotificationDispatcher::tick()` — advances
+#     next_occurrence_at + last_occurrence_at + occurrences_remaining +
+#     status on every tick
+#
+# Read by:
+#   - `RecurringNotificationDispatcher::tick()` — selects rows where
+#     `status='active' AND next_occurrence_at <= now()` with
+#     `FOR UPDATE SKIP LOCKED` (multi-worker safety)
+#   - `GET /hq/{brand}/notifications/schedules` — admin list page
+#   - `GET /hq/{brand}/notifications/schedules/{id}` — detail with next-5
+#     occurrences preview rendered by the Recurr ArrayTransformer
+#
+# Lifecycle (`status` column):
+#   active     → tick worker materialises new occurrences
+#   paused     → tick worker skips; resume flips back to active and
+#                recomputes next_occurrence_at from now()
+#   completed  → RRULE produced no more dates OR occurrences_remaining
+#                hit 0 OR ends_at reached. Terminal; not re-activatable.
+#   cancelled  → admin DELETE before next_occurrence_at - 60s freeze
+#                window. Terminal.
+#
+# Idempotency: each occurrence dispatch uses
+#   `schedule:{schedule_id}:occurrence:{next_occurrence_at_iso8601}`
+# as `notifications.idempotency_key`, so a re-run of the tick worker
+# (e.g. crash + restart between materialise + advance) cannot duplicate
+# the notification — the unique index on `idempotency_key` blocks it.
+#
+# Tick cadence: every 5 minutes via `Schedule::call(...)->everyFiveMinutes()
+# ->withoutOverlapping(15)->onOneServer()` in routes/console.php (T3.4).
+# Five-minute resolution is the contract surfaced to the composer copy
+# ("your weekly send will fire between 09:00 and 09:04"). If a future
+# use case needs minute-precision, open a separate plan to add a
+# high-precision schedule subset rather than tightening this one.
+#
+# Freeze window: T3.9 — DELETE on a schedule whose
+# `next_occurrence_at - now() < 60s` returns 422 `within_freeze_window`.
+# Prevents racing the tick worker; the dispatched notification cannot be
+# pulled back from recipients' inboxes once it's been written.
+# =============================================================================
+
+displayName:
+  en: Notification Schedule
+  ja: 通知スケジュール
+  vi: Lịch thông báo
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: false
+  id: Uuid
+  indexes:
+    # Tick worker query — "active schedules due now". Composite covers
+    # both the WHERE filter and the lock-skipping behaviour.
+    - columns: [next_occurrence_at, status]
+    # Admin list "schedules in this brand by status".
+    - columns: [brand_id, status]
+    # Brand listing default sort by next occurrence.
+    - columns: [brand_id, next_occurrence_at]
+
+properties:
+  # Tenancy boundary.
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+    description:
+      en: Organization that owns this schedule. Every query filters by this.
+      ja: このスケジュールを所有する組織。全てのクエリはこの列でフィルタ。
+      vi: Tổ chức sở hữu schedule này. Mọi query đều filter theo cột này.
+
+  # Brand scope — required (recurring broadcasts always target one brand).
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: CASCADE
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu
+    description:
+      en: Brand scope. Required — recurring broadcasts always target one brand. Cascade-delete with the brand so orphaned schedules can't fire.
+      ja: ブランドスコープ。必須 — 定期ブロードキャストは常に1つのブランドを対象とする。ブランドと CASCADE 削除し、孤立したスケジュールが発火しないようにする。
+      vi: Phạm vi brand. Bắt buộc — recurring broadcast luôn nhắm tới một brand. Cascade-delete với brand để schedule mồ côi không fire được.
+
+  # Template lookup key — soft pointer to notification_templates.key.
+  template_key:
+    type: String
+    length: 100
+    filterable: true
+    displayName:
+      en: Template Key
+      ja: テンプレートキー
+      vi: Khoá template
+    description:
+      en: "Soft pointer to `notification_templates.key` (not a FK — admin may delete a template and the schedule's lookup will fall back to a logged warning + literal key in the inbox). Examples: `stock.alert.low`, `system.weekly_digest`."
+      ja: "`notification_templates.key` へのソフトポインタ（FK ではない — 管理者がテンプレートを削除した場合、スケジュールのルックアップはログ警告 + インボックスのリテラルキーにフォールバック）。例：`stock.alert.low`、`system.weekly_digest`。"
+      vi: "Soft pointer tới `notification_templates.key` (không phải FK — admin có thể xoá template, lookup của schedule sẽ fall back về warning log + literal key trong inbox). Ví dụ: `stock.alert.low`, `system.weekly_digest`."
+
+  # Recipients — every occurrence resolves through this audience.
+  audience:
+    type: Association
+    relation: ManyToOne
+    target: NotificationAudience
+    onDelete: RESTRICT
+    displayName:
+      en: Audience
+      ja: オーディエンス
+      vi: Đối tượng
+    description:
+      en: NotificationAudience the schedule fires at. RESTRICT delete — admin must cancel the schedule explicitly before deleting the underlying audience (prevents silent loss of an active recurrence).
+      ja: スケジュールが発火するオーディエンス。RESTRICT 削除 — 基礎となるオーディエンスを削除する前に、管理者は明示的にスケジュールをキャンセルする必要がある（アクティブな再帰の暗黙的な損失を防ぐ）。
+      vi: NotificationAudience mà schedule fire tới. RESTRICT delete — admin phải cancel schedule trước khi xoá audience (chặn mất một recurrence đang chạy mà không hay).
+
+  # Channel multiset for each occurrence — copied into the materialised notification.
+  channels:
+    type: Json
+    displayName:
+      en: Channels
+      ja: チャネル
+      vi: Kênh
+    description:
+      en: "Array of NotificationChannel enum values applied to every occurrence (e.g. `['in_app', 'email']`). Multi-select on composer step 3. Defaults to the template's `default_channels` if omitted at create time."
+      ja: "全てのオカレンスに適用される NotificationChannel enum 値の配列（例：`['in_app', 'email']`）。コンポーザーステップ3でマルチセレクト。作成時に省略された場合、テンプレートの `default_channels` がデフォルト。"
+      vi: "Mảng giá trị NotificationChannel enum áp dụng cho mọi occurrence (VD: `['in_app', 'email']`). Multi-select ở composer bước 3. Default về `default_channels` của template nếu bỏ qua khi tạo."
+
+  # Priority — drives effective-channel intersection (urgent bypasses master mute).
+  priority:
+    type: String
+    length: 20
+    default: normal
+    displayName:
+      en: Priority
+      ja: 優先度
+      vi: Mức ưu tiên
+    description:
+      en: "NotificationPriority enum value (`low` | `normal` | `high` | `urgent`). Drives the urgent-bypass rule in EffectiveChannelService — urgent occurrences ignore master_mute + quiet_hours but still honour per-(type × channel) opt-out."
+      ja: "NotificationPriority enum 値（`low` | `normal` | `high` | `urgent`）。EffectiveChannelService の urgent-bypass ルールを駆動 — urgent オカレンスは master_mute + quiet_hours を無視するが、per-(type × channel) opt-out は引き続き尊重する。"
+      vi: "Giá trị enum NotificationPriority (`low` | `normal` | `high` | `urgent`). Điều khiển rule urgent-bypass trong EffectiveChannelService — occurrence urgent bỏ qua master_mute + quiet_hours nhưng vẫn tôn trọng per-(type × channel) opt-out."
+
+  # Template parameter bag — substituted into title/body at render time.
+  params:
+    type: Json
+    nullable: true
+    displayName:
+      en: Params
+      ja: パラメータ
+      vi: Tham số
+    description:
+      en: "Token substitution bag for `TemplateRenderer::render` (e.g. `{warehouse_name: 'Tokyo HQ', threshold: 100}`). Nullable — templates without `{{tokens}}` need no params."
+      ja: "`TemplateRenderer::render` のトークン置換バッグ（例：`{warehouse_name: 'Tokyo HQ', threshold: 100}`）。Nullable — `{{tokens}}` を持たないテンプレートはパラメータ不要。"
+      vi: "Bag thay token cho `TemplateRenderer::render` (VD: `{warehouse_name: 'Tokyo HQ', threshold: 100}`). Nullable — template không có `{{tokens}}` không cần params."
+
+  # RRULE substring — parsed by simshaun/recurr.
+  rrule:
+    type: String
+    length: 500
+    displayName:
+      en: RRULE
+      ja: RRULE
+      vi: RRULE
+    description:
+      en: "RFC-5545 RRULE substring (no `BEGIN:VEVENT`/`END:VEVENT` wrapper). Examples: `FREQ=DAILY;BYHOUR=9;BYMINUTE=0`, `FREQ=WEEKLY;BYDAY=MO,WE,FR;BYHOUR=9`. Parsed by `\\Recurr\\Rule` at tick time; invalid RRULE → schedule create returns 422."
+      ja: "RFC-5545 RRULE サブストリング（`BEGIN:VEVENT`/`END:VEVENT` ラッパーなし）。例：`FREQ=DAILY;BYHOUR=9;BYMINUTE=0`、`FREQ=WEEKLY;BYDAY=MO,WE,FR;BYHOUR=9`。ティック時に `\\Recurr\\Rule` で解析；無効な RRULE → スケジュール作成は 422 を返す。"
+      vi: "RRULE substring RFC-5545 (không có wrapper `BEGIN:VEVENT`/`END:VEVENT`). VD: `FREQ=DAILY;BYHOUR=9;BYMINUTE=0`, `FREQ=WEEKLY;BYDAY=MO,WE,FR;BYHOUR=9`. Parse bằng `\\Recurr\\Rule` lúc tick; RRULE không hợp lệ → schedule create trả 422."
+
+  # IANA timezone — drives daylight-saving correctness.
+  timezone:
+    type: String
+    length: 64
+    default: Asia/Tokyo
+    displayName:
+      en: Timezone
+      ja: タイムゾーン
+      vi: Múi giờ
+    description:
+      en: "IANA tz name (e.g. `Asia/Tokyo`, `America/Los_Angeles`). Re-read on every tick so DST transitions advance the occurrence correctly. Validated against `DateTimeZone::listIdentifiers()` on create."
+      ja: "IANA tz 名（例：`Asia/Tokyo`、`America/Los_Angeles`）。ティックごとに再読み込みされ、DST 遷移時にオカレンスが正しく進む。作成時に `DateTimeZone::listIdentifiers()` に対して検証。"
+      vi: "Tên tz IANA (VD: `Asia/Tokyo`, `America/Los_Angeles`). Đọc lại mỗi tick để DST chuyển đúng. Validate với `DateTimeZone::listIdentifiers()` khi tạo."
+
+  # Window start — anchors the first occurrence and grounds the RRULE.
+  starts_at:
+    type: Timestamp
+    displayName:
+      en: Starts At
+      ja: 開始日時
+      vi: Bắt đầu
+    description:
+      en: First eligible occurrence. UTC. The RRULE iterator anchors from this datetime; occurrences before `starts_at` are skipped even if the RRULE would otherwise match.
+      ja: 最初の対象オカレンス。UTC。RRULE イテレータはこの日時から基準を取り；RRULE が一致してもこの日時より前のオカレンスはスキップされる。
+      vi: Occurrence đầu tiên đủ điều kiện. UTC. Iterator RRULE neo từ datetime này; occurrence trước `starts_at` bị skip dù RRULE có match.
+
+  # Window end — terminal once reached.
+  ends_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Ends At
+      ja: 終了日時
+      vi: Kết thúc
+    description:
+      en: Last eligible occurrence (inclusive). Nullable → schedule runs indefinitely until `occurrences_remaining` exhausts (if set) or admin cancels. Flips `status` to `completed` once tick observes `next_occurrence_at > ends_at`.
+      ja: 最後の対象オカレンス（境界を含む）。Nullable → `occurrences_remaining` 枯渇（設定時）または管理者キャンセルまでスケジュールは無期限に実行。ティックが `next_occurrence_at > ends_at` を観測すると `status` を `completed` にフリップ。
+      vi: Occurrence cuối cùng (inclusive). Nullable → schedule chạy vô hạn cho tới khi `occurrences_remaining` cạn (nếu set) hoặc admin cancel. Tick quan sát `next_occurrence_at > ends_at` thì flip `status` về `completed`.
+
+  # Remaining-occurrences counter — alternative termination signal.
+  occurrences_remaining:
+    type: Int
+    nullable: true
+    displayName:
+      en: Occurrences Remaining
+      ja: 残オカレンス数
+      vi: Số occurrence còn lại
+    description:
+      en: '"Send N more times" counter. Nullable means no count limit (use `ends_at` instead, or run indefinitely). Tick decrements on every successful materialise; hits 0 → status flips to `completed`, next_occurrence_at goes null.'
+      ja: '"あとN回送信" カウンタ。Nullable はカウント制限なし（代わりに `ends_at` を使うか、無期限に実行）。ティックは成功的な materialise ごとにデクリメント；0 になると status は `completed` にフリップ、next_occurrence_at は null になる。'
+      vi: 'Đếm "gửi thêm N lần". Nullable nghĩa là không giới hạn số lần (dùng `ends_at` thay thế, hoặc chạy vô hạn). Tick decrement mỗi lần materialise thành công; về 0 → status flip về `completed`, next_occurrence_at thành null.'
+
+  # Tick worker write-target — UTC, indexed.
+  next_occurrence_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Next Occurrence At
+      ja: 次回発火日時
+      vi: Lần sau
+    description:
+      en: Next datetime the tick worker will materialise (UTC). Computed by `\\Recurr\\Transformer\\ArrayTransformer` at create time + after every tick. Null when status is terminal (`completed`/`cancelled`).
+      ja: 次にティックワーカーが materialise する日時（UTC）。作成時 + 毎ティック後に `\\Recurr\\Transformer\\ArrayTransformer` で計算。ステータスがターミナル（`completed`/`cancelled`）の場合 null。
+      vi: Datetime tiếp theo mà tick worker materialise (UTC). Tính bằng `\\Recurr\\Transformer\\ArrayTransformer` lúc tạo + sau mỗi tick. Null khi status đã terminal (`completed`/`cancelled`).
+
+  # Audit trace — last successful materialise.
+  last_occurrence_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Last Occurrence At
+      ja: 最終発火日時
+      vi: Lần trước
+    description:
+      en: Most recent successful occurrence (UTC). Updated by `RecurringNotificationDispatcher::tick` immediately after a Notification row is written + before next_occurrence_at advances. Useful for admin diagnostics when a schedule's badge says "fired 3h ago".
+      ja: 最新の成功オカレンス（UTC）。Notification 行が書き込まれた直後、next_occurrence_at が進む前に `RecurringNotificationDispatcher::tick` が更新。スケジュールのバッジが「3時間前に発火」と表示する場合の管理者診断に有用。
+      vi: Occurrence gần nhất thành công (UTC). Update bởi `RecurringNotificationDispatcher::tick` ngay sau khi Notification row được ghi + trước khi next_occurrence_at tiến. Hữu ích cho diagnostics khi badge schedule hiển thị "fired 3h ago".
+
+  # Lifecycle marker — see header for full state machine.
+  status:
+    type: String
+    length: 20
+    default: active
+    filterable: true
+    displayName:
+      en: Status
+      ja: ステータス
+      vi: Trạng thái
+    description:
+      en: "Lifecycle state — `active` (tick materialises), `paused` (tick skips), `completed` (terminal, RRULE exhausted), `cancelled` (terminal, admin DELETE before freeze window). State transitions are: active ↔ paused, active → completed (tick), active → cancelled (admin), paused → cancelled (admin)."
+      ja: "ライフサイクル状態 — `active`（ティックが materialise）、`paused`（ティックはスキップ）、`completed`（ターミナル、RRULE 枯渇）、`cancelled`（ターミナル、フリーズウィンドウ前の管理者 DELETE）。状態遷移：active ↔ paused、active → completed（ティック）、active → cancelled（管理者）、paused → cancelled（管理者）。"
+      vi: "Trạng thái lifecycle — `active` (tick materialise), `paused` (tick skip), `completed` (terminal, RRULE cạn), `cancelled` (terminal, admin DELETE trước freeze window). Chuyển trạng thái: active ↔ paused, active → completed (tick), active → cancelled (admin), paused → cancelled (admin)."
+
+  # Creator trace — SET NULL so schedules outlive the user who created them.
+  createdBy:
+    type: Association
+    relation: ManyToOne
+    target: User
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Created By
+      ja: 作成者
+      vi: Người tạo
+    description:
+      en: User who created this schedule. SET NULL on user deletion so the schedule and its history survive the creator's account removal.
+      ja: このスケジュールを作成したユーザー。ユーザー削除時は SET NULL — スケジュールと履歴が作成者アカウントの削除後も残るため。
+      vi: User đã tạo schedule này. SET NULL khi user bị xoá — schedule và lịch sử vẫn tồn tại sau khi tài khoản creator bị xoá.

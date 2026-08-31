@@ -1,0 +1,155 @@
+# =============================================================================
+# Allergen (アレルゲン / Chất gây dị ứng)
+# =============================================================================
+#
+# Master-data lookup for declared food allergens. Brand-agnostic at the
+# organization scope — the same JP/EU/US regulatory set is shared across
+# every brand in the org, seeded once at install time via AllergenSeeder.
+#
+# Written by:  HQ admin (via AllergenService — CRUD in `/hq/{brand}/allergens`).
+#              Regulatory set seeded by AllergenSeeder.
+# Read by:     Material form (M2M multi-select), Recipe allergen_rollup
+#              computation, customer-facing menu allergen display (future).
+# Lifecycle:   soft-deletable; in-use guard (AllergenInUseException) blocks
+#              delete while any Material still references it.
+#
+# Data model:
+#   Allergen (this)
+#     ↕ M2M via material_allergens
+#   Material
+#     ↕ used in Recipe.ingredients
+#   Recipe.allergen_rollup (denormalized cache of upstream Material allergens)
+#
+# Regulatory set:
+#   - JP: 8 mandatory (tokutei-genryou) + 20 recommended (junkan-tokutei-genryou)
+#   - EU: 14 mandatory (FIC 1169/2011 Annex II)
+#   - US: 9 mandatory (FALCPA + FASTER Act 2023 sesame)
+#
+# Uniqueness: (organization_id, code, jurisdiction) composite — multi-tenant
+# scope means same substance can appear once per (org, jurisdiction) with
+# jurisdiction-specific severity. Each org seeds its own JP/EU/US set
+# independently (see AllergenSeeder which loops over all organizations).
+# =============================================================================
+
+displayName:
+  en: Allergen
+  ja: アレルゲン
+  vi: Chất gây dị ứng
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  audit:
+    createdBy: true
+    updatedBy: true
+  indexes:
+    - columns: [organization_id]
+    - columns: [organization_id, code, jurisdiction]
+      unique: true
+    - columns: [jurisdiction]
+    - columns: [severity]
+
+properties:
+  # Stable machine-readable code within a jurisdiction (e.g. "milk", "egg",
+  # "shrimp"). Immutable once created — seeders match on (code, jurisdiction)
+  # to stay idempotent. Lowercased snake_case. NOT shown to end users —
+  # translated `name` is the display label.
+  code:
+    type: String
+    length: 60
+    searchable: true
+    defaultSort: asc
+    lookupable: true
+    displayName:
+      en: Code
+      ja: コード
+      vi: Mã
+    description:
+      en: Stable snake_case identifier within a jurisdiction (e.g. "milk").
+      ja: 管轄内で固定される snake_case 識別子 (例 "milk")。
+      vi: Định danh snake_case cố định trong thẩm quyền (vd "milk").
+
+  # Human-readable name shown to HQ admins and (via rollup) to end customers.
+  # Translatable — the display label for "egg" differs per locale (卵 / egg /
+  # trứng). Persisted in allergen_translations (Astrotomic) via the service
+  # layer; the service must route locale-keyed payloads through fill().
+  name:
+    type: String
+    length: 120
+    searchable: true
+    sortable: true
+    translatable: true
+    displayName:
+      en: Name
+      ja: 名称
+      vi: Tên
+
+  # Regulatory jurisdiction this row applies to. The same substance (e.g.
+  # "milk") appears once per jurisdiction with its jurisdiction-specific
+  # severity. Seeders emit one row per (code, jurisdiction) pair.
+  jurisdiction:
+    type: EnumRef
+    enum: AllergenJurisdiction
+    filterable: true
+    sortable: true
+    displayName:
+      en: Jurisdiction
+      ja: 管轄
+      vi: Thẩm quyền
+
+  # Regulatory severity — mandatory (must declare) vs recommended (encouraged).
+  # Drives UI warnings on Recipe allergen rollup: mandatory = red chip,
+  # recommended = yellow chip.
+  severity:
+    type: EnumRef
+    enum: AllergenSeverity
+    default: mandatory
+    filterable: true
+    sortable: true
+    displayName:
+      en: Severity
+      ja: 重要度
+      vi: Mức độ
+
+  # Inactive allergens stay in the DB for history but are hidden from the
+  # Material form's picker and excluded from new rollup computations. Use
+  # when a regulator retires an allergen from the mandatory list — soft
+  # retirement rather than hard delete preserves historical Recipe rollups.
+  is_active:
+    type: Boolean
+    default: true
+    filterable: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+
+  # M2M inverse. Pivot table `material_allergens` is declared on Material
+  # (owning side) via `joinTable`. Used by AllergenService::delete guard
+  # to count in-use materials before permitting deletion.
+  materials:
+    type: Association
+    relation: ManyToMany
+    target: Material
+    mappedBy: allergens
+    displayName:
+      en: Materials
+      ja: 関連材料
+      vi: Nguyên liệu liên quan
+
+  # Multi-tenancy scope. Allergen is org-scoped (not brand-scoped) because
+  # regulatory sets are shared across brands within one organization —
+  # seeding one JP/EU/US set per org is enough. Brand-level overrides are
+  # out of scope for plan-003.
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức

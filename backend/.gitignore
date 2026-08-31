@@ -1,0 +1,47 @@
+*.log
+.DS_Store
+.env
+.env.backup
+.env.production
+.phpactor.json
+.phpunit.result.cache
+/.fleet
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/auth.json
+Homestead.json
+Homestead.yaml
+Thumbs.db
+_ide_helper.php
+
+# Omnify codegen workspace
+/node_modules
+
+/.claude/settings.local.json
+
+# Laravel
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/framework/payment-backfill-locks/
+/storage/pail
+/vendor
+
+# Playwright MCP
+.playwright-mcp/
+*.png
+!database/seeders/fixtures/catalog/media/**/*.png
+/dxs_product
+
+# Deptrac AST cache — máy sinh, không commit (#1532)
+/.deptrac.cache
+
+# Workstation release binaries — published by CI, not git
+/public/downloads/workstation/*
+!/public/downloads/workstation/manifest.json
+!/public/downloads/workstation/archive/
+!/public/downloads/workstation/archive/.gitkeep

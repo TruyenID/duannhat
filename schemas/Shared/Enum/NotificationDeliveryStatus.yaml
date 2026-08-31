@@ -1,0 +1,52 @@
+# =============================================================================
+# NotificationDeliveryStatus (配信ステータス / Trạng thái phân phối)
+# =============================================================================
+#
+# Status on every `notification_deliveries` row (plan-012 T3.2).
+# `NotificationChannelJob` writes this after each send attempt.
+#
+# Transitions:
+#   pending   → sent        (channel impl returned success synchronously)
+#   pending   → failed      (3 retries exhausted; error column populated)
+#   pending   → skipped     (channel deliberately noop — e.g. PushChannel
+#                            stub, or RealtimeChannel when the brand has
+#                            no provisioned Reverb app)
+#   sent      → delivered   (downstream receipt — email delivery webhook,
+#                            push provider ack; Phase C leaves this alone)
+#   sent      → bounced     (downstream bounce webhook — Postmark
+#                            HardBounce / SES Bounce / Mailgun bounce)
+#   sent      → complained  (Postmark SpamComplaint / SES Complaint /
+#                            Mailgun complained — plan-023 M4)
+#   sent      → suppressed  (downstream unsubscribe — Postmark
+#                            SubscriptionChange — plan-023 M4)
+#
+# Plan-023 M4 added bounced semantics + the complained / suppressed
+# terminal states. `EmailChannel::send` may also write `skipped` when a
+# pre-send suppression lookup blocks the message before it leaves the
+# app; the delivery row's metadata records the reason in that case.
+# =============================================================================
+
+kind: enum
+
+displayName:
+  ja: 配信ステータス
+  en: Delivery Status
+  vi: Trạng thái phân phối
+
+values:
+  - value: pending
+    label: { ja: 保留中, en: Pending, vi: Đang chờ }
+  - value: sent
+    label: { ja: 送信済, en: Sent, vi: Đã gửi }
+  - value: delivered
+    label: { ja: 配信済, en: Delivered, vi: Đã phân phối }
+  - value: failed
+    label: { ja: 失敗, en: Failed, vi: Thất bại }
+  - value: bounced
+    label: { ja: バウンス, en: Bounced, vi: Bị trả lại }
+  - value: complained
+    label: { ja: 苦情, en: Complained, vi: Khiếu nại spam }
+  - value: suppressed
+    label: { ja: 抑制, en: Suppressed, vi: Bị chặn }
+  - value: skipped
+    label: { ja: スキップ, en: Skipped, vi: Bỏ qua }

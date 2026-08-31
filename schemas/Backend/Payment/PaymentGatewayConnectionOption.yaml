@@ -1,0 +1,170 @@
+# =============================================================================
+# PaymentGatewayConnectionOption — verified capability for one merchant account
+# =============================================================================
+#
+# Intersects catalog potential with merchant contract/account configuration. A row
+# cannot widen PaymentGatewayOption; policies can only narrow it further. Evidence
+# is non-secret metadata/reference, never a provider response or credential.
+# =============================================================================
+
+displayName:
+  en: Payment Gateway Connection Option
+  ja: 決済ゲートウェイ接続オプション
+  vi: Tuỳ chọn kết nối cổng thanh toán
+
+kind: object
+
+options:
+  id: Uuid
+  timestamps: true
+  softDelete: false
+  indexes:
+    # Exactly one account-specific capability row per catalog option.
+    - columns: [connection_id, option_id]
+      unique: true
+      name: payment_gateway_connection_options_unique
+    # Effective resolver scan by connection/state.
+    - columns: [connection_id, verification_state, is_enabled]
+      name: payment_gateway_connection_options_eligibility
+    - columns: [effective_from, effective_to]
+      name: payment_connection_options_effective_window
+
+properties:
+  connection:
+    # Merchant contract owner. RESTRICT retains attempt/refund history references.
+    type: Association
+    relation: ManyToOne
+    target: PaymentGatewayConnection
+    onDelete: RESTRICT
+    displayName:
+      en: Connection
+      ja: 接続
+      vi: Kết nối
+
+  option:
+    # Catalog capability being narrowed/verified for this exact merchant account.
+    type: Association
+    relation: ManyToOne
+    target: PaymentGatewayOption
+    onDelete: RESTRICT
+    displayName:
+      en: Option
+      ja: オプション
+      vi: Tuỳ chọn
+
+  verification_state:
+    # Only verified is eligible. Unknown/contract/certification/restricted fail closed.
+    type: Enum
+    enum: [unknown, contract_required, certification_required, verified, restricted]
+    default: unknown
+    filterable: true
+    displayName:
+      en: Verification State
+      ja: 検証状態
+      vi: Trạng thái xác minh
+
+  approved_currencies:
+    # Explicit subset of option currencies with minor units; empty means unavailable.
+    type: Json
+    displayName:
+      en: Approved Currencies
+      ja: 承認済み通貨
+      vi: Tiền tệ được duyệt
+
+  approved_channels:
+    # Explicit subset of option PaymentChannel values; cannot add catalog-absent values.
+    type: Json
+    displayName:
+      en: Approved Channels
+      ja: 承認済みチャネル
+      vi: Kênh được duyệt
+
+  approved_operations:
+    # Machine-readable subset/conditional predicates; cannot widen catalog operations.
+    type: Json
+    displayName:
+      en: Approved Operations
+      ja: 承認済みオペレーション
+      vi: Thao tác được duyệt
+
+  approved_limits:
+    # Account-specific limits equal to or narrower than catalog limits.
+    type: Json
+    nullable: true
+    displayName:
+      en: Approved Limits
+      ja: 承認済み制限
+      vi: Giới hạn được duyệt
+
+  merchant_configuration:
+    # Allowlisted non-secret flags (for example partial_refund_enabled); no IDs/secrets.
+    type: Json
+    nullable: true
+    displayName:
+      en: Merchant Configuration
+      ja: 加盟店設定
+      vi: Cấu hình đơn vị bán hàng
+
+  evidence_ref:
+    # Non-secret audit/document reference proving contract or certification; not payload.
+    type: String
+    length: 255
+    nullable: true
+    displayName:
+      en: Evidence Reference
+      ja: 証跡参照
+      vi: Tham chiếu bằng chứng
+
+  capability_revision:
+    # Monotonic account capability revision snapshotted by new attempts/policies.
+    type: BigInt
+    unsigned: true
+    default: 1
+    rules:
+      min: 1
+    displayName:
+      en: Capability Revision
+      ja: 機能リビジョン
+      vi: Phiên bản khả năng
+
+  effective_from:
+    # Inclusive contract/certification eligibility boundary.
+    type: Timestamp
+    displayName:
+      en: Effective From
+      ja: 有効開始
+      vi: Hiệu lực từ
+
+  effective_to:
+    # Exclusive boundary; null means open-ended verified entitlement.
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Effective To
+      ja: 有効終了
+      vi: Hiệu lực đến
+
+  verified_at:
+    # Last time account evidence was verified; null unless state=verified/restricted.
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Verified At
+      ja: 検証日時
+      vi: Thời điểm xác minh
+
+  is_enabled:
+    # Connection owner switch; still requires verified state, health, time, and policy.
+    type: Boolean
+    default: false
+    filterable: true
+    displayName:
+      en: Enabled
+      ja: 有効
+      vi: Bật
+
+policies:
+  - forbid: [create, edit, delete]
+    desc: Verified capability rows mutate only through connection validation flows with explicit auth
+  - permit: [view, list]
+    desc: Capability state is readable for admin explanation within tenant scope

@@ -1,0 +1,36 @@
+{
+  "seqNo": 1786364495964,
+  "cashStatus": {
+    "5000": "nearEmpty",
+    "10": "enough",
+    "10000": "enough",
+    "overflow": "none",
+    "billReject": "enough",
+    "cassete": "enough",
+    "50": "enough",
+    "2000": "none",
+    "1": "enough",
+    "5": "enough",
+    "100": "enough",
+    "500": "empty",
+    "1000": "enough"
+  },
+  "coin": {
+    "errorCode": 0,
+    "setInfo": 2
+  },
+  "cashWrapStatus": {
+    "opened": false,
+    "1": "empty",
+    "10": "empty",
+    "5": "empty",
+    "100": "empty",
+    "reject": false,
+    "500": "empty",
+    "50": "empty"
+  },
+  "bill": {
+    "errorCode": 0,
+    "setInfo": 0
+  }
+}

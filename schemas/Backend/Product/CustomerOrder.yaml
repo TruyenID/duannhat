@@ -1,0 +1,718 @@
+# CustomerOrder schema
+# Đơn hàng khách — header chứa tổng tiền, trạng thái, lifecycle.
+# Payment tách riêng ở OrderPayment (1 order → N payments).
+# Table link qua Table.current_order_id (reverse relation, hỗ trợ gộp bàn).
+#
+# Scope: Branch (Shop). Order code unique globally.
+#
+# Written by: staff POS tại quán via CustomerOrderService
+# Read by: POS realtime, admin report, đối soát cuối ngày, workstation sync
+#
+# Business Rules:
+#   - BR-O01: order_code auto-generated: ORD-YYYY-NNNN (sequential per year)
+#   - BR-O02: customer_id nullable — khách vãng lai không cần record
+#   - BR-O03: Tables optional tại thời điểm tạo order, gán sau qua init hoặc merge-table
+#   - BR-O04: tax / discount / service charge live in order_conditions.
+#            total_amount is the frozen priced total; the condition ledger is
+#            the authoritative breakdown (discount rows carry a negative sign).
+#            Coupon flow (plan-019) binds one coupon per order (BR-COUP01) —
+#            enforced at DB level by the unique customer_order_id on
+#            coupon_redemptions.
+#   - BR-O05: remaining_amount = total_amount - paid_amount (computed accessor, không lưu DB)
+#   - BR-O06: closed → tạo stock_out transaction (sub_type: sales), 1 lần duy nhất
+#   - BR-O07: closed orders are immutable (no edit/delete/void).
+#            Coupon release CHỈ cho phép trên non-closed (BR-COUP07).
+#   - BR-O08: paid_amount = cache sum(OrderPayment.amount WHERE status=succeeded)
+#   - BR-O09: total_tip = cache sum(OrderPayment.tip_amount WHERE status=succeeded)
+#   - BR-O10: (plan-045) tax_rounding_mode + tax_rounding_decimals are snapshots
+#            of ShopOrderSetting taken at order creation. The pricing engine reads
+#            these columns (never the live setting) so a settings change never
+#            re-rounds an existing order. Immutable after create.
+#
+# Workflow (dine-in):
+#   open → dining → checkout → paying → closed
+#   Bất kỳ (trừ closed) → voided
+#
+# Workflow (takeaway shortcut):
+#   open → checkout → paying → closed
+#
+# Stock Impact:
+#   - closed: Creates stock_out transaction (only served items, exclude voided)
+
+displayName:
+  en: Customer Order
+  ja: 注文
+  vi: Đơn hàng
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    - columns: [order_code]
+      unique: true
+    - columns: [stripe_payment_intent_id]
+      unique: true
+    - columns: [organization_id, status]
+    - columns: [branch_id, status]
+    - columns: [customer_id]
+    - columns: [brand_id]
+    - columns: [branch_id, created_at]
+    - columns: [branch_id, updated_at]
+    - columns: [qr_token]
+      unique: true
+    - columns: [client_order_id]
+      unique: true
+    # plan-044 — per-shift order attribution lookups (carry-over re-stamp scan +
+    # close-report aggregation). The single-column [till_session_id] index is
+    # auto-created by the tillSession FK below; add the composite for the
+    # branch-scoped carry-over re-stamp scan.
+    - columns: [branch_id, till_session_id]
+
+properties:
+  order_code:
+    # Mã tự động: ORD-YYYY-NNNN (tăng dần theo năm, unique toàn cục) (BR-O01)
+    type: String
+    length: 50
+    displayName:
+      en: Order Code
+      ja: 注文コード
+      vi: Mã đơn hàng
+
+  qr_token:
+    # Opaque base62 token (32-char) cho unified kiosk resolve qua
+    # /api/v1/customer/qr/{token}. order_code đoán được nên không dùng làm
+    # QR payload — cùng namespace với Table.qr_token. Nullable: chỉ order
+    # mới (creating hook) + active order backfill mới có token; order cũ
+    # terminal để null.
+    type: String
+    length: 64
+    nullable: true
+    displayName:
+      en: QR Token
+      ja: QRトークン
+      vi: Token QR
+
+  client_order_id:
+    # plan-041 — workstation's local order UUID. Durable idempotency key so a
+    # LAN sync-up replay maps to the same cloud order without minting a second
+    # ORD-#### number. Null for cloud-direct orders (customer-web/admin/QR).
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Client Order ID
+      ja: クライアント注文ID
+      vi: ID đơn (local)
+
+  order_type:
+    # Loại đơn hàng: spot (mặc định, linh hoạt, bàn optional), dine_in (ăn tại chỗ), takeaway (mang về)
+    # Nullable — nếu không truyền thì default spot
+    type: EnumRef
+    enum: CustomerOrderType
+    nullable: true
+    default: spot
+    displayName:
+      en: Order Type
+      ja: 注文タイプ
+      vi: Loại đơn hàng
+
+  # === Pickup time (takeaway flow) ===
+
+  pickup_type:
+    # Cách khách muốn nhận: immediate (ASAP) hoặc scheduled (chọn giờ).
+    # Default 'immediate' — flow takeaway cũ không cần khai báo.
+    type: EnumRef
+    enum: CustomerOrderPickupType
+    default: immediate
+    displayName:
+      en: Pickup Type
+      ja: ピックアップタイプ
+      vi: Loại nhận hàng
+
+  scheduled_pickup_time:
+    # Khi khách yêu cầu giờ nhận cụ thể (pickup_type=scheduled).
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Scheduled Pickup Time
+      ja: 予約受取時刻
+      vi: Giờ nhận hẹn
+
+  estimated_ready_time:
+    # Hệ thống tính từ CustomerPickupService (base 15 + item factor + load factor).
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Estimated Ready Time
+      ja: 完成予定時刻
+      vi: Dự kiến xong
+
+  actual_ready_time:
+    # Staff bấm "đã sẵn sàng" → set giờ thực tế (đo prep time KPI).
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Actual Ready Time
+      ja: 実際の完成時刻
+      vi: Giờ xong thực tế
+
+  preparation_minutes:
+    # Số phút prep do hệ thống tính — lưu để analytics/calibration.
+    type: Int
+    default: 15
+    displayName:
+      en: Preparation Minutes
+      ja: 調理時間（分）
+      vi: Thời gian chuẩn bị (phút)
+
+  status:
+    # Lifecycle state — xem diagram ở header comment
+    type: EnumRef
+    enum: CustomerOrderStatus
+    default: open
+    displayName:
+      en: Status
+      ja: ステータス
+      vi: Trạng thái
+
+  # === Tài chính ===
+
+  subtotal:
+    # Tổng tiền món (chưa trừ giảm giá, chưa cộng phí)
+    # = sum(items.subtotal) WHERE item.status != voided
+    type: Decimal
+    precision: 15
+    scale: 2
+    displayName:
+      en: Subtotal
+      ja: 小計
+      vi: Tạm tính
+
+  manual_discount_amount:
+    # #1124/#2041 — the MANUALLY-ENTERED checkout intent. The effective
+    # applied discount is projected from order_conditions (and may instead
+    # come from a coupon). Governance: cashier-capped at
+    # ShopOrderSetting.manual_discount_max_percent of the live subtotal;
+    # manager+ roles may comp up to the full subtotal; any manual discount
+    # requires `manual_discount_reason`. Audit rides checked_out.
+    type: Decimal
+    precision: 15
+    scale: 2
+    default: 0
+    displayName:
+      en: Manual Discount
+      ja: 手動割引額
+      vi: Giảm giá thủ công
+
+  manual_discount_reason:
+    # #1124 — mandatory free-text reason whenever manual_discount_amount > 0
+    # ("regular customer", "spilled drink", …). Stamped into the audit trail;
+    # money leaving the till without a coupon must always say why.
+    type: String
+    length: 255
+    nullable: true
+    displayName:
+      en: Manual Discount Reason
+      ja: 手動割引理由
+      vi: Lý do giảm giá thủ công
+
+  coupon_code_snapshot:
+    # Mã coupon đã áp tại apply time (snapshot, BR-COUP01). Synced
+    # với coupon_redemptions.coupon_snapshot.code. Phục vụ receipt +
+    # audit ngay cả khi Coupon row sau này bị rename. Null khi
+    # order chưa apply coupon hoặc đã release.
+    type: String
+    length: 50
+    nullable: true
+    displayName:
+      en: Coupon Code Snapshot
+      ja: クーポンコード（スナップショット）
+      vi: Mã coupon (snapshot)
+
+  is_tax_included:
+    # (plan-043) Snapshot mode "giá đã gồm thuế" từ ShopOrderSetting
+    # .prices_include_tax TẠI THỜI ĐIỂM TẠO order — admin flip flag về sau
+    # KHÔNG đổi order cũ (§6.3; guard 409 chặn flip khi còn ca mở).
+    # true  = mode included/総額表示: engine tách thuế từ gross (hiển thị
+    #         内税), total = Σ gross + service charge.
+    # false = mode excluded (hành vi BR-O04 hiện tại): thuế cộng thêm.
+    type: Boolean
+    default: false
+    displayName:
+      en: Prices Include Tax
+      ja: 税込価格
+      vi: Giá đã gồm thuế
+
+  tax_rounding_mode:
+    # (plan-045 BR-O10) Snapshot of ShopOrderSetting.tax_rounding_mode taken at
+    # order creation — round / ceil / floor (四捨五入 / 切り上げ / 切り捨て). The
+    # engine reads THIS column (not the live setting) when (re)computing tax, so
+    # a later settings change never re-rounds this order. Immutable after create.
+    # Legacy snapshots (half_up/round_up/round_down) still price correctly via
+    # RoundingMode::roundToStep's aliases.
+    type: String
+    length: 20
+    default: round
+    displayName:
+      en: Tax Rounding Mode
+      ja: 消費税の端数処理
+      vi: Cách làm tròn thuế
+
+  tax_rounding_decimals:
+    # (plan-045 BR-O10) Snapshot of ShopOrderSetting.tax_rounding_decimals (0–3).
+    # Default 0 (整数, JPY/VND). Nullable only for legacy rows (null = engine
+    # derives the step from currency_code). Immutable after create; paired with
+    # tax_rounding_mode above.
+    type: Int
+    nullable: true
+    default: 0
+    displayName:
+      en: Tax Rounding Decimals
+      ja: 消費税の小数点桁数
+      vi: Số thập phân làm tròn thuế
+
+  total_amount:
+    # Frozen priced total. Its authoritative tax / discount / service-charge
+    # components are the signed order_conditions rows (BR-O04).
+    type: Decimal
+    precision: 15
+    scale: 2
+    displayName:
+      en: Total Amount
+      ja: 合計金額
+      vi: Tổng tiền
+
+  paid_amount:
+    # Cache: sum(OrderPayment.amount WHERE status=succeeded) (BR-O08)
+    # Cập nhật mỗi khi payment thay đổi
+    type: Decimal
+    precision: 15
+    scale: 2
+    default: 0
+    displayName:
+      en: Paid Amount
+      ja: 支払済金額
+      vi: Đã thanh toán
+
+  total_tip:
+    # Cache: sum(OrderPayment.tip_amount WHERE status=succeeded) (BR-O09)
+    type: Decimal
+    precision: 15
+    scale: 2
+    default: 0
+    displayName:
+      en: Total Tip
+      ja: チップ合計
+      vi: Tổng tip
+
+  stripe_payment_intent_id:
+    # Stripe PaymentIntent ID — set khi customer khởi tạo payment intent lần đầu,
+    # reuse ở các retry. Unique vì 1 intent chỉ map đúng 1 order (webhook dùng để match).
+    type: String
+    length: 255
+    nullable: true
+    displayName:
+      en: Stripe Payment Intent
+      ja: Stripe 決済 ID
+      vi: Mã Stripe PaymentIntent
+
+  # remaining_amount = total_amount - paid_amount (computed accessor, không lưu DB) (BR-O05)
+
+  # === Lifecycle timestamps ===
+
+  opened_at:
+    # Khi tạo order (mở bàn)
+    type: Timestamp
+    displayName:
+      en: Opened At
+      ja: 受付日時
+      vi: Thời điểm mở
+
+  offline_replayed_at:
+    # plan-055 T5.1 (#1826) — Cloud ĐÓNG DẤU, thiết bị KHÔNG khai.
+    #
+    # Set duy nhất ở EloquentOrderPersistence::insertOfflineReplay(), ngay sau
+    # assertTrusted() — tức chỉ sau khi OfflineOrderEvidenceVerifier đã chấp
+    # nhận chữ ký của thiết bị. Đường tạo đơn online KHÔNG BAO GIỜ set trường
+    # này. NULL nghĩa là "đơn không đến từ replay offline".
+    #
+    # Written by: Cloud (insertOfflineReplay) — không nhận từ payload client
+    # Read by:    OrderPaymentService::handleMissingPolicyOption() để miễn trừ
+    #             kiểm policy cho payment thuộc đơn bán offline
+    #
+    # VÌ SAO CLOUD GHI CHỨ KHÔNG PHẢI CLIENT KHAI: nếu workstation tự gửi một
+    # trường kiểu `taken_offline_at`, nó chỉ cần gắn vào MỌI payment là tự miễn
+    # trừ vĩnh viễn — đúng cái lỗ plan-055 đang vá. Nguyên tắc #1092: thiết bị
+    # KÝ bằng chứng, Cloud PHÁN XÉT.
+    #
+    # Giá trị là thời điểm Cloud NHẬN replay, không phải thời điểm bán —
+    # thời điểm bán đã nằm ở opened_at (ràng buộc chữ ký).
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Offline Replayed At
+      ja: オフライン取込日時
+      vi: Thời điểm nhận lại từ offline
+
+  checkout_at:
+    # Khi staff bấm "tính tiền" — items locked sau thời điểm này
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Checkout At
+      ja: 会計日時
+      vi: Thời điểm tính tiền
+
+  closed_at:
+    # Khi đóng đơn (paid đủ) — triggers stock_out + table release
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Closed At
+      ja: 完了日時
+      vi: Thời điểm đóng
+
+  voided_at:
+    # Khi hủy đơn
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Voided At
+      ja: 無効日時
+      vi: Thời điểm hủy
+
+  void_reason:
+    # Lý do hủy (bắt buộc khi void)
+    type: String
+    length: 500
+    nullable: true
+    displayName:
+      en: Void Reason
+      ja: 無効理由
+      vi: Lý do hủy
+
+  # ---------------------------------------------------------------------------
+  # #1127 — five columns adopted from pre-rule hand migrations. Declared to
+  # MATCH the built definitions byte-for-byte (char36 / timestamp / varchar);
+  # the historical migrations are now hasColumn-guarded so the generated alter
+  # (which sorts first on a fresh DB) and they cannot collide. The
+  # table_session_id: Omnify cannot emit its FK or index — `table_sessions` is
+  # not an Omnify entity (hand-written 2026_06_12_100000). This used to say they
+  # "stay in 2026_06_12_100001"; that file was deleted when the history was
+  # flattened, so from then on NOTHING created the FK on a new install (#1216).
+  # The index has since been re-added by the generated alter migration
+  # (2000_04_15_000000_alter_customer_orders_table). The FK is still ownerless —
+  # it needs the schema builder, which the hand-migration guard blocks, and it
+  # cannot come from here. See #1216.
+  # ---------------------------------------------------------------------------
+  tableSession:
+    # plan-034 — nullable link to table_sessions. NULL for legacy + takeaway
+    # orders; dine-in orders pin to the session opened on the first QR scan.
+    #
+    # #1216 — declared as an Association so Omnify owns the FK + index. It was a
+    # bare Uuid, and the hand-written migration that carried the FK was deleted
+    # when the history was flattened, so on a fresh install nothing created it.
+    #
+    # `renamedFrom` is what makes this safe on an EXISTING database: the guide
+    # says a rename without it "degrades to drop+add" and loses data. With it,
+    # the generator emits a single RENAME COLUMN — and since the property is
+    # named `tableSession`, the column it renames TO is `table_session_id`,
+    # i.e. the same column, so nothing actually moves.
+    type: Association
+    relation: ManyToOne
+    target: TableSession
+    renamedFrom: table_session_id
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Table Session
+      ja: テーブルセッション
+      vi: Phiên bàn
+
+  editing_by_staff_at:
+    # plan-034 — POS soft-lock. /start-edit stamps now(); cleared by /end-edit
+    # or stale after 60s. Customer device sees the lock over Reverb.
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Editing By Staff At
+      ja: スタッフ編集開始時刻
+      vi: Nhân viên bắt đầu sửa lúc
+
+  customer_locale:
+    # Locale the customer ordered in (ja/en/vi…) — drives notification +
+    # receipt language for this order.
+    type: String
+    length: 8
+    nullable: true
+    displayName:
+      en: Customer Locale
+      ja: 顧客ロケール
+      vi: Ngôn ngữ khách
+
+  split_mode:
+    # plan-036 — split-bill mode chosen at checkout (by_items / equal …).
+    type: String
+    length: 20
+    nullable: true
+    displayName:
+      en: Split Mode
+      ja: 分割方式
+      vi: Kiểu chia hoá đơn
+
+  confirmation_due_at:
+    # plan-037 — takeaway counter-pay confirmation deadline; the FE countdown
+    # survives reloads and the reaper finds expired rows by this.
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Confirmation Due At
+      ja: 確認期限
+      vi: Hạn xác nhận
+
+  payment_due_at:
+    # plan-031 — Thời hạn thanh toán (chỉ dùng cho takeaway counter-payment).
+    # Set = opened_at + brand.takeaway_payment_timeout_minutes khi tạo order.
+    # Khi hiện tại > payment_due_at mà vẫn chưa thanh toán → BE tự void order.
+    # FE dùng để hiển thị countdown "Còn X phút để thanh toán".
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Payment Due At
+      ja: 支払期限
+      vi: Hạn thanh toán
+
+  payment_timeout_minutes:
+    # plan-031 — Số phút timeout (snapshot từ brand.takeaway_payment_timeout_minutes
+    # tại thời điểm tạo order, để audit log không bị ảnh hưởng nếu brand setting
+    # thay đổi sau). Chỉ set cho takeaway counter-payment. Nullable vì dine-in
+    # không có timeout (khách ngồi tại bàn, staff thu tiền trực tiếp).
+    type: Int
+    nullable: true
+    displayName:
+      en: Payment Timeout (Minutes)
+      ja: 支払タイムアウト（分）
+      vi: Thời gian chờ thanh toán (phút)
+
+  auto_cancelled_at:
+    # issue #512 — Terminal stamp set by the CancelOverdueTakeawayOrders job
+    # when a takeaway counter-pay order's payment window elapses (status →
+    # `expired`). Distinct from voided_at (manual cancel). NULL until the
+    # sweep touches the row; also acts as the idempotency guard so the job
+    # never re-processes an already-expired order.
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Auto Cancelled At
+      ja: 自動キャンセル日時
+      vi: Thời điểm tự huỷ
+
+  # === Thông tin bổ sung ===
+
+  guest_count:
+    # Số khách — dùng cho split-bill + báo cáo
+    type: Int
+    nullable: true
+    displayName:
+      en: Guest Count
+      ja: 来客数
+      vi: Số khách
+
+  split_people_count:
+    # plan-039 follow-up — headcount pre-declared on customer-web for
+    # the "Chia đều" + counter-pay flow. Paired with split_mode=by_people;
+    # lets the kiosk display ¥X/người ngay khi scan QR thay vì hỏi cashier
+    # nhập lại. NULL khi customer chưa pre-declare (kiosk fallback chooser).
+    type: Int
+    nullable: true
+    displayName:
+      en: Split People Count
+      ja: 割り勘人数
+      vi: Số người chia hóa đơn
+
+  note:
+    type: Text
+    nullable: true
+    displayName:
+      en: Note
+      ja: 備考
+      vi: Ghi chú
+
+  stock_out_transaction_id:
+    # FK mềm → stock_transactions — tự tạo khi order closed (BR-O06). Không dùng FK cứng.
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Stock Out Transaction
+      ja: 出庫取引
+      vi: Phiếu xuất kho
+
+  created_by_id:
+    # Staff tạo đơn (SSO user ID). Không dùng FK cứng.
+    # Nullable vì customer-created orders (QR) không có staff user.
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Created By
+      ja: 作成者
+      vi: Người tạo
+
+  customer_takeaway_name:
+    # Tên khách mang về — nhập ở checkout guest flow (customer-web).
+    # Chỉ dùng cho order_type=takeaway khi customer_id null (khách vãng lai).
+    type: String
+    length: 255
+    nullable: true
+    displayName:
+      en: Takeaway Customer Name
+      ja: テイクアウト顧客名
+      vi: Tên khách mang về
+
+  customer_takeaway_phone:
+    # SĐT khách mang về — liên hệ khi đơn sẵn sàng.
+    # Chỉ dùng cho order_type=takeaway khi customer_id null.
+    type: String
+    length: 50
+    nullable: true
+    displayName:
+      en: Takeaway Customer Phone
+      ja: テイクアウト顧客電話
+      vi: SĐT khách mang về
+
+  customer_takeaway_email:
+    # plan-035 — email khách mang về. Khi có giá trị thì BE dispatch
+    # OrderPlacedMail (kèm QR mã đơn) ngay sau khi save, và sau khi
+    # khách thanh toán xong sẽ dispatch OrderPaidInvoiceMail (kèm PDF
+    # hoá đơn). Cả 2 trigger đều no-op khi field này null.
+    type: String
+    length: 255
+    nullable: true
+    displayName:
+      en: Takeaway Customer Email
+      ja: テイクアウト顧客メール
+      vi: Email khách mang về
+
+  # === Relationships ===
+
+  table:
+    # Bàn chính — denormalized để tra cứu lịch sử sau khi đóng đơn.
+    # Gán khi bàn đầu tiên được link vào order; KHÔNG xóa khi đóng đơn.
+    # Multi-table (gộp bàn): chỉ lưu bàn đầu tiên. Real-time dùng Table.current_order_id.
+    type: Association
+    relation: ManyToOne
+    target: Table
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Table
+      ja: テーブル
+      vi: Bàn
+
+  customer:
+    # Khách hàng — nullable cho khách vãng lai (BR-O02)
+    type: Association
+    relation: ManyToOne
+    target: Customer
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Customer
+      ja: 顧客
+      vi: Khách hàng
+
+  coupon:
+    # Coupon đang áp lên order (plan-019). Nullable — set khi
+    # CouponService::apply() chạy, clear khi release(). 1 coupon per
+    # order (BR-COUP01). SET NULL nếu Coupon row biến mất (không
+    # CASCADE — order đã closed phải giữ history dù coupon bị xóa,
+    # snapshot đã có ở coupon_code_snapshot + coupon_redemptions).
+    type: Association
+    relation: ManyToOne
+    target: Coupon
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Coupon
+      ja: クーポン
+      vi: Coupon
+
+  branch:
+    # Chi nhánh nơi đặt đơn
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    onDelete: CASCADE
+    displayName:
+      en: Branch
+      ja: 店舗
+      vi: Chi nhánh
+
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: CASCADE
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  tillSession:
+    # Plan-044 — Order ↔ Till Session attribution. An order belongs to the
+    # cashier shift that *serves* it. Stamped at creation via
+    # CustomerOrderService::insertOrder() using an `open`-only resolver
+    # (TillSessionService::openSessionIdForBranch) — a `closing` shift never
+    # stamps orders, unlike payments which keep plan-030 `inProgress` semantics.
+    #
+    # Mutable (unlike OrderPayment.till_session_id): while the order is still
+    # active it is carried over to the next shift at open() time (R2 re-stamp).
+    # Terminal orders (closed/voided) are frozen and never re-stamped (R3).
+    #
+    # Nullable: rows created before plan-044 (legacy), orders created while no
+    # shift is open (handy/customer gap orders — re-stamped when the next shift
+    # opens), or during a `closing` shift.
+    #
+    # onDelete: SET NULL — TillSession is no-softDelete + service-immutable, so
+    # a hard delete is theoretical; keep the order row safe regardless.
+    type: Association
+    relation: ManyToOne
+    target: TillSession
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Till Session
+      ja: レジセッション
+      vi: Ca thu ngân
+
+  items:
+    type: Association
+    relation: OneToMany
+    target: CustomerOrderItem
+    mappedBy: customerOrder
+    displayName:
+      en: Order Items
+      ja: 注文明細
+      vi: Chi tiết đơn hàng
+
+  payments:
+    # Các lần thanh toán — 1 order có thể có N payments (split tender)
+    type: Association
+    relation: OneToMany
+    target: OrderPayment
+    mappedBy: customerOrder
+    displayName:
+      en: Payments
+      ja: 支払い
+      vi: Thanh toán

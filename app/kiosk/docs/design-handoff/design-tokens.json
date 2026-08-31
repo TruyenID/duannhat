@@ -1,0 +1,124 @@
+{
+  "meta": {
+    "brand": "Betoya",
+    "app": "godx-kiosk",
+    "orientation": "landscape",
+    "device": "iPad tablet",
+    "frame_size": "1194x834",
+    "ui_style": "light",
+    "design_system": "Japanese enterprise (SmartHR convergent)"
+  },
+
+  "colors": {
+    "brand": {
+      "primary": { "value": "#3E7B4A", "label": "Betoya Forest Green", "usage": "Headlines, CTA buttons, focus ring" },
+      "primary-foreground": { "value": "#FFFFFF", "usage": "Text on primary" },
+      "background": { "value": "#F5EFD0", "label": "Warm Cream", "usage": "Page background" },
+      "foreground": { "value": "#1A1A1A", "label": "Near Black", "usage": "Body text" }
+    },
+
+    "semantic": {
+      "secondary": { "value": "#FFFFFF", "foreground": "#1A1A1A", "usage": "Secondary buttons" },
+      "destructive": { "value": "#D4183D", "foreground": "#FFFFFF", "usage": "Delete, cancel actions" },
+      "success": { "value": "#10B981", "foreground": "#FFFFFF", "usage": "Payment success, available status" },
+      "warning": { "value": "#F59E0B", "foreground": "#FFFFFF", "usage": "Occupied tables, caution" },
+      "info": { "value": "#3B82F6", "foreground": "#FFFFFF", "usage": "Reserved status, links" },
+      "error": { "value": "#EF4444", "foreground": "#FFFFFF", "usage": "Form errors, failed states" }
+    },
+
+    "surface": {
+      "card": { "value": "#FFFFFF", "foreground": "#1A1A1A", "usage": "Card backgrounds (float on cream)" },
+      "muted": { "value": "#EDE7CC", "foreground": "#717182", "usage": "Disabled states, subtle backgrounds" },
+      "accent": { "value": "#E8E2CC", "foreground": "#1A1A1A", "usage": "Hover states, highlights" }
+    },
+
+    "border": {
+      "default": { "value": "#C8C0A0", "usage": "Card borders, dividers" },
+      "input": { "value": "#D4CDB0", "usage": "Input field borders" },
+      "focus-ring": { "value": "#3E7B4A", "usage": "Focus state ring (same as primary)" }
+    },
+
+    "gray_scale": {
+      "50": "#F9FAFB",
+      "100": "#F3F4F6",
+      "200": "#E5E7EB",
+      "300": "#D1D5DB",
+      "400": "#9CA3AF",
+      "500": "#6B7280",
+      "600": "#4B5563",
+      "700": "#374151",
+      "800": "#1F2937",
+      "900": "#111827"
+    },
+
+    "table_status": {
+      "available": { "value": "#10B981", "label": "Green" },
+      "occupied": { "value": "#F59E0B", "label": "Amber" },
+      "reserved": { "value": "#3B82F6", "label": "Blue" },
+      "cleaning": { "value": "#9B8EC4", "label": "Purple" },
+      "blocked": { "value": "#8B8B8B", "label": "Gray" }
+    }
+  },
+
+  "typography": {
+    "font_family": ["Hiragino Sans", "Yu Gothic", "Noto Sans JP", "System"],
+    "note": "Japanese-first font stack. Figma: use 'Noto Sans JP' (freely available on Google Fonts)",
+    "weights": {
+      "regular": 400,
+      "medium": 500,
+      "semibold": 600,
+      "bold": 700
+    }
+  },
+
+  "spacing": {
+    "unit": "4px",
+    "base": "16px",
+    "scale": [0, 4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96]
+  },
+
+  "sizing": {
+    "control_height": "32px",
+    "button_height": "48px (kiosk touch target)",
+    "card_padding": "16px",
+    "card_radius": "8px",
+    "input_radius": "6px",
+    "touch_target_min": "44px (iOS HIG)"
+  },
+
+  "layout": {
+    "orientation": "landscape (always)",
+    "columns": {
+      "checkout_left": "40% (order summary)",
+      "checkout_right": "60% (payment methods / action area)"
+    },
+    "safe_area": "Respect iPad safe area insets on all edges"
+  },
+
+  "locales": {
+    "default": "ja (Japanese)",
+    "supported": ["ja", "en", "vi"],
+    "note": "All text must support 3 languages. Japanese is primary."
+  },
+
+  "components": {
+    "button": {
+      "variants": ["default (primary)", "secondary", "destructive", "ghost", "outline"],
+      "sizes": ["sm", "default", "lg"],
+      "note": "Large touch targets for kiosk use (min 48px height)"
+    },
+    "card": {
+      "subcomponents": ["CardHeader", "CardContent", "CardFooter", "CardTitle", "CardDescription"],
+      "style": "White surface, warm border (#C8C0A0), 8px radius"
+    },
+    "input": {
+      "style": "Warm gray border (#D4CDB0), 6px radius, green focus ring"
+    },
+    "badge": {
+      "variants": ["default", "secondary", "destructive", "outline"]
+    },
+    "skeleton": {
+      "style": "Animated pulse, muted cream color (#EDE7CC)"
+    }
+  }
+}

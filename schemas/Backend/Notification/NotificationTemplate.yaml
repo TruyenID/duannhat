@@ -1,0 +1,213 @@
+# =============================================================================
+# NotificationTemplate (通知テンプレート / Mẫu thông báo)
+# =============================================================================
+#
+# DB-backed copy + params schema for a notification `type`. Replaces the
+# Phase A FE-i18n bundle lookup: the response renderer joins
+# `notifications.template_key` → `notification_templates.key` (soft FK —
+# no DB constraint) and renders `content[<locale>].title/body` with
+# `params` substituted at response time.
+#
+# Written by:
+#   - `POST /hq/{brand}/notifications/templates` — admin custom templates
+#   - `PATCH /hq/{brand}/notifications/templates/{id}` — admin edits
+#   - `SystemNotificationTemplateSeeder` — migrates the 5 original Phase A
+#     strings (stock.alert.low/out, recipe.approved/rejected,
+#     order.status_changed) into `is_system=true` rows
+#
+# Read by:
+#   - `TemplateRenderer::render($template, $params, $locale)` — invoked by
+#     `NotificationResource` so `GET /me/notifications` returns already-
+#     rendered `title` + `body`
+#   - `POST /hq/{brand}/notifications/templates/render` — composer live
+#     preview (returns `renderAll`: {ja, en, vi})
+#
+# Rendering contract:
+#   - `content[<locale>]` is `{title: string, body: string}`. Tokens
+#     `{{param_key}}` are substituted from `params` at response time.
+#   - Missing locale → fall back `$locale` → `ja` → `en`.
+#   - Missing param → empty string + `Log::warning('notification.template.missing_param')`
+#     (no throw — silent missing keys are a diagnostic, not a 500).
+#
+# NO content snapshotting (Decision 15 in plan-008 DESIGN.md):
+#   `notifications` stores `template_key` + `params`, NOT a snapshot of
+#   rendered title/body. An admin PATCH to this row reflects immediately
+#   in every recipient's inbox. Deliberate: one source of truth, easier
+#   audit, simpler storage. Consequence: deleting / renaming a template
+#   that is still referenced leaves rendered output blank — the arch test
+#   under tests/Arch/NotificationArchTest guards against missing entries
+#   for types emitters actually use.
+#
+# is_system protection:
+#   `is_system=true` rows were seeded by `SystemNotificationTemplateSeeder`.
+#   PATCH + DELETE against these rows return 403 — the controller guards
+#   this. Admins can override copy by creating a NEW row with the same
+#   `key` + `brand_id` — lookup prefers brand-scoped rows over system rows.
+#
+# `default_channels` is a JSON array of `NotificationChannel` enum cases
+# (defined in M3 T3.1). Phase B callers can populate with `["in_app"]`;
+# M3 routing layer consumes the column once it lands.
+#
+# `params_schema` documents the expected token keys an emitter passes.
+# Shape (soft contract, validated at seeder time only):
+#   {
+#     "required": ["warehouse_name", "item_name"],
+#     "optional": ["current_quantity", "min_stock"]
+#   }
+# The composer UI reads this to populate the param-helper dropdown.
+# =============================================================================
+
+displayName:
+  en: Notification Template
+  ja: 通知テンプレート
+  vi: Mẫu thông báo
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: false
+  id: Uuid
+  indexes:
+    # Primary lookup — `NotificationResource` joins on `key`. Brand-scoped
+    # first; org-scoped and system rows fall through.
+    - columns: [key]
+      unique: true
+    - columns: [brand_id, key]
+    - columns: [is_system]
+
+properties:
+  # Tenancy boundary — nullable for platform-wide (system) templates.
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    nullable: true
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+    description:
+      en: "Organization that owns this template. Nullable — null means platform-wide (e.g. system rows seeded by SystemNotificationTemplateSeeder)."
+      ja: "このテンプレートを所有する組織。null = プラットフォーム全体（例：シーダーのシステム行）。"
+      vi: "Tổ chức sở hữu mẫu. Null = toàn platform (VD: row hệ thống từ seeder)."
+
+  # Brand scope — null means organization-wide OR platform-wide (combined
+  # with null organization_id). Admin-created brand-scoped rows override
+  # the platform row at lookup time.
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    nullable: true
+    onDelete: CASCADE
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu
+    description:
+      en: Brand scope. Null = org-scoped (when organization_id is set) or platform-scoped (when both are null). Brand-scoped row wins over org / platform rows at render time.
+      ja: ブランドスコープ。null = organization_id セット時は組織スコープ、両方 null ならプラットフォームスコープ。レンダリング時にブランド行が組織／プラットフォーム行を上書き。
+      vi: Phạm vi brand. Null = phạm vi tổ chức (khi organization_id có) hoặc toàn platform (khi cả hai null). Row brand thắng row tổ chức / platform lúc render.
+
+  # Shop scope (plan-023 M6 T6.1) — null = brand/org-managed; set = shop override.
+  # FK column lands as `branch_id` (codebase uses Branch for the shop concept).
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    nullable: true
+    onDelete: CASCADE
+    displayName:
+      en: Shop
+      ja: 店舗
+      vi: Cửa hàng
+    description:
+      en: "Shop scope. When the renderer resolves a template_key the lookup order is shop → brand → system (org) → platform. Set means the row overrides the brand-level wording for that specific shop. is_system is always false on shop-scoped rows."
+      ja: "店舗スコープ。レンダラーが template_key を解決する際、shop → brand → system (組織) → platform の順でルックアップ。セットの場合、その店舗専用にブランド級の文言を上書きする行。店舗スコープ行では is_system は常に false。"
+      vi: "Phạm vi shop. Khi renderer resolve template_key thì lookup order là shop → brand → system (org) → platform. Set nghĩa là row override wording brand cho shop cụ thể. Row shop-scope luôn có is_system=false."
+
+  # Lookup key — joined to `notifications.template_key`. Unique globally
+  # (every template_key resolves to at most one active template, picked
+  # brand-first).
+  key:
+    type: String
+    length: 100
+    filterable: true
+    displayName:
+      en: Key
+      ja: キー
+      vi: Khóa
+    description:
+      en: "Lookup key — joined to notifications.template_key. Examples: `stock.alert.low`, `recipe.approved`, `order.status_changed`. Unique globally."
+      ja: "ルックアップキー — notifications.template_key と結合。例：`stock.alert.low`、`recipe.approved`、`order.status_changed`。グローバルで一意。"
+      vi: "Khóa lookup — join vào notifications.template_key. VD: `stock.alert.low`, `recipe.approved`, `order.status_changed`. Unique global."
+
+  # Locale-keyed content — `{ja:{title,body}, en:{title,body}, vi:{title,body}}`.
+  content:
+    type: Json
+    displayName:
+      en: Content
+      ja: コンテンツ
+      vi: Nội dung
+    description:
+      en: "Locale-keyed content: `{ja:{title,body}, en:{title,body}, vi:{title,body}}`. Tokens `{{param}}` are substituted at render time from `notifications.params`. Missing token → empty + Log::warning (no throw)."
+      ja: "ロケール別コンテンツ：`{ja:{title,body}, en:{title,body}, vi:{title,body}}`。トークン `{{param}}` はレンダリング時に notifications.params から置換。欠落トークン → 空 + Log::warning（throw しない）。"
+      vi: "Nội dung theo locale: `{ja:{title,body}, en:{title,body}, vi:{title,body}}`. Token `{{param}}` được substitute lúc render từ notifications.params. Token thiếu → rỗng + Log::warning (không throw)."
+
+  # Default channel set — consumed by M3 routing layer.
+  default_channels:
+    type: Json
+    nullable: true
+    displayName:
+      en: Default Channels
+      ja: デフォルトチャンネル
+      vi: Kênh mặc định
+    description:
+      en: "JSON array of NotificationChannel cases (M3 enum). Phase B rows ship with `['in_app']`; M3 T3.9 channel-routing layer reads this as the fallback when no brand / org route override exists. Nullable → treat as `['in_app']`."
+      ja: "NotificationChannel 値の JSON 配列（M3 enum）。Phase B 行は `['in_app']` で出荷。M3 T3.9 のルーティング層で、ブランド／組織のルート上書きがないときのフォールバックとして読み取る。null → `['in_app']` として扱う。"
+      vi: "Mảng JSON các case NotificationChannel (enum M3). Row Phase B ship với `['in_app']`; tầng routing M3 T3.9 đọc làm fallback khi không có route override brand/org. Null → treat như `['in_app']`."
+
+  # Params schema — soft contract enumerating expected token keys.
+  params_schema:
+    type: Json
+    nullable: true
+    displayName:
+      en: Params Schema
+      ja: パラメータスキーマ
+      vi: Schema tham số
+    description:
+      en: "Soft contract: `{required: [key, ...], optional: [key, ...]}`. Composer UI reads this to render the param-helper dropdown. Validated at seeder time for system templates; admin-created rows are not strictly validated."
+      ja: "ソフト契約：`{required: [key, ...], optional: [key, ...]}`。コンポーザー UI がパラメータヘルパーのドロップダウンを描画する際に参照。システムテンプレートはシーダー時に検証、管理者作成行は厳密な検証なし。"
+      vi: "Soft contract: `{required: [key, ...], optional: [key, ...]}`. UI composer đọc để render dropdown param helper. System template validate tại seeder; row admin tạo không validate chặt."
+
+  # System flag — blocks admin PATCH/DELETE.
+  is_system:
+    type: Boolean
+    default: false
+    filterable: true
+    displayName:
+      en: Is System
+      ja: システム
+      vi: Hệ thống
+    description:
+      en: "`true` when seeded by `SystemNotificationTemplateSeeder`. PATCH + DELETE return 403 on these rows — admins override by creating a brand-scoped row with the same `key`."
+      ja: "`SystemNotificationTemplateSeeder` によるシード時 `true`。PATCH + DELETE は 403 — 管理者は同じ `key` のブランドスコープ行を作成して上書き。"
+      vi: "`true` khi seed bởi `SystemNotificationTemplateSeeder`. PATCH + DELETE trả 403 — admin override bằng cách tạo row brand-scoped cùng `key`."
+
+  # Creator trace — SET NULL.
+  createdBy:
+    type: Association
+    relation: ManyToOne
+    target: User
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Created By
+      ja: 作成者
+      vi: Người tạo
+    description:
+      en: User who created this template. SET NULL on user deletion. Null for seeder-created rows (is_system=true).
+      ja: このテンプレートを作成したユーザー。ユーザー削除時 SET NULL。シーダー作成行（is_system=true）は null。
+      vi: User tạo mẫu này. SET NULL khi user bị xoá. Null cho row seeder tạo (is_system=true).

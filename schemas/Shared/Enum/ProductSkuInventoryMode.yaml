@@ -1,0 +1,55 @@
+# ==============================================================================
+# ProductSku Inventory Mode Enum (在庫モード / Chế độ tồn kho)
+# ==============================================================================
+#
+# Determines whether a ProductSku's sale at order close should:
+#   (1) decrement its own finished-goods StockLevel (`track_stock`), and
+#   (2) deduct ingredient Materials via the linked Recipe (`track_stock`).
+#
+# When `made_to_order` (default for new + existing rows), the order close
+# skips both the SKU stock-out AND the recipe → material deduction. The
+# ProductSku is treated as ephemeral — cooked on demand, never inventoried.
+# This is the only correct mode for restaurant menu items where stock
+# tracking would generate noise: the kitchen replenishes from raw
+# materials, not finished goods.
+#
+# When `track_stock`, the order close fires two stock_out StockTransactions:
+#   1. `sub_type=sales` for the SKU itself (the existing path)
+#   2. `sub_type=sales_material_consumption` for the recipe ingredients
+# If the SKU is set `track_stock` but has no Recipe (or Recipe.ingredients
+# is empty), step 2 is skipped silently with a Log::warning. The SKU
+# stock-out in step 1 still runs.
+#
+# Values:
+#   - made_to_order: no stock tracking on sale (default)
+#   - track_stock:   decrement SKU + recipe materials on order close
+#
+# Used in:
+#   - ProductSku.inventory_mode (plan-024)
+#
+# Migration note:
+#   Existing ProductSku rows after plan-024 default to `made_to_order`.
+#   Shops that relied on implicit stock tracking should mass-set
+#   `inventory_mode=track_stock` via HQ admin (or one-off SQL). See
+#   docs/explanation/inventory-domain.md "Plan-024 migration" section.
+#
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: 在庫モード
+  en: ProductSku Inventory Mode
+  vi: Chế độ tồn kho
+
+values:
+  - value: made_to_order
+    label:
+      ja: 注文都度調理
+      en: Made to Order
+      vi: Làm theo đơn
+  - value: track_stock
+    label:
+      ja: 在庫追跡
+      en: Track Stock
+      vi: Theo dõi tồn kho

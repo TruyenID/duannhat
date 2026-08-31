@@ -1,0 +1,49 @@
+# ==============================================================================
+# Warehouse Type Enum (倉庫タイプ / Loại kho)
+# ==============================================================================
+#
+# Phân loại kho hàng trong hệ thống quản lý tồn kho.
+# Mỗi loại kho phục vụ mục đích khác nhau trong chuỗi cung ứng.
+#
+# Giá trị (Values):
+#   - main: Kho chính (メイン倉庫)
+#     Mục đích: Kho trung tâm, lưu trữ nguyên liệu/hàng hóa chính
+#     Ví dụ: "Kho NVL trung tâm", "Kho hàng thành phẩm"
+#
+#   - branch: Kho chi nhánh (支店倉庫)
+#     Mục đích: Kho tại cửa hàng hoặc chi nhánh
+#     Ví dụ: "Kho cửa hàng Q1", "Kho chi nhánh Đà Nẵng"
+#
+#   - production: Kho sản xuất (生産倉庫)
+#     Mục đích: Kho phục vụ sản xuất/chế biến
+#     Ví dụ: "Kho bếp Q1", "Kho nguyên liệu xưởng"
+#
+# Sử dụng trong:
+#   - Warehouse.type: Xác định loại kho
+#   - Filter/Search: Lọc danh sách kho theo loại
+#
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: 倉庫タイプ
+  en: Warehouse Type
+  vi: Loại kho
+
+values:
+  - value: main
+    label:
+      ja: メイン倉庫
+      en: Main Warehouse
+      vi: Kho chính
+  - value: branch
+    label:
+      ja: 支店倉庫
+      en: Branch Warehouse
+      vi: Kho chi nhánh
+  - value: production
+    label:
+      ja: 生産倉庫
+      en: Production Warehouse
+      vi: Kho sản xuất

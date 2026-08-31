@@ -1,0 +1,314 @@
+# #1182 — backend test gate. Before this file the repo had ZERO test CI:
+# a 6.9k-test suite enforced only by whoever remembered to run it locally.
+#
+# RUNNER: self-hosted ONLY. GitHub-hosted runners are forbidden for this org
+# (billing is not enabled — a hosted job dies in ~4s with "recent account
+# payments have failed"), and every existing workflow already targets
+# [self-hosted, Linux, X64]. Do NOT reintroduce ubuntu-latest.
+#
+# TOOLCHAIN: the JP self-hosted runner ships PHP 8.4 + Composer natively and
+# `shivammathur/setup-php` FAILS there (needs privileges the runner lacks) —
+# same reason deploy-xserver.yml asserts the toolchain instead of installing
+# it. Assert, don't install.
+#
+# PR → dev      → ARCHITECTURE GATE ONLY — **453 test / 1790 assertion, ~44s**
+#                 (đo trên `9d8548633`, máy M-series; job CI thật của PR #2831:
+#                 58s). Con số cũ ghi "~59 tests, ~4s" — lệch ~7,7× số test và
+#                 ~11× thời gian, vì cổng chạy BA thư mục `tests/Unit/Arch`
+#                 `tests/Feature/Architecture` `tests/Arch`, không phải một.
+#                 Một con số sai ở đây không vô hại: nó là thứ người ta dựa vào
+#                 để chạy "đúng phạm vi cổng" tại chỗ, và chạy hẹp hơn cổng rồi
+#                 tin là đã kiểm chính là cách #2832 lọt (#2834).
+#                 Full suite on every
+#                 PR into dev cost two full runs per change (PR + the push that
+#                 follows the merge) on a single self-hosted runner, and jobs
+#                 queue behind each other. Owner ruling 2026-08-01: the full
+#                 suite is the dev→promotion gate, not the per-PR gate (#1516).
+# PR/push → main → full Pest suite (deterministic order) — the promotion gate.
+# nightly   → the expensive nets too slow for every push: the timezone matrix
+#             (the #1091 bug class is invisible in a single daytime run) and a
+#             randomized-order flake hunt with the seed printed so a red run
+#             reproduces (#1132).
+name: backend-tests
+
+# `workstation-app` is in the filter although this workflow runs no Go (#2089).
+# The PHP side is the only side that hash-compares the SHARED golden fixtures
+# (tax allocation · tax resolution · offline signing), so a PR that moves ONLY
+# the workstation pointer — i.e. changes the Go half of a parity pair — used to
+# trigger no run at all and the comparison never happened. Measured on PR #2105
+# and #2107: files touched were workstation-app only, and neither PR shows a
+# check from this workflow.
+#
+# `web/**` cũng ở lại trong filter — nhưng workflow này **KHÔNG kiểm các app
+# web** (#2585). Cổng đó là `web-apps.yml`: lint · typecheck · test · build cho
+# `web/{admin,customer,pos}` + `app/kds`. Nếu bạn tới đây vì thấy một PR
+# chỉ-đụng-web mang tick xanh của `backend-tests`: tick ấy không nói được gì về
+# mã web, đừng đọc nó thành "đã có thứ gì đó kiểm rồi".
+#
+# Giữ lại vì đúng lý lẽ của `workstation-app` ngay trên: phía PHP là phía DUY
+# NHẤT đọc một số file nằm dưới `web/`, nên gỡ filter là tạo điểm mù thật, đúng
+# vào loại PR duy nhất có thể phá chúng.
+#
+#   arch-gate (mọi PR)   `DocsReferencedPathsExistTest` có `web/` trong danh
+#                        sách tiền tố và đối chiếu từng đường dẫn `web/**` mà
+#                        docs trỏ tới. Một PR web đổi tên hay xoá một trong số
+#                        đó phải ĐỎ — mà nó chỉ đỏ được nếu workflow khởi động.
+#                        Đếm tại chỗ, đừng tin số chép lại:
+#                          grep -rhoE '`web/[A-Za-z0-9_./+-]+`' docs | sort -u
+#   pest (PR → main)     `Plan047AcceptanceAdminApiExtendedTest` đọc THẲNG
+#                        `web/admin/src/__tests__/shop-payments-settings-page.test.tsx`
+#                        rồi grep hai chuỗi trong đó — hợp đồng coverage
+#                        G12/G14, và nó CỐ Ý đỏ khi vắng file (#2333/#2343).
+#                        `CrossRepoGatesRanInCiTest` còn đòi `web/admin/` không
+#                        rỗng trên runner.
+#
+# `dev` là nhánh TÍCH HỢP: các PR gom vào đó, và full suite chạy MỘT lần trên
+# `dev` sau khi gom — không phải 14 phút nhân với số PR. `main` là đích cuối.
+# `docs/**` NẰM TRONG `paths:` vì `arch-gate` bên dưới ĐỌC `docs/` — 
+# `DocsIndexAndLinksStayHonestTest` (#1322) và `DocsReferencedPathsExistTest`.
+#
+# Thiếu nó thì một PR chỉ-đổi-docs chạy KHÔNG check nào, merge xanh, rồi làm
+# `arch-gate` đỏ ở PR KẾ TIẾP có chạm backend — và người đọc sẽ tưởng là lỗi của
+# PR đó. Đúng chuyện đã xảy ra: #2803 thêm `docs/contributing/work-policy.md`
+# không kèm dòng chỉ mục, và #2831 lãnh cái đỏ (#2832).
+on:
+  push:
+    branches: [dev, main]
+    paths: ['backend/**', 'schemas/**', 'workstation/**', 'web/**', 'docs/**', '.github/workflows/backend-tests.yml']
+  pull_request:
+    # `labeled` là bắt buộc cho van `full-suite`: mặc định của `pull_request` là
+    # [opened, synchronize, reopened], nên gắn nhãn lên một PR đang mở sẽ KHÔNG
+    # khởi động lượt chạy nào và cái van thành đồ trang trí.
+    types: [opened, synchronize, reopened, labeled]
+    branches: [dev, main]
+    paths: ['backend/**', 'schemas/**', 'workstation/**', 'web/**', 'docs/**', '.github/workflows/backend-tests.yml']
+  schedule:
+    - cron: '30 17 * * *' # 02:30 JST nightly
+  workflow_dispatch:
+
+# The group MUST include the event. Keyed on ref alone, a nightly run and an
+# ordinary push to the same branch share a group — and `cancel-in-progress`
+# then lets any push kill the nightly. That is exactly what happened: the only
+# scheduled run this workflow has ever had (07-28 18:53 on main) was cancelled
+# by a push at 19:10, taking both the timezone matrix and the flake hunt with
+# it. Those are the two jobs that cannot be replaced by the per-push gate, so
+# losing them silently every night defeats the point of scheduling them.
+concurrency:
+  group: backend-tests-${{ github.ref }}-${{ github.event_name }}
+  # Huỷ lượt cũ CHỈ trên PR. Trên `dev`/`main`, lượt đang chạy là bằng chứng
+  # DUY NHẤT cho commit đó: huỷ nó đi thì commit trung gian không bao giờ được
+  # test, và `workflow_run` thấy `cancelled` nên `deploy-xserver.yml` bỏ qua
+  # luôn cả deploy. Trước #2557 điều đó còn rẻ vì mỗi thay đổi đã được full
+  # suite ở PR của nó; nay không còn.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # #2325 — cổng `submodule-pointers` ĐÃ XOÁ cùng submodule cuối cùng: repo là monorepo,
+  # không còn gitlink nào để canh.
+  #
+  # Nó thừa hưởng bộ lọc `paths` của workflow này (`backend/**`, `schemas/**`),
+  # nên PR chỉ-bump-con-trỏ — đúng loại PR duy nhất có thể làm hỏng gitlink —
+  # là loại PR mà nó KHÔNG chạy. Điều kiện kích hoạt của một rào phải mô tả thứ
+  # nó canh, không phải thứ tình cờ ở chung file. Đừng đưa nó về đây.
+
+  # Full suite — cổng THĂNG CẤP (dev→main) và nightly, KHÔNG phải cổng mỗi PR.
+  # Điều kiện dựa trên nhánh ĐÍCH: với pull_request thì `github.base_ref` là
+  # nhánh được merge VÀO; với push thì nó rỗng nên phải dùng `github.ref`.
+  pest:
+    # Điều kiện này KHÔNG đổi ở #2557 — nó vốn đúng. Ghi lại vì tôi đã đổi nó
+    # hai lần rồi trả về chỗ cũ, và người sau sẽ bị cám dỗ y hệt:
+    #
+    #   PR  → dev        : KHÔNG chạy. Một PR lẻ không đáng 14 phút.
+    #   push dev         : KHÔNG chạy. Gom PR vào `dev` chưa phải lúc.
+    #   PR  dev → main   : CHẠY. ĐÂY là cổng — cả loạt PR đã gom, một lượt
+    #                      full suite duy nhất cho tất cả.
+    #   push main        : CHẠY. `deploy-xserver.yml` treo vào `workflow_run`
+    #                      của workflow này trên `main` và chỉ deploy khi XANH.
+    #   nhãn full-suite  : CHẠY trên PR đó. Van kéo tay khi cần chắc sớm.
+    #
+    # Cái #2557 sửa là `arch-gate` bên dưới, không phải job này.
+    # Nhãn `full-suite` là van kéo tay cho ĐÚNG quy trình chủ dự án đặt: gom
+    # nhiều PR vào một nhánh tích hợp, gắn nhãn, chạy full suite MỘT lần ở đó
+    # trước khi vào `main`. Không có nhãn thì full suite là cổng SAU merge —
+    # `main` có thể đỏ một lúc, nhưng production vẫn được chắn vì
+    # `deploy-xserver.yml` chỉ chạy khi `backend-tests` trên `main` XANH.
+    if: >-
+      github.event_name != 'schedule' &&
+      (github.base_ref == 'main' ||
+       github.ref == 'refs/heads/main' ||
+       github.event_name == 'workflow_dispatch' ||
+       contains(github.event.pull_request.labels.*.name, 'full-suite'))
+    runs-on: [self-hosted, Linux, X64]
+    timeout-minutes: 120
+    defaults: { run: { working-directory: backend } }
+    steps:
+      # SELF-HOSTED RUNNER HYGIENE: ~/.gitconfig is SHARED by every job and every
+      # repo on this machine. A leftover url.insteadOf rewrite makes
+      # actions/checkout try SSH and fail with "Permission denied (publickey)"
+      # for unrelated repos. Strip any inherited rewrite before doing anything.
+      - name: Sanitize inherited git config
+        run: |
+          git config --global --unset-all url."git@github.com:".insteadOf || true
+          git config --global --unset-all url."https://github.com/".insteadOf || true
+
+      - uses: actions/checkout@v4
+
+      - name: Assert PHP toolchain
+        run: |
+          php -v | head -1
+          php -r 'exit(version_compare(PHP_VERSION, "8.4.0", ">=") ? 0 : 1);' \
+            || { echo "::error::runner needs PHP >= 8.4"; exit 1; }
+          php -r 'exit(extension_loaded("pdo_sqlite") ? 0 : 1);' \
+            || { echo "::error::runner needs the pdo_sqlite extension (phpunit.xml runs on sqlite :memory:)"; exit 1; }
+          composer --version
+
+      - name: Composer install
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Bootstrap env
+        run: |
+          [ -f .env ] || cp .env.example .env
+          php artisan key:generate
+
+      - name: Pest (full suite)
+        # #2778 — CHẠY SONG SONG. `paratest` đã nằm sẵn trong vendor từ lâu;
+        # thiếu đúng cái cờ này.
+        #
+        # Đo trên máy 10 nhân: tuần tự 752–860s, song song **105s** — nhanh hơn
+        # 7–8 lần, 9697 test cùng xanh.
+        #
+        # Vì sao nó không chỉ là "chạy nhanh hơn cho sướng": deploy chờ workflow
+        # này (`deploy-xserver.yml` dùng `workflow_run: [backend-tests]`), và ở
+        # 13–14 phút cộng tới 27 phút xếp hàng, suite trên `dev` gần như KHÔNG
+        # BAO GIỜ kịp xong — đã đo bốn lượt liên tiếp bị huỷ vì merge kế tiếp
+        # landing trước. Ở ~2 phút thì chuỗi huỷ đó tự tan.
+        run: php -d memory_limit=-1 vendor/bin/pest --compact --parallel
+
+  # Cổng mỗi PR vào `dev` — HẸP CÓ CHỦ ĐÍCH (#1516).
+  #
+  # Chọn nhóm architecture chứ không phải một tập ngẫu nhiên: đó chính là nhóm
+  # bắt được ca #1489, nơi #1474 và #1480 mỗi cái XANH trên nhánh của nó nhưng
+  # gộp lại thì đỏ. Và nó chạy trong ~4 giây, nên không ai phải chờ.
+  #
+  # Cái gì bắt phần còn lại: `nightly` (full suite + timezone matrix + flake
+  # hunt) và cổng `main`. Lỗi lọt vào `dev` sẽ nhiều hơn — đó là đánh đổi đã
+  # chốt, không phải điều bị bỏ sót. CI chạy trên NHÁNH không bao giờ bắt được
+  # semantic conflict; chỉ thứ chạy trên KẾT QUẢ phép hợp mới bắt được.
+  arch-gate:
+    # #2557 — điều kiện cũ loại trừ `main`, nên khi mọi PR nhắm `main` thì job
+    # này KHÔNG BAO GIỜ chạy nữa. Mất mát thật không phải `tests/Feature/
+    # Architecture` (nó nằm trong `pest` full) mà là **`deptrac`**: bước ranh
+    # giới module chỉ tồn tại ở đây. Deptrac bắt được vi phạm
+    # `Ordering → PlatformIntegration` của #2522 lúc 04:43 ngày 2026-08-12,
+    # một giờ trước khi `dev` biến mất; sau mốc đó cùng lỗi ấy merge im lặng.
+    #
+    # Chạy ở mọi nơi trừ nightly: ~1 phút, và sau khi `pest` rời khỏi đường PR
+    # thì đây là cổng DUY NHẤT còn gác từng PR.
+    if: github.event_name != 'schedule'
+    runs-on: [self-hosted, Linux, X64]
+    timeout-minutes: 20
+    defaults: { run: { working-directory: backend } }
+    steps:
+      # SELF-HOSTED RUNNER HYGIENE: ~/.gitconfig is SHARED by every job and every
+      # repo on this machine. A leftover url.insteadOf rewrite makes
+      # actions/checkout try SSH and fail with "Permission denied (publickey)"
+      # for unrelated repos. Strip any inherited rewrite before doing anything.
+      - name: Sanitize inherited git config
+        run: |
+          git config --global --unset-all url."git@github.com:".insteadOf || true
+          git config --global --unset-all url."https://github.com/".insteadOf || true
+
+      - uses: actions/checkout@v4
+
+      - name: Assert PHP toolchain
+        run: |
+          php -v | head -1
+          php -r 'exit(version_compare(PHP_VERSION, "8.4.0", ">=") ? 0 : 1);' \
+            || { echo "::error::runner needs PHP >= 8.4"; exit 1; }
+          php -r 'exit(extension_loaded("pdo_sqlite") ? 0 : 1);' \
+            || { echo "::error::runner needs the pdo_sqlite extension (phpunit.xml runs on sqlite :memory:)"; exit 1; }
+          composer --version
+
+      - name: Composer install
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Bootstrap env
+        run: |
+          [ -f .env ] || cp .env.example .env
+          php artisan key:generate
+
+      # #2357 — `tests/Arch` NẰM TRONG cổng này. Trước đó job tên "architecture
+      # gate" bỏ sót đúng thư mục tên là `Arch`, nên một PR thêm truy vấn Eloquent
+      # thẳng vào controller HQ (rào #1920) đi qua CI XANH, merge, rồi để `dev` đỏ
+      # ở cổng full-suite. Một cổng hẹp hơn cái tên nó hứa là cổng đánh lừa người
+      # đọc dấu xanh.
+      #
+      # Chi phí đo được: `tests/Arch` chạy 24s trên máy dev, so với ~15s của hai
+      # thư mục kia — rẻ so với việc phát hiện muộn ở chặng dev→staging.
+      - name: Pest (architecture gate only)
+        run: |
+          php -d memory_limit=-1 vendor/bin/pest --compact \
+            tests/Unit/Arch tests/Feature/Architecture tests/Arch
+
+      # Deptrac replaces the hand-rolled edge counter (#1532). Needs a raised
+      # memory limit: it builds an AST for ~2.6k classes and the 128M default
+      # dies mid-parse — which reads as a crash, not as a boundary failure.
+      - name: Deptrac (module boundaries)
+        run: php -d memory_limit=-1 vendor/bin/deptrac analyse --no-progress
+
+  timezone-matrix:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: [self-hosted, Linux, X64]
+    timeout-minutes: 300
+    defaults: { run: { working-directory: backend } }
+    steps:
+      # SELF-HOSTED RUNNER HYGIENE: ~/.gitconfig is SHARED by every job and every
+      # repo on this machine. A leftover url.insteadOf rewrite makes
+      # actions/checkout try SSH and fail with "Permission denied (publickey)"
+      # for unrelated repos. Strip any inherited rewrite before doing anything.
+      - name: Sanitize inherited git config
+        run: |
+          git config --global --unset-all url."git@github.com:".insteadOf || true
+          git config --global --unset-all url."https://github.com/".insteadOf || true
+
+      - uses: actions/checkout@v4
+      - name: Assert PHP toolchain
+        run: php -v | head -1 && composer --version
+
+      - run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Bootstrap env
+        run: |
+          [ -f .env ] || cp .env.example .env
+          php artisan key:generate
+      - name: Timezone matrix (UTC / Tokyo / Ho_Chi_Minh)
+        run: composer test:timezones
+
+  flake-hunt:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: [self-hosted, Linux, X64]
+    timeout-minutes: 180
+    defaults: { run: { working-directory: backend } }
+    steps:
+      # SELF-HOSTED RUNNER HYGIENE: ~/.gitconfig is SHARED by every job and every
+      # repo on this machine. A leftover url.insteadOf rewrite makes
+      # actions/checkout try SSH and fail with "Permission denied (publickey)"
+      # for unrelated repos. Strip any inherited rewrite before doing anything.
+      - name: Sanitize inherited git config
+        run: |
+          git config --global --unset-all url."git@github.com:".insteadOf || true
+          git config --global --unset-all url."https://github.com/".insteadOf || true
+
+      - uses: actions/checkout@v4
+      - name: Assert PHP toolchain
+        run: php -v | head -1 && composer --version
+
+      - run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Bootstrap env
+        run: |
+          [ -f .env ] || cp .env.example .env
+          php artisan key:generate
+      - name: Randomized order (seed logged — reproduce with the same seed)
+        run: |
+          SEED=$RANDOM$RANDOM
+          echo "::notice title=flake-hunt seed::$SEED"
+          php -d memory_limit=-1 vendor/bin/pest --compact --order-by=random --random-order-seed=$SEED

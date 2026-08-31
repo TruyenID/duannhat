@@ -1,0 +1,40 @@
+# ==============================================================================
+# Movement Type Enum (変動タイプ / Loại biến động)
+# ==============================================================================
+#
+# Chiều biến động tồn kho trong stock_movements (log bất biến).
+# Ánh xạ trực tiếp từ StockTransactionType:
+#   stock_in  → in  (tăng tồn)
+#   stock_out → out (giảm tồn)
+#
+# Giá trị (Values):
+#   - in: Nhập — tăng tồn kho (入庫)
+#     quantity_after = quantity_before + quantity
+#
+#   - out: Xuất — giảm tồn kho (出庫)
+#     quantity_after = quantity_before - quantity
+#
+# Sử dụng trong:
+#   - StockMovement.movement_type: Chiều biến động
+#   - Báo cáo: Tổng hợp nhập/xuất theo kho, sản phẩm
+#
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: 変動タイプ
+  en: Movement Type
+  vi: Loại biến động
+
+values:
+  - value: in
+    label:
+      ja: 入庫
+      en: In
+      vi: Nhập
+  - value: out
+    label:
+      ja: 出庫
+      en: Out
+      vi: Xuất

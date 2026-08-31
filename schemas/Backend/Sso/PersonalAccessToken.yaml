@@ -1,0 +1,67 @@
+# Bảng token của Sanctum. Ship kèm ở đây để service dùng package không phải tự
+# giữ một migration tay cho nó.
+kind: object
+
+options:
+  timestamps: true
+  softDelete: false
+  indexes:
+    - columns: [tokenable_type, tokenable_id]
+    - columns: [expires_at]
+
+properties:
+  tokenable_type:
+    type: String
+    length: 255
+    displayName:
+      ja: 対象タイプ
+      en: Tokenable Type
+      vi: Loại đối tượng
+
+  tokenable_id:
+    type: String
+    length: 36
+    displayName:
+      ja: 対象ID
+      en: Tokenable ID
+      vi: ID đối tượng
+
+  name:
+    type: Text
+    displayName:
+      ja: 名称
+      en: Name
+      vi: Tên
+
+  token:
+    type: String
+    length: 64
+    unique: true
+    displayName:
+      ja: トークンハッシュ
+      en: Token Hash
+      vi: Hash token
+
+  abilities:
+    type: Text
+    nullable: true
+    displayName:
+      ja: 権限
+      en: Abilities
+      vi: Quyền
+
+  last_used_at:
+    type: DateTime
+    nullable: true
+    displayName:
+      ja: 最終使用日時
+      en: Last Used At
+      vi: Lần dùng cuối
+
+  expires_at:
+    type: DateTime
+    nullable: true
+    displayName:
+      ja: 有効期限
+      en: Expires At
+      vi: Hết hạn

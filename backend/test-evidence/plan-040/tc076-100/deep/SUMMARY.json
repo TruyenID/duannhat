@@ -1,0 +1,242 @@
+[
+  {
+    "tc": "TC-076",
+    "desc": "List + meta + brand",
+    "http": 200,
+    "pass": true,
+    "checks": [
+      [
+        "http200",
+        true
+      ],
+      [
+        "has_pagination_meta",
+        true
+      ],
+      [
+        "all_brand_beto_coffee",
+        true
+      ],
+      [
+        "nonempty",
+        true
+      ]
+    ]
+  },
+  {
+    "tc": "TC-077",
+    "desc": "Search match WHEAT",
+    "http": 200,
+    "pass": true,
+    "checks": [
+      [
+        "http200",
+        true
+      ],
+      [
+        "all_match_WHEAT",
+        true
+      ]
+    ]
+  },
+  {
+    "tc": "TC-078",
+    "desc": "Isolation betoya only",
+    "http": 200,
+    "pass": false,
+    "checks": [
+      [
+        "http200",
+        true
+      ],
+      [
+        "no_BETOCOFFEE",
+        true
+      ],
+      [
+        "all_BETOYA",
+        false
+      ]
+    ]
+  },
+  {
+    "tc": "TC-080",
+    "desc": "Lookup no cross-brand leak",
+    "http": 200,
+    "pass": true,
+    "checks": [
+      [
+        "http200",
+        true
+      ],
+      [
+        "betoya_id_not_leaked",
+        true
+      ]
+    ]
+  },
+  {
+    "tc": "TC-081",
+    "desc": "Create stamped beto-coffee",
+    "http": 201,
+    "pass": true,
+    "checks": [
+      [
+        "http201",
+        true
+      ],
+      [
+        "brand_id==beto-coffee",
+        true
+      ],
+      [
+        "sku_ok",
+        true
+      ]
+    ]
+  },
+  {
+    "tc": "TC-082",
+    "desc": "Empty -> field-keyed 422",
+    "http": 422,
+    "pass": true,
+    "checks": [
+      [
+        "http422",
+        true
+      ],
+      [
+        "has_field_errors",
+        true
+      ]
+    ]
+  },
+  {
+    "tc": "TC-083",
+    "desc": "Neg yield 422 + msg (F3)",
+    "http": 422,
+    "pass": true,
+    "checks": [
+      [
+        "http422",
+        true
+      ],
+      [
+        "msg_greater_than_0",
+        true
+      ]
+    ]
+  },
+  {
+    "tc": "TC-084",
+    "desc": "Staff create allowed (F2)",
+    "http": 201,
+    "pass": true,
+    "checks": [
+      [
+        "http201_flatorg",
+        true
+      ]
+    ]
+  },
+  {
+    "tc": "TC-085",
+    "desc": "Show full + units",
+    "http": 200,
+    "pass": true,
+    "checks": [
+      [
+        "http200",
+        true
+      ],
+      [
+        "has_units_field",
+        true
+      ]
+    ]
+  },
+  {
+    "tc": "TC-086",
+    "desc": "Cross-brand show 404 (F1)",
+    "http": 404,
+    "pass": true,
+    "checks": [
+      [
+        "http404",
+        true
+      ]
+    ]
+  },
+  {
+    "tc": "TC-087",
+    "desc": "Update persists name",
+    "http": 200,
+    "pass": true,
+    "checks": [
+      [
+        "http200",
+        true
+      ],
+      [
+        "name_persisted",
+        true
+      ]
+    ]
+  },
+  {
+    "tc": "TC-089",
+    "desc": "Delete 204",
+    "http": 204,
+    "pass": true,
+    "checks": [
+      [
+        "http204",
+        true
+      ]
+    ]
+  },
+  {
+    "tc": "TC-091",
+    "desc": "Restore 200",
+    "http": 200,
+    "pass": true,
+    "checks": [
+      [
+        "http200",
+        true
+      ]
+    ]
+  },
+  {
+    "tc": "TC-099",
+    "desc": "Units 3 + base",
+    "http": 200,
+    "pass": true,
+    "checks": [
+      [
+        "http200",
+        true
+      ],
+      [
+        ">=3 units",
+        true
+      ],
+      [
+        "has_base",
+        true
+      ]
+    ]
+  },
+  {
+    "tc": "TC-100",
+    "desc": "Unit create 201",
+    "http": 201,
+    "pass": true,
+    "checks": [
+      [
+        "http201",
+        true
+      ]
+    ]
+  }
+]

@@ -1,0 +1,158 @@
+# StockCount schema
+# Stock count session header (phiên kiểm kê).
+# Each stock count represents an inventory audit at a specific warehouse.
+# Contains count items (StockCountItem) for comparing system vs actual quantities.
+#
+# Business Rules:
+#   - BR-01: Warehouse continues normal operations during count (no lock)
+#   - BR-02: system_quantity is snapshot at creation time, never updated
+#   - BR-03: Approval auto-creates adjustment transactions (reference_type = stock_count)
+#   - BR-04: No soft delete — count history is preserved permanently
+#
+# Workflow:
+#   draft → in_progress → pending_approval → approved
+#                                          ↘ cancelled
+#
+# Key Design:
+#   - count_code auto-generated: SC-YYYYMMDD-XXX
+#   - created_by_id / approved_by_id: SSO user IDs (no hard FK)
+#   - No soft delete (BR-04: permanent audit trail)
+#   - scope: full (all items) or partial (selected items)
+
+displayName:
+  en: Stock Count
+  ja: 棚卸
+  vi: Kiểm kê
+
+kind: object
+
+options:
+  timestamps: true
+  id: Uuid
+  indexes:
+    # plan-040 C5: count_code unique PER-ORG (was a global single-column unique).
+    # No deleted_at term — StockCount has no softDelete, so (organization_id,
+    # count_code) is the complete key.
+    - columns: [organization_id, count_code]
+      unique: true
+    - columns: [organization_id, status]
+
+properties:
+  count_code:
+    type: String
+    length: 50
+    displayName:
+      en: Count Code
+      ja: 棚卸コード
+      vi: Mã kiểm kê
+    description:
+      en: "Auto-generated code: SC-YYYYMMDD-XXX"
+      ja: "自動生成コード：SC-YYYYMMDD-XXX"
+      vi: "Mã tự động: SC-YYYYMMDD-XXX"
+
+  warehouse:
+    type: Association
+    relation: ManyToOne
+    target: Warehouse
+    onDelete: RESTRICT
+    displayName:
+      en: Warehouse
+      ja: 倉庫
+      vi: Kho hàng
+    description:
+      en: Target warehouse for this stock count
+      ja: この棚卸の対象倉庫
+      vi: Kho hàng của phiên kiểm kê này
+
+  status:
+    type: EnumRef
+    enum: StockCountStatus
+    default: draft
+    displayName:
+      en: Status
+      ja: ステータス
+      vi: Trạng thái
+    description:
+      en: "Workflow status: draft → in_progress → pending_approval → approved / cancelled"
+      ja: "ワークフローステータス：下書き → 実施中 → 承認待ち → 承認済み / キャンセル"
+      vi: "Trạng thái workflow: nháp → đang kiểm → chờ duyệt → đã duyệt / đã hủy"
+
+  scope:
+    type: EnumRef
+    enum: StockCountScope
+    displayName:
+      en: Scope
+      ja: 範囲
+      vi: Phạm vi
+    description:
+      en: "full: count all items in warehouse. partial: count selected items only."
+      ja: "full：倉庫の全品を棚卸。partial：選択した品目のみ。"
+      vi: "full: kiểm kê toàn bộ. partial: kiểm kê sản phẩm được chọn."
+
+  note:
+    type: Text
+    nullable: true
+    displayName:
+      en: Note
+      ja: 備考
+      vi: Ghi chú
+
+  created_by_id:
+    type: Uuid
+    displayName:
+      en: Created By
+      ja: 作成者
+      vi: Người tạo
+    description:
+      en: "SSO user who created this stock count (user_caches.id). No hard FK."
+      ja: "この棚卸を作成したSSOユーザー（user_caches.id）。ハードFKなし。"
+      vi: "User SSO tạo phiên kiểm kê (user_caches.id). Không dùng FK cứng."
+
+  approved_by_id:
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Approved By
+      ja: 承認者
+      vi: Người duyệt
+    description:
+      en: "SSO user who approved this stock count. Null if not yet approved."
+      ja: "この棚卸を承認したSSOユーザー。未承認の場合はNull。"
+      vi: "User SSO duyệt phiên kiểm kê. Null nếu chưa duyệt."
+
+  approved_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Approved At
+      ja: 承認日時
+      vi: Ngày duyệt
+
+  completed_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Completed At
+      ja: 完了日時
+      vi: Ngày hoàn thành
+
+  # Relationships
+  items:
+    type: Association
+    relation: OneToMany
+    target: StockCountItem
+    mappedBy: stockCount
+    displayName:
+      en: Items
+      ja: 明細
+      vi: Chi tiết
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức

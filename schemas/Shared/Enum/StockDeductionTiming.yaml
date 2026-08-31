@@ -1,0 +1,47 @@
+# ==============================================================================
+# Stock Deduction Timing (在庫引落タイミング / Thời điểm trừ kho)
+# ==============================================================================
+#
+# Plan-051 (#1150) — per-shop choice of WHEN a sold line's ingredients are
+# deducted from stock (ShopOrderSetting.stock_deduction_timing):
+#
+#   - on_close:     at order close (DEFAULT — today's behaviour, phase 5 of
+#                   OrderClosingService sweeps un-deducted lines).
+#   - on_preparing: when the kitchen accepts the item (pending → preparing) —
+#                   the physical truth (Toast/MarketMan standard). Voiding a
+#                   cooked dish no longer drifts stock (#1148 warning solved).
+#   - on_add:       the moment the line is added to the order.
+#
+# Prerequisite is per-LINE deduction with an idempotent marker
+# (customer_order_items.stock_deducted_at + stock_out_transaction_id), so
+# switching timing mid-day is safe: a deducted line is never deducted twice
+# and an un-deducted line is always swept at close.
+#
+# Used in:
+#   - ShopOrderSetting.stock_deduction_timing (plan-051)
+#
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: 在庫引落タイミング
+  en: Stock Deduction Timing
+  vi: Thời điểm trừ kho
+
+values:
+  - value: on_close
+    label:
+      ja: 会計時
+      en: On close
+      vi: Khi đóng đơn
+  - value: on_preparing
+    label:
+      ja: 調理開始時
+      en: On preparing
+      vi: Khi bắt đầu chế biến
+  - value: on_add
+    label:
+      ja: 注文追加時
+      en: On add
+      vi: Khi thêm món

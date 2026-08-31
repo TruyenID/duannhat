@@ -1,0 +1,17 @@
+-- 078 — #2031: nền chịu thuế theo mức, lưu cạnh số thuế.
+--
+-- `order_conditions` là bản sao của sổ plan-045 bên Cloud. Cloud vừa thêm cột
+-- `taxable_base` cho dòng `type=tax`: 税率ごとに区分した対価の額 — một trường BẮT
+-- BUỘC của 適格請求書, và là con số khách cầm trên tay.
+--
+-- Vì sao phải LƯU chứ không suy lại lúc in: đường hoá đơn trước #2031 gom
+-- `SUM(items.subtotal)` (GỘP, không có cột giảm giá nào trên dòng món) cạnh
+-- `SUM(items.tax_amount)` (đã trừ giảm giá). Trên đơn có khuyến mãi hai cột lấy
+-- từ hai mốc khác nhau, nên hoá đơn in ra "mức 10%: đối giá 10.000, thuế 900" —
+-- và 10.000 × 10% ≠ 900. Tờ giấy tự mâu thuẫn ở một trường pháp lý.
+--
+-- Máy trạm ĐỌC sổ này (loadOrderConditions) và phơi `conditions[]` cho POS/KDS,
+-- nên thiếu cột ở đây thì bản sao nói một đằng, Cloud nói một nẻo.
+--
+-- NULL với `discount`/`refund` — nền chịu thuế chỉ có nghĩa với dòng thuế.
+ALTER TABLE order_conditions ADD COLUMN taxable_base REAL;

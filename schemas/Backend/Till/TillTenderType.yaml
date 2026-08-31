@@ -1,0 +1,200 @@
+# ==============================================================================
+# TillTenderType — Reconciliation tender master (cash / credit / QR / e-money)
+# ==============================================================================
+#
+# Plan 030 — Cashier Shift.
+# ARTS ODM 7.3: maps to `Tender`.
+#
+# Master các loại tender hiển thị trên màn hình kết ca. KHÔNG trùng với
+# bảng PaymentMethod — PaymentMethod là phía POS ghi nhận thu tiền (cash /
+# card / transfer / e_wallet / stripe). TillTenderType bao gồm cả các
+# sub-brand do Stera 日計 in ra (9 QR sub-brands + e-money brands) để
+# cashier nhập từng dòng theo slip.
+#
+# Mapping về phía POS qua `payment_method_code`:
+#   - cash → PaymentMethod.code='cash' (anchor, có per-row expected).
+#   - credit → PaymentMethod.code='card' (anchor, có per-row expected).
+#   - QR sub-brands → KHÔNG có 1:1 mapping (POS chỉ biết e_wallet).
+#     expected nằm ở mức category (qr); is_expected_anchor=false.
+#   - e-money brands → tương tự QR, expected ở mức category (emoney).
+#
+# Written by: TillTenderTypeSeeder qua TillTenderTypeService (idempotent,
+#             KHÔNG raw Model::create — convention #3).
+# Read by: GET /pos/till/tender-types (form kết ca), reconciliation
+#          aggregation.
+#
+# Business Rules:
+#   - BR-TT01: (organization_id, branch_id, tender_key) unique. branch_id
+#              null = org-wide default (mặc định cho mọi branch chưa override).
+#   - BR-TT02: payment_method_code nullable. Set khi tender map 1:1 với
+#              PaymentMethod (cash/credit); null cho sub-brands.
+#   - BR-TT03: is_expected_anchor=true → service compute per-row expected_amount
+#              từ Σ OrderPayment qua payment_method_code. false → expected
+#              ở category level.
+#   - BR-TT04: parent_tender_key nullable. Set cho sub-brand (vd:
+#              rakuten_pay.parent_tender_key='qr'? KHÔNG — parent là category
+#              key. Trong v1 ta NHÓM theo category, parent_tender_key
+#              reserved cho hierarchy phức tạp hơn).
+#   - BR-TT05: requires_terminal_total=true → UI hiển thị thêm input
+#              "売上合計" (terminal_batch_total) để cashier nhập từ slip.
+#   - BR-TT06: Soft delete on — deactivate vs delete đều giữ history.
+# ==============================================================================
+
+displayName:
+  en: Till Tender Type
+  ja: テンダー種別
+  vi: Loại tender
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    - columns: [organization_id, branch_id, tender_key]
+      unique: true
+      name: till_tender_types_org_branch_key_unique
+    - columns: [organization_id, branch_id, category]
+    - columns: [is_active]
+  service: {}
+
+properties:
+  tender_key:
+    # Mã định danh tender (vd: cash, credit, rakuten_pay, paypay, waon).
+    # Cashier nhập tender_details với key này tại close request.
+    type: String
+    length: 50
+    searchable: true
+    lookupable: true
+    displayName:
+      en: Tender Key
+      ja: テンダーキー
+      vi: Mã tender
+
+  name:
+    # Tên hiển thị (vd: "楽天ペイ", "Rakuten Pay", "Cash"). Translatable —
+    # seeded ja/en/vi tại TillTenderTypeSeeder. Convention #2 áp dụng nếu
+    # tương lai có admin form (v1 KHÔNG có admin form cho tender type).
+    type: String
+    length: 255
+    translatable: true
+    searchable: true
+    displayName:
+      en: Name
+      ja: 名称
+      vi: Tên
+
+  category:
+    # Khoá nhóm, đối chiếu `till_tender_categories.key`. CỐ Ý là String chứ
+    # không phải EnumRef: danh sách nhóm giờ do shop tự quản qua bảng đó, nên
+    # ràng vào một enum cố định sẽ ném "not a valid backing value" ngay khi
+    # đọc một nhóm tuỳ chỉnh. 4 khoá hệ thống (cash/card/qr/emoney) vẫn giữ
+    # nguyên tên trong TillTenderSystemCategory để phần reconcile không đổi.
+    type: String
+    length: 50
+    filterable: true
+    displayName:
+      en: Category
+      ja: 分類
+      vi: Phân loại
+
+  parent_tender_key:
+    # Reserved cho hierarchy phức tạp v2 (vd: credit có thể parent ra
+    # visa/master/jcb). v1: nullable, không set. Sub-brand QR/e-money
+    # nhóm bằng `category` thay vì parent_tender_key.
+    type: String
+    length: 50
+    nullable: true
+    displayName:
+      en: Parent Tender Key
+      ja: 親テンダーキー
+      vi: Tender cha
+
+  currency_code:
+    # Currency của tender. v1 mặc định JPY (theo Stera).
+    type: String
+    length: 3
+    default: JPY
+    displayName:
+      en: Currency
+      ja: 通貨
+      vi: Tiền tệ
+
+  payment_method_code:
+    # FK mềm tới PaymentMethod.code. Null cho sub-brand không có 1:1
+    # mapping (QR/emoney sub-brands đều map qua e_wallet ở POS).
+    # Cash: 'cash'. Credit: 'card'. QR/emoney sub-brand: null.
+    type: String
+    length: 50
+    nullable: true
+    displayName:
+      en: Payment Method Code
+      ja: 支払方法コード
+      vi: Mã phương thức POS
+
+  is_expected_anchor:
+    # true = tender này chịu trách nhiệm "anchor" expected_amount per-row
+    # cho category của nó (cash anchor cho cash; credit anchor cho card).
+    # false = sub-brand không có per-row expected, chỉ tham gia rollup.
+    # Service compute reconciliation theo cờ này.
+    type: Boolean
+    default: false
+    displayName:
+      en: Expected Anchor
+      ja: 期待値アンカー
+      vi: Là gốc expected
+
+  requires_terminal_total:
+    # true = UI close screen hiển thị thêm input "売上合計" (terminal_batch_total)
+    # để cashier nhập grand total từ slip Stera (helpful cross-check).
+    type: Boolean
+    default: false
+    displayName:
+      en: Requires Terminal Total
+      ja: 端末合計必須
+      vi: Yêu cầu tổng máy
+
+  sort_order:
+    # Thứ tự hiển thị trong group (UI: order by category, sort_order asc).
+    type: Int
+    default: 0
+    defaultSort: asc
+    displayName:
+      en: Sort Order
+      ja: 表示順
+      vi: Thứ tự
+
+  is_active:
+    # false = ẩn khỏi form kết ca + reconciliation. Settlement detail cũ
+    # vẫn còn (snapshot).
+    type: Boolean
+    default: true
+    filterable: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+
+  # Relationships
+  branch:
+    # null = áp dụng toàn org. Có giá trị = override cho branch cụ thể.
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    nullable: true
+    onDelete: CASCADE
+    displayName:
+      en: Branch
+      ja: 店舗
+      vi: Chi nhánh
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức

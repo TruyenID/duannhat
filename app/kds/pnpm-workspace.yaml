@@ -1,0 +1,7 @@
+# `app/kds` phải TỰ làm workspace root. Không có file này, pnpm đi ngược lên tới
+# gốc umbrella, coi đó là root, rồi cài `packages/*` của umbrella — `pnpm install`
+# trong thư mục này in "Done" và để lại thư mục KHÔNG có `node_modules`, im lặng.
+# Ba app web kia đều đã có file tương đương; kds bị bỏ sót (#2585).
+#
+# Rỗng vì kds không có sub-package nào; ý nghĩa nằm ở sự TỒN TẠI của file.
+packages: []

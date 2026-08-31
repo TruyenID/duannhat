@@ -1,0 +1,179 @@
+# ==============================================================================
+# FloatingSection Schema (フローティングセクション / Khung giờ ưu đãi)
+# ==============================================================================
+#
+# A FloatingSection is a promotional group of products that is NOT owned by
+# any single Menu — e.g. "Happy Hour 17:00-19:00". It carries its own time
+# schedule (FloatingSectionSchedule) and its own product list
+# (FloatingSectionProduct) with optional promotional prices, independent of
+# whichever Menu is currently active for the branch.
+#
+# Scope: HQ defines a brand-level "master" section (branch_id = NULL), and a
+# shop clones it to their branch (cloneToBranch — mirrors Menu's master/branch
+# clone model). The branch's copy is a fully independent row — its own
+# schedules + products the shop can edit without touching the HQ master.
+# master_section_id tracks provenance only; there is no ongoing sync-from-master
+# like Menu has (out of scope — re-clone is manual if HQ changes the master).
+#
+# Resolving/displaying floating sections on customer-web, POS, or kiosk is
+# explicitly OUT of scope — is_active is a simple on/off toggle, no
+# Draft/Approve workflow like Menu.
+#
+# ==============================================================================
+
+displayName:
+  en: Floating Section
+  ja: フローティングセクション
+  vi: Khung giờ ưu đãi
+
+kind: object
+
+options:
+  service: false
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    - columns: [organization_id]
+    - columns: [brand_id]
+    - columns: [brand_id, is_active]
+
+properties:
+  name:
+    type: String
+    length: 255
+    translatable: true
+    displayName:
+      en: Name
+      ja: 名前
+      vi: Tên
+    description:
+      en: Display name for this floating section (e.g. "Happy Hour 17:00-19:00")
+      ja: フローティングセクションの表示名（例：「ハッピーアワー 17:00-19:00」）
+      vi: Tên hiển thị của khung giờ ưu đãi (vd "Happy Hour 17:00-19:00")
+
+  is_active:
+    type: Boolean
+    default: true
+    filterable: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+    description:
+      en: Simple on/off toggle — no approval workflow like Menu.
+      ja: シンプルなオン/オフの切り替え。Menuのような承認ワークフローはありません。
+      vi: Bật/tắt đơn giản — không có quy trình duyệt như Menu.
+
+  priority:
+    type: Int
+    default: 0
+    sortable: true
+    displayName:
+      en: Priority
+      ja: 優先度
+      vi: Độ ưu tiên
+    description:
+      en: Tiebreak ordering when multiple floating sections are active at once.
+      ja: 複数のフローティングセクションが同時に有効な場合の表示順。
+      vi: Thứ tự ưu tiên khi nhiều khung giờ ưu đãi cùng hoạt động.
+
+  start_date:
+    type: Date
+    nullable: true
+    displayName:
+      en: Start Date
+      ja: 開始日
+      vi: Ngày bắt đầu
+    description:
+      en: Optional calendar-date lower bound (e.g. a seasonal promo). NULL = no lower bound.
+      ja: オプションのカレンダー開始日（季節限定プロモなど）。NULL = 下限なし。
+      vi: Ngày bắt đầu áp dụng (vd chương trình theo mùa). NULL = không giới hạn.
+
+  end_date:
+    type: Date
+    nullable: true
+    displayName:
+      en: End Date
+      ja: 終了日
+      vi: Ngày kết thúc
+    description:
+      en: Optional calendar-date upper bound. NULL = no upper bound.
+      ja: オプションのカレンダー終了日。NULL = 上限なし。
+      vi: Ngày kết thúc áp dụng. NULL = không giới hạn.
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: CASCADE
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu
+
+  # NULL = HQ master (brand-level template). Set = this row is a branch's own
+  # clone, fully independent of the master after cloneToBranch() runs.
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    nullable: true
+    onDelete: CASCADE
+    displayName:
+      en: Branch
+      ja: 店舗
+      vi: Chi nhánh
+
+  # Provenance only — the master section this was cloned from. NULL on master
+  # rows. No sync-from-master; editing the master does not touch existing clones.
+  masterSection:
+    type: Association
+    relation: ManyToOne
+    target: FloatingSection
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Master Section
+      ja: マスターセクション
+      vi: Khung giờ gốc (HQ)
+
+  clonedSections:
+    type: Association
+    relation: OneToMany
+    target: FloatingSection
+    mappedBy: masterSection
+    displayName:
+      en: Cloned Sections
+      ja: クローンされたセクション
+      vi: Các bản sao đã clone
+
+  schedules:
+    type: Association
+    relation: OneToMany
+    target: FloatingSectionSchedule
+    mappedBy: floatingSection
+    displayName:
+      en: Schedules
+      ja: スケジュール
+      vi: Lịch trình
+
+  products:
+    type: Association
+    relation: OneToMany
+    target: FloatingSectionProduct
+    mappedBy: floatingSection
+    displayName:
+      en: Products
+      ja: 商品
+      vi: Sản phẩm

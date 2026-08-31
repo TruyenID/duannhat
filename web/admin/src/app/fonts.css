@@ -1,0 +1,54 @@
+/**
+ * Font tự host — #2699.
+ *
+ * Trước đây `layout.tsx` gọi `next/font/google`, và lời gọi đó **tải font từ
+ * fonts.googleapis.com LÚC BUILD**. Ngày 2026-08-13 container build của Amplify
+ * không với tới Google một lần, và deploy production chết:
+ *
+ *     > src: url(@vercel/turbopack-next/internal/font/google/font?…https://fonts.gs…
+ *     https://nextjs.org/docs/messages/module-not-found
+ *     !!! Build failed
+ *
+ * Chạy lại thì xanh. Đó chính là vấn đề: build không tất định, hỏng theo mạng
+ * của runner chứ không theo mã, và chạy lại là thao tác TAY.
+ *
+ * `@fontsource/*` là gói npm mang sẵn file .woff2, nên build chỉ cần registry
+ * npm — thứ nó vốn đã cần. Cùng commit ⇒ cùng kết quả.
+ *
+ * Nạp ĐÚNG các subset và weight mà cấu hình `next/font` cũ khai, không hơn:
+ * subsets `latin` · `latin-ext` · `vietnamese`, weights 300–700. Gói còn có
+ * subset `japanese` nhưng bản cũ KHÔNG nạp nó — thêm vào đây sẽ là đổi diện
+ * mạo tiếng Nhật một cách âm thầm, nên để nguyên. Muốn thêm thì làm ở một thay
+ * đổi riêng, có người nhìn.
+ */
+
+@import "@fontsource/m-plus-2/latin-300.css";
+@import "@fontsource/m-plus-2/latin-400.css";
+@import "@fontsource/m-plus-2/latin-500.css";
+@import "@fontsource/m-plus-2/latin-600.css";
+@import "@fontsource/m-plus-2/latin-700.css";
+
+@import "@fontsource/m-plus-2/latin-ext-300.css";
+@import "@fontsource/m-plus-2/latin-ext-400.css";
+@import "@fontsource/m-plus-2/latin-ext-500.css";
+@import "@fontsource/m-plus-2/latin-ext-600.css";
+@import "@fontsource/m-plus-2/latin-ext-700.css";
+
+@import "@fontsource/m-plus-2/vietnamese-300.css";
+@import "@fontsource/m-plus-2/vietnamese-400.css";
+@import "@fontsource/m-plus-2/vietnamese-500.css";
+@import "@fontsource/m-plus-2/vietnamese-600.css";
+@import "@fontsource/m-plus-2/vietnamese-700.css";
+
+/**
+ * Đặt biến bằng MỘT CLASS gắn lên `<html>`, đúng chỗ mà `mplus2.variable` của
+ * next/font từng gắn.
+ *
+ * Không đặt thẳng vào `:root`: `globals.css` có `@theme { --font-sans:
+ * var(--font-sans) }` — nó đọc giá trị từ tầng cascade của `<html>`. Đưa biến
+ * xuống `:root` biến dòng đó thành tham chiếu vòng, và Tailwind sẽ phân giải
+ * `font-sans` ra rỗng.
+ */
+.font-vars {
+  --font-sans: "M PLUS 2", ui-sans-serif, system-ui, sans-serif;
+}

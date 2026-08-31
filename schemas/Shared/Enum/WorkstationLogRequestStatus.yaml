@@ -1,0 +1,38 @@
+# ==============================================================================
+# Workstation Log Request Status Enum (#2901)
+# ==============================================================================
+#
+# Vòng đời của MỘT yêu cầu lấy log:
+#
+#   pending   — đã tạo, máy trạm chưa đẩy lô cuối. Đây là trạng thái DUY NHẤT
+#               mà `GET /workstation/log-requests` trả về.
+#   fulfilled — máy trạm đã gửi lô có `final: true`. Đóng sổ, kể cả khi số bản
+#               ghi nhận được là 0 — xem `received_count` ở schema bản ghi.
+#   expired   — quá `expires_at` mà máy trạm chưa trả lời. Máy tắt hẳn hoặc mất
+#               mạng, tức đúng cái đánh đổi đã ghi khi chốt "kéo theo yêu cầu".
+#
+# **`fulfilled` với 0 bản ghi KHÁC `expired`, và khác cả "không có sự cố".**
+# Đây là bẫy mẫu số bằng không mà issue nêu đích danh: máy trạm bản cũ chưa
+# biết endpoint này thì nó không trả lời gì cả, và im lặng KHÔNG được đọc thành
+# "quán đó chạy sạch". Ba trạng thái tách bạch là cách phân biệt ba câu chuyện
+# đó bằng dữ liệu chứ không bằng suy đoán.
+#
+# KHÔNG có `cancelled`: một yêu cầu đã phát đi thì máy trạm có thể đã lọc và
+# đang gửi; "huỷ" chỉ tạo ảo giác thu hồi được thứ đã rời khỏi quán. Hết hạn là
+# đường đóng duy nhất ngoài `fulfilled`.
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: ログ取得要求ステータス
+  en: Workstation Log Request Status
+  vi: Trạng thái yêu cầu lấy log
+
+values:
+  - value: pending
+    label: { ja: 待機中, en: Pending, vi: Đang chờ }
+  - value: fulfilled
+    label: { ja: 取得済み, en: Fulfilled, vi: Đã lấy }
+  - value: expired
+    label: { ja: 期限切れ, en: Expired, vi: Hết hạn }

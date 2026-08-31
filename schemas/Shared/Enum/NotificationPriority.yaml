@@ -1,0 +1,31 @@
+# =============================================================================
+# NotificationPriority (通知優先度 / Mức độ ưu tiên thông báo)
+# =============================================================================
+#
+# Priority level on every `notifications` row. Consumed by:
+#   - Admin-web bell badge rendering (urgent shows a dot overlay)
+#   - Inbox filter dropdown
+#   - `Prunable` retention cutoff (low=7d, normal/high=30d, urgent=90d)
+#   - Phase C channel selection: `priority=urgent` bypasses master mute +
+#     quiet hours (but not type-specific opt-out — Decision 10)
+#
+# Default priority is resolved via `NotificationService::defaultPriorityFor(
+# string $type)`; dispatch callers may override per-event.
+# =============================================================================
+
+kind: enum
+
+displayName:
+  ja: 通知優先度
+  en: Notification Priority
+  vi: Mức độ ưu tiên thông báo
+
+values:
+  - value: low
+    label: { ja: 低, en: Low, vi: Thấp }
+  - value: normal
+    label: { ja: 通常, en: Normal, vi: Thông thường }
+  - value: high
+    label: { ja: 高, en: High, vi: Cao }
+  - value: urgent
+    label: { ja: 緊急, en: Urgent, vi: Khẩn cấp }

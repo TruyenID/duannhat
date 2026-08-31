@@ -1,0 +1,86 @@
+# =============================================================================
+# OrderPaymentIntent — con trỏ HIỆN HÀNH từ một đơn tới một intent ở cổng
+# =============================================================================
+#
+# #1611 / #962 · 7a-2a — thay chỗ cho `customer_orders.stripe_payment_intent_id`,
+# một cột của Payments nằm nhầm trên bảng của Ordering (ADR ledger #1151:
+# order_payments là sổ phụ AR của Payments; con trỏ tới đối tượng ở cổng thanh
+# toán thuộc về phía đó).
+#
+# VÌ SAO LÀ BẢNG RIÊNG, KHÔNG PHẢI CỘT TRÊN `payment_attempts`
+# ------------------------------------------------------------------
+# `payment_attempts` đã có `provider_object_id` + unique
+# (connection_id, environment, provider_object_id) — nhưng nó là NHIỀU bản ghi
+# mỗi đơn (mỗi lần thử một dòng), còn cái đang thay thế là MỘT con trỏ hiện hành
+# mỗi đơn. Hai unique dưới đây giữ nguyên đúng bất biến mà cột cũ bảo đảm:
+#
+#   customer_order        UNIQUE  — một đơn ⇢ tối đa một intent hiện hành
+#   (provider, intent_id) UNIQUE  — một intent ⇢ đúng một đơn TRONG cổng đó
+#
+# Mất một trong hai là mất một tính chất mà đường webhook đang dựa vào.
+#
+# Unique thứ hai PHẢI mang `provider` (sửa theo review vòng 1). Cột cũ tên là
+# `stripe_payment_intent_id`, nên unique của nó bị giới hạn trong một cổng DO
+# CẤU TẠO. Đánh unique trên riêng `intent_id` thì tuyên bố một điều MẠNH HƠN cái
+# nó thay thế: một chuỗi id chỉ được tồn tại một lần trên toàn hệ thống, bất kể
+# cổng nào cấp.
+#
+# Vì sao điều đó hỏng: PayPay dùng `merchantPaymentId` do **merchant tự đặt**
+# (thường là mã đơn hoặc chuỗi ngắn theo quy ước riêng), không phải id có tiền tố
+# như `pi_...` của Stripe. Hai không gian id chạm nhau là insert của cổng thứ hai
+# bị từ chối bởi một unique không liên quan gì đến nó — và chỗ nó nổ là giữa lúc
+# khách đang trả tiền.
+#
+# `provider` có mặt ngay từ đầu dù hôm nay chỉ có Stripe: #1603 (PayPay) và
+# #1088 (Terminal) sẽ gặp đúng bài toán này, và một bảng đã có cột provider thì
+# họ không phải sửa hình dạng lần nữa. Đây KHÔNG phải "thêm cho đủ bộ" — nó là
+# lý do bảng này tồn tại thay vì một cột `stripe_*` thứ hai.
+# =============================================================================
+
+displayName: { en: Order Payment Intent, ja: 注文決済インテント, vi: Intent thanh toán của đơn }
+kind: object
+
+options:
+  id: Uuid
+  timestamps: true
+  softDelete: false
+  indexes:
+    # Một đơn chỉ có MỘT intent hiện hành.
+    - columns: [customer_order_id]
+      unique: true
+      name: order_payment_intents_order_unique
+    # Một intent chỉ thuộc MỘT đơn — webhook tra ngược theo cặp này.
+    # `provider` nằm trong unique có chủ ý: xem khối lý do ở đầu file.
+    - columns: [provider, intent_id]
+      unique: true
+      name: order_payment_intents_provider_intent_unique
+    - columns: [organization_id, provider]
+      name: order_payment_intents_org_provider
+
+properties:
+  organization:
+    # Phạm vi tổ chức, chép từ đơn lúc ghi.
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: RESTRICT
+    displayName: { en: Organization, ja: 組織, vi: Tổ chức }
+  customer_order:
+    # Đơn đang giữ intent này. CASCADE: đơn bị xoá cứng thì con trỏ vô nghĩa.
+    type: Association
+    relation: ManyToOne
+    target: CustomerOrder
+    onDelete: CASCADE
+    displayName: { en: Order, ja: 注文, vi: Đơn hàng }
+  provider:
+    # Cổng thanh toán sở hữu `intent_id`. Hôm nay chỉ 'stripe'.
+    type: String
+    length: 32
+    nullable: false
+    displayName: { en: Provider, ja: 決済プロバイダ, vi: Cổng thanh toán }
+  intent_id:
+    # Id đối tượng ở phía cổng (Stripe PaymentIntent id).
+    type: String
+    length: 255
+    nullable: false
+    displayName: { en: Intent ID, ja: インテント ID, vi: Mã intent }

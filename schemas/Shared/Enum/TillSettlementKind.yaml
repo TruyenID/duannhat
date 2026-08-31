@@ -1,0 +1,54 @@
+# ==============================================================================
+# Till Settlement Kind Enum (精算区分 / Loại kết ca)
+# ==============================================================================
+#
+# Plan 046 — Shift handover / chain-of-shifts final close.
+#
+# Discriminator stamped onto TillSession.settlement_kind at the moment a shift
+# is settled. It decides whether the shift's chain stays OPEN (another cashier
+# takes over) or is CLOSED (the whole day's chain is finalized). Only the two
+# settle paths that participate in a chain set this — every OTHER terminal exit
+# (cashier abandon, manager force-abandon, system expire, manager manual-settle)
+# leaves it NULL (R5), so the next open starts a fresh chain and those sessions
+# never join a chain aggregate.
+#
+# Values:
+#
+#   - handover: TillSessionService::handover() settled this shift AND kept the
+#               chain open. The next open() on the same till continues the same
+#               chain_id with chain_sequence + 1 (R1) and a blind-recount float
+#               (R3). Prints a single-shift 引き継ぎ slip.
+#
+#   - final:    TillSessionService::close() settled this shift AS the chain
+#               terminator. The chain is closed; the next open starts a brand-new
+#               chain (fresh chain_id, chain_sequence = 1). Drives the aggregate
+#               精算 slip = Σ per-shift snapshots (R4). A chain of ONE shift
+#               (final close with no prior handover) == today's single 精算 slip.
+#
+# Used in:
+#   - TillSession.settlement_kind
+#   - Audit log payload for `till_session_handover` / `till_session_final_close`
+#   - R1 chain-continuation resolver (open() reads the prior terminal session's
+#     settlement_kind === 'handover' to decide continue-vs-new-chain)
+#   - R8 currency/rounding guard (branchHasOpenChain checks for a most-recent
+#     terminal session whose settlement_kind = handover)
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: 精算区分
+  en: Settlement Kind
+  vi: Loại kết ca
+
+values:
+  - value: handover
+    label:
+      ja: 引き継ぎ
+      en: Handover
+      vi: Bàn giao ca
+  - value: final
+    label:
+      ja: 精算（最終）
+      en: Final close
+      vi: Kết ca cuối

@@ -1,0 +1,33 @@
+{
+  "billRejectCount": 0,
+  "seqNo": 1786364496219,
+  "cashErrorStatus": {
+    "cassette": false,
+    "cash": {
+      "2000": false,
+      "5000": true,
+      "1": true,
+      "10": true,
+      "10000": false,
+      "5": true,
+      "100": true,
+      "500": true,
+      "1000": true,
+      "50": true
+    }
+  },
+  "cashCount": {
+    "wrap": {},
+    "stock": {},
+    "cash": {
+      "5000": 1,
+      "1": 39,
+      "10": 88,
+      "10000": 7,
+      "5": 71,
+      "100": 59,
+      "1000": 113,
+      "50": 15
+    }
+  }
+}

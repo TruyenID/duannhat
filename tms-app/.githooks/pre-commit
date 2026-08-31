@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+#
+# Guard against the @godxjp/ui dependency being re-added to tms-app.
+#
+# tms-app is React Native — @godxjp/ui is a React DOM package. It has been
+# removed three times (commits 4cb43de, 3af58d1, ...) and keeps coming back
+# through branches that were cut before the previous removal landed. Fail
+# fast at commit time so we stop playing whack-a-mole.
+#
+# If you genuinely need a shared React Native primitive here, use
+# @godxjp/ui-native (the RN-compatible sibling). If you're sure you want to
+# override this guard for a specific commit, pass --no-verify.
+
+set -e
+
+if git diff --cached --name-only | grep -qE '^package(-lock)?\.json$'; then
+    # Look for additions of the @godxjp/ui dependency in staged diffs.
+    # awk strips file headers ("+++ b/..." etc.) and matches added lines
+    # that contain the dep key. macOS BRE/ERE differences are avoided by
+    # using fgrep on a pre-filtered stream.
+    added=$(git diff --cached -- package.json package-lock.json 2>/dev/null \
+        | awk '/^\+[^+]/ && /"@godxjp\/ui"/ { print }')
+    if [ -n "$added" ]; then
+        echo ""
+        echo "❌ pre-commit: '@godxjp/ui' dependency detected in staged changes."
+        echo ""
+        echo "   tms-app is React Native; @godxjp/ui is React DOM and has no"
+        echo "   importers in src/. See previous removals in commits 4cb43de"
+        echo "   and 3af58d1 for context."
+        echo ""
+        echo "   If you need shared RN primitives use @godxjp/ui-native."
+        echo "   To bypass this guard for a single commit, pass --no-verify."
+        echo ""
+        exit 1
+    fi
+fi

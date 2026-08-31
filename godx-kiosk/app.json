@@ -1,0 +1,70 @@
+{
+  "expo": {
+    "name": "Kiosk",
+    "slug": "godx-kiosk",
+    "version": "0.1.0",
+    "orientation": "landscape",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "scheme": "godx-kiosk",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "jp.godx.kiosk",
+      "infoPlist": {
+        "NSLocalNetworkUsageDescription": "Tìm Workstation trong mạng nhà hàng để xử lý order nhanh hơn",
+        "NSBonjourServices": [
+          "_ws-app._tcp"
+        ],
+        "UIRequiresFullScreen": true,
+        "UIStatusBarHidden": true,
+        "UISupportedInterfaceOrientations~ipad": [
+          "UIInterfaceOrientationLandscapeLeft",
+          "UIInterfaceOrientationLandscapeRight"
+        ],
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": false,
+          "NSAllowsLocalNetworking": true,
+          "NSAllowsArbitraryLoadsInWebContent": true
+        }
+      }
+    },
+    "android": {
+      "package": "jp.godx.kiosk",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.CHANGE_WIFI_MULTICAST_STATE"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Kiosk to access your camera for QR code scanning."
+        }
+      ],
+      "expo-asset",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
+    ]
+  }
+}

@@ -1,0 +1,67 @@
+# MaterialUnit schema
+# Local purchasing units created by users for materials.
+# This is the ONLY editable table in the saas-product feature.
+# Base unit auto-created during material sync (BR-09).
+
+displayName:
+  en: Material Unit
+  ja: 材料単位
+  vi: Đơn vị nguyên liệu
+
+kind: object
+
+options:
+  timestamps: true
+  id: Uuid
+  indexes:
+    - columns: [material_id, unit]
+      unique: true
+
+properties:
+  material:
+    type: Association
+    relation: ManyToOne
+    target: Material
+    onDelete: CASCADE
+    displayName:
+      en: Material
+      ja: 材料
+      vi: Nguyên liệu
+
+  unit:
+    type: String
+    length: 50
+    displayName:
+      en: Unit
+      ja: 単位
+      vi: Đơn vị
+    description:
+      en: "Unit name (e.g., bag, box, carton)"
+      ja: "単位名（例：袋、箱、カートン）"
+      vi: "Tên đơn vị (VD: bao, thùng, hộp)"
+
+  ratio:
+    type: Decimal
+    precision: 10
+    scale: 4
+    default: 1.0000
+    displayName:
+      en: Ratio
+      ja: 比率
+      vi: Tỷ lệ
+    description:
+      en: "Conversion ratio: 1 [unit] = ratio x base_unit"
+      ja: "換算比率: 1 [単位] = ratio × 基本単位"
+      vi: "Tỷ lệ quy đổi: 1 [đơn vị] = ratio x đơn vị cơ bản"
+
+  is_base:
+    type: Boolean
+    default: false
+    displayName:
+      en: Is Base Unit
+      ja: 基本単位
+      vi: Đơn vị cơ bản
+    description:
+      en: "Only one base unit per material (auto-created during sync, BR-09)"
+      ja: "材料ごとに1つの基本単位のみ（同期時に自動作成、BR-09）"
+      vi: "Chỉ 1 đơn vị cơ bản mỗi NVL (tự tạo khi sync, BR-09)"

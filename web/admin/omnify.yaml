@@ -1,0 +1,33 @@
+# admin-web submodule omnify config — minimal, self-contained.
+#
+# Shares schema definitions with the umbrella monorepo via relative path.
+# When run from the umbrella (npm run omnify:gen), codegen happens there.
+# When run standalone (cd admin-web && npx omnify generate), use this file.
+
+lockFilePath: .omnify/lock.json
+
+workspace:
+  schemas:
+    shared:
+      path: ../schemas/Shared
+    backend:
+      path: ../schemas/Backend
+      includes: [shared]
+
+  projects:
+    admin-web:
+      schemas: backend
+      targets:
+        typescript:
+          - name: admin-web
+            enable: true
+            modelsPath: ./src/types/models
+
+connections:
+  default:
+    driver: mysql
+
+locale:
+  locales: [ja, en, vi]
+  defaultLocale: ja
+  fallbackLocale: en

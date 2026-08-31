@@ -1,0 +1,99 @@
+.DS_Store
+Thumbs.db
+*.log
+
+# IDE / editor
+.idea
+.vscode
+.fleet
+.zed
+.nova
+
+# Local secrets / overrides — see docs/guide/local-config.md
+# NEVER commit any of these: they carry per-box hosts, credentials and the
+# dev-only auth bypass flags. A committed override becomes everyone's default.
+.env
+.env.local
+.env.*.local
+.env.local-server
+docker-compose.override.yml
+compose.*.override.yml
+
+# Node (omnify codegen workspace at umbrella root — runtime only on host)
+node_modules/
+# #3012 — KHÔNG gạch chéo: `node_modules/` chỉ khớp THƯ MỤC, nên một
+# symlink tên `node_modules` (agent hay dựng để chạy test trong worktree)
+# vẫn bị `git add -A` cuốn vào. Đã lọt một lần, trỏ đường dẫn tuyệt đối.
+node_modules
+.pnpm-store/
+.next/
+
+# Local-only artifacts emitted by `omnify schema` (used by IDE schema validation
+# via the cdn URL in omnify.yaml's yaml-language-server directive — not needed
+# in the repo).
+.omnify/omnify-config-schema.json
+
+# Omnify intermediate caches — regenerable by `npm run omnify:gen` from the
+# YAML schemas. Contents duplicate `.omnify/schemas.json` (top-level canonical
+# copy is kept) and mirror the backend PHP base files that are already
+# committed inside each submodule. Keeping them out of VCS avoids merge
+# noise on every codegen and keeps the diff surface honest.
+.omnify/workspace-cache/
+.omnify/codegen-cache/
+
+# `backend/.omnify/schemas.json` — 868 KB, cùng 224 schema với bản canonical ở
+# `.omnify/schemas.json` trên gốc.
+#
+# #2371 ignore nó với lý do "bản sao thừa". Lý do đó SAI, và omnify 6.0.3 đã nói
+# rõ (`guide/config.md`, sau khi ta hỏi ở omnify-go#160): root `schemasPath` là
+# **canonical workspace export**, còn của Laravel target là **project-scoped
+# export** — *"they are not interchangeable"*. Nó là output CỐ Ý, có vai trò
+# riêng, không phải sản phẩm phụ.
+#
+# Vẫn ignore, nhưng vì lý do khác: nó **sinh lại được** từ YAML, và gỡ nó ra
+# rồi chạy `omnify:diff` (No changes detected) + `omnify:drift` (xanh) vẫn
+# đúng — tức không cổng nào của repo này đọc nó. Commit vào là thêm 868 KB
+# state trùng lặp mỗi lượt regen. Bỏ dòng này khi có thứ thật sự đọc nó.
+#
+# Các file khác trong `backend/.omnify/` vẫn track như cũ.
+backend/.omnify/schemas.json
+
+# Playwright MCP scratch snapshots
+.playwright-mcp/
+
+# SQLite databases must never be committed (a stray ws-app.db once was — #2188)
+*.db
+
+# CodeGraph index (local, regenerable)
+.codegraph/
+
+# Claude Code local settings (machine-specific, not for VCS)
+.claude/settings.local.json
+
+# Tools source — managed in a separate repo, cloned locally into tools-src/
+# The compiled binaries live in tools/ (built via `go build` from tools-src/).
+tools-src/
+
+# Superpowers docs (local-only)
+docs/superpowers/plans/
+docs/superpowers/specs/
+
+# Agent-loop (tal): worktree mỗi issue + thẻ lease của session giữ worktree đó
+.claude/worktrees/
+.tal-lease.json
+
+# Python bytecode (tal_test.py sinh ra khi chạy)
+__pycache__/
+
+# Cache của công cụ agent/skill trên máy dev — không phải mã nguồn của repo.
+# `/vendor/` là composer-vendor do skill PHP lỡ cài ở ROOT (backend/vendor mới
+# là thật và đã được backend/.gitignore lo); .agents/.hermes là kho skill do
+# hermes quản, khôi phục được bằng chính công cụ đó.
+/vendor/
+/.agents/
+/.hermes/
+/skills-lock.json
+# Symlink do plugin skill (hermes) tạo, trỏ vào .agents/ ở trên — theo máy.
+/.claude/skills/connect-recommend
+/.claude/skills/stripe-*
+/.claude/skills/upgrade-stripe

@@ -1,0 +1,90 @@
+# =============================================================================
+# NotificationChannelRoute (通知ルーティング / Định tuyến kênh thông báo)
+# =============================================================================
+#
+# Per-org / per-brand `type` → channels[] routing (plan-012 T3.3). The
+# M3 effective-channel resolver consults this row before user preferences:
+#
+#   routes[brand, type] || routes[org, type] || template.default_channels
+#     || ['in_app']
+#
+# Written by:
+#   - `PUT /hq/{brand}/notifications/channel-routes` (bulk upsert)
+# Read by:
+#   - `NotificationService::effectiveChannelsFor()` — filter chain
+# =============================================================================
+
+displayName:
+  en: Notification Channel Route
+  ja: 通知ルーティング
+  vi: Định tuyến kênh thông báo
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: false
+  id: Uuid
+  indexes:
+    - columns: [organization_id, type]
+      unique: true
+    - columns: [brand_id, type]
+
+properties:
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName: { en: Organization, ja: 組織, vi: Tổ chức }
+
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    nullable: true
+    onDelete: CASCADE
+    displayName: { en: Brand, ja: ブランド, vi: Thương hiệu }
+
+  # Plan-023 M6 T6.8 — shop (Branch) override. Lookup precedence at
+  # NotificationChannelJob fan-out is branch → brand → org/system, so
+  # a shop_admin can disable email for a specific type at shop scope
+  # without affecting other shops in the same brand.
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    nullable: true
+    onDelete: CASCADE
+    displayName: { en: Shop, ja: 店舗, vi: Cửa hàng }
+    description:
+      en: 'Shop (branch) scope override. Null = brand/org-managed. Set = shop admin owns this routing override; lookup precedence is branch → brand → org/system at dispatch fan-out.'
+      ja: '店舗（ブランチ）スコープ上書き。Null = ブランド／組織管理。セット = 店舗管理者がこのルーティング上書きを所有；ディスパッチファンアウト時のルックアップ優先順位は branch → brand → org/system。'
+      vi: 'Phạm vi shop (branch) override. Null = brand/org-managed. Set = shop admin own routing override này; thứ tự lookup lúc dispatch fan-out là branch → brand → org/system.'
+
+  type:
+    type: String
+    length: 100
+    filterable: true
+    displayName: { en: Type, ja: タイプ, vi: Loại }
+    description:
+      en: "Notification type string (dot-namespaced). Matches `notifications.type` + `notification_templates.key`."
+      ja: "通知タイプ文字列（ドット区切り）。`notifications.type` + `notification_templates.key` と一致。"
+      vi: "Chuỗi loại thông báo (dấu chấm). Trùng với `notifications.type` + `notification_templates.key`."
+
+  channels:
+    type: Json
+    displayName: { en: Channels, ja: チャンネル, vi: Kênh }
+    description:
+      en: "JSON array of NotificationChannel cases, e.g. ['in_app','email']. Empty array disables the type entirely for this scope."
+      ja: "NotificationChannel 値の JSON 配列（例：['in_app','email']）。空配列はこのスコープで当該タイプを完全無効化。"
+      vi: "Mảng JSON các case NotificationChannel (VD: ['in_app','email']). Mảng rỗng vô hiệu hoá hoàn toàn type cho scope này."
+
+  priority_overrides:
+    type: Json
+    nullable: true
+    displayName: { en: Priority Overrides, ja: 優先度上書き, vi: Ghi đè ưu tiên }
+    description:
+      en: "Optional { <priority>: [<channel>, ...] } map — per-priority channel override. E.g. urgent → [in_app, realtime, email] for this type."
+      ja: "オプション：`{ <priority>: [<channel>, ...] }` マップ — 優先度別チャンネル上書き。例：urgent → [in_app, realtime, email]。"
+      vi: "Tuỳ chọn: map `{ <priority>: [<channel>, ...] }` — override kênh theo priority. VD: urgent → [in_app, realtime, email]."

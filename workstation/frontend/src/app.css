@@ -1,0 +1,20 @@
+/*
+ * Styling comes entirely from @godxjp/ui 18.x — its own design tokens and
+ * component stylesheets. The workstation deliberately keeps NO local theme
+ * overrides (the previous 700-line inlined token block was removed): whatever
+ * the design system ships is what the app looks like.
+ */
+@import "tailwindcss";
+@import "@godxjp/ui/styles";
+
+/*
+ * Fonts LAST, on purpose. `@godxjp/ui/styles` imports fonts.css and then
+ * base.css, and base.css re-imports tokens/base.css — whose `--font-sans-base`
+ * is a pure system stack. Same `:root` specificity means the later rule wins,
+ * so the bundled M PLUS 2 face gets overwritten and the app silently renders in
+ * the system font. Re-importing the fonts layer here puts it last again.
+ */
+@import "@godxjp/ui/styles/fonts";
+
+/* Let Tailwind scan the UI package so its utility classes are generated. */
+@source "../node_modules/@godxjp/ui/dist/**/*.js";

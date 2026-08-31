@@ -1,0 +1,421 @@
+name: CI
+
+# dev is the working branch — gating only `main` means CI reports a break
+# AFTER the release (#1197).
+on:
+  push:
+    branches: [dev, main]
+    # #1827 — a tag runs the FULL gate (lint → test → frontend → pos-web →
+    # build) and only then releases. Publishing from anything less means
+    # shipping a binary nothing verified; the whole point of having a gate is
+    # that the artifact people install came through it.
+    tags: ['v*']
+  pull_request:
+    branches: [dev, main]
+
+# One self-hosted runner serves this org, and a -race suite holds it for the
+# best part of an hour. Without this, three pushes in a row queue three full
+# runs and the last one reports on code that is already two commits stale.
+# Same group shape as the backend gate (#1182).
+concurrency:
+  group: workstation-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache: true
+      # #1197 — frontend.go carries `//go:embed all:frontend/dist`, and
+      # frontend/dist is a BUILD ARTIFACT that .gitignore excludes. On a clean
+      # checkout the pattern matches nothing and the package fails to compile,
+      # so `go vet` and `go test` died before running a single test — 24 of the
+      # last 25 runs were red for this one reason, and `build` (needs: lint,
+      # test) was skipped every time.
+      #
+      # These two jobs need the embed to RESOLVE, not to contain the real app;
+      # nothing under test reads FrontendAssets (only cmd/workstation and
+      # cmd/ws-server do, via fs.Sub). The `build` job below still runs the
+      # real `pnpm build` — that is where the frontend is actually verified.
+      - name: Stub the embedded frontend
+        run: |
+          mkdir -p frontend/dist
+          echo '<!doctype html><title>ci stub</title>' > frontend/dist/index.html
+      # #1197 — cmd/workstation is the Wails v3 GUI shell, and Wails links
+      # GTK/WebKit through cgo. The Linux runner has no gtk+-3.0 /
+      # webkit2gtk-4.1 dev packages, so anything that pulls that package in
+      # dies in pkg-config before Go gets a say. Installing system libraries on
+      # a SHARED self-hosted runner is not this workflow's call.
+      #
+      # It is the ONLY package that imports Wails: every line of logic lives in
+      # internal/* and cmd/ws-server, which are pure Go and stay fully gated.
+      # What is lost is compile coverage of the ~100-line GUI entry point; the
+      # build job below is where that has to be proven.
+      - name: go vet
+        run: go vet $(go list ./... | grep -v '/cmd/workstation$')
+      - name: gofmt
+        run: |
+          # Exclude codegen output — those files are regenerated from YAML.
+          unformatted=$(find . -name '*.go' \
+            -not -path './internal/domain/generated/*' \
+            -not -path './internal/generated/*' \
+            -not -path './vendor/*' | xargs gofmt -l)
+          if [ -n "$unformatted" ]; then
+            echo "Files need gofmt:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+  test:
+    name: Test
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache: true
+      # 40m, not 5m: ~1000 tests across handler+service, each opening a real
+      # SQLite database. Without -race the two packages take ~27s/~39s; -race
+      # multiplies that ~30x — handler alone measured 842s on a 10-core dev
+      # machine, and the CI runner has 4. At 5m the job died mid-suite on a
+      # test that had only been running 2s: the package total was over budget,
+      # nothing was hung — so every run since has been red. 40m leaves room
+      # for the slower runner rather than sitting on the measured number.
+      # #1186 — internal/service alone measures 560-710s (SQLite migrate per
+      # case). Go's DEFAULT is 600s, so a bare `go test` panics at random on a
+      # busy machine. Keep this timeout generous; do not trim it back.
+      # #1197 — frontend.go carries `//go:embed all:frontend/dist`, and
+      # frontend/dist is a BUILD ARTIFACT that .gitignore excludes. On a clean
+      # checkout the pattern matches nothing and the package fails to compile,
+      # so `go vet` and `go test` died before running a single test — 24 of the
+      # last 25 runs were red for this one reason, and `build` (needs: lint,
+      # test) was skipped every time.
+      #
+      # These two jobs need the embed to RESOLVE, not to contain the real app;
+      # nothing under test reads FrontendAssets (only cmd/workstation and
+      # cmd/ws-server do, via fs.Sub). The `build` job below still runs the
+      # real `pnpm build` — that is where the frontend is actually verified.
+      - name: Stub the embedded frontend
+        run: |
+          mkdir -p frontend/dist
+          echo '<!doctype html><title>ci stub</title>' > frontend/dist/index.html
+      # #1197 — cmd/workstation is the Wails v3 GUI shell, and Wails links
+      # GTK/WebKit through cgo. The Linux runner has no gtk+-3.0 /
+      # webkit2gtk-4.1 dev packages, so anything that pulls that package in
+      # dies in pkg-config before Go gets a say. Installing system libraries on
+      # a SHARED self-hosted runner is not this workflow's call.
+      #
+      # It is the ONLY package that imports Wails: every line of logic lives in
+      # internal/* and cmd/ws-server, which are pure Go and stay fully gated.
+      # What is lost is compile coverage of the ~100-line GUI entry point; the
+      # build job below is where that has to be proven.
+      # -count=1 disables Go's test cache. Without it a green Test job proves
+      # nothing about THIS run: the job before #1186 finished in 62s with every
+      # package — internal/handler and internal/service included — reporting
+      # `(cached)`, i.e. zero tests executed. Go's cache is input-keyed so the
+      # verdict was not wrong, but a merge gate that can decline to run is not
+      # a gate, and a flaky test (#1132) is never re-rolled.
+      #
+      # Affordable only because #1186 landed: the real -race suite now takes
+      # ~162s on this runner instead of the best part of an hour.
+      - name: go test -race
+        run: go test -race -count=1 -timeout=40m $(go list ./... | grep -v '/cmd/workstation$')
+
+  # #1197 — the frontend is built ONCE and handed to the matrix as an artifact.
+  #
+  # It was built inside every matrix job, which is both waste and a race: the
+  # bundle is platform-independent, so four of the five builds were redundant
+  # (~45s of vite each), and `pnpm/action-setup` installs into `~/setup-pnpm`
+  # — a path SHARED by every runner instance on this machine, since they all
+  # run as the same user. Two jobs reaching it at once left one of them with
+  # "Worker pnpm#2 exited with code 1", which is exactly how darwin/amd64 died
+  # while its four siblings passed.
+  frontend:
+    name: Frontend
+    needs: [lint, test]
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
+          retention-days: 1
+
+  # #1169 — the pos-web SPA embedded at /pos, built from its OWN repo
+  # (godx-jp/godx-tempo-pos-web) with base=/pos/ and handed to the matrix as an
+  # artifact. pos-web is a SEPARATE repo, so this job clones it with a read-only
+  # deploy key (POSWEB_DEPLOY_KEY), same posture as tests.yml's UI_DEPLOY_KEY.
+  #
+  # This job NEVER fails the pipeline: if the secret is missing or the build
+  # trips, it warns loudly and emits a bundle-less placeholder so the ws-server
+  # artifact still builds (its /pos then 404s and the version endpoint reports
+  # "unknown"). The real shop release is the GUI binary built with `make build`
+  # from the umbrella, which embeds the sibling ../pos-web regardless — see
+  # docs/guide/workstation-serves-pos-web.md (umbrella).
+  pos-web:
+    name: pos-web bundle
+    needs: [lint, test]
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - uses: actions/checkout@v4
+      # ~/.gitconfig is SHARED across jobs on this runner; strip any inherited
+      # insteadOf rewrite before we set our own (see tests.yml for the story).
+      - name: Sanitize inherited git config
+        run: |
+          git config --global --unset-all url."git@github.com:".insteadOf || true
+          git config --global --unset-all url."https://github.com/".insteadOf || true
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Build & stage pos-web bundle (or bundle-less fallback)
+        env:
+          POSWEB_DEPLOY_KEY: ${{ secrets.POSWEB_DEPLOY_KEY }}
+          # pos-web depends on github:@godxjp/ui — load that repo's deploy key too
+          # so its `pnpm install` authenticates. Optional: absent → we fall back.
+          UI_DEPLOY_KEY: ${{ secrets.UI_DEPLOY_KEY }}
+        run: |
+          set -u
+          mkdir -p pos-web-dist
+          fallback() {
+            echo "::warning::pos-web bundle: $1. The ws-server CI artifact will serve a bundle-less /pos (version endpoint reports \"unknown\"). Add the POSWEB_DEPLOY_KEY (and UI_DEPLOY_KEY) repo secret to embed the real bundle; the make-build GUI release embeds it regardless."
+            rm -rf pos-web-dist && mkdir -p pos-web-dist
+            printf '%s\n' '{"bundle":"pos-web","version":"unknown","commit":"ci-fallback"}' > pos-web-dist/pos-bundle-version.json
+            exit 0
+          }
+          [ -n "${POSWEB_DEPLOY_KEY:-}" ] || fallback "POSWEB_DEPLOY_KEY secret is missing"
+
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          ssh-keyscan -t ed25519,rsa github.com >> ~/.ssh/known_hosts 2>/dev/null || true
+          eval "$(ssh-agent -s)"
+          printf '%s\n' "$POSWEB_DEPLOY_KEY" | tr -d '\r' | ssh-add - 2>/dev/null || fallback "POSWEB_DEPLOY_KEY is not a usable SSH key"
+          if [ -n "${UI_DEPLOY_KEY:-}" ]; then
+            printf '%s\n' "$UI_DEPLOY_KEY" | tr -d '\r' | ssh-add - 2>/dev/null || true
+          fi
+
+          # Empty per-step global git config so the shared runner's token
+          # insteadOf rewrite can't hijack SSH auth; rewrite https→ssh so pnpm's
+          # github:@godxjp/ui dependency resolves over ssh with our keys.
+          export GIT_CONFIG_GLOBAL="$RUNNER_TEMP/posweb-gitconfig"
+          : > "$GIT_CONFIG_GLOBAL"
+          git config --global url."ssh://git@github.com/".insteadOf "https://github.com/"
+
+          rm -rf pos-web-src
+          git clone --depth 1 git@github.com:godx-jp/godx-tempo-pos-web.git pos-web-src \
+            || fallback "clone of godx-tempo-pos-web failed"
+          ( cd pos-web-src && pnpm install --frozen-lockfile && pnpm run build:workstation ) \
+            || fallback "pnpm build:workstation failed (check UI_DEPLOY_KEY for @godxjp/ui)"
+
+          rm -rf pos-web-dist && mkdir -p pos-web-dist
+          cp -R pos-web-src/dist/. pos-web-dist/
+          echo "pos-web bundle built (commit $(git -C pos-web-src rev-parse --short HEAD)) and staged"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pos-web-dist
+          path: pos-web-dist
+          retention-days: 1
+
+  build:
+    name: Build
+    needs: [lint, test, frontend, pos-web]
+    runs-on: [self-hosted, Linux, X64]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+          - goos: linux
+            goarch: arm64
+          - goos: darwin
+            goarch: amd64
+          - goos: darwin
+            goarch: arm64
+          - goos: windows
+            goarch: amd64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache: true
+      # The bundle the `frontend` job produced. `//go:embed all:frontend/dist`
+      # needs real files here, so this download is what makes the binary
+      # meaningful rather than a stub.
+      - uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
+      # #1169 — the pos-web bundle for the /pos embed. Merges alongside the
+      # committed pos-web/dist/.gitkeep. Real bundle when POSWEB_DEPLOY_KEY was
+      # set in the pos-web job; otherwise a bundle-less placeholder (the job
+      # already warned). `//go:embed all:pos-web/dist` picks up whichever.
+      - uses: actions/download-artifact@v4
+        with:
+          name: pos-web-dist
+          path: pos-web/dist
+      # #1197 — builds cmd/ws-server, the headless LAN server, NOT
+      # cmd/workstation.
+      #
+      # The five-platform matrix used to target the Wails GUI shell with
+      # CGO_ENABLED=0, and that combination cannot work: Wails needs cgo for
+      # the webview, so a linux target dies at
+      # `menu_linux.go: undefined: pointer`, and a darwin target
+      # cross-compiled from linux needs an Objective-C toolchain. It never
+      # surfaced because `build` is `needs: [lint, test]` and those two had
+      # never once been green.
+      #
+      # Measured: ws-server cross-compiles cleanly with CGO_ENABLED=0 for all
+      # five targets (modernc.org/sqlite is pure Go), so this matrix now proves
+      # something real — the frontend builds, the embed resolves, and the
+      # server code compiles everywhere.
+      #
+      # The GUI binary is NOT built here. It needs a runner carrying that OS's
+      # GUI toolchain; until one exists it is built with `make build` on a
+      # developer machine. Better an honest gap than a matrix that silently
+      # never ran.
+      - name: Build binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: "0"
+        run: |
+          mkdir -p build/bin
+          ext=""
+          if [ "${{ matrix.goos }}" = "windows" ]; then ext=".exe"; fi
+          # A released binary must report the RELEASE version, not ci-<sha>:
+          # config.Version is what `GET /api/lan/health` and `/version` publish,
+          # and "which build is this shop running" is a question we currently
+          # cannot answer at all (#1822). Stamping the tag is the first half of
+          # ever being able to.
+          VERSION="ci-${{ github.sha }}"
+          if [ "${{ github.ref_type }}" = "tag" ]; then VERSION="${{ github.ref_name }}"; fi
+          go build -ldflags "-s -w -X 'github.com/dxs-platform/workstation-app/internal/config.Version=${VERSION}'" \
+            -o build/bin/ws-server-${{ matrix.goos }}-${{ matrix.goarch }}${ext} ./cmd/ws-server
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ws-server-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: build/bin/
+          retention-days: 7
+
+  # ── Release ────────────────────────────────────────────────────────────────
+  # #1827 — before this job the repo had NO publishing path at all: `on:` did
+  # not listen for tags, no job called `gh release create`, and the only
+  # GitHub Release (v0.0.1, 2026-07-23) predated the fix shops were waiting
+  # for. A tag was a label pointing at a commit and nothing else, so "cut a
+  # release" was not a thing anyone could do.
+  #
+  # What ships here is `ws-server` for five platforms — and that IS the shop
+  # build, not a lesser one. `cmd/ws-server` serves the same embedded frontend
+  # at `/` and the same pos-web at `/pos`, and opens the database through the
+  # same `store.Open` (so it carries every migration). `cmd/workstation` is the
+  # same server wrapped in a Wails webview: a convenience window, not a
+  # different product. A shop runs this binary and reaches the UI at
+  # http://<ip>:<port>/ — which is why the GUI's cgo/toolchain problem does not
+  # block releasing.
+  release:
+    name: Release
+    needs: [build]
+    if: github.ref_type == 'tag'
+    runs-on: [self-hosted, Linux, X64]
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # release notes are generated from the commit range
+
+      # `gh` is not used by any other job, so its presence on this self-hosted
+      # runner is unproven. Check it FIRST: without this the job dies at the
+      # very last step, after downloading and checksumming everything, with a
+      # bare "gh: command not found" — and the tag is already pushed by then,
+      # so the failure looks like "the release broke" rather than "the runner
+      # is missing a tool".
+      - name: Preflight — gh is available
+        run: |
+          if ! command -v gh >/dev/null 2>&1; then
+            echo "::error::gh CLI is not installed on this runner. Install it (https://cli.github.com) or swap the publish step for a curl call to the Releases API."
+            exit 1
+          fi
+          gh --version
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: ws-server-*
+          path: dist
+          merge-multiple: true
+
+      # Fail loudly on a short delivery. Publishing 3 of 5 platforms silently
+      # would leave two OSes with no upgrade path and nobody looking.
+      - name: Verify all five platforms are present
+        run: |
+          cd dist
+          missing=""
+          for t in linux-amd64 linux-arm64 darwin-amd64 darwin-arm64 windows-amd64.exe; do
+            [ -f "ws-server-$t" ] || missing="$missing ws-server-$t"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::release is missing:$missing"
+            ls -la
+            exit 1
+          fi
+          ls -la
+
+      - name: Checksums
+        run: cd dist && sha256sum ws-server-* > SHA256SUMS.txt && cat SHA256SUMS.txt
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PREV=$(git describe --tags --abbrev=0 "${{ github.ref_name }}^" 2>/dev/null || echo "")
+          if [ -n "$PREV" ]; then
+            RANGE="$PREV..${{ github.ref_name }}"
+            HEADING="Thay đổi kể từ $PREV"
+          else
+            RANGE="${{ github.ref_name }}"
+            HEADING="Thay đổi"
+          fi
+
+          {
+            echo "## Cài đặt"
+            echo
+            echo "Tải binary cho nền tảng của máy quán rồi chạy. **Đây là bản cài đầy đủ** —"
+            echo "giao diện quản trị mở bằng trình duyệt tại \`http://<ip-máy>:<cổng>/\`, POS tại"
+            echo "\`/pos\`. Cửa sổ desktop (Wails) là tuỳ chọn, không bắt buộc để quán chạy."
+            echo
+            echo "Đối chiếu \`SHA256SUMS.txt\` trước khi cài."
+            echo
+            echo "## $HEADING"
+            echo
+            git log --no-merges --pretty='- %s' "$RANGE" | head -100
+          } > NOTES.md
+
+          gh release create "${{ github.ref_name }}" \
+            --title "${{ github.ref_name }}" \
+            --notes-file NOTES.md \
+            dist/ws-server-* dist/SHA256SUMS.txt

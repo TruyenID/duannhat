@@ -1,0 +1,1460 @@
+[
+    {
+        "id": 1,
+        "product_sku_id": "019f408b-16d8-701d-925c-0812c543bdb2",
+        "locale": "ja",
+        "name": "並"
+    },
+    {
+        "id": 2,
+        "product_sku_id": "019f408b-16d8-701d-925c-0812c543bdb2",
+        "locale": "en",
+        "name": "Regular"
+    },
+    {
+        "id": 3,
+        "product_sku_id": "019f408b-16d8-701d-925c-0812c543bdb2",
+        "locale": "vi",
+        "name": "Thường"
+    },
+    {
+        "id": 4,
+        "product_sku_id": "019f408b-16da-7125-a7a7-bea4693ea45f",
+        "locale": "ja",
+        "name": "大盛"
+    },
+    {
+        "id": 5,
+        "product_sku_id": "019f408b-16da-7125-a7a7-bea4693ea45f",
+        "locale": "en",
+        "name": "Large"
+    },
+    {
+        "id": 6,
+        "product_sku_id": "019f408b-16da-7125-a7a7-bea4693ea45f",
+        "locale": "vi",
+        "name": "Lớn"
+    },
+    {
+        "id": 7,
+        "product_sku_id": "019f408b-16e5-70b5-b4d8-2f042390896f",
+        "locale": "ja",
+        "name": "並"
+    },
+    {
+        "id": 8,
+        "product_sku_id": "019f408b-16e5-70b5-b4d8-2f042390896f",
+        "locale": "en",
+        "name": "Regular"
+    },
+    {
+        "id": 9,
+        "product_sku_id": "019f408b-16e5-70b5-b4d8-2f042390896f",
+        "locale": "vi",
+        "name": "Thường"
+    },
+    {
+        "id": 10,
+        "product_sku_id": "019f408b-16e8-7392-bfae-20e4a5c04119",
+        "locale": "ja",
+        "name": "大盛"
+    },
+    {
+        "id": 11,
+        "product_sku_id": "019f408b-16e8-7392-bfae-20e4a5c04119",
+        "locale": "en",
+        "name": "Large"
+    },
+    {
+        "id": 12,
+        "product_sku_id": "019f408b-16e8-7392-bfae-20e4a5c04119",
+        "locale": "vi",
+        "name": "Lớn"
+    },
+    {
+        "id": 13,
+        "product_sku_id": "019f408b-16ee-736e-8453-8e5943e1c173",
+        "locale": "ja",
+        "name": "Regular"
+    },
+    {
+        "id": 14,
+        "product_sku_id": "019f408b-16ee-736e-8453-8e5943e1c173",
+        "locale": "en",
+        "name": "Regular"
+    },
+    {
+        "id": 15,
+        "product_sku_id": "019f408b-16ee-736e-8453-8e5943e1c173",
+        "locale": "vi",
+        "name": "Regular"
+    },
+    {
+        "id": 16,
+        "product_sku_id": "019f408b-16f4-7291-95ef-b3edd36e0b4d",
+        "locale": "ja",
+        "name": "並"
+    },
+    {
+        "id": 17,
+        "product_sku_id": "019f408b-16f4-7291-95ef-b3edd36e0b4d",
+        "locale": "en",
+        "name": "Regular"
+    },
+    {
+        "id": 18,
+        "product_sku_id": "019f408b-16f4-7291-95ef-b3edd36e0b4d",
+        "locale": "vi",
+        "name": "Thường"
+    },
+    {
+        "id": 19,
+        "product_sku_id": "019f408b-16f5-73a5-9dba-224bde856e23",
+        "locale": "ja",
+        "name": "大盛"
+    },
+    {
+        "id": 20,
+        "product_sku_id": "019f408b-16f5-73a5-9dba-224bde856e23",
+        "locale": "en",
+        "name": "Large"
+    },
+    {
+        "id": 21,
+        "product_sku_id": "019f408b-16f5-73a5-9dba-224bde856e23",
+        "locale": "vi",
+        "name": "Lớn"
+    },
+    {
+        "id": 22,
+        "product_sku_id": "019f408b-16fb-723f-a88f-5c61c6b98f11",
+        "locale": "ja",
+        "name": "クラシック"
+    },
+    {
+        "id": 23,
+        "product_sku_id": "019f408b-16fb-723f-a88f-5c61c6b98f11",
+        "locale": "en",
+        "name": "Classic"
+    },
+    {
+        "id": 24,
+        "product_sku_id": "019f408b-16fb-723f-a88f-5c61c6b98f11",
+        "locale": "vi",
+        "name": "Cổ điển"
+    },
+    {
+        "id": 25,
+        "product_sku_id": "019f408b-16fd-710b-b0c5-0df729471d48",
+        "locale": "ja",
+        "name": "スペシャル"
+    },
+    {
+        "id": 26,
+        "product_sku_id": "019f408b-16fd-710b-b0c5-0df729471d48",
+        "locale": "en",
+        "name": "Special"
+    },
+    {
+        "id": 27,
+        "product_sku_id": "019f408b-16fd-710b-b0c5-0df729471d48",
+        "locale": "vi",
+        "name": "Đặc biệt"
+    },
+    {
+        "id": 28,
+        "product_sku_id": "019f408b-1700-705d-ab5f-3ce2b8092522",
+        "locale": "ja",
+        "name": "ベジ"
+    },
+    {
+        "id": 29,
+        "product_sku_id": "019f408b-1700-705d-ab5f-3ce2b8092522",
+        "locale": "en",
+        "name": "Veggie"
+    },
+    {
+        "id": 30,
+        "product_sku_id": "019f408b-1700-705d-ab5f-3ce2b8092522",
+        "locale": "vi",
+        "name": "Chay"
+    },
+    {
+        "id": 31,
+        "product_sku_id": "019f408b-170b-7277-a4a7-4b5a502a839f",
+        "locale": "ja",
+        "name": "豚スネ"
+    },
+    {
+        "id": 32,
+        "product_sku_id": "019f408b-170b-7277-a4a7-4b5a502a839f",
+        "locale": "en",
+        "name": "Pork"
+    },
+    {
+        "id": 33,
+        "product_sku_id": "019f408b-170b-7277-a4a7-4b5a502a839f",
+        "locale": "vi",
+        "name": "Sườn"
+    },
+    {
+        "id": 34,
+        "product_sku_id": "019f408b-1710-701c-90ff-a11bf12d3a82",
+        "locale": "ja",
+        "name": "鶏肉"
+    },
+    {
+        "id": 35,
+        "product_sku_id": "019f408b-1710-701c-90ff-a11bf12d3a82",
+        "locale": "en",
+        "name": "Chicken"
+    },
+    {
+        "id": 36,
+        "product_sku_id": "019f408b-1710-701c-90ff-a11bf12d3a82",
+        "locale": "vi",
+        "name": "Gà"
+    },
+    {
+        "id": 37,
+        "product_sku_id": "019f408b-1729-72c8-aad1-a75dd3eb725e",
+        "locale": "ja",
+        "name": "Regular"
+    },
+    {
+        "id": 38,
+        "product_sku_id": "019f408b-1729-72c8-aad1-a75dd3eb725e",
+        "locale": "en",
+        "name": "Regular"
+    },
+    {
+        "id": 39,
+        "product_sku_id": "019f408b-1729-72c8-aad1-a75dd3eb725e",
+        "locale": "vi",
+        "name": "Regular"
+    },
+    {
+        "id": 40,
+        "product_sku_id": "019f408b-1731-7153-bae5-db631cc4fc94",
+        "locale": "ja",
+        "name": "Regular"
+    },
+    {
+        "id": 41,
+        "product_sku_id": "019f408b-1731-7153-bae5-db631cc4fc94",
+        "locale": "en",
+        "name": "Regular"
+    },
+    {
+        "id": 42,
+        "product_sku_id": "019f408b-1731-7153-bae5-db631cc4fc94",
+        "locale": "vi",
+        "name": "Regular"
+    },
+    {
+        "id": 43,
+        "product_sku_id": "019f408b-173a-7290-9c3c-23bef20c6221",
+        "locale": "ja",
+        "name": "Regular"
+    },
+    {
+        "id": 44,
+        "product_sku_id": "019f408b-173a-7290-9c3c-23bef20c6221",
+        "locale": "en",
+        "name": "Regular"
+    },
+    {
+        "id": 45,
+        "product_sku_id": "019f408b-173a-7290-9c3c-23bef20c6221",
+        "locale": "vi",
+        "name": "Regular"
+    },
+    {
+        "id": 46,
+        "product_sku_id": "019f408b-1742-721b-ac5b-37713ef8ab43",
+        "locale": "ja",
+        "name": "Regular"
+    },
+    {
+        "id": 47,
+        "product_sku_id": "019f408b-1742-721b-ac5b-37713ef8ab43",
+        "locale": "en",
+        "name": "Regular"
+    },
+    {
+        "id": 48,
+        "product_sku_id": "019f408b-1742-721b-ac5b-37713ef8ab43",
+        "locale": "vi",
+        "name": "Regular"
+    },
+    {
+        "id": 49,
+        "product_sku_id": "019f408b-174c-7109-8ecb-f7d47d74d93a",
+        "locale": "ja",
+        "name": "2pc"
+    },
+    {
+        "id": 50,
+        "product_sku_id": "019f408b-174c-7109-8ecb-f7d47d74d93a",
+        "locale": "en",
+        "name": "2pc"
+    },
+    {
+        "id": 51,
+        "product_sku_id": "019f408b-174c-7109-8ecb-f7d47d74d93a",
+        "locale": "vi",
+        "name": "2pc"
+    },
+    {
+        "id": 52,
+        "product_sku_id": "019f408b-1752-7341-9887-ddb3aad728e3",
+        "locale": "ja",
+        "name": "4pc"
+    },
+    {
+        "id": 53,
+        "product_sku_id": "019f408b-1752-7341-9887-ddb3aad728e3",
+        "locale": "en",
+        "name": "4pc"
+    },
+    {
+        "id": 54,
+        "product_sku_id": "019f408b-1752-7341-9887-ddb3aad728e3",
+        "locale": "vi",
+        "name": "4pc"
+    },
+    {
+        "id": 55,
+        "product_sku_id": "019f408b-1758-70ff-9423-bddf6b007ce6",
+        "locale": "ja",
+        "name": "3pc"
+    },
+    {
+        "id": 56,
+        "product_sku_id": "019f408b-1758-70ff-9423-bddf6b007ce6",
+        "locale": "en",
+        "name": "3pc"
+    },
+    {
+        "id": 57,
+        "product_sku_id": "019f408b-1758-70ff-9423-bddf6b007ce6",
+        "locale": "vi",
+        "name": "3pc"
+    },
+    {
+        "id": 58,
+        "product_sku_id": "019f408b-175a-730d-ac36-3fc8e880b1d3",
+        "locale": "ja",
+        "name": "5pc"
+    },
+    {
+        "id": 59,
+        "product_sku_id": "019f408b-175a-730d-ac36-3fc8e880b1d3",
+        "locale": "en",
+        "name": "5pc"
+    },
+    {
+        "id": 60,
+        "product_sku_id": "019f408b-175a-730d-ac36-3fc8e880b1d3",
+        "locale": "vi",
+        "name": "5pc"
+    },
+    {
+        "id": 61,
+        "product_sku_id": "019f408b-1761-7013-bfe2-57886c83711f",
+        "locale": "ja",
+        "name": "Regular"
+    },
+    {
+        "id": 62,
+        "product_sku_id": "019f408b-1761-7013-bfe2-57886c83711f",
+        "locale": "en",
+        "name": "Regular"
+    },
+    {
+        "id": 63,
+        "product_sku_id": "019f408b-1761-7013-bfe2-57886c83711f",
+        "locale": "vi",
+        "name": "Regular"
+    },
+    {
+        "id": 64,
+        "product_sku_id": "019f408b-1767-715e-adfd-a3dfbf309532",
+        "locale": "ja",
+        "name": "1pc"
+    },
+    {
+        "id": 65,
+        "product_sku_id": "019f408b-1767-715e-adfd-a3dfbf309532",
+        "locale": "en",
+        "name": "1pc"
+    },
+    {
+        "id": 66,
+        "product_sku_id": "019f408b-1767-715e-adfd-a3dfbf309532",
+        "locale": "vi",
+        "name": "1pc"
+    },
+    {
+        "id": 67,
+        "product_sku_id": "019f408b-1771-70f2-b4cd-6971487c5856",
+        "locale": "ja",
+        "name": "Regular"
+    },
+    {
+        "id": 68,
+        "product_sku_id": "019f408b-1771-70f2-b4cd-6971487c5856",
+        "locale": "en",
+        "name": "Regular"
+    },
+    {
+        "id": 69,
+        "product_sku_id": "019f408b-1771-70f2-b4cd-6971487c5856",
+        "locale": "vi",
+        "name": "Regular"
+    },
+    {
+        "id": 70,
+        "product_sku_id": "019f408b-1783-711e-8153-d5e9467bb7cb",
+        "locale": "ja",
+        "name": "Regular"
+    },
+    {
+        "id": 71,
+        "product_sku_id": "019f408b-1783-711e-8153-d5e9467bb7cb",
+        "locale": "en",
+        "name": "Regular"
+    },
+    {
+        "id": 72,
+        "product_sku_id": "019f408b-1783-711e-8153-d5e9467bb7cb",
+        "locale": "vi",
+        "name": "Regular"
+    },
+    {
+        "id": 73,
+        "product_sku_id": "019f408b-1791-7083-a1f8-48473d154079",
+        "locale": "ja",
+        "name": "ホット"
+    },
+    {
+        "id": 74,
+        "product_sku_id": "019f408b-1791-7083-a1f8-48473d154079",
+        "locale": "en",
+        "name": "Hot"
+    },
+    {
+        "id": 75,
+        "product_sku_id": "019f408b-1791-7083-a1f8-48473d154079",
+        "locale": "vi",
+        "name": "Nóng"
+    },
+    {
+        "id": 76,
+        "product_sku_id": "019f408b-1798-7180-b40e-63534794989f",
+        "locale": "ja",
+        "name": "アイス"
+    },
+    {
+        "id": 77,
+        "product_sku_id": "019f408b-1798-7180-b40e-63534794989f",
+        "locale": "en",
+        "name": "Iced"
+    },
+    {
+        "id": 78,
+        "product_sku_id": "019f408b-1798-7180-b40e-63534794989f",
+        "locale": "vi",
+        "name": "Đá"
+    },
+    {
+        "id": 79,
+        "product_sku_id": "019f408b-17ae-71a9-9e15-c138537a435c",
+        "locale": "ja",
+        "name": "ホット"
+    },
+    {
+        "id": 80,
+        "product_sku_id": "019f408b-17ae-71a9-9e15-c138537a435c",
+        "locale": "en",
+        "name": "Hot"
+    },
+    {
+        "id": 81,
+        "product_sku_id": "019f408b-17ae-71a9-9e15-c138537a435c",
+        "locale": "vi",
+        "name": "Nóng"
+    },
+    {
+        "id": 82,
+        "product_sku_id": "019f408b-17b3-7385-bbeb-3c43d271db78",
+        "locale": "ja",
+        "name": "アイス"
+    },
+    {
+        "id": 83,
+        "product_sku_id": "019f408b-17b3-7385-bbeb-3c43d271db78",
+        "locale": "en",
+        "name": "Iced"
+    },
+    {
+        "id": 84,
+        "product_sku_id": "019f408b-17b3-7385-bbeb-3c43d271db78",
+        "locale": "vi",
+        "name": "Đá"
+    },
+    {
+        "id": 85,
+        "product_sku_id": "019f408b-17c6-7169-8c6f-28796b85e450",
+        "locale": "ja",
+        "name": "Iced"
+    },
+    {
+        "id": 86,
+        "product_sku_id": "019f408b-17c6-7169-8c6f-28796b85e450",
+        "locale": "en",
+        "name": "Iced"
+    },
+    {
+        "id": 87,
+        "product_sku_id": "019f408b-17c6-7169-8c6f-28796b85e450",
+        "locale": "vi",
+        "name": "Iced"
+    },
+    {
+        "id": 88,
+        "product_sku_id": "019f408b-17db-70c2-8179-0ca28b9335d2",
+        "locale": "ja",
+        "name": "Hot"
+    },
+    {
+        "id": 89,
+        "product_sku_id": "019f408b-17db-70c2-8179-0ca28b9335d2",
+        "locale": "en",
+        "name": "Hot"
+    },
+    {
+        "id": 90,
+        "product_sku_id": "019f408b-17db-70c2-8179-0ca28b9335d2",
+        "locale": "vi",
+        "name": "Hot"
+    },
+    {
+        "id": 91,
+        "product_sku_id": "019f408b-17e1-7327-a85c-4e2a247d3885",
+        "locale": "ja",
+        "name": "Iced"
+    },
+    {
+        "id": 92,
+        "product_sku_id": "019f408b-17e1-7327-a85c-4e2a247d3885",
+        "locale": "en",
+        "name": "Iced"
+    },
+    {
+        "id": 93,
+        "product_sku_id": "019f408b-17e1-7327-a85c-4e2a247d3885",
+        "locale": "vi",
+        "name": "Iced"
+    },
+    {
+        "id": 94,
+        "product_sku_id": "019f408b-17f8-73a9-8b93-9d2285992f69",
+        "locale": "ja",
+        "name": "Hot"
+    },
+    {
+        "id": 95,
+        "product_sku_id": "019f408b-17f8-73a9-8b93-9d2285992f69",
+        "locale": "en",
+        "name": "Hot"
+    },
+    {
+        "id": 96,
+        "product_sku_id": "019f408b-17f8-73a9-8b93-9d2285992f69",
+        "locale": "vi",
+        "name": "Hot"
+    },
+    {
+        "id": 97,
+        "product_sku_id": "019f408b-17fe-7341-9220-1fb97fb9435a",
+        "locale": "ja",
+        "name": "Iced"
+    },
+    {
+        "id": 98,
+        "product_sku_id": "019f408b-17fe-7341-9220-1fb97fb9435a",
+        "locale": "en",
+        "name": "Iced"
+    },
+    {
+        "id": 99,
+        "product_sku_id": "019f408b-17fe-7341-9220-1fb97fb9435a",
+        "locale": "vi",
+        "name": "Iced"
+    },
+    {
+        "id": 100,
+        "product_sku_id": "019f408b-1812-7077-8b45-cb5e8a8c4961",
+        "locale": "ja",
+        "name": "Hot"
+    },
+    {
+        "id": 101,
+        "product_sku_id": "019f408b-1812-7077-8b45-cb5e8a8c4961",
+        "locale": "en",
+        "name": "Hot"
+    },
+    {
+        "id": 102,
+        "product_sku_id": "019f408b-1812-7077-8b45-cb5e8a8c4961",
+        "locale": "vi",
+        "name": "Hot"
+    },
+    {
+        "id": 103,
+        "product_sku_id": "019f408b-1820-7117-bef5-f96f81d09f80",
+        "locale": "ja",
+        "name": "330ml"
+    },
+    {
+        "id": 104,
+        "product_sku_id": "019f408b-1820-7117-bef5-f96f81d09f80",
+        "locale": "en",
+        "name": "330ml"
+    },
+    {
+        "id": 105,
+        "product_sku_id": "019f408b-1820-7117-bef5-f96f81d09f80",
+        "locale": "vi",
+        "name": "330ml"
+    },
+    {
+        "id": 106,
+        "product_sku_id": "019f408b-1829-72ce-963c-d10e7843dced",
+        "locale": "ja",
+        "name": "330ml"
+    },
+    {
+        "id": 107,
+        "product_sku_id": "019f408b-1829-72ce-963c-d10e7843dced",
+        "locale": "en",
+        "name": "330ml"
+    },
+    {
+        "id": 108,
+        "product_sku_id": "019f408b-1829-72ce-963c-d10e7843dced",
+        "locale": "vi",
+        "name": "330ml"
+    },
+    {
+        "id": 109,
+        "product_sku_id": "019f408b-1832-72a6-b4b6-da48175e4113",
+        "locale": "ja",
+        "name": "マンゴー"
+    },
+    {
+        "id": 110,
+        "product_sku_id": "019f408b-1832-72a6-b4b6-da48175e4113",
+        "locale": "en",
+        "name": "Mango"
+    },
+    {
+        "id": 111,
+        "product_sku_id": "019f408b-1832-72a6-b4b6-da48175e4113",
+        "locale": "vi",
+        "name": "Xoài"
+    },
+    {
+        "id": 112,
+        "product_sku_id": "019f408b-1836-7366-8067-2d2ae90d4c70",
+        "locale": "ja",
+        "name": "アボカド"
+    },
+    {
+        "id": 113,
+        "product_sku_id": "019f408b-1836-7366-8067-2d2ae90d4c70",
+        "locale": "en",
+        "name": "Avocado"
+    },
+    {
+        "id": 114,
+        "product_sku_id": "019f408b-1836-7366-8067-2d2ae90d4c70",
+        "locale": "vi",
+        "name": "Bơ"
+    },
+    {
+        "id": 115,
+        "product_sku_id": "019f408b-1837-708a-9fe9-5de57743e296",
+        "locale": "ja",
+        "name": "ドラゴンフルーツ"
+    },
+    {
+        "id": 116,
+        "product_sku_id": "019f408b-1837-708a-9fe9-5de57743e296",
+        "locale": "en",
+        "name": "Dragon Fruit"
+    },
+    {
+        "id": 117,
+        "product_sku_id": "019f408b-1837-708a-9fe9-5de57743e296",
+        "locale": "vi",
+        "name": "Thanh long"
+    },
+    {
+        "id": 118,
+        "product_sku_id": "019f408b-1840-7167-b935-b96639124b54",
+        "locale": "ja",
+        "name": "Regular"
+    },
+    {
+        "id": 119,
+        "product_sku_id": "019f408b-1840-7167-b935-b96639124b54",
+        "locale": "en",
+        "name": "Regular"
+    },
+    {
+        "id": 120,
+        "product_sku_id": "019f408b-1840-7167-b935-b96639124b54",
+        "locale": "vi",
+        "name": "Regular"
+    },
+    {
+        "id": 121,
+        "product_sku_id": "019f408b-2feb-728a-9027-a1dc9734d28b",
+        "locale": "ja",
+        "name": "ハッピーアワーセット"
+    },
+    {
+        "id": 122,
+        "product_sku_id": "019f408b-2feb-728a-9027-a1dc9734d28b",
+        "locale": "en",
+        "name": "Happy Hour Set"
+    },
+    {
+        "id": 123,
+        "product_sku_id": "019f408b-2feb-728a-9027-a1dc9734d28b",
+        "locale": "vi",
+        "name": "Combo giờ vàng"
+    },
+    {
+        "id": 124,
+        "product_sku_id": "019f408b-301d-7285-b831-9ed1b299ebf8",
+        "locale": "ja",
+        "name": "ディナーフィースト"
+    },
+    {
+        "id": 125,
+        "product_sku_id": "019f408b-301d-7285-b831-9ed1b299ebf8",
+        "locale": "en",
+        "name": "Dinner Feast"
+    },
+    {
+        "id": 126,
+        "product_sku_id": "019f408b-301d-7285-b831-9ed1b299ebf8",
+        "locale": "vi",
+        "name": "Tiệc tối"
+    },
+    {
+        "id": 127,
+        "product_sku_id": "019f408b-8414-7252-b621-4467aa69bc62",
+        "locale": "ja",
+        "name": "Mild"
+    },
+    {
+        "id": 128,
+        "product_sku_id": "019f408b-8414-7252-b621-4467aa69bc62",
+        "locale": "en",
+        "name": "Mild"
+    },
+    {
+        "id": 129,
+        "product_sku_id": "019f408b-8414-7252-b621-4467aa69bc62",
+        "locale": "vi",
+        "name": "Mild"
+    },
+    {
+        "id": 130,
+        "product_sku_id": "019f408b-841a-72cc-9709-42c49d2e7523",
+        "locale": "ja",
+        "name": "Medium"
+    },
+    {
+        "id": 131,
+        "product_sku_id": "019f408b-841a-72cc-9709-42c49d2e7523",
+        "locale": "en",
+        "name": "Medium"
+    },
+    {
+        "id": 132,
+        "product_sku_id": "019f408b-841a-72cc-9709-42c49d2e7523",
+        "locale": "vi",
+        "name": "Medium"
+    },
+    {
+        "id": 133,
+        "product_sku_id": "019f408b-8420-72e6-8197-17af0c72bd7c",
+        "locale": "ja",
+        "name": "Hot"
+    },
+    {
+        "id": 134,
+        "product_sku_id": "019f408b-8420-72e6-8197-17af0c72bd7c",
+        "locale": "en",
+        "name": "Hot"
+    },
+    {
+        "id": 135,
+        "product_sku_id": "019f408b-8420-72e6-8197-17af0c72bd7c",
+        "locale": "vi",
+        "name": "Hot"
+    },
+    {
+        "id": 136,
+        "product_sku_id": "019f408b-8427-7229-8f33-d94897fa066e",
+        "locale": "ja",
+        "name": "Extra hot"
+    },
+    {
+        "id": 137,
+        "product_sku_id": "019f408b-8427-7229-8f33-d94897fa066e",
+        "locale": "en",
+        "name": "Extra hot"
+    },
+    {
+        "id": 138,
+        "product_sku_id": "019f408b-8427-7229-8f33-d94897fa066e",
+        "locale": "vi",
+        "name": "Extra hot"
+    },
+    {
+        "id": 139,
+        "product_sku_id": "019f408b-8432-7096-aa25-7dbd8073e1e0",
+        "locale": "ja",
+        "name": "0% sugar"
+    },
+    {
+        "id": 140,
+        "product_sku_id": "019f408b-8432-7096-aa25-7dbd8073e1e0",
+        "locale": "en",
+        "name": "0% sugar"
+    },
+    {
+        "id": 141,
+        "product_sku_id": "019f408b-8432-7096-aa25-7dbd8073e1e0",
+        "locale": "vi",
+        "name": "0% sugar"
+    },
+    {
+        "id": 142,
+        "product_sku_id": "019f408b-8438-7366-ba0b-2d6f55835bef",
+        "locale": "ja",
+        "name": "50% sugar"
+    },
+    {
+        "id": 143,
+        "product_sku_id": "019f408b-8438-7366-ba0b-2d6f55835bef",
+        "locale": "en",
+        "name": "50% sugar"
+    },
+    {
+        "id": 144,
+        "product_sku_id": "019f408b-8438-7366-ba0b-2d6f55835bef",
+        "locale": "vi",
+        "name": "50% sugar"
+    },
+    {
+        "id": 145,
+        "product_sku_id": "019f408b-843d-73fd-8362-0eb9088bc5d1",
+        "locale": "ja",
+        "name": "100% sugar"
+    },
+    {
+        "id": 146,
+        "product_sku_id": "019f408b-843d-73fd-8362-0eb9088bc5d1",
+        "locale": "en",
+        "name": "100% sugar"
+    },
+    {
+        "id": 147,
+        "product_sku_id": "019f408b-843d-73fd-8362-0eb9088bc5d1",
+        "locale": "vi",
+        "name": "100% sugar"
+    },
+    {
+        "id": 148,
+        "product_sku_id": "019f408b-8445-73c1-b2b0-df738133f310",
+        "locale": "ja",
+        "name": "Extra sweet"
+    },
+    {
+        "id": 149,
+        "product_sku_id": "019f408b-8445-73c1-b2b0-df738133f310",
+        "locale": "en",
+        "name": "Extra sweet"
+    },
+    {
+        "id": 150,
+        "product_sku_id": "019f408b-8445-73c1-b2b0-df738133f310",
+        "locale": "vi",
+        "name": "Extra sweet"
+    },
+    {
+        "id": 151,
+        "product_sku_id": "019f408b-8454-739a-99b7-fb85f6b1a0e7",
+        "locale": "ja",
+        "name": "Iced"
+    },
+    {
+        "id": 152,
+        "product_sku_id": "019f408b-8454-739a-99b7-fb85f6b1a0e7",
+        "locale": "en",
+        "name": "Iced"
+    },
+    {
+        "id": 153,
+        "product_sku_id": "019f408b-8454-739a-99b7-fb85f6b1a0e7",
+        "locale": "vi",
+        "name": "Iced"
+    },
+    {
+        "id": 154,
+        "product_sku_id": "019f408b-845a-72e7-b665-35812a741feb",
+        "locale": "ja",
+        "name": "Less ice"
+    },
+    {
+        "id": 155,
+        "product_sku_id": "019f408b-845a-72e7-b665-35812a741feb",
+        "locale": "en",
+        "name": "Less ice"
+    },
+    {
+        "id": 156,
+        "product_sku_id": "019f408b-845a-72e7-b665-35812a741feb",
+        "locale": "vi",
+        "name": "Less ice"
+    },
+    {
+        "id": 157,
+        "product_sku_id": "019f408b-8460-704c-90a5-8a6b3a75a9d5",
+        "locale": "ja",
+        "name": "No ice"
+    },
+    {
+        "id": 158,
+        "product_sku_id": "019f408b-8460-704c-90a5-8a6b3a75a9d5",
+        "locale": "en",
+        "name": "No ice"
+    },
+    {
+        "id": 159,
+        "product_sku_id": "019f408b-8460-704c-90a5-8a6b3a75a9d5",
+        "locale": "vi",
+        "name": "No ice"
+    },
+    {
+        "id": 160,
+        "product_sku_id": "019f408b-846c-717c-b9ec-8559c9b1790b",
+        "locale": "ja",
+        "name": "Egg"
+    },
+    {
+        "id": 161,
+        "product_sku_id": "019f408b-846c-717c-b9ec-8559c9b1790b",
+        "locale": "en",
+        "name": "Egg"
+    },
+    {
+        "id": 162,
+        "product_sku_id": "019f408b-846c-717c-b9ec-8559c9b1790b",
+        "locale": "vi",
+        "name": "Egg"
+    },
+    {
+        "id": 163,
+        "product_sku_id": "019f408b-8472-7399-8557-794f23feae27",
+        "locale": "ja",
+        "name": "Extra beef"
+    },
+    {
+        "id": 164,
+        "product_sku_id": "019f408b-8472-7399-8557-794f23feae27",
+        "locale": "en",
+        "name": "Extra beef"
+    },
+    {
+        "id": 165,
+        "product_sku_id": "019f408b-8472-7399-8557-794f23feae27",
+        "locale": "vi",
+        "name": "Extra beef"
+    },
+    {
+        "id": 166,
+        "product_sku_id": "019f408b-8478-703c-b988-3b15769e4275",
+        "locale": "ja",
+        "name": "Extra noodles"
+    },
+    {
+        "id": 167,
+        "product_sku_id": "019f408b-8478-703c-b988-3b15769e4275",
+        "locale": "en",
+        "name": "Extra noodles"
+    },
+    {
+        "id": 168,
+        "product_sku_id": "019f408b-8478-703c-b988-3b15769e4275",
+        "locale": "vi",
+        "name": "Extra noodles"
+    },
+    {
+        "id": 169,
+        "product_sku_id": "019f408b-847e-715b-b944-df632ba5bdd4",
+        "locale": "ja",
+        "name": "Cheese"
+    },
+    {
+        "id": 170,
+        "product_sku_id": "019f408b-847e-715b-b944-df632ba5bdd4",
+        "locale": "en",
+        "name": "Cheese"
+    },
+    {
+        "id": 171,
+        "product_sku_id": "019f408b-847e-715b-b944-df632ba5bdd4",
+        "locale": "vi",
+        "name": "Cheese"
+    },
+    {
+        "id": 172,
+        "product_sku_id": "019f408b-8485-739b-96e9-3dc2d9b697ad",
+        "locale": "ja",
+        "name": "Veggies"
+    },
+    {
+        "id": 173,
+        "product_sku_id": "019f408b-8485-739b-96e9-3dc2d9b697ad",
+        "locale": "en",
+        "name": "Veggies"
+    },
+    {
+        "id": 174,
+        "product_sku_id": "019f408b-8485-739b-96e9-3dc2d9b697ad",
+        "locale": "vi",
+        "name": "Veggies"
+    },
+    {
+        "id": 175,
+        "product_sku_id": "019f408b-8490-71b2-b293-7afbfdbf5a6e",
+        "locale": "ja",
+        "name": "Boba pearls"
+    },
+    {
+        "id": 176,
+        "product_sku_id": "019f408b-8490-71b2-b293-7afbfdbf5a6e",
+        "locale": "en",
+        "name": "Boba pearls"
+    },
+    {
+        "id": 177,
+        "product_sku_id": "019f408b-8490-71b2-b293-7afbfdbf5a6e",
+        "locale": "vi",
+        "name": "Boba pearls"
+    },
+    {
+        "id": 178,
+        "product_sku_id": "019f408b-8498-700f-8f9c-fae6c43ef63a",
+        "locale": "ja",
+        "name": "Aloe vera"
+    },
+    {
+        "id": 179,
+        "product_sku_id": "019f408b-8498-700f-8f9c-fae6c43ef63a",
+        "locale": "en",
+        "name": "Aloe vera"
+    },
+    {
+        "id": 180,
+        "product_sku_id": "019f408b-8498-700f-8f9c-fae6c43ef63a",
+        "locale": "vi",
+        "name": "Aloe vera"
+    },
+    {
+        "id": 181,
+        "product_sku_id": "019f408b-849e-7180-8400-b029e8a02719",
+        "locale": "ja",
+        "name": "Lychee jelly"
+    },
+    {
+        "id": 182,
+        "product_sku_id": "019f408b-849e-7180-8400-b029e8a02719",
+        "locale": "en",
+        "name": "Lychee jelly"
+    },
+    {
+        "id": 183,
+        "product_sku_id": "019f408b-849e-7180-8400-b029e8a02719",
+        "locale": "vi",
+        "name": "Lychee jelly"
+    },
+    {
+        "id": 184,
+        "product_sku_id": "019f408b-84a5-72d7-bac3-d24846c38621",
+        "locale": "ja",
+        "name": "Coconut jelly"
+    },
+    {
+        "id": 185,
+        "product_sku_id": "019f408b-84a5-72d7-bac3-d24846c38621",
+        "locale": "en",
+        "name": "Coconut jelly"
+    },
+    {
+        "id": 186,
+        "product_sku_id": "019f408b-84a5-72d7-bac3-d24846c38621",
+        "locale": "vi",
+        "name": "Coconut jelly"
+    },
+    {
+        "id": 187,
+        "product_sku_id": "019f408b-84b0-727e-b2c9-fb52835e87ac",
+        "locale": "ja",
+        "name": "Fish sauce"
+    },
+    {
+        "id": 188,
+        "product_sku_id": "019f408b-84b0-727e-b2c9-fb52835e87ac",
+        "locale": "en",
+        "name": "Fish sauce"
+    },
+    {
+        "id": 189,
+        "product_sku_id": "019f408b-84b0-727e-b2c9-fb52835e87ac",
+        "locale": "vi",
+        "name": "Fish sauce"
+    },
+    {
+        "id": 190,
+        "product_sku_id": "019f408b-84b6-7274-b408-3cc875453d3a",
+        "locale": "ja",
+        "name": "Soy sauce"
+    },
+    {
+        "id": 191,
+        "product_sku_id": "019f408b-84b6-7274-b408-3cc875453d3a",
+        "locale": "en",
+        "name": "Soy sauce"
+    },
+    {
+        "id": 192,
+        "product_sku_id": "019f408b-84b6-7274-b408-3cc875453d3a",
+        "locale": "vi",
+        "name": "Soy sauce"
+    },
+    {
+        "id": 193,
+        "product_sku_id": "019f408b-84bc-718f-85ff-14723336eaf3",
+        "locale": "ja",
+        "name": "Sriracha"
+    },
+    {
+        "id": 194,
+        "product_sku_id": "019f408b-84bc-718f-85ff-14723336eaf3",
+        "locale": "en",
+        "name": "Sriracha"
+    },
+    {
+        "id": 195,
+        "product_sku_id": "019f408b-84bc-718f-85ff-14723336eaf3",
+        "locale": "vi",
+        "name": "Sriracha"
+    },
+    {
+        "id": 196,
+        "product_sku_id": "019f408b-84c2-70c3-b6e7-3b627ce87069",
+        "locale": "ja",
+        "name": "Sweet chili"
+    },
+    {
+        "id": 197,
+        "product_sku_id": "019f408b-84c2-70c3-b6e7-3b627ce87069",
+        "locale": "en",
+        "name": "Sweet chili"
+    },
+    {
+        "id": 198,
+        "product_sku_id": "019f408b-84c2-70c3-b6e7-3b627ce87069",
+        "locale": "vi",
+        "name": "Sweet chili"
+    },
+    {
+        "id": 199,
+        "product_sku_id": "019f408b-84cd-72c1-95b5-faec58f65d94",
+        "locale": "ja",
+        "name": "No onion"
+    },
+    {
+        "id": 200,
+        "product_sku_id": "019f408b-84cd-72c1-95b5-faec58f65d94",
+        "locale": "en",
+        "name": "No onion"
+    },
+    {
+        "id": 201,
+        "product_sku_id": "019f408b-84cd-72c1-95b5-faec58f65d94",
+        "locale": "vi",
+        "name": "No onion"
+    },
+    {
+        "id": 202,
+        "product_sku_id": "019f408b-84d3-7276-a6b7-d3eff87ff677",
+        "locale": "ja",
+        "name": "No cilantro"
+    },
+    {
+        "id": 203,
+        "product_sku_id": "019f408b-84d3-7276-a6b7-d3eff87ff677",
+        "locale": "en",
+        "name": "No cilantro"
+    },
+    {
+        "id": 204,
+        "product_sku_id": "019f408b-84d3-7276-a6b7-d3eff87ff677",
+        "locale": "vi",
+        "name": "No cilantro"
+    },
+    {
+        "id": 205,
+        "product_sku_id": "019f408b-84d8-73aa-9f65-940e137c8e68",
+        "locale": "ja",
+        "name": "No bean sprouts"
+    },
+    {
+        "id": 206,
+        "product_sku_id": "019f408b-84d8-73aa-9f65-940e137c8e68",
+        "locale": "en",
+        "name": "No bean sprouts"
+    },
+    {
+        "id": 207,
+        "product_sku_id": "019f408b-84d8-73aa-9f65-940e137c8e68",
+        "locale": "vi",
+        "name": "No bean sprouts"
+    },
+    {
+        "id": 208,
+        "product_sku_id": "019f408b-84dd-71fd-bdf8-31a57148f0b9",
+        "locale": "ja",
+        "name": "No peanuts (allergy)"
+    },
+    {
+        "id": 209,
+        "product_sku_id": "019f408b-84dd-71fd-bdf8-31a57148f0b9",
+        "locale": "en",
+        "name": "No peanuts (allergy)"
+    },
+    {
+        "id": 210,
+        "product_sku_id": "019f408b-84dd-71fd-bdf8-31a57148f0b9",
+        "locale": "vi",
+        "name": "No peanuts (allergy)"
+    },
+    {
+        "id": 211,
+        "product_sku_id": "019f6ed5-5c1f-728e-80eb-921adafebf14",
+        "locale": "vi",
+        "name": null
+    },
+    {
+        "id": 212,
+        "product_sku_id": "d2cbae65-e9af-4b76-b522-60e360225f68",
+        "locale": "ja",
+        "name": null
+    },
+    {
+        "id": 213,
+        "product_sku_id": "d90f8675-69a8-4b8e-aeb6-2dc30fc1d386",
+        "locale": "ja",
+        "name": null
+    },
+    {
+        "id": 214,
+        "product_sku_id": "b82fa330-5734-48bf-8cae-ab584353878f",
+        "locale": "ja",
+        "name": null
+    },
+    {
+        "id": 215,
+        "product_sku_id": "d14dd773-cf3b-4404-b8e3-f54856152a58",
+        "locale": "ja",
+        "name": null
+    },
+    {
+        "id": 216,
+        "product_sku_id": "4f3d2adc-906f-438c-9c58-10a53084e502",
+        "locale": "vi",
+        "name": null
+    },
+    {
+        "id": 217,
+        "product_sku_id": "f2287398-7aab-4f25-8508-408a80a6ca69",
+        "locale": "vi",
+        "name": "100"
+    },
+    {
+        "id": 218,
+        "product_sku_id": "ce683686-2824-4c0d-9935-8f945b8217ad",
+        "locale": "vi",
+        "name": null
+    },
+    {
+        "id": 219,
+        "product_sku_id": "019f6ed5-510f-711b-8a7d-d24c49b3e034",
+        "locale": "vi",
+        "name": null
+    },
+    {
+        "id": 220,
+        "product_sku_id": "019fdb53-fd48-71bc-a1b3-0f6ee42ad5b0",
+        "locale": "vi",
+        "name": "200"
+    },
+    {
+        "id": 221,
+        "product_sku_id": "019fdb5b-b376-71a1-b8fc-52285cc08554",
+        "locale": "vi",
+        "name": "2 cây"
+    },
+    {
+        "id": 222,
+        "product_sku_id": "019f6ed5-510f-711b-8a7d-d24c49b3e034",
+        "locale": "ja",
+        "name": null
+    },
+    {
+        "id": 223,
+        "product_sku_id": "019fdb6d-15b1-71d9-9dbd-fdb3938fe6a4",
+        "locale": "vi",
+        "name": "2本"
+    },
+    {
+        "id": 224,
+        "product_sku_id": "019f6ed5-5bc6-7059-a3d1-5472530e3dfd",
+        "locale": "vi",
+        "name": null
+    },
+    {
+        "id": 225,
+        "product_sku_id": "019fdb7c-ef9b-7169-94d4-44878ed9ff07",
+        "locale": "vi",
+        "name": "4 cuốn"
+    },
+    {
+        "id": 226,
+        "product_sku_id": "019fdb7c-efa0-735f-bc9c-a5cfad481c5c",
+        "locale": "vi",
+        "name": "cuốn"
+    },
+    {
+        "id": 227,
+        "product_sku_id": "019fdb7c-ef9b-7169-94d4-44878ed9ff07",
+        "locale": "ja",
+        "name": "4本"
+    },
+    {
+        "id": 228,
+        "product_sku_id": "019fdb99-55ec-70f1-938e-6311459bbe1a",
+        "locale": "vi",
+        "name": "4本"
+    },
+    {
+        "id": 229,
+        "product_sku_id": "019fdb99-55ec-70f1-938e-6311459bbe1a",
+        "locale": "ja",
+        "name": "4本"
+    },
+    {
+        "id": 230,
+        "product_sku_id": "019fdbb8-5c70-7187-a829-e2a50564a20c",
+        "locale": "vi",
+        "name": "Muối tôm"
+    },
+    {
+        "id": 231,
+        "product_sku_id": "019fdbb8-5c70-7187-a829-e2a50564a20c",
+        "locale": "ja",
+        "name": "エビ塩"
+    },
+    {
+        "id": 232,
+        "product_sku_id": "019fdb53-fd48-71bc-a1b3-0f6ee42ad5b0",
+        "locale": "ja",
+        "name": "200"
+    },
+    {
+        "id": 233,
+        "product_sku_id": "019fdb53-fd48-71bc-a1b3-0f6ee42ad5b0",
+        "locale": "en",
+        "name": "200"
+    },
+    {
+        "id": 234,
+        "product_sku_id": "019fdb5b-b376-71a1-b8fc-52285cc08554",
+        "locale": "ja",
+        "name": "2本"
+    },
+    {
+        "id": 235,
+        "product_sku_id": "019fdb5b-b376-71a1-b8fc-52285cc08554",
+        "locale": "en",
+        "name": "2 cây"
+    },
+    {
+        "id": 236,
+        "product_sku_id": "019fdb6d-15b1-71d9-9dbd-fdb3938fe6a4",
+        "locale": "ja",
+        "name": "2本"
+    },
+    {
+        "id": 237,
+        "product_sku_id": "019fdb6d-15b1-71d9-9dbd-fdb3938fe6a4",
+        "locale": "en",
+        "name": "2本"
+    },
+    {
+        "id": 238,
+        "product_sku_id": "019fdb7c-ef9b-7169-94d4-44878ed9ff07",
+        "locale": "en",
+        "name": "4 cuốn"
+    },
+    {
+        "id": 239,
+        "product_sku_id": "019fdb7c-efa0-735f-bc9c-a5cfad481c5c",
+        "locale": "ja",
+        "name": "cuốn"
+    },
+    {
+        "id": 240,
+        "product_sku_id": "019fdb7c-efa0-735f-bc9c-a5cfad481c5c",
+        "locale": "en",
+        "name": "cuốn"
+    },
+    {
+        "id": 241,
+        "product_sku_id": "019fdb99-55ec-70f1-938e-6311459bbe1a",
+        "locale": "en",
+        "name": "4本"
+    },
+    {
+        "id": 242,
+        "product_sku_id": "019fdbb8-5c70-7187-a829-e2a50564a20c",
+        "locale": "en",
+        "name": "Muối tôm"
+    },
+    {
+        "id": 243,
+        "product_sku_id": "019f6ed5-59af-73d6-af01-ba1af60e9072",
+        "locale": "vi",
+        "name": null
+    }
+]

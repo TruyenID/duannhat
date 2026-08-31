@@ -1,0 +1,90 @@
+# DisposalRecord schema
+# Supplementary metadata for disposal items (1-1 with stock_transaction_items).
+# Stores the disposal reason and cost snapshot for each disposed item.
+#
+# Design:
+#   - Each disposal item (stock_transaction_item where sub_type=disposal) has
+#     exactly one disposal_record containing the reason and cost at time of disposal.
+#   - This is a supplementary table — the disposal "header" is a stock_transaction
+#     (type=stock_out, sub_type=disposal). See F3 for stock_transaction schema.
+#   - UNIQUE constraint on stock_transaction_item_id ensures 1-1 mapping.
+#   - CASCADE delete: records are removed when parent item is deleted.
+#
+# Business Rules:
+#   - BR-01: Every disposal item MUST have a disposal_reason
+#   - BR-02: reason=other requires a note (app-level validation)
+#   - BR-04: cost_at_disposal is a snapshot of cost_price/calculated_cost at creation time
+#   - BR-05: disposal_reason is a fixed enum (DisposalReason)
+#
+# Cost source:
+#   - For variants: product_skus.cost_price
+#   - For materials: materials.calculated_cost
+
+displayName:
+  en: Disposal Record
+  ja: 廃棄記録
+  vi: Chi tiết hủy
+
+kind: object
+
+options:
+  timestamps: true
+  id: Uuid
+  indexes:
+    - columns: [stock_transaction_item_id]
+      unique: true
+    - columns: [disposal_reason]
+
+properties:
+  stockTransactionItem:
+    type: Association
+    relation: ManyToOne
+    target: StockTransactionItem
+    onDelete: CASCADE
+    displayName:
+      en: Stock Transaction Item
+      ja: 在庫取引明細
+      vi: Chi tiết phiếu kho
+    description:
+      en: "1-1 mapping with stock_transaction_items. Each disposal item has exactly one disposal record."
+      ja: "stock_transaction_itemsとの1対1マッピング。各廃棄品目には1つの廃棄記録がある。"
+      vi: "Mapping 1-1 với stock_transaction_items. Mỗi item hủy có đúng 1 disposal record."
+
+  disposal_reason:
+    type: EnumRef
+    enum: DisposalReason
+    displayName:
+      en: Disposal Reason
+      ja: 廃棄理由
+      vi: Lý do hủy
+    description:
+      en: "Fixed enum classifying why the item is being disposed. BR-05: users cannot add custom reasons."
+      ja: "品目が廃棄される理由を分類する固定enum。BR-05: ユーザーはカスタム理由を追加できない。"
+      vi: "Enum cố định phân loại lý do hủy. BR-05: user không được thêm lý do tùy chỉnh."
+
+  cost_at_disposal:
+    type: Decimal
+    precision: 15
+    scale: 4
+    # plan-040 L5: scale 2 → 4 to match material calculated_cost / lot unit_cost —
+    # the disposal snapshot must not truncate the scale-4 cost it copies.
+    displayName:
+      en: Cost at Disposal
+      ja: 廃棄時原価
+      vi: Giá vốn lúc hủy
+    description:
+      en: "Snapshot of cost_price (variant) or calculated_cost (material) at disposal creation time. BR-04."
+      ja: "廃棄作成時のcost_price（バリエーション）またはcalculated_cost（材料）のスナップショット。BR-04。"
+      vi: "Snapshot giá vốn tại thời điểm tạo phiếu hủy. BR-04."
+
+  note:
+    type: Text
+    nullable: true
+    displayName:
+      en: Note
+      ja: 備考
+      vi: Ghi chú
+    description:
+      en: "Optional note. Required when disposal_reason=other (BR-02). App-level validation."
+      ja: "任意の備考。disposal_reason=otherの場合は必須（BR-02）。アプリレベルのバリデーション。"
+      vi: "Ghi chú tùy chọn. Bắt buộc khi disposal_reason=other (BR-02). Validate ở app."

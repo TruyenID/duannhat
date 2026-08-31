@@ -1,0 +1,10 @@
+node_modules/
+android/build/
+android/.gradle/
+ios/
+.expo/
+*.log
+docs/
+patches/
+scripts/
+.claude/

@@ -1,0 +1,135 @@
+# #1199 follow-up — tms-app test gate. This repo had three vitest files and no
+# `test` script at all, so 20 assertions had never run anywhere, ever. Two of
+# them had also been dead since 2026-06-09: an unrelated feature commit dropped
+# `@testing-library/react-hooks` from package.json (it cannot coexist with React
+# 19 anyway) and nothing noticed, because nothing ran them.
+#
+# RUNNER: self-hosted ONLY. GitHub-hosted runners are forbidden for this org
+# (no Actions billing — a hosted job dies in ~4s with "recent account payments
+# have failed"). Do NOT introduce ubuntu-latest.
+#
+# Node and npm are asserted, not installed: the runner provides both.
+name: tests
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    branches: [dev, main]
+
+# One self-hosted runner serves this org. Without this, three pushes queue
+# three full runs and the last one reports on code that is already stale.
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: [self-hosted, Linux, X64]
+    timeout-minutes: 30
+    steps:
+      # SELF-HOSTED RUNNER HYGIENE: ~/.gitconfig is SHARED by every job and
+      # every repo on this machine. A leftover url.insteadOf rewrite makes
+      # actions/checkout try SSH and fail with "Permission denied (publickey)"
+      # for unrelated repos. Strip any inherited rewrite before doing anything.
+      - name: Sanitize inherited git config
+        run: |
+          git config --global --unset-all url."git@github.com:".insteadOf || true
+          git config --global --unset-all url."https://github.com/".insteadOf || true
+
+      - uses: actions/checkout@v4
+
+      - name: Assert Node toolchain
+        run: |
+          node -v
+          node -e 'process.exit(parseInt(process.versions.node) >= 20 ? 0 : 1)' \
+            || { echo "::error::runner needs Node >= 20"; exit 1; }
+          npm --version
+
+      # tms-app has TWO private GitHub dependencies, not one:
+      #   @godxjp/ui-native     → godx-jp/godx-tempo-ui-native
+      #   @godxjp/mobile-shared → godx-jp/godx-tempo-mobile-shared
+      # Auth is a READ-ONLY DEPLOY KEY per repo — deliberately not a personal
+      # PAT, which would hand CI the whole account's scope; and a key of this
+      # repo's own, so revoking one consumer cannot break another.
+      #   gh repo deploy-key list --repo godx-jp/godx-tempo-ui-native
+      #   gh repo deploy-key list --repo godx-jp/godx-tempo-mobile-shared
+      #
+      # A GitHub deploy key is scoped to ONE repo, and github.com accepts ANY
+      # registered key at the SSH layer before authorizing at the git layer —
+      # so `ssh -i keyA -i keyB` does NOT work: ssh stops at the first key
+      # github accepts and the other repo then 404s. Each dependency therefore
+      # gets its own ssh Host alias, and a per-URL `insteadOf` routes exactly
+      # that one clone through exactly that one key. Unrelated clones (the
+      # checkout above, the public registry) are untouched.
+      - name: Authenticate the private GitHub dependencies
+        env:
+          UI_NATIVE_DEPLOY_KEY: ${{ secrets.UI_NATIVE_DEPLOY_KEY }}
+          MOBILE_SHARED_DEPLOY_KEY: ${{ secrets.MOBILE_SHARED_DEPLOY_KEY }}
+        run: |
+          if [ -z "$UI_NATIVE_DEPLOY_KEY" ]; then
+            echo "::error::secret UI_NATIVE_DEPLOY_KEY is missing — add the read-only deploy key for godx-jp/godx-tempo-ui-native"
+            exit 1
+          fi
+          if [ -z "$MOBILE_SHARED_DEPLOY_KEY" ]; then
+            echo "::error::secret MOBILE_SHARED_DEPLOY_KEY is missing — add the read-only deploy key for godx-jp/godx-tempo-mobile-shared"
+            exit 1
+          fi
+
+          # Keys and ssh config live in RUNNER_TEMP, which is wiped per job.
+          # Nothing is written to the shared ~/.ssh on this machine.
+          printf '%s\n' "$UI_NATIVE_DEPLOY_KEY" > "$RUNNER_TEMP/ui_native_key"
+          printf '%s\n' "$MOBILE_SHARED_DEPLOY_KEY" > "$RUNNER_TEMP/mobile_shared_key"
+          chmod 600 "$RUNNER_TEMP/ui_native_key" "$RUNNER_TEMP/mobile_shared_key"
+          ssh-keyscan -t ed25519 github.com > "$RUNNER_TEMP/known_hosts" 2>/dev/null
+
+          cat > "$RUNNER_TEMP/ssh_config" <<EOF
+          Host gh-ui-native
+            HostName github.com
+            User git
+            IdentityFile $RUNNER_TEMP/ui_native_key
+            IdentitiesOnly yes
+            UserKnownHostsFile $RUNNER_TEMP/known_hosts
+          Host gh-mobile-shared
+            HostName github.com
+            User git
+            IdentityFile $RUNNER_TEMP/mobile_shared_key
+            IdentitiesOnly yes
+            UserKnownHostsFile $RUNNER_TEMP/known_hosts
+          EOF
+
+          # The runner's ~/.gitconfig carries a token-embedded rewrite
+          #   url.https://<TOKEN>@github.com/.insteadOf = git@github.com:
+          # whose token cannot read the private repos — which is why an npm
+          # `git clone git@github.com:…` reports an https auth failure. Its key
+          # name embeds the token so `--unset` never matches it, and a shared
+          # runner's config must not be rewritten anyway.
+          #
+          # GIT_CONFIG_GLOBAL points git at an EMPTY global config for THIS job
+          # only: the rewrite disappears for our process, nothing on the machine
+          # changes, and the deploy keys get to authenticate.
+          #
+          # The insteadOf sources below are the EXACT `resolved` URLs in
+          # package-lock.json (npm strips the `git+` prefix before calling git).
+          # If a lockfile refresh ever changes that spelling, these stop
+          # matching and npm falls back to an unauthenticated clone.
+          : > "$RUNNER_TEMP/empty-gitconfig"
+          {
+            echo "GIT_CONFIG_GLOBAL=$RUNNER_TEMP/empty-gitconfig"
+            echo "GIT_SSH_COMMAND=ssh -F $RUNNER_TEMP/ssh_config"
+            echo "GIT_CONFIG_COUNT=2"
+            echo "GIT_CONFIG_KEY_0=url.git@gh-ui-native:godx-jp/godx-tempo-ui-native.git.insteadOf"
+            echo "GIT_CONFIG_VALUE_0=ssh://git@github.com/godx-jp/godx-tempo-ui-native.git"
+            echo "GIT_CONFIG_KEY_1=url.git@gh-mobile-shared:godx-jp/godx-tempo-mobile-shared.git.insteadOf"
+            echo "GIT_CONFIG_VALUE_1=ssh://git@github.com/godx-jp/godx-tempo-mobile-shared.git"
+          } >> "$GITHUB_ENV"
+
+      - run: npm ci
+
+      # THE gate. There is no lint config and `tsc --noEmit` has a 266-error
+      # backlog (265 of them Omnify-generated models importing `zod`, which is
+      # not a dependency of this app), so vitest is the only step here that can
+      # honestly be blocking. Do not add an advisory typecheck step without a
+      # plan to clear that backlog.
+      - name: Vitest
+        run: npm test

@@ -1,0 +1,187 @@
+# GenealogyLink schema
+# ============================================================================
+# Directed edge in the lot consumption graph. Append-only.
+#
+# Two edge shapes:
+#   1. Production edge:  parent_lot → child_lot  (source_event_type=material_batch)
+#      Written by MaterialBatchService::complete — one row per consumed lot
+#      pointing at the newly minted output lot. customer_order_id stays NULL.
+#
+#   2. Sales edge:       parent_lot → customer_order  (source_event_type=customer_order)
+#      Written by StockTransactionService when a `sub_type=sales` stock_out
+#      consumes a lot during OrderClosingService::close(). child_lot stays NULL
+#      because no new lot is minted — the consumption terminates the trace.
+#
+# Why a separate table (vs walking stock_transaction_items):
+#   - Trace walk needs O(1) parent/child lookups for recursive queries.
+#   - Stock items are item-grain (one row per allocated lot inside a transaction);
+#     genealogy is event-grain (one row per "this lot fed into that thing").
+#   - Append-only semantics enforced at service layer (no UPDATE / DELETE) — the
+#     only way to "fix" a wrong link is to write a compensating manual_adjustment row.
+#
+# Read by:
+#   - TraceService::traceLot (forward + backward recursive walk)
+#   - TraceService::traceCustomerOrder (terminal sales-edge lookup)
+#   - RecallService::initiate (downstream blast radius)
+#
+# Written by:
+#   - MaterialBatchService::complete             (production edges)
+#   - StockTransactionService::completeTransaction (sales edges, when sub_type=sales)
+#   - DisposalService                            (disposal edges, source_event_type=disposal)
+#   - GenealogyLinkService                       (single thin service — only record* methods)
+#
+# Indexes are bidirectional so both forward (`WHERE parent_lot_id = ?`) and backward
+# (`WHERE child_lot_id = ?`) walks are index-only scans.
+# ============================================================================
+
+displayName:
+  en: Genealogy Link
+  ja: 系譜リンク
+  vi: Liên kết phả hệ
+
+kind: object
+
+options:
+  # No softDelete — the table is append-only and rows must persist for FSMA-204
+  # 24-hour retrieval. Compensating rows (manual_adjustment) replace deletion.
+  timestamps: true
+  id: Uuid
+  indexes:
+    # Forward walk: "what lots fed into this child?" — used by recall preview.
+    - columns: [parent_lot_id, child_lot_id]
+    # Backward walk: "what children did this parent feed?" — used by trace UI.
+    - columns: [child_lot_id, parent_lot_id]
+    # Sales-edge lookup: "trace this customer order back to source lots".
+    - columns: [customer_order_id]
+    # Source-event lookup: "show me every link emitted by batch X / order Y".
+    - columns: [source_event_type, source_event_id]
+    # plan-040 H12: idempotent edges — the same (parent, child, event) recorded
+    # twice is a no-op. NOTE: child_lot_id is NULL on sales edges and MySQL treats
+    # NULLs as distinct, so this unique fully de-dupes only production edges;
+    # GenealogyLinkService::record* uses firstOrCreate (plan-040 TG.6) as the
+    # complete backstop for the NULL-child sales edges.
+    - columns: [parent_lot_id, child_lot_id, source_event_type, source_event_id]
+      unique: true
+      # Explicit short name — the auto-generated 4-column name exceeds MySQL's 64-char limit.
+      name: uq_genealogy_edge
+
+properties:
+  parent_lot:
+    type: Association
+    relation: ManyToOne
+    target: MaterialLot
+    onDelete: RESTRICT
+    # Non-nullable: every edge MUST have an upstream lot. RESTRICT (plan-040 C4):
+    # genealogy is append-only FSMA-204 history — a parent lot must never be
+    # hard-deletable while edges reference it. Quarantine/soft-delete the lot
+    # instead; the edge persists for 24h-retrieval compliance.
+    displayName:
+      en: Parent Lot
+      ja: 親ロット
+      vi: Lô cha
+    description:
+      en: "The consumed lot. Always set. RESTRICT — a lot referenced by genealogy cannot be hard-deleted (plan-040 C4)."
+      ja: "消費されたロット。常に設定。RESTRICT — 系譜から参照されるロットはハード削除不可（plan-040 C4）。"
+      vi: "Lô bị tiêu thụ. Luôn có. RESTRICT — lô được phả hệ tham chiếu không thể hard-delete (plan-040 C4)."
+
+  child_lot:
+    type: Association
+    relation: ManyToOne
+    target: MaterialLot
+    nullable: true
+    onDelete: RESTRICT
+    # NULL on sales edges (consumption goes to a customer_order, not a new lot).
+    # Set on production edges (consumption mints output lot). RESTRICT (plan-040 C4):
+    # a minted child lot must not be hard-deletable while this edge records its origin.
+    displayName:
+      en: Child Lot
+      ja: 子ロット
+      vi: Lô con
+    description:
+      en: "The lot produced from this consumption. NULL on sales edges (terminates in customer_order). RESTRICT — a referenced child lot cannot be hard-deleted (plan-040 C4)."
+      ja: "この消費から生産されたロット。販売エッジではNULL（customer_orderで終了）。RESTRICT — 参照される子ロットはハード削除不可（plan-040 C4）。"
+      vi: "Lô tạo ra từ tiêu thụ này. NULL với cạnh bán hàng (kết thúc ở customer_order). RESTRICT — lô con được tham chiếu không thể hard-delete (plan-040 C4)."
+
+  customer_order_id:
+    type: Uuid
+    nullable: true
+    # Soft FK (no Association) — customer_orders lives in a separate domain;
+    # we don't want CASCADE-from-orders deleting genealogy history. Use the
+    # uuid for joins; rely on application-level integrity.
+    displayName:
+      en: Customer Order ID
+      ja: 顧客注文ID
+      vi: ID đơn khách hàng
+    description:
+      en: "Soft FK to customer_orders.id when source_event_type=customer_order. NULL on production / disposal edges."
+      ja: "source_event_type=customer_order時のcustomer_orders.idへのソフトFK。生産／廃棄エッジではNULL。"
+      vi: "Soft FK đến customer_orders.id khi source_event_type=customer_order. NULL với cạnh sản xuất/hủy."
+
+  qty_consumed:
+    type: Decimal
+    precision: 15
+    scale: 4
+    # Positive quantity. For multi-lot allocations, one edge per (parent_lot, allocation).
+    displayName:
+      en: Quantity Consumed
+      ja: 消費数量
+      vi: Số lượng tiêu thụ
+    description:
+      en: "Positive qty drawn from parent_lot in this event. Recall reports use this to compute distribution percentages."
+      ja: "このイベントでparent_lotから引き出された正の数量。リコールレポートで配分比率の計算に使用。"
+      vi: "Số lượng dương rút từ parent_lot trong sự kiện này. Báo cáo recall dùng để tính tỷ lệ phân phối."
+
+  unit:
+    type: String
+    length: 50
+    # Must match parent_lot.unit (validation enforced at service layer).
+    displayName:
+      en: Unit
+      ja: 単位
+      vi: Đơn vị
+    description:
+      en: "Unit of qty_consumed. Must match parent_lot.unit (denormalized for reporting)."
+      ja: "qty_consumedの単位。parent_lot.unitと一致必須（レポート用に非正規化）。"
+      vi: "Đơn vị của qty_consumed. Phải khớp parent_lot.unit (denormalize cho reporting)."
+
+  consumed_at:
+    type: Timestamp
+    # Distinct from created_at because the consumption event timestamp is what
+    # FSMA-204 reports must show — created_at can drift if the row is written
+    # in a delayed job.
+    displayName:
+      en: Consumed At
+      ja: 消費日時
+      vi: Thời điểm tiêu thụ
+    description:
+      en: "When consumption physically happened (batch start / order close). Distinct from created_at — used in FSMA-204 timeline reports."
+      ja: "消費が物理的に発生した日時（バッチ開始／注文クローズ）。created_atとは別 — FSMA-204タイムラインレポートで使用。"
+      vi: "Thời điểm tiêu thụ thực tế (start batch / close đơn). Khác created_at — dùng trong báo cáo timeline FSMA-204."
+
+  source_event_type:
+    type: String
+    length: 50
+    # Free-form string (NOT enum) so future event types (e.g. `internal_transfer`,
+    # `recall_dispose`) can be added without schema migrations. Known values
+    # today: 'material_batch' | 'customer_order' | 'disposal' | 'manual_adjustment'.
+    displayName:
+      en: Source Event Type
+      ja: ソースイベント種別
+      vi: Loại sự kiện gốc
+    description:
+      en: "Discriminator for source_event_id. Known values: material_batch | customer_order | disposal | manual_adjustment. NOT an enum — keeps future events extensible."
+      ja: "source_event_idの判別子。既知の値：material_batch | customer_order | disposal | manual_adjustment。enumではない — 将来のイベント拡張可能性を維持。"
+      vi: "Discriminator cho source_event_id. Giá trị đã biết: material_batch | customer_order | disposal | manual_adjustment. KHÔNG dùng enum — giữ khả năng mở rộng."
+
+  source_event_id:
+    type: Uuid
+    # Soft FK; resolved against source_event_type. material_batch_id, customer_order_id,
+    # disposal_record_id, etc.
+    displayName:
+      en: Source Event ID
+      ja: ソースイベントID
+      vi: ID sự kiện gốc
+    description:
+      en: "Soft FK to the row identified by source_event_type. e.g. material_batches.id when source_event_type=material_batch."
+      ja: "source_event_typeで識別される行へのソフトFK。例：source_event_type=material_batch時のmaterial_batches.id。"
+      vi: "Soft FK đến row xác định bởi source_event_type. VD: material_batches.id khi source_event_type=material_batch."

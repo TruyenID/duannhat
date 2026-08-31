@@ -1,0 +1,22 @@
+# Operational connection lifecycle/health. Only `ready` is eligible by default; degraded
+# or unavailable may recover without deleting policy preferences, while revoked is terminal.
+kind: enum
+
+displayName:
+  en: Payment Connection Health
+  ja: 決済接続ヘルス
+  vi: Tình trạng kết nối thanh toán
+
+values:
+  - value: pending_verification
+    label: { en: Pending Verification, ja: 確認待ち, vi: Chờ xác minh }
+  - value: ready
+    label: { en: Ready, ja: 利用可能, vi: Sẵn sàng }
+  - value: degraded
+    label: { en: Degraded, ja: 性能低下, vi: Suy giảm }
+  - value: unavailable
+    label: { en: Temporarily Unavailable, ja: 一時利用不可, vi: Tạm thời không khả dụng }
+  - value: restricted
+    label: { en: Restricted, ja: 制限あり, vi: Bị hạn chế }
+  - value: revoked
+    label: { en: Revoked, ja: 取消済み, vi: Đã thu hồi }

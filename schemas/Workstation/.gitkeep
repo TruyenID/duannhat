@@ -1,0 +1,5 @@
+# Placeholder so omnify's `workspace.schemas.workstation: schemas/Workstation`
+# resolves successfully. The Go workstation app (under workstation-app/) doesn't
+# yet have its own omnify schemas — its domain logic is still hand-written.
+# When the team starts driving workstation models from omnify, drop YAML
+# schemas next to this file and remove this placeholder.

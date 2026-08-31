@@ -1,0 +1,294 @@
+# Thương hiệu thuộc một tenant. Giữ cả cấu hình Reverb riêng cho từng brand nên
+# một brand bị lộ khoá không kéo theo brand khác.
+kind: object
+
+options:
+  id: Uuid
+  timestamps: true
+  softDelete: true
+  indexes:
+    - columns: [console_organization_id]
+    - columns: [console_organization_id, slug]
+      unique: true
+    - columns: [console_organization_id, is_active]
+
+properties:
+  console_brand_id:
+    type: Uuid
+    unique: true
+    displayName:
+      ja: コンソールブランドID
+      en: Console Brand ID
+      vi: ID thương hiệu trên Console
+
+  console_organization_id:
+    type: Uuid
+    displayName:
+      ja: コンソール組織ID
+      en: Console Organization ID
+      vi: ID tổ chức trên Console
+
+  name:
+    type: String
+    length: 255
+    displayName:
+      ja: ブランド名
+      en: Brand Name
+      vi: Tên thương hiệu
+
+  slug:
+    type: String
+    length: 100
+    displayName:
+      ja: スラッグ
+      en: Slug
+      vi: Slug
+
+  description:
+    type: Text
+    nullable: true
+    displayName:
+      ja: 説明
+      en: Description
+      vi: Mô tả
+
+  logo_url:
+    type: String
+    length: 500
+    nullable: true
+    displayName:
+      ja: ロゴURL
+      en: Logo URL
+      vi: URL logo
+
+  is_active:
+    type: Boolean
+    default: true
+    displayName:
+      ja: 有効
+      en: Active
+      vi: Hoạt động
+
+  primary_color:
+    type: String
+    length: 7
+    nullable: true
+    displayName:
+      ja: プライマリカラー
+      en: Primary Color
+      vi: Màu chính
+
+  secondary_color:
+    type: String
+    length: 7
+    nullable: true
+    displayName:
+      ja: セカンダリカラー
+      en: Secondary Color
+      vi: Màu phụ
+
+  accent_color:
+    type: String
+    length: 7
+    nullable: true
+    displayName:
+      ja: アクセントカラー
+      en: Accent Color
+      vi: Màu nhấn
+
+  text_color:
+    type: String
+    length: 7
+    nullable: true
+    displayName:
+      ja: テキストカラー
+      en: Text Color
+      vi: Màu chữ
+
+  reverb_app_id:
+    type: String
+    length: 64
+    nullable: true
+    displayName:
+      ja: Reverb App ID
+      en: Reverb App ID
+      vi: Reverb App ID
+
+  reverb_app_key:
+    type: String
+    length: 64
+    nullable: true
+    displayName:
+      ja: Reverb App Key
+      en: Reverb App Key
+      vi: Reverb App Key
+
+  reverb_app_secret:
+    type: Text
+    nullable: true
+    displayName:
+      ja: Reverb App Secret
+      en: Reverb App Secret
+      vi: Reverb App Secret
+
+  reverb_allowed_origins:
+    type: Json
+    nullable: true
+    displayName:
+      ja: Reverb 許可オリジン
+      en: Reverb Allowed Origins
+      vi: Origin cho phép của Reverb
+
+  reverb_provisioned_at:
+    type: DateTime
+    nullable: true
+    displayName:
+      ja: Reverb 発行日時
+      en: Reverb Provisioned At
+      vi: Thời điểm cấp Reverb
+
+  # --- Cột riêng của dxs-product (thêm sau khi publish) ---
+
+  # #2047 — DEPRECATED, giữ lại để không mất dữ liệu khi rollback.
+  #
+  # Hai cột `*_logo_url` lưu URL TUYỆT ĐỐI do client gửi lên, và đó là nguồn
+  # của lỗi: URL ghim host lúc upload, còn ảnh thì trỏ vào `uploads/temp/…`
+  # với dòng `files` vẫn `status=temporary`, nên job `omnify:cleanup-files`
+  # xoá file vật lý trong khi cột vẫn trỏ tới nó → logo vỡ vĩnh viễn.
+  #
+  # Đường mới là `*_logo_file_id` bên dưới. Việc DROP hai cột này để một PR
+  # riêng, sau khi xác nhận đường mới chạy ổn trên production.
+  customer_header_logo_url:
+    type: String
+    length: 500
+    nullable: true
+    displayName:
+      ja: 顧客ヘッダーロゴURL
+      en: Customer Header Logo URL
+      vi: URL logo header cho khách
+
+  customer_order_logo_url:
+    type: String
+    length: 500
+    nullable: true
+    displayName:
+      ja: 注文画面ロゴURL
+      en: Customer Order Logo URL
+      vi: URL logo màn đặt món
+
+  # #2047 — id của `File` thay cho URL tuyệt đối, theo đúng tiền lệ
+  # `customer_tier_card_backgrounds` (#1772): `File::getUrl()` dựng lại đường
+  # dẫn từ cấu hình disk LÚC ĐỌC, nên cùng một hàng DB phục vụ được cả staging
+  # lẫn prod, và file được `make-permanent` nên cleanup job không quét mất.
+  #
+  # Khai cột uuid trần thay vì `Association` là CỐ Ý: `Association` tên kết
+  # thúc bằng `_id` sẽ sinh `_id_id` (bẫy generator đã ghi ở CLAUDE.md), và
+  # tiền lệ tier-card cũng lưu file id trong cột thường.
+  customer_header_logo_file_id:
+    type: String
+    length: 36
+    nullable: true
+    displayName:
+      ja: 顧客ヘッダーロゴファイル
+      en: Customer Header Logo File
+      vi: File logo header cho khách
+
+  customer_order_logo_file_id:
+    type: String
+    length: 36
+    nullable: true
+    displayName:
+      ja: 注文画面ロゴファイル
+      en: Customer Order Logo File
+      vi: File logo màn đặt món
+
+  customer_order_subtitle:
+    type: String
+    length: 255
+    nullable: true
+    displayName:
+      ja: 注文画面サブタイトル
+      en: Customer Order Subtitle
+      vi: Phụ đề màn đặt món
+
+  # #1772 — ảnh nền thẻ thành viên, MỘT HÌNH CHO MỖI HẠNG.
+  #
+  # Map `{"<tier_key>": "<url>"}` chứ không phải bốn cột riêng, vì thang hạng
+  # sống ở `config/loyalty.php` (bronze/silver/gold/platinum hôm nay) và mốc
+  # hạng là chính sách của người vận hành — đổi vài lần một năm. Bốn cột thì
+  # thêm một hạng là một lần DDL + một lần regen; một map thì chỉ là một khoá
+  # mới. Khoá lạ không nằm trong config bị validator của HQ chặn, nên map không
+  # trôi thành bãi rác.
+  #
+  # NULL hoặc thiếu khoá = hạng đó chưa cấu hình ⇒ customer-web giữ nguyên
+  # gradient vàng mặc định. Không bao giờ điền sẵn URL mặc định vào đây: brand
+  # chưa chọn ảnh phải phân biệt được với brand đã chọn.
+  customer_tier_card_backgrounds:
+    type: Json
+    nullable: true
+    displayName:
+      ja: 会員ランク別カード背景
+      en: Membership Card Backgrounds by Tier
+      vi: Ảnh nền thẻ theo hạng
+
+  # #1152 — 登録番号 T+13. Để trống là hợp lệ: 免税事業者 không đăng ký.
+  invoice_registration_number:
+    type: String
+    length: 14
+    nullable: true
+    displayName:
+      ja: 登録番号
+      en: Invoice Registration Number
+      vi: Số đăng ký hoá đơn
+
+  # Thời gian giữ giỏ hàng, mặc định cấp brand; chi nhánh có cột cùng tên để
+  # ghi đè (Branch.cart_timeout_minutes).
+  cart_timeout_minutes:
+    type: Int
+    nullable: true
+    displayName:
+      ja: カート保持時間（分）
+      en: Cart Timeout (minutes)
+      vi: Thời gian giữ giỏ (phút)
+
+  takeaway_payment_timeout_minutes:
+    type: Int
+    nullable: true
+    default: 15
+    displayName:
+      ja: 持ち帰り支払期限（分）
+      en: Takeaway Payment Timeout (minutes)
+      vi: Hạn thanh toán mang đi (phút)
+
+  # #1674 — Tỉ lệ tích điểm của brand, đọc thành MỘT CÂU: "point_earn_amount
+  # tiền = point_earn_points điểm" (ví dụ 100 yên = 1 điểm).
+  #
+  # Phải là MỘT CẶP chứ không phải một con số: mẫu số cố định 1 điểm không khai
+  # được chính sách kiểu "100 yên = 2 điểm" mà không quy về phân số.
+  #
+  # CẢ HAI cùng null = brand chưa cấu hình ⇒ rơi về `config('loyalty.earn')`
+  # theo đơn vị tiền của chi nhánh bán hàng. Set một trong hai là 422 — nửa
+  # cặp không phải một tỉ lệ. Cả hai phải > 0: `amount = 0` khiến
+  # `CustomerPointService::pointsForOrder()` trả 0 điểm mà không kêu tiếng nào.
+  #
+  # Đây là cặp DUY NHẤT cho cả brand, cố ý (#1674 phương án (a)): brand đa
+  # quốc gia (chi nhánh JP + VN) vẫn phải chỉnh ở config, vì 100 JPY và
+  # 100 VND lệch hai bậc độ lớn nên một cặp phẳng sẽ sai với một trong hai.
+  point_earn_amount:
+    type: Decimal
+    precision: 12
+    scale: 2
+    nullable: true
+    displayName:
+      ja: ポイント付与の金額単位
+      en: Point Earn Amount
+      vi: Số tiền để tích điểm
+
+  point_earn_points:
+    type: Int
+    nullable: true
+    displayName:
+      ja: 付与ポイント数
+      en: Point Earn Points
+      vi: Số điểm nhận được
+

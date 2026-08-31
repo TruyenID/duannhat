@@ -1,0 +1,59 @@
+version: 1
+applications:
+  - appRoot: web/admin
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - nvm install 22
+            - nvm use 22
+            - npm i -g pnpm@10.29.1
+            - git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
+            - git config --global --add url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "ssh://git@github.com/"
+            - git config --global --add url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "git@github.com:"
+            - echo "node-linker=hoisted" > .npmrc
+            - pnpm install --frozen-lockfile
+            # #3231 — DẤU VÂN TAY của lượt build, phát ra ở /build-info.json.
+            #
+            # Không có nó thì smoke test chỉ hỏi được "server còn thở", và một
+            # bundle sáu tháng tuổi trả lời "có" y hệt bundle vừa dựng. Chính lỗ
+            # đó để `/downloads` trả 500 qua BA lượt deploy xanh liên tiếp
+            # (#3222 → #3225 → #3227): mỗi vòng CI xanh, smoke xanh, trang vẫn 500.
+            #
+            # Commit lấy từ CHÍNH git clone mà Amplify đang dựng — không phải
+            # commit workflow nghĩ là nó dựng; hai cái lệch nhau chính là thứ
+            # cần đo, nên `github.sha` ở đây chỉ lặp lại câu hỏi. Cũng KHÔNG
+            # dùng `AWS_COMMIT_ID`: job kiểu RELEASE đặt nó là chuỗi "HEAD"
+            # (đo 2026-08-18, job 126) — smoke check không merge-base được và
+            # đỏ mọi lượt deploy dù bundle đúng.
+            - export BUILD_INFO_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "")
+            - >-
+              node -e "require('fs').writeFileSync('public/build-info.json',
+              JSON.stringify({commit: process.env.BUILD_INFO_COMMIT || '', branch:
+              process.env.AWS_BRANCH || '', built_at: new
+              Date().toISOString()}))"
+            - cat public/build-info.json
+        build:
+          commands:
+            # #3088 — ghim biến vào lúc BUILD, không phó thác cho runtime SSR.
+            #
+            # Đặt `TEMPO_BACKEND_URL` trên Amplify app là đủ để nó có mặt trong
+            # container BUILD, nhưng KHÔNG bảo đảm nó tới được Lambda chạy SSR —
+            # và `backendOrigin()` đọc `process.env` lúc render. Đo 2026-08-18:
+            # biến đã set (`5 -> 6 keys`, hết AccessDenied), build xanh, và trang
+            # vẫn 500 vì cú ném "TEMPO_BACKEND_URL is not set".
+            #
+            # Ghi vào `.env.production` thì Next nướng giá trị vào bundle server
+            # lúc build, nên nó không còn phụ thuộc việc runtime có được tiêm hay
+            # không. Biến rỗng thì KHÔNG ghi dòng nào — để cú ném ở
+            # `backendOrigin()` vẫn nổ, thay vì nướng một chuỗi rỗng vào bundle
+            # rồi trang render đẹp với mọi nút tải chết.
+            - if [ -n "$TEMPO_BACKEND_URL" ]; then echo "TEMPO_BACKEND_URL=$TEMPO_BACKEND_URL" >> .env.production; echo "baked TEMPO_BACKEND_URL"; else echo "TEMPO_BACKEND_URL rỗng — không ghi, để backendOrigin() ném"; fi
+            - pnpm run build
+      artifacts:
+        baseDirectory: .next
+        files:
+          - "**/*"
+      cache:
+        paths:
+          - .next/cache/**/*

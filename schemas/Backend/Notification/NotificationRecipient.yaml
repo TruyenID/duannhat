@@ -1,0 +1,152 @@
+# =============================================================================
+# NotificationRecipient (通知受信者 / Người nhận thông báo)
+# =============================================================================
+#
+# Per-recipient fan-out row. One row per (notification × recipient) pair,
+# holding that recipient's independent interaction state — seen, read,
+# dismissed.
+#
+# Written by:
+#   - `NotificationService::dispatch` inside a DB transaction (bulk insert
+#     after the parent `notifications` row is created).
+#
+# Read by:
+#   - `/api/v1/me/notifications/*` — joined with the parent `notifications`
+#     row to present the authenticated user's inbox.
+#   - `/api/v1/hq/{brand}/notifications/{id}` — admin detail endpoint walks
+#     all recipients of a notification + their state.
+#
+# Polymorphic recipient (`recipient_type` + `recipient_id`) resolves through
+# the shared morph map registered in `AppServiceProvider::boot` (T1.6).
+# Valid recipient aliases: `user`, `device`. Every row MUST resolve — the
+# dispatch service rejects unregistered morph types before insert.
+#
+# Cascade: `notification_id` → parent Notification. When the parent is
+# pruned (by Prunable) or deleted, all recipient rows go with it.
+#
+# Tri-state interaction columns — only set one direction at a time:
+#   - seen_at      = notification entered viewport / inbox was opened
+#   - read_at      = user explicitly interacted (click, open detail)
+#   - dismissed_at = user archived; row hidden from default `/me/notifications`
+# Each is nullable, set once (idempotent — subsequent set calls keep the
+# first timestamp), and independent across recipients.
+#
+# `resolved_via` (Phase A) holds a human-readable trace for audit/debug —
+# e.g. `role:warehouse_manager:{warehouse_id}`, `user:direct`,
+# `shop:{id}:members`. Populated by `AudienceResolverService`. Nullable so
+# code-path emitters that hand-pass recipients still write valid rows.
+# =============================================================================
+
+displayName:
+  en: Notification Recipient
+  ja: 通知受信者
+  vi: Người nhận thông báo
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: false
+  id: Uuid
+  indexes:
+    # Primary inbox query — "my unread" (ordered implicitly by created_at)
+    - columns: [recipient_type, recipient_id, read_at]
+    # List inbox ordered by newest-first, excluding dismissed
+    - columns: [recipient_type, recipient_id, dismissed_at, created_at]
+    # Fan-out detail lookup — "all recipients of this notification"
+    - columns: [notification_id]
+    # Enforce one-row-per-recipient per notification
+    - columns: [notification_id, recipient_type, recipient_id]
+      unique: true
+
+properties:
+  # Parent content pointer — cascades on delete/prune.
+  notification:
+    type: Association
+    relation: ManyToOne
+    target: Notification
+    onDelete: CASCADE
+    displayName:
+      en: Notification
+      ja: 通知
+      vi: Thông báo
+    description:
+      en: Parent content row. Cascade-delete when the parent is pruned by retention.
+      ja: 親コンテンツ行。リテンションによる親の削除時にカスケード削除。
+      vi: Row content cha. Cascade-delete khi cha bị prune theo retention.
+
+  # Polymorphic recipient — NOT nullable; every row must resolve.
+  recipient_type:
+    type: String
+    length: 60
+    filterable: true
+    displayName:
+      en: Recipient Type
+      ja: 受信者タイプ
+      vi: Loại người nhận
+    description:
+      en: "Morph alias — `user` or `device`. Never null; every recipient row must resolve through the morph map in AppServiceProvider::boot."
+      ja: "morph エイリアス — `user` または `device`。null は不可；すべての受信者行は AppServiceProvider::boot の morph マップ経由で解決される必要がある。"
+      vi: "Morph alias — `user` hoặc `device`. Không bao giờ null; mọi row người nhận phải resolve qua morph map trong AppServiceProvider::boot."
+
+  recipient_id:
+    type: Uuid
+    displayName:
+      en: Recipient ID
+      ja: 受信者ID
+      vi: ID người nhận
+    description:
+      en: PK of the recipient record (User or Device UUID). Never null.
+      ja: 受信者レコードの主キー（User または Device の UUID）。null は不可。
+      vi: PK record người nhận (UUID của User hoặc Device). Không null.
+
+  # Tri-state interaction columns — independent lifecycles.
+  seen_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Seen At
+      ja: 表示日時
+      vi: Đã xem lúc
+    description:
+      en: Timestamp when the notification entered the user's viewport / inbox was opened. Idempotent — once set, subsequent seen calls do not overwrite.
+      ja: 通知がユーザーのビューポートに入った / 受信箱が開かれた日時。冪等 — 一度セットされると後続の seen 呼び出しで上書きされない。
+      vi: Thời điểm notification vào viewport / inbox được mở. Idempotent — set rồi thì call seen tiếp theo không ghi đè.
+
+  read_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Read At
+      ja: 既読日時
+      vi: Đã đọc lúc
+    description:
+      en: Timestamp when the user explicitly interacted (clicked the row, opened detail). Idempotent. Setting `read_at` also implies `seen_at` (the controller sets both if `seen_at` is still null).
+      ja: ユーザーが明示的に操作した（行クリック / 詳細を開いた）日時。冪等。`read_at` のセットは `seen_at` も含意（コントローラが `seen_at` が null なら併せてセット）。
+      vi: Thời điểm user tương tác rõ ràng (click row, mở detail). Idempotent. Set `read_at` cũng hàm ý `seen_at` (controller set cả 2 nếu `seen_at` còn null).
+
+  dismissed_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Dismissed At
+      ja: 消去日時
+      vi: Đã bỏ qua lúc
+    description:
+      en: Timestamp when the user archived/cleared the row. Dismissed rows disappear from default `/me/notifications` responses. Soft-flag (not a hard delete) — retention pruning eventually removes rows anyway.
+      ja: ユーザーが行をアーカイブ / クリアした日時。消去された行はデフォルトの `/me/notifications` 応答から消える。ソフトフラグ（ハード削除ではない）— リテンション剪定で最終的に削除される。
+      vi: Thời điểm user archive/clear row. Row đã dismiss biến mất khỏi response `/me/notifications` mặc định. Soft-flag (không hard delete) — retention pruning sẽ xoá sau.
+
+  # Audience-resolution trace — human-readable debug string.
+  resolved_via:
+    type: String
+    length: 120
+    nullable: true
+    displayName:
+      en: Resolved Via
+      ja: 解決元
+      vi: Nguồn resolve
+    description:
+      en: "Trace string from `AudienceResolverService` explaining how this recipient was reached. Examples: `role:warehouse_manager:{warehouse_id}`, `user:direct`, `shop:{shop_id}:members`. Null when the dispatch path passed an explicit recipient Collection without going through the resolver."
+      ja: "この受信者に到達した経路を示す `AudienceResolverService` のトレース文字列。例：`role:warehouse_manager:{warehouse_id}`、`user:direct`、`shop:{shop_id}:members`。明示的な受信者 Collection を渡してリゾルバを経由しないディスパッチ経路では null。"
+      vi: "Chuỗi trace từ `AudienceResolverService` giải thích cách reach recipient này. VD: `role:warehouse_manager:{warehouse_id}`, `user:direct`, `shop:{shop_id}:members`. Null khi dispatch path pass recipient Collection trực tiếp mà không qua resolver."

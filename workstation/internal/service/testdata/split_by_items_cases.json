@@ -1,0 +1,274 @@
+{
+  "_comment": "plan-033 — shared fixture set for SplitByItemsCalculator (PHP) and the deferred pos-web/test/fixtures/split-by-items-cases.json copy (Vitest). Keep both files byte-identical so the parity test holds. Every case states inputs + expected per-bill outputs so both calculators are pinned to the same numeric contract.",
+  "cases": [
+    {
+      "name": "happy-1-item-1-bill-no-tax",
+      "order": {
+        "subtotal": 1000,
+        "discount_amount": 0,
+        "total_amount": 1000,
+        "items": [
+          { "id": "i-1", "unit_price": 1000, "quantity": 1, "topping_subtotal": 0, "status": "preparing" }
+        ]
+      },
+      "allocations": [{ "item_id": "i-1", "units": 1, "bill_index": 0 }],
+      "rounding_mode": "auto",
+      "currency_code": "VND",
+      "tax_rate": 0,
+      "service_charge_rate": 0,
+      "people_count": 1,
+      "expected": {
+        "total_check": 1000,
+        "bills": [
+          { "index": 0, "subtotal": 1000, "discount": 0, "tax": 0, "service": 0, "total": 1000, "is_empty": false }
+        ]
+      }
+    },
+    {
+      "name": "split-2-bills-with-tax-vnd",
+      "order": {
+        "subtotal": 2000,
+        "discount_amount": 0,
+        "total_amount": 2200,
+        "items": [
+          { "id": "i-1", "unit_price": 1000, "quantity": 2, "topping_subtotal": 0, "status": "preparing" }
+        ]
+      },
+      "allocations": [
+        { "item_id": "i-1", "units": 1, "bill_index": 0 },
+        { "item_id": "i-1", "units": 1, "bill_index": 1 }
+      ],
+      "rounding_mode": "auto",
+      "currency_code": "VND",
+      "tax_rate": 10,
+      "service_charge_rate": 0,
+      "people_count": 2,
+      "expected": {
+        "total_check": 2200,
+        "bills": [
+          { "index": 0, "subtotal": 1000, "discount": 0, "tax": 100, "service": 0, "total": 1100, "is_empty": false },
+          { "index": 1, "subtotal": 1000, "discount": 0, "tax": 100, "service": 0, "total": 1100, "is_empty": false }
+        ]
+      }
+    },
+    {
+      "name": "proportional-discount-2-bills",
+      "order": {
+        "subtotal": 2100,
+        "discount_amount": 100,
+        "total_amount": 2000,
+        "items": [
+          { "id": "i-A", "unit_price": 600, "quantity": 1, "topping_subtotal": 0, "status": "preparing" },
+          { "id": "i-B", "unit_price": 1500, "quantity": 1, "topping_subtotal": 0, "status": "preparing" }
+        ]
+      },
+      "allocations": [
+        { "item_id": "i-A", "units": 1, "bill_index": 0 },
+        { "item_id": "i-B", "units": 1, "bill_index": 1 }
+      ],
+      "rounding_mode": "auto",
+      "currency_code": "VND",
+      "tax_rate": 0,
+      "service_charge_rate": 0,
+      "people_count": 2,
+      "expected": {
+        "total_check": 2000,
+        "bills": [
+          { "index": 0, "subtotal": 600, "discount": 29, "tax": 0, "service": 0, "total": 571, "is_empty": false },
+          { "index": 1, "subtotal": 1500, "discount": 71, "tax": 0, "service": 0, "total": 1429, "is_empty": false }
+        ]
+      }
+    },
+    {
+      "name": "reconcile-drift-last-absorbs",
+      "order": {
+        "subtotal": 301,
+        "discount_amount": 1,
+        "total_amount": 300,
+        "items": [
+          { "id": "i-A", "unit_price": 100, "quantity": 1, "topping_subtotal": 0, "status": "preparing" },
+          { "id": "i-B", "unit_price": 100, "quantity": 1, "topping_subtotal": 0, "status": "preparing" },
+          { "id": "i-C", "unit_price": 101, "quantity": 1, "topping_subtotal": 0, "status": "preparing" }
+        ]
+      },
+      "allocations": [
+        { "item_id": "i-A", "units": 1, "bill_index": 0 },
+        { "item_id": "i-B", "units": 1, "bill_index": 1 },
+        { "item_id": "i-C", "units": 1, "bill_index": 2 }
+      ],
+      "rounding_mode": "auto",
+      "currency_code": "VND",
+      "tax_rate": 0,
+      "service_charge_rate": 0,
+      "people_count": 3,
+      "expected": {
+        "total_check": 300,
+        "bills": [
+          { "index": 0, "subtotal": 100, "discount": 0, "tax": 0, "service": 0, "total": 100, "is_empty": false },
+          { "index": 1, "subtotal": 100, "discount": 0, "tax": 0, "service": 0, "total": 100, "is_empty": false },
+          { "index": 2, "subtotal": 101, "discount": 0, "tax": -1, "service": 0, "total": 100, "is_empty": false }
+        ]
+      }
+    },
+    {
+      "name": "empty-bills-mixed",
+      "order": {
+        "subtotal": 1000,
+        "discount_amount": 0,
+        "total_amount": 1000,
+        "items": [
+          { "id": "i-1", "unit_price": 1000, "quantity": 1, "topping_subtotal": 0, "status": "preparing" }
+        ]
+      },
+      "allocations": [
+        { "item_id": "i-1", "units": 1, "bill_index": 1 }
+      ],
+      "rounding_mode": "auto",
+      "currency_code": "VND",
+      "tax_rate": 0,
+      "service_charge_rate": 0,
+      "people_count": 3,
+      "expected": {
+        "total_check": 1000,
+        "bills": [
+          { "index": 0, "subtotal": 0, "discount": 0, "tax": 0, "service": 0, "total": 0, "is_empty": true },
+          { "index": 1, "subtotal": 1000, "discount": 0, "tax": 0, "service": 0, "total": 1000, "is_empty": false },
+          { "index": 2, "subtotal": 0, "discount": 0, "tax": 0, "service": 0, "total": 0, "is_empty": true }
+        ]
+      }
+    },
+    {
+      "name": "mode-integer-rounds-up-usd",
+      "order": {
+        "subtotal": 1000,
+        "discount_amount": 0,
+        "total_amount": 1080,
+        "items": [
+          { "id": "i-1", "unit_price": 1000, "quantity": 1, "topping_subtotal": 0, "status": "preparing" }
+        ]
+      },
+      "allocations": [
+        { "item_id": "i-1", "units": 1, "bill_index": 0 }
+      ],
+      "rounding_mode": "integer",
+      "currency_code": "USD",
+      "tax_rate": 8,
+      "service_charge_rate": 0,
+      "people_count": 1,
+      "expected": {
+        "total_check": 1080,
+        "bills": [
+          { "index": 0, "subtotal": 1000, "discount": 0, "tax": 80, "service": 0, "total": 1080, "is_empty": false }
+        ]
+      }
+    },
+    {
+      "name": "mode-none-vnd-with-drift",
+      "order": {
+        "subtotal": 10001,
+        "discount_amount": 0,
+        "total_amount": 10001,
+        "items": [
+          { "id": "i-1", "unit_price": 10001, "quantity": 1, "topping_subtotal": 0, "status": "preparing" }
+        ]
+      },
+      "allocations": [
+        { "item_id": "i-1", "units": 1, "bill_index": 0 }
+      ],
+      "rounding_mode": "none",
+      "currency_code": "VND",
+      "tax_rate": 0,
+      "service_charge_rate": 0,
+      "people_count": 1,
+      "expected": {
+        "total_check": 10001,
+        "bills": [
+          { "index": 0, "subtotal": 10001, "discount": 0, "tax": 0, "service": 0, "total": 10001, "is_empty": false }
+        ]
+      }
+    },
+    {
+      "name": "mode-two-decimals-vnd-tax-service",
+      "order": {
+        "subtotal": 1000,
+        "discount_amount": 0,
+        "total_amount": 1150,
+        "items": [
+          { "id": "i-1", "unit_price": 1000, "quantity": 1, "topping_subtotal": 0, "status": "preparing" }
+        ]
+      },
+      "allocations": [
+        { "item_id": "i-1", "units": 1, "bill_index": 0 }
+      ],
+      "rounding_mode": "two_decimals",
+      "currency_code": "VND",
+      "tax_rate": 10,
+      "service_charge_rate": 5,
+      "people_count": 1,
+      "expected": {
+        "total_check": 1150,
+        "bills": [
+          { "index": 0, "subtotal": 1000, "discount": 0, "tax": 100, "service": 50, "total": 1150, "is_empty": false }
+        ]
+      }
+    },
+    {
+      "name": "toppings-are-per-unit-not-per-line",
+      "_why": "REGRESSION (shop-reported, 2026-08-13). `topping_subtotal` is PER UNIT — the column comment says so and every writer stores subtotal = quantity x (unit_price + topping_subtotal). All three calculators used to divide it by the line quantity, so a 1000 bowl x3 with a 100 extra priced each unit at 1033 instead of 1100: every guest but the last under-paid and the last absorbed the whole 200 gap through the reconcile step, which is why the totals still added up and nothing looked wrong. Not one case in this file carried a non-zero topping_subtotal — that is how three implementations agreed on the same wrong rule.",
+      "order": {
+        "subtotal": 3300,
+        "discount_amount": 0,
+        "total_amount": 3300,
+        "items": [
+          { "id": "i-1", "unit_price": 1000, "quantity": 3, "topping_subtotal": 100, "status": "preparing" }
+        ]
+      },
+      "allocations": [
+        { "item_id": "i-1", "units": 1, "bill_index": 0 },
+        { "item_id": "i-1", "units": 1, "bill_index": 1 },
+        { "item_id": "i-1", "units": 1, "bill_index": 2 }
+      ],
+      "rounding_mode": "auto",
+      "currency_code": "VND",
+      "tax_rate": 0,
+      "service_charge_rate": 0,
+      "people_count": 3,
+      "expected": {
+        "total_check": 3300,
+        "bills": [
+          { "index": 0, "subtotal": 1100, "discount": 0, "tax": 0, "service": 0, "total": 1100, "is_empty": false },
+          { "index": 1, "subtotal": 1100, "discount": 0, "tax": 0, "service": 0, "total": 1100, "is_empty": false },
+          { "index": 2, "subtotal": 1100, "discount": 0, "tax": 0, "service": 0, "total": 1100, "is_empty": false }
+        ]
+      }
+    },
+    {
+      "name": "toppings-per-unit-uneven-split",
+      "_why": "The same rule where the units do NOT divide evenly, so a per-unit price that is wrong by the same amount on every unit cannot hide behind the final reconcile: bill 0 takes two of the three units and must carry exactly 2 x 1100 on its own.",
+      "order": {
+        "subtotal": 3300,
+        "discount_amount": 0,
+        "total_amount": 3300,
+        "items": [
+          { "id": "i-1", "unit_price": 1000, "quantity": 3, "topping_subtotal": 100, "status": "preparing" }
+        ]
+      },
+      "allocations": [
+        { "item_id": "i-1", "units": 2, "bill_index": 0 },
+        { "item_id": "i-1", "units": 1, "bill_index": 1 }
+      ],
+      "rounding_mode": "auto",
+      "currency_code": "VND",
+      "tax_rate": 0,
+      "service_charge_rate": 0,
+      "people_count": 2,
+      "expected": {
+        "total_check": 3300,
+        "bills": [
+          { "index": 0, "subtotal": 2200, "discount": 0, "tax": 0, "service": 0, "total": 2200, "is_empty": false },
+          { "index": 1, "subtotal": 1100, "discount": 0, "tax": 0, "service": 0, "total": 1100, "is_empty": false }
+        ]
+      }
+    }
+  ]
+}

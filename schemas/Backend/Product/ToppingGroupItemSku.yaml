@@ -1,0 +1,85 @@
+# =============================================================================
+# ToppingGroupItemSku (トッピンググループ項目SKU / Giá SKU của Mục Topping)
+# =============================================================================
+#
+# Price override per-SKU cho một topping item trong nhóm.
+# Cho phép topping có biến thể (VD: Pepsi S / Pepsi L) có giá khác nhau.
+#
+# Written by: HQ admin via ToppingGroupItemSkuService (auto-created hoặc tay).
+# Read by: POS/workstation (Phase 2 — lấy giá topping khi khách chọn).
+#
+# product_sku_id nullable:
+#   - NULL = config giá cho topping KHÔNG có variant (simple topping).
+#     Đây là ĐÚNG và hợp lệ — product_sku_id=null ở đây có nghĩa "áp dụng
+#     cho topping không có biến thể", KHÔNG phải "không có SKU".
+#   - Non-null = price override cho SKU cụ thể của topping có variant.
+#
+# NULL unique constraint issue:
+#   MySQL UNIQUE index KHÔNG block nhiều NULL trong cùng column. Vì vậy,
+#   application layer PHẢI check duplicate trước insert:
+#     ToppingGroupItemSku::where('topping_group_item_id', $item->id)
+#                         ->whereNull('product_sku_id')->exists()
+#   Logic giá (Phase 2):
+#     - Topping không variant → extra_price WHERE product_sku_id IS NULL
+#     - Topping có variant    → extra_price WHERE product_sku_id = {chosen SKU}
+#                               Fallback: product_skus.selling_price nếu không có row
+#
+# No soft delete, no timestamps: bảng config giá, xoá cứng khi unset.
+# Cascade hard-delete khi ToppingGroupItem bị soft-delete (observer).
+# =============================================================================
+
+displayName:
+  en: Topping Group Item SKU
+  ja: トッピンググループ項目SKU
+  vi: Giá SKU của Mục Topping
+
+kind: object
+
+options:
+  # No softDelete: price config rows, hard-delete when unset or item deleted
+  softDelete: false
+  # No timestamps: append/replace pattern, no change tracking needed
+  timestamps: false
+  id: Uuid
+  indexes:
+    # Composite unique (MySQL UNIQUE on nullable column — see NULL constraint note above)
+    - columns: [topping_group_item_id, product_sku_id]
+      unique: true
+
+properties:
+  # Item chứa SKU price này. CASCADE — khi item bị xoá (hard) thì SKU rows đi theo.
+  # Observer (ToppingGroupItemObserver) trigger cascade khi item soft-deleted.
+  toppingGroupItem:
+    type: Association
+    relation: ManyToOne
+    target: ToppingGroupItem
+    onDelete: CASCADE
+    displayName:
+      en: Topping Group Item
+      ja: トッピンググループ項目
+      vi: Mục Topping
+
+  # SKU của topping product. nullable — NULL = topping không có variant.
+  # CASCADE — khi SKU bị xoá (hard) thì price override đi theo.
+  productSku:
+    type: Association
+    relation: ManyToOne
+    target: ProductSku
+    nullable: true
+    onDelete: CASCADE
+    displayName:
+      en: Product SKU
+      ja: 商品SKU
+      vi: SKU sản phẩm
+
+  # Giá bổ sung cho topping này (chênh lệch so với giá cơ bản = 0 là không phụ phí).
+  # Phase 2: unit_price trong OrderItemTopping = extra_price tại thời điểm order.
+  extra_price:
+    type: Decimal
+    precision: 15
+    scale: 2
+    default: 0
+    displayName:
+      en: Extra Price
+      ja: 追加料金
+      vi: Giá thêm

@@ -1,0 +1,153 @@
+# ==============================================================================
+# CashDeviceErrorEvent — một lần máy 釣銭機 gặp sự cố, có dấu thời gian
+# ==============================================================================
+#
+# T5 của #2876 (issue #2882).
+#
+# ## Alert và sổ là HAI câu hỏi, không phải một
+#
+# Phân loại lỗi trong `workstation/internal/device/glory/errors.go` đã tốt — nó
+# phân theo *người vận hành phải làm gì*. Nhưng những lỗi đó chỉ thành **alert
+# đang-mở**, và alert chỉ trả lời được **"bây giờ có sao không"**.
+#
+# Không có chỗ nào trả lời:
+#
+#   - tháng này máy hết tiền thối BAO NHIÊU LẦN?
+#   - mỗi lần chặn mất BAO NHIÊU PHÚT bán hàng?
+#   - máy nào hỏng nhiều hơn — 本郷店 hay 人形町店?
+#   - nên mua thêm máy, hay chỉ cần nạp tiền thối sớm hơn?
+#
+# Câu thứ hai mới là câu quyết định chi tiền, và **suy nó ra từ trạng thái hiện
+# tại là không làm được**. Nên đây là bảng riêng, KHÔNG thay alert.
+#
+# ## Vì sao KHÔNG gộp vào `cash_device_transactions`
+#
+# Bảng kia đã có `error_title`, và với lỗi xảy ra TRONG một lượt thu thì thế là
+# đủ. Nhưng hai nhóm nặng nhất xảy ra khi KHÔNG có lượt thu nào đang chạy:
+#
+#   - `IsForbidden` — IP máy trạm không nằm trong allowlist của adapter. Đây là
+#     CẤU HÌNH SAI, và nó thường im lặng hàng tuần.
+#   - `IsConnectivity` — đứt cáp / mất điện / máy chưa sẵn sàng.
+#
+# Không có hàng giao dịch để bám vào, nên không có chỗ ghi. Đó là lý do bảng này
+# tồn tại chứ không phải vì muốn một bảng cho đẹp.
+#
+# ## `cleared_at` là mảnh cho phép tính THỜI LƯỢNG
+#
+# Không có nó thì không trả lời được "chặn mất bao nhiêu phút" — mà đó chính là
+# con số quy ra tiền. NULL = đang còn.
+#
+# ## Nhóm nào KHÔNG vào sổ
+#
+# `IsBusy` · `IsNotFound` · `IsNotEnoughDeposit` là **nhịp bình thường của giao
+# thức**. Ghi chúng vào sẽ chôn lấp bốn nhóm thật, và một sổ toàn rác sẽ bị tắt.
+#
+# Business Rules:
+#   - BR-ERR01: UNIQUE (peripheral_device_id, error_title, occurred_at) — khoá
+#               idempotent của đường sync-UP. MỘT LẦN XẢY RA = MỘT HÀNG; collector
+#               poll theo `pollInterval` nên một sự cố kéo dài 2 phút có thể sinh
+#               hàng trăm lượt GẶP lỗi, mà đó vẫn là một sự cố.
+#   - BR-ERR02: `error_title` là chuỗi NGUYÊN VĂN của adapter, không phải enum —
+#               adapter thêm title mới thì nó phải đi lên được, không bị nuốt.
+#   - BR-ERR03: NO soft delete — sổ audit.
+#
+# Written by: POST /api/v1/workstation/cash-device-errors (device token).
+# Read by:   báo cáo sự cố thiết bị (đếm + tổng thời lượng theo máy/chi nhánh/tháng).
+# ==============================================================================
+
+displayName:
+  en: Cash Device Error Event
+  ja: 釣銭機エラー事象
+  vi: Sự cố máy thu tiền
+
+kind: object
+
+options:
+  timestamps: true
+  id: Uuid
+  softDelete: false
+  indexes:
+    # BR-ERR01 — khoá idempotent.
+    - columns: [peripheral_device_id, error_title, occurred_at]
+      unique: true
+      name: cash_device_err_device_title_time_unique
+    # "Máy nào hỏng nhiều hơn, nhóm lỗi nào" — trục báo cáo chính.
+    - columns: [peripheral_device_id, occurred_at]
+    - columns: [branch_id, error_group, occurred_at]
+    # Sự cố còn đang mở.
+    - columns: [cleared_at]
+
+properties:
+  peripheralDevice:
+    type: Association
+    relation: ManyToOne
+    target: PeripheralDevice
+    onDelete: RESTRICT
+    displayName: { en: Cash Device, ja: 釣銭機, vi: Máy thu tiền }
+
+  error_title:
+    # BR-ERR02 — từ vựng của BÊN THỨ BA, nguyên văn: "empty", "billRejectFull",
+    # "needPullOut", "ifError", "notReady", "forbidden"…
+    type: String
+    length: 50
+    filterable: true
+    displayName: { en: Error Title, ja: エラー種別, vi: Loại lỗi }
+
+  error_group:
+    # Nhóm theo VIỆC NGƯỜI PHẢI LÀM, không theo mã lỗi:
+    #   change_shortage — hết tiền thối, CHẶN BÁN HÀNG (đo được = doanh thu mất)
+    #   needs_operator  — kẹt/đầy/chưa rút tiền, cần người ra máy
+    #   connectivity    — đứt cáp/mất điện/chưa sẵn sàng
+    #   forbidden       — IP không trong allowlist: CẤU HÌNH SAI, im lặng hàng tuần
+    #
+    # Phân nhóm ở tầng GHI (máy trạm biết `errors.go`) chứ không ở tầng đọc, vì
+    # tầng đọc sẽ phải chép lại bảng phân loại và hai bản sẽ lệch nhau.
+    type: String
+    length: 30
+    filterable: true
+    displayName: { en: Error Group, ja: 分類, vi: Nhóm }
+
+  occurred_at:
+    type: Timestamp
+    filterable: true
+    displayName: { en: Occurred At, ja: 発生日時, vi: Bắt đầu }
+
+  cleared_at:
+    # NULL = đang còn. Cặp với `occurred_at` cho ra THỜI LƯỢNG — con số quy ra
+    # tiền, và là lý do bảng này khác một dòng log.
+    type: Timestamp
+    nullable: true
+    displayName: { en: Cleared At, ja: 復旧日時, vi: Kết thúc }
+
+  cashDeviceTransaction:
+    # Lỗi xảy ra TRONG một lượt thu thì trỏ về nó. NULL với `forbidden` và
+    # `connectivity` lúc máy rảnh — chính hai nhóm này là lý do bảng tồn tại,
+    # nên NULL ở đây là ngữ nghĩa vĩnh viễn (#2618), không phải dữ liệu thiếu.
+    type: Association
+    relation: ManyToOne
+    target: CashDeviceTransaction
+    nullable: true
+    onDelete: RESTRICT
+    displayName: { en: Transaction, ja: 取引, vi: Lượt thu }
+
+  tillSession:
+    type: Association
+    relation: ManyToOne
+    target: TillSession
+    nullable: true
+    onDelete: RESTRICT
+    displayName: { en: Till Session, ja: レジ精算, vi: Ca thu ngân }
+
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    onDelete: RESTRICT
+    displayName: { en: Branch, ja: 店舗, vi: Chi nhánh }
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: RESTRICT
+    displayName: { en: Organization, ja: 組織, vi: Tổ chức }

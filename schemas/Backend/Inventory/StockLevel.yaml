@@ -1,0 +1,179 @@
+# StockLevel schema
+# Current stock quantity per warehouse × item (variant or material).
+# Each row represents the real-time quantity of one item in one warehouse.
+# Quantities are always stored in the item's base unit.
+#
+# Business Rules:
+#   - BR-01: quantity must never go negative (enforced at service layer)
+#   - One of (product_sku_id, material_id) must be NOT NULL (app-level CHECK)
+#   - Unique per warehouse + item combination (composite unique indexes)
+#   - min_stock/max_stock/alert_enabled reserved for F8 (stock alerts)
+#
+# Key Design:
+#   - quantity always in base unit (e.g., kg, piece, liter)
+#   - No soft delete — stock levels are updated, not deleted
+#
+# plan-040 M14 — lot-less canonical row:
+#   MySQL 8.0+ treats NULLs as DISTINCT in a UNIQUE index, so the
+#   (warehouse_id, material_id, material_lot_id) unique below does NOT stop
+#   multiple lot-less (material_lot_id = NULL) rows for the same warehouse×material
+#   — that fragments the legacy/lot-less total across several rows. A plain unique
+#   index cannot express "one row WHERE material_lot_id IS NULL" (MySQL has no
+#   partial index). So StockLevelService routes every lot-less write through ONE
+#   canonical row via a whereNull(material_lot_id) upsert under lock — the
+#   single-canonical-row invariant is enforced at the service layer, not the DB.
+
+displayName:
+  en: Stock Level
+  ja: 在庫レベル
+  vi: Tồn kho
+
+kind: object
+
+options:
+  timestamps: true
+  id: Uuid
+  indexes:
+    - columns: [warehouse_id, product_sku_id]
+      unique: true
+    # Plan-017: lot-tracked stock distinguishes per-lot rows. Unique index now
+    # spans material_lot_id so two active lots of the same material in the same
+    # warehouse get two rows. Legacy stock keeps material_lot_id=NULL — MySQL
+    # 8.0+ allows multiple NULLs in UNIQUE so the legacy bucket stays a single row.
+    - columns: [warehouse_id, material_id, material_lot_id]
+      unique: true
+    - columns: [warehouse_id, quantity]
+
+properties:
+  warehouse:
+    type: Association
+    relation: ManyToOne
+    target: Warehouse
+    onDelete: RESTRICT
+    displayName:
+      en: Warehouse
+      ja: 倉庫
+      vi: Kho hàng
+    description:
+      en: Warehouse containing this stock
+      ja: この在庫を保管する倉庫
+      vi: Kho chứa tồn kho này
+
+  productSku:
+    type: Association
+    relation: ManyToOne
+    target: ProductSku
+    onDelete: RESTRICT
+    nullable: true
+    displayName:
+      en: Product Variant
+      ja: 商品バリエーション
+      vi: Biến thể sản phẩm
+    description:
+      en: "Product variant. Mutually exclusive with material_id (exactly one must be set)"
+      ja: "商品バリエーション。material_idと排他的（どちらか1つ必須）"
+      vi: "Biến thể sản phẩm. Loại trừ với material_id (chính xác 1 phải có giá trị)"
+
+  material:
+    type: Association
+    relation: ManyToOne
+    target: Material
+    onDelete: RESTRICT
+    nullable: true
+    displayName:
+      en: Material
+      ja: 材料
+      vi: Nguyên liệu
+    description:
+      en: "Raw material. Mutually exclusive with product_sku_id (exactly one must be set)"
+      ja: "原材料。product_sku_idと排他的（どちらか1つ必須）"
+      vi: "Nguyên liệu. Loại trừ với product_sku_id (chính xác 1 phải có giá trị)"
+
+  materialLot:
+    type: Association
+    relation: ManyToOne
+    target: MaterialLot
+    onDelete: RESTRICT
+    nullable: true
+    # Plan-017: nullable so legacy (pre-migration) stock survives the schema
+    # bump as a single (warehouse_id, material_id, NULL) row. Post-migration
+    # receipts create one row per lot.
+    # plan-040 M23: RESTRICT (was SET NULL) — nulling the lot link on lot delete
+    # would silently merge a tracked lot's balance into the lot-less bucket and
+    # corrupt FEFO/recall. A lot referenced by a stock_levels row cannot be
+    # hard-deleted; drain/quarantine it instead.
+    displayName:
+      en: Material Lot
+      ja: 材料ロット
+      vi: Lô nguyên liệu
+    description:
+      en: "FK to material_lots when stock is lot-tracked. NULL = legacy stock from before plan-017 migration. RESTRICT on lot delete (plan-040 M23 — balance integrity)."
+      ja: "ロット管理在庫の場合のmaterial_lotsへのFK。NULL = plan-017移行前のレガシー在庫。ロット削除時はRESTRICT（plan-040 M23 — 残高整合性）。"
+      vi: "FK đến material_lots khi tồn kho theo lô. NULL = tồn kho legacy trước plan-017 migration. RESTRICT khi xóa lô (plan-040 M23 — toàn vẹn số dư)."
+
+  quantity:
+    type: Decimal
+    precision: 15
+    scale: 4
+    default: 0
+    displayName:
+      en: Quantity
+      ja: 数量
+      vi: Số lượng
+    description:
+      en: "Current stock quantity in base unit. Must not be negative (BR-01)"
+      ja: "基本単位での現在の在庫数量。マイナス不可（BR-01）"
+      vi: "Số lượng tồn kho hiện tại (đơn vị cơ bản). Không được âm (BR-01)"
+
+  unit:
+    type: String
+    length: 50
+    nullable: true
+    displayName:
+      en: Unit
+      ja: 単位
+      vi: Đơn vị
+    description:
+      en: "Base unit of measurement (e.g., kg, piece, liter)"
+      ja: "基本計量単位（例：kg、piece、liter）"
+      vi: "Đơn vị đo lường cơ bản (VD: kg, piece, liter)"
+
+  min_stock:
+    type: Decimal
+    precision: 15
+    scale: 4
+    nullable: true
+    displayName:
+      en: Minimum Stock
+      ja: 最低在庫
+      vi: Tồn kho tối thiểu
+    description:
+      en: "Minimum stock threshold for alerts (F8). Null = no alert"
+      ja: "アラート用の最低在庫しきい値（F8）。Null = アラートなし"
+      vi: "Ngưỡng tồn kho tối thiểu cho cảnh báo (F8). Null = không cảnh báo"
+
+  max_stock:
+    type: Decimal
+    precision: 15
+    scale: 4
+    nullable: true
+    displayName:
+      en: Maximum Stock
+      ja: 最大在庫
+      vi: Tồn kho tối đa
+    description:
+      en: "Maximum stock threshold (F8). Null = no limit"
+      ja: "最大在庫しきい値（F8）。Null = 制限なし"
+      vi: "Ngưỡng tồn kho tối đa (F8). Null = không giới hạn"
+
+  alert_enabled:
+    type: Boolean
+    default: true
+    displayName:
+      en: Alert Enabled
+      ja: アラート有効
+      vi: Bật cảnh báo
+    description:
+      en: "Enable stock level alerts for this item (F8)"
+      ja: "このアイテムの在庫レベルアラートを有効にする（F8）"
+      vi: "Bật cảnh báo tồn kho cho item này (F8)"

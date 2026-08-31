@@ -1,0 +1,227 @@
+{
+    "version": 1,
+    "purpose": "Per-rate group tax allocation (largest remainder). Both engines MUST agree line for line — see the header of the Go and PHP tests that read this file.",
+    "generated_by": "backend App\\Services\\Customer\\OrderPricingCalculator::allocateGroupTax",
+    "case_count": 15,
+    "cases": [
+        {
+            "name": "single line takes everything",
+            "ideals": [
+                10
+            ],
+            "group_tax": 10,
+            "step": 1,
+            "expected": [
+                10
+            ]
+        },
+        {
+            "name": "no remainder to hand out",
+            "ideals": [
+                10,
+                20,
+                30
+            ],
+            "group_tax": 60,
+            "step": 1,
+            "expected": [
+                10,
+                20,
+                30
+            ]
+        },
+        {
+            "name": "exact tie in remainders",
+            "ideals": [
+                10.5,
+                10.5,
+                10.5
+            ],
+            "group_tax": 32,
+            "step": 1,
+            "expected": [
+                11,
+                11,
+                10
+            ]
+        },
+        {
+            "name": "four-way tie, two steps to give",
+            "ideals": [
+                5.5,
+                5.5,
+                5.5,
+                5.5
+            ],
+            "group_tax": 24,
+            "step": 1,
+            "expected": [
+                6,
+                6,
+                6,
+                6
+            ]
+        },
+        {
+            "name": "distinct remainders, one step",
+            "ideals": [
+                10.9,
+                10.1,
+                10.4
+            ],
+            "group_tax": 32,
+            "step": 1,
+            "expected": [
+                11,
+                10,
+                11
+            ]
+        },
+        {
+            "name": "residual beyond the whole steps",
+            "ideals": [
+                3.33,
+                3.33,
+                3.34
+            ],
+            "group_tax": 10,
+            "step": 1,
+            "expected": [
+                3,
+                3,
+                4
+            ]
+        },
+        {
+            "name": "group tax below the ideal sum",
+            "ideals": [
+                10,
+                10,
+                10
+            ],
+            "group_tax": 29,
+            "step": 1,
+            "expected": [
+                9,
+                10,
+                10
+            ]
+        },
+        {
+            "name": "group tax above the ideal sum",
+            "ideals": [
+                10,
+                10,
+                10
+            ],
+            "group_tax": 31,
+            "step": 1,
+            "expected": [
+                11,
+                10,
+                10
+            ]
+        },
+        {
+            "name": "step 0 — exact division",
+            "ideals": [
+                3.333,
+                3.333,
+                3.334
+            ],
+            "group_tax": 10,
+            "step": 0,
+            "expected": [
+                3.333,
+                3.333,
+                3.334
+            ]
+        },
+        {
+            "name": "sub-unit step (2 decimals)",
+            "ideals": [
+                1.005,
+                1.005,
+                1.005
+            ],
+            "group_tax": 3.02,
+            "step": 0.01,
+            "expected": [
+                1.01,
+                1.01,
+                1
+            ]
+        },
+        {
+            "name": "negative ideal is clamped",
+            "ideals": [
+                -5,
+                10
+            ],
+            "group_tax": 10,
+            "step": 1,
+            "expected": [
+                0,
+                10
+            ]
+        },
+        {
+            "name": "zero group tax",
+            "ideals": [
+                0,
+                0
+            ],
+            "group_tax": 0,
+            "step": 1,
+            "expected": [
+                0,
+                0
+            ]
+        },
+        {
+            "name": "many lines, one yen to place",
+            "ideals": [
+                1.1,
+                1.1,
+                1.1,
+                1.1,
+                1.1
+            ],
+            "group_tax": 6,
+            "step": 1,
+            "expected": [
+                2,
+                1,
+                1,
+                1,
+                1
+            ]
+        },
+        {
+            "name": "floored sum overshoots (内税)",
+            "ideals": [
+                10,
+                10
+            ],
+            "group_tax": 19.5,
+            "step": 1,
+            "expected": [
+                9.5,
+                10
+            ]
+        },
+        {
+            "name": "large values, 500-step rounding",
+            "ideals": [
+                1200,
+                800
+            ],
+            "group_tax": 2000,
+            "step": 500,
+            "expected": [
+                1000,
+                1000
+            ]
+        }
+    ]
+}

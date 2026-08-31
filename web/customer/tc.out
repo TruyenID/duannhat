@@ -1,0 +1,19 @@
+components/brand-switcher-sheet.tsx(75,27): error TS2339: Property 'description' does not exist on type 'Brand'.
+components/brand-switcher-sheet.tsx(86,21): error TS2339: Property 'description' does not exist on type 'Branch'.
+components/brand-switcher-sheet.tsx(99,28): error TS2339: Property 'description' does not exist on type 'Branch'.
+components/brand-switcher-sheet.tsx(320,44): error TS2339: Property 'description' does not exist on type 'Brand'.
+components/brand-switcher-sheet.tsx(321,51): error TS2339: Property 'description' does not exist on type 'Brand'.
+components/brand-switcher-sheet.tsx(407,19): error TS2339: Property 'description' does not exist on type 'Branch'.
+components/checkout-page.tsx(86,14): error TS2339: Property 'position' does not exist on type 'ProductOption'.
+components/checkout-page.tsx(87,16): error TS2339: Property 'sku' does not exist on type 'CartItem'.
+components/checkout-page.tsx(88,18): error TS2339: Property 'position' does not exist on type 'ProductOption'.
+components/checkout-page.tsx(89,18): error TS2339: Property 'sku' does not exist on type 'CartItem'.
+components/checkout-page.tsx(90,18): error TS2339: Property 'sku' does not exist on type 'CartItem'.
+components/checkout-page.tsx(91,26): error TS2339: Property 'values' does not exist on type 'ProductOption'.
+components/checkout-page.tsx(91,39): error TS7006: Parameter 'v' implicitly has an 'any' type.
+components/product-modal.tsx(171,19): error TS2339: Property 'description' does not exist on type 'MenuItem'.
+components/product-modal.tsx(172,86): error TS2339: Property 'description' does not exist on type 'MenuItem'.
+context/auth-context.tsx(46,37): error TS2345: Argument of type '{ user: User; }' is not assignable to parameter of type 'SetStateAction<User | null>'.
+context/cart-context.tsx(210,17): error TS2339: Property 'sku' does not exist on type 'CartItem'.
+context/cart-context.tsx(212,39): error TS2339: Property 'skus' does not exist on type 'MenuItem'.
+context/cart-context.tsx(214,32): error TS2339: Property 'slug' does not exist on type 'MenuItem'.

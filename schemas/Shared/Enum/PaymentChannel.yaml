@@ -1,0 +1,24 @@
+# Initiating/consuming channel used during capability resolution. It is snapshotted on an
+# attempt; callers cannot submit an option certified only for another channel.
+kind: enum
+
+displayName:
+  en: Payment Channel
+  ja: 決済チャネル
+  vi: Kênh thanh toán
+
+values:
+  - value: customer_web
+    label: { en: Customer Web, ja: 顧客Web, vi: Web khách hàng }
+  - value: pos
+    label: { en: POS, ja: POS, vi: POS }
+  - value: kiosk
+    label: { en: Kiosk, ja: キオスク, vi: Kiosk }
+  - value: workstation
+    label: { en: Workstation, ja: ワークステーション, vi: Workstation }
+  # #1085 — self-checkout register channel; distinct capability profile from
+  # `kiosk` (cash via 釣銭機 + card_present on by default).
+  - value: self_regi
+    label: { en: Self-Checkout Register, ja: セルフレジ, vi: Máy tự thanh toán }
+  - value: server_to_server
+    label: { en: Server to Server, ja: サーバー間, vi: Máy chủ tới máy chủ }

@@ -1,0 +1,34 @@
+# TMS App standalone omnify config — consumer mode.
+#
+# Run from tms-app: cd tms-app && npx omnify generate
+# Run from umbrella: npm run omnify:gen -- --project api
+
+lockFilePath: .omnify/lock.json
+
+workspace:
+  schemas:
+    shared:
+      path: ../schemas/Shared
+    backend:
+      path: ../schemas/Backend
+      includes: [shared]
+
+  projects:
+    tms-app:
+      schemas: backend
+      targets:
+        typescript:
+          - name: tms-app
+            enable: true
+            modelsPath: ./src/types/models
+            platform: expo
+            auth: secureStore
+
+connections:
+  default:
+    driver: mysql
+
+locale:
+  locales: [ja, en, vi]
+  defaultLocale: ja
+  fallbackLocale: en

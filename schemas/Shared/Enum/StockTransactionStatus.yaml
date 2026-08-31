@@ -1,0 +1,78 @@
+# ==============================================================================
+# Stock Transaction Status Enum (在庫取引ステータス / Trạng thái phiếu kho)
+# ==============================================================================
+#
+# Trạng thái workflow phiếu kho.
+# Quyết định tác động lên tồn kho và quyền chỉnh sửa.
+#
+# Giá trị (Values):
+#   - draft: Nháp (下書き)
+#     Cho phép: Chỉnh sửa, thêm/xóa items
+#     Tác động: KHÔNG ảnh hưởng tồn kho
+#     Transition: → pending (submit) hoặc → cancelled (hủy)
+#
+#   - pending: Chờ duyệt (承認待ち)
+#     Cho phép: Chỉ xem
+#     Tác động: KHÔNG ảnh hưởng tồn kho
+#     Transition: → approved (duyệt) hoặc → cancelled (từ chối)
+#
+#   - approved: Đã duyệt (承認済み)
+#     Cho phép: Chỉ xem
+#     Tác động: CẬP NHẬT tồn kho + tạo stock_movements
+#     Transition: → completed (xác nhận hoàn thành)
+#     Lưu ý: Auto-approve áp dụng khi Manager/Admin tạo phiếu (BR-06)
+#
+#   - completed: Hoàn thành (完了)
+#     Cho phép: Chỉ xem
+#     Tác động: BẤT BIẾN — không thể sửa/xóa (BR-02)
+#     Transition: Trạng thái cuối cùng
+#
+#   - cancelled: Đã hủy (キャンセル)
+#     Cho phép: Chỉ xem
+#     Tác động: KHÔNG ảnh hưởng tồn kho
+#     Transition: Trạng thái cuối cùng
+#
+# Workflow:
+#   draft → pending → approved → completed
+#                  ↘ cancelled
+#          ↗ cancelled
+#
+# Sử dụng trong:
+#   - StockTransaction.status: Trạng thái phiếu
+#   - Authorization: Xác định quyền thao tác
+#
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: 在庫取引ステータス
+  en: Stock Transaction Status
+  vi: Trạng thái phiếu kho
+
+values:
+  - value: draft
+    label:
+      ja: 下書き
+      en: Draft
+      vi: Nháp
+  - value: pending
+    label:
+      ja: 承認待ち
+      en: Pending
+      vi: Chờ duyệt
+  - value: approved
+    label:
+      ja: 承認済み
+      en: Approved
+      vi: Đã duyệt
+  - value: completed
+    label:
+      ja: 完了
+      en: Completed
+      vi: Hoàn thành
+  - value: cancelled
+    label:
+      ja: キャンセル
+      en: Cancelled
+      vi: Đã hủy

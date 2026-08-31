@@ -1,0 +1,134 @@
+# Zone schema
+# Một khu vực vật lý bên trong một shop (chi nhánh) — ví dụ: Terrace, VIP, Indoor.
+# Tables (xem Table.yaml) được nhóm theo Zone.
+#
+# Scope: Branch (Shop). Code unique theo branch.
+# Không có workflow approval — chỉ có is_active flag (giống Warehouse).
+#
+# Business Rules:
+#   - BR-Z01: code unique trong scope của một branch
+#   - BR-Z02: Soft-delete zone sẽ cascade soft-delete các table thuộc zone
+#             (xử lý ở ZoneService::delete bên trong DB::transaction)
+#   - BR-Z03: Restore zone KHÔNG auto-restore tables — operator phải restore
+#             table riêng nếu cần
+#   - BR-Z04: zone_template_id != null ⇒ zone được copy từ HQ template
+#             (issue #890). Shop KHÔNG được xoá zone này (và cũng không được
+#             xoá zone chứa bàn HQ-origin — cascade sẽ cuốn bàn HQ theo).
+#             Guard 409 ZONE_DELETE_BLOCKED_HQ_TEMPLATE ở ZoneService::delete.
+
+displayName:
+  en: Zone
+  ja: エリア
+  vi: Khu vực
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    - columns: [branch_id, code]
+      unique: true
+    - columns: [branch_id, is_active]
+    - columns: [branch_id, display_order]
+
+properties:
+  code:
+    type: String
+    length: 50
+    searchable: true
+    lookupable: true
+    displayName:
+      en: Zone Code
+      ja: エリアコード
+      vi: Mã khu vực
+    description:
+      en: "Unique code per branch (BR-Z01). Alphanumeric and hyphens only."
+      ja: "店舗内で一意のコード（BR-Z01）。英数字とハイフンのみ。"
+      vi: "Mã unique trong shop (BR-Z01). Chỉ chữ, số, gạch ngang."
+
+  name:
+    type: String
+    length: 255
+    searchable: true
+    lookupable: true
+    displayName:
+      en: Zone Name
+      ja: エリア名
+      vi: Tên khu vực
+
+  description:
+    type: Text
+    nullable: true
+    displayName:
+      en: Description
+      ja: 説明
+      vi: Mô tả
+
+  display_order:
+    type: Int
+    default: 0
+    defaultSort: asc
+    lookupable: true
+    displayName:
+      en: Display Order
+      ja: 表示順
+      vi: Thứ tự hiển thị
+    description:
+      en: "Lower number appears first in the table grid."
+      ja: "数値が小さいほど先頭に表示。"
+      vi: "Số nhỏ hơn hiển thị trước."
+
+  is_active:
+    type: Boolean
+    default: true
+    filterable: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+
+  # Relationships
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    onDelete: CASCADE
+    displayName:
+      en: Branch
+      ja: 店舗
+      vi: Chi nhánh
+
+  # Origin marker (issue #890 / BR-Z04): set when the zone was copied from an
+  # HQ zone template via tables/defaults/apply. Null = shop-created.
+  zoneTemplate:
+    type: Association
+    relation: ManyToOne
+    target: ZoneTemplate
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: HQ Zone Template
+      ja: HQエリアテンプレート
+      vi: Mẫu khu vực HQ
+
+  tables:
+    type: Association
+    relation: OneToMany
+    target: Table
+    mappedBy: zone
+    displayName:
+      en: Tables
+      ja: テーブル
+      vi: Bàn

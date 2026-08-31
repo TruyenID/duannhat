@@ -1,0 +1,26 @@
+# =============================================================================
+# CouponDiscountType (クーポン割引種別 / Loại giảm giá Coupon)
+# =============================================================================
+#
+# Drives Coupon.discount_value semantics + UI input rendering:
+#   - fixed   → discount_value is an absolute VND amount (cap = N/A)
+#   - percent → discount_value is a percent (0–100); max_discount_cap may apply
+#
+# CouponService::computeDiscount() switches on this enum to derive the actual
+# applied amount on a given subtotal (clamped to subtotal for fixed, clamped
+# to cap for percent). UI hides the `max_discount_cap` field unless this is
+# `percent`.
+# =============================================================================
+
+kind: enum
+
+displayName:
+  ja: クーポン割引種別
+  en: Coupon Discount Type
+  vi: Loại giảm giá Coupon
+
+values:
+  - value: fixed
+    label: { ja: 固定金額, en: Fixed Amount, vi: Cố định }
+  - value: percent
+    label: { ja: パーセント, en: Percent, vi: Phần trăm }

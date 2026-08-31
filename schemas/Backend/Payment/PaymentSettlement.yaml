@@ -1,0 +1,120 @@
+# Một dòng đối soát từ cổng thanh toán: khoản thu, hoàn, tranh chấp, hay phí
+# tài khoản. Đây là SỰ THẬT của cổng, đối chiếu ngược về ledger nội bộ.
+#
+# `net_minor` BẮT BUỘC bằng gross - fee - fee_tax (S-15). Mọi số đều có dấu:
+# âm với hoàn tiền và tranh chấp (S-11).
+kind: object
+
+options:
+  id: Uuid
+  timestamps: true
+  softDelete: false
+  indexes:
+    - columns: [provider, external_ref]
+      unique: true
+      name: payment_settlements_provider_external_ref_unique
+    - columns: [connection_id, status]
+    - columns: [connection_id, kind]
+    - columns: [status, provider_settled_at]
+
+properties:
+  connection:
+    type: Association
+    relation: ManyToOne
+    target: PaymentGatewayConnection
+    onDelete: RESTRICT
+    displayName: { ja: 接続, en: Connection, vi: Kết nối }
+
+  provider:
+    type: String
+    length: 50
+    displayName: { ja: プロバイダ, en: Provider, vi: Nhà cung cấp }
+
+  kind:
+    type: String
+    length: 50
+    displayName: { ja: 種別, en: Kind, vi: Loại }
+
+  # null với account_fee / manual / dòng mồ côi.
+  orderPayment:
+    type: Association
+    relation: ManyToOne
+    target: OrderPayment
+    nullable: true
+    onDelete: RESTRICT
+    displayName: { ja: 決済, en: Order Payment, vi: Khoản thanh toán }
+
+  paymentAttempt:
+    type: Association
+    relation: ManyToOne
+    target: PaymentAttempt
+    nullable: true
+    onDelete: RESTRICT
+    displayName: { ja: 決済試行, en: Payment Attempt, vi: Lượt thanh toán }
+
+  gross_minor:
+    type: BigInt
+    displayName: { ja: 総額（最小単位）, en: Gross (minor), vi: Tổng (đơn vị nhỏ) }
+
+  fee_minor:
+    type: BigInt
+    displayName: { ja: 手数料（最小単位）, en: Fee (minor), vi: Phí (đơn vị nhỏ) }
+
+  # Thuế trên phí — PayPay 10%, thẻ JP 0. Lấy từ bảng kê (S-16).
+  fee_tax_minor:
+    type: BigInt
+    default: 0
+    displayName: { ja: 手数料税（最小単位）, en: Fee Tax (minor), vi: Thuế phí (đơn vị nhỏ) }
+
+  net_minor:
+    type: BigInt
+    displayName: { ja: 純額（最小単位）, en: Net (minor), vi: Thực nhận (đơn vị nhỏ) }
+
+  currency:
+    type: String
+    length: 3
+    displayName: { ja: 通貨, en: Currency, vi: Tiền tệ }
+
+  source:
+    type: String
+    length: 50
+    displayName: { ja: 取得元, en: Source, vi: Nguồn }
+
+  # Khoá sự thật của cổng: id balance txn hoặc khoá dòng trong file.
+  external_ref:
+    type: String
+    length: 191
+    displayName: { ja: 外部参照, en: External Reference, vi: Tham chiếu bên ngoài }
+
+  reportBatch:
+    type: Association
+    relation: ManyToOne
+    target: SettlementReportBatch
+    nullable: true
+    onDelete: RESTRICT
+    displayName: { ja: 取込バッチ, en: Report Batch, vi: Lô nhập }
+
+  payout:
+    type: Association
+    relation: ManyToOne
+    target: GatewayPayout
+    nullable: true
+    onDelete: SET NULL
+    displayName: { ja: 入金, en: Payout, vi: Đợt chi trả }
+
+  # Lịch của cổng, KHÔNG phải giờ nghiệp vụ chi nhánh (#1091).
+  provider_settled_at:
+    type: Timestamp
+    nullable: true
+    displayName: { ja: 精算日時, en: Provider Settled At, vi: Cổng chốt lúc }
+
+  status:
+    type: String
+    length: 50
+    default: pending_payout
+    displayName: { ja: 状態, en: Status, vi: Trạng thái }
+
+  metadata:
+    type: Json
+    nullable: true
+    displayName: { ja: メタデータ, en: Metadata, vi: Dữ liệu kèm }

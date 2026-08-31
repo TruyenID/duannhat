@@ -1,0 +1,16 @@
+﻿id,sku,name,description,yield_quantity,yield_unit,calculated_cost,is_active
+019f1163-d040-729e-9cb3-e1dec8537abb,BETOCOFFEE-MA-WHEAT-FLOUR,x,"All-purpose wheat flour. Used as base for doughs and sauces.",1000.0000,,80.0000,true
+019f1163-d04c-7239-8f5a-c777714b8fa6,BETOCOFFEE-MA-EGG-WHOLE,"Whole Egg","Fresh hen egg. Widely used in baking and cooking.",50.0000,,25.0000,true
+019f1163-d055-73ad-affc-7be466ed7ade,BETOCOFFEE-MA-MILK-WHOLE,"Whole Milk","Full-fat cow milk. Used for beverages and baking base.",1000.0000,,120.0000,true
+019f1163-d062-7278-a012-a45b38ab3090,BETOCOFFEE-MA-SOY-SAUCE,"Soy Sauce","Japanese-style soy sauce. Used for seasoning and marinades.",1000.0000,,200.0000,true
+019f1163-d06d-719b-90de-84a53d8891cf,BETOCOFFEE-MA-BUTTER-UNSALT,"Unsalted Butter","Unsalted butter. Used for baking and finishing sauces.",100.0000,,150.0000,true
+019f1163-d076-700c-9964-b0a6432b6292,BETOCOFFEE-MA-SHRIMP-RAW,"Raw Shrimp","Shell-on raw shrimp. Used for stir-fries and soups.",100.0000,,350.0000,true
+019f1163-d086-7304-a4ad-4c66e3a87124,BETOCOFFEE-MA-SUGAR-WHITE,"White Sugar","Japanese-style white sugar. Used in baking and seasoning.",1000.0000,,90.0000,true
+019f1163-d089-7297-b598-3a9e027ec596,BETOCOFFEE-MA-PASSION-FRUIT,"Passion Fruit","Fresh passion fruit. Used for sauces and desserts.",100.0000,,220.0000,true
+019f1163-d08d-70f8-a1c6-5101f44875d3,BETOCOFFEE-MA-RICE-JAPANESE,"Japanese Short-Grain Rice","Domestic Japanese short-grain rice. Used for steamed rice and risotto.",1000.0000,,180.0000,true
+019f1163-d65d-708e-b772-33b286eb317c,DEMO-PANCAKE-MIX,"Pancake Mix","Wheat flour, egg and milk blend. 1000g per batch.",1000.0000,g,0.0000,true
+019f1163-d698-71ab-b9e3-bde22a3aeecb,DEMO-SAUCE-BASE,"Sauce Base","Plan-022 demo BTP — ソースベース",500.0000,ml,0.0000,true
+019f1163-d6b5-71f8-a11b-903f3f6a7f57,DEMO-TEMPURA-SHRIMP,"Tempura Shrimp","Plan-022 demo BTP — えびの天ぷら",200.0000,g,0.0000,true
+019f1163-d6cb-7307-9aa3-d07bec7fc270,DEMO-PASSION-SAUCE,"Passion Fruit Sauce","Sauce made from passion fruit and sugar. Dessert topping.",200.0000,ml,0.0000,true
+019f1259-c20e-7198-a8e3-024f0b094347,T81-1782719299,x,,1000.0000,g,0.0000,true
+019f1259-c295-7241-a0f3-6fd66a7017d6,T84-1782719299,x,,1.0000,g,0.0000,true

@@ -1,0 +1,17 @@
+# ReviewSentiment — Binary review verdict (thumbs up/down).
+# Used by ProductReview to record whether a customer recommends a dish.
+# Written by: customer via POST /customer/orders/{id}/reviews
+# Read by: ProductReviewService (aggregate), CustomerMenuService (recommend %)
+
+kind: enum
+
+displayName:
+  ja: レビュー評価
+  en: Review Sentiment
+  vi: Cảm nhận đánh giá
+
+values:
+  - value: up
+    label: { ja: おすすめ, en: Recommend, vi: Đề xuất }
+  - value: down
+    label: { ja: おすすめしない, en: Not Recommend, vi: Không đề xuất }

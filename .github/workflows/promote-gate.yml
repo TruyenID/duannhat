@@ -1,0 +1,65 @@
+# #2909 — CHẶN một lượt promote `dev → main` âm thầm XOÁ file mà chỉ `main` có.
+#
+# Một PR hotfix merge thẳng vào `main` mà không mang ngược về `dev` sẽ bị lượt
+# promote kế hoàn tác, và diff của lượt promote đó trông như một PR bình thường.
+# Ca thật 2026-08-15: 271 dòng test ghim React #310 (hook sau early-return làm
+# sập giỏ đơn) nằm im hai ngày trên `main`, suýt bị xoá khỏi production.
+#
+# Vì sao đây là workflow RIÊNG chứ không phải một bước trong `tal`:
+#
+#   `tal merge` ĐÃ có rào này và nó đúng — nhưng `tal` chỉ là MỘT đường merge.
+#   Hai lượt promote gần nhất (#2957, #2966) đều đi bằng `gh pr merge` gõ tay,
+#   nên rào trong `tal` không hề chạm vào chúng. Đúng hình dạng đã trả giá ở
+#   #2874: rào đứng ở đường ít bị dùng nhất, và ở #2971: rào đúng mà không bao
+#   giờ chạy đọc log CI y hệt rào đúng và có chạy.
+#
+#   Cổng CI thì gắn vào PR, nên MỌI đường merge đều thấy nó.
+#
+# Đánh đổi phải nói thẳng: repo private gói free KHÔNG có branch protection
+# (API trả 403 "Upgrade to Pro"), nên dấu X đỏ ở đây KHÔNG chặn được `gh pr
+# merge --admin`. Nó biến một sự vắng mặt im lặng thành một dấu đỏ đọc được
+# trước khi bấm — đó là mức cưỡng chế cao nhất repo này với tới được, và nói ra
+# giới hạn ấy còn hơn để người sau tưởng mình được máy bảo vệ.
+name: promote-gate
+
+on:
+  pull_request:
+    branches: [main]
+    # CỐ Ý KHÔNG có `paths:`. Rào này phát biểu về những file KHÔNG nằm trong
+    # diff của PR — chính xác là thứ mà một bộ lọc theo path không thể nhìn
+    # thấy. Thêm `paths:` vào đây là tự tắt tiếng nó (#2971).
+
+concurrency:
+  group: promote-gate-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  no-silent-deletions:
+    name: promote không được xoá file của main
+    # Chỉ đúng PR promote `dev → main`. PR hotfix `issue-<n> → main` là ĐƯỜNG
+    # TẠO RA chênh lệch này và không được tự chặn chính nó — hotfix production
+    # phải đi thẳng được, thứ cần chặn là quên bước đồng bộ.
+    if: github.head_ref == 'dev'
+    runs-on: [self-hosted, Linux, X64]
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Rào của chính rào này: #3093 tách logic khỏi YAML để nó chứng minh được
+      # cả hai chiều. Chạy ngay tại đây, không chỉ ở omnify-gate — một PR promote
+      # là lúc DUY NHẤT phép phân loại thật sự được dùng.
+      - name: Rào của cổng (KÊU đúng ca, IM đúng ca)
+        run: npm run test:promote-gate
+
+      - name: File chỉ main có ⇒ promote sẽ xoá chúng
+        run: |
+          set -euo pipefail
+          git fetch --quiet origin dev main
+          PROMOTE_BASE=origin/dev PROMOTE_HEAD=origin/main \
+            node scripts/promote-no-silent-deletions.mjs

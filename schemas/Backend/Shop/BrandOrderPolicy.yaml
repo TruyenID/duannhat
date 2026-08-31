@@ -1,0 +1,163 @@
+# BrandOrderPolicy schema
+# plan-035 — brand-wide defaults for the takeaway payment policy. Sits
+# next to ShopOrderSetting (per-branch) and acts as the fallback when a
+# branch row leaves the field null ("inherit HQ default").
+#
+# Each Brand has at most one BrandOrderPolicy row. Resolution lives in
+# App\Services\Shop\EffectiveOrderPolicyService.
+#
+# Business Rules:
+#   - BR-BOP01: One row per brand (brand_id unique).
+#   - BR-BOP02: default_prep_before_payment is the HQ default for
+#               whether takeaway orders must be paid before kitchen prep.
+#               Defaults to false so existing brands keep the legacy
+#               behaviour (prep-on-click).
+
+displayName:
+  en: Brand Order Policy
+  ja: ブランド注文ポリシー
+  vi: Chính sách đơn hàng theo Brand
+
+kind: object
+
+options:
+  timestamps: true
+  id: Uuid
+  indexes:
+    - columns: [brand_id]
+      unique: true
+    - columns: [organization_id]
+
+properties:
+  default_print_label_locale:
+    # Ngôn ngữ mặc định CẢ CHUỖI dùng cho phiếu in, khi chi nhánh để trống
+    # (shop_order_settings.print_label_locale = null). Nhờ vậy chuỗi 20 cửa
+    # hàng đặt MỘT lần ở HQ thay vì vào từng shop đặt 20 lần.
+    #
+    # Cloud resolve shop ?? HQ ngay trong WorkstationBranchController rồi mới
+    # gửi xuống, nên workstation chỉ thấy MỘT giá trị đã chốt trong
+    # shop_settings.print_label_locale — nó không cần biết HQ tồn tại, và vẫn
+    # in đúng ngôn ngữ khi MẤT MẠNG (giá trị nằm sẵn trong SQLite local).
+    # Cùng khuôn với default_prep_before_payment (BR-BOP02).
+    #
+    # null = HQ không ép gì → workstation tự fallback tiếp:
+    # branches.locale → settings.pos_print_locale (legacy) → "ja".
+    # Giá trị hợp lệ: ja | en | vi (đúng tập locale ở omnify.yaml).
+    type: String
+    length: 8
+    nullable: true
+    displayName:
+      en: Default print label language
+      ja: デフォルト印刷言語
+      vi: Ngôn ngữ in mặc định
+
+  default_prep_before_payment:
+    # plan-035 BR-BOP02. HQ default for ShopOrderSetting.prep_before_payment.
+    # Each branch row may override (null = inherit this).
+    #
+    # Default `true` because current takeaway flow already creates orders as
+    # `pending` and waits for staff to flip to `open` after seeing payment
+    # — flipping the default would silently start cooking unpaid orders.
+    # Brands that want the new "no wait" mode set this to false.
+    type: Boolean
+    default: true
+    displayName:
+      en: Default — Require payment before prep
+      ja: デフォルト — 調理前の支払い必須
+      vi: Mặc định — Phải thanh toán trước khi chuẩn bị
+
+  default_prep_minutes_per_item:
+    # #1160 BR-BOP03 — brand default for ShopOrderSetting.prep_minutes_per_item
+    # (each branch may override; null there = inherit this). The customer's
+    # takeaway estimate is `this x SUM(quantity)`.
+    #
+    # Nullable with NO default so "HQ never configured it" stays
+    # distinguishable from "HQ chose 0 minutes" — 0 is meaningful (pre-made
+    # goods, no wait). Unset resolves to
+    # EffectiveOrderPolicyService::DEFAULT_PREP_MINUTES_PER_ITEM.
+    type: Int
+    nullable: true
+    displayName:
+      en: Default — prep minutes per item
+      ja: デフォルト — 1品あたりの調理時間 (分)
+      vi: Mặc định — Thời gian chuẩn bị mỗi món (phút)
+
+  allow_shop_edit_hq_tables:
+    # issue #890. Shops receive the brand's default tables via
+    # tables/defaults/apply (tables.table_template_id != null). This switch
+    # decides whether those shops may EDIT the received tables:
+    #   - false (default): shop chi nhan va su dung — edit 409s (BR-T09).
+    #   - true: shop may edit code/name/seats/zone.
+    # Delete stays HQ-only in both modes; toggle-active and QR rotation are
+    # always allowed.
+    type: Boolean
+    default: false
+    displayName:
+      en: Shops may edit HQ default tables
+      ja: 店舗がHQ標準テーブルを編集可能
+      vi: Shop được sửa bàn mặc định từ HQ
+
+  cash_variance_tolerance_minor:
+    # T2 của #2876 (#2879) — ngưỡng lệch tiền mặt trước khi đối soát 3 chân
+    # kêu, tính bằng minor units (JPY: yên).
+    #
+    # THEO BRAND, không hardcode. Đây là bài học của `SettlementAlertService`:
+    # Stripe trả tiền theo ngày, PayPay theo chu kỳ tháng, nên một ngưỡng chung
+    # sẽ hoặc CÂM với cái này hoặc LA HÉT với cái kia. Ở đây cũng vậy — một
+    # quán bán 50 đơn/ngày và một quán bán 2000 đơn/ngày không chịu được cùng
+    # một con số, và ngưỡng sai chiều nào cũng giết cảnh báo: quá chặt thì
+    # người ta tắt nó, quá lỏng thì nó không bắt được gì.
+    #
+    # Nằm ở `brand_order_policies` vì đây là bảng CHÍNH SÁCH CẤP BRAND đã có
+    # (locale in, thời gian chuẩn bị, quyền sửa bàn) — dựng một bảng riêng cho
+    # một số nguyên là nặng hơn giá trị nó mang. Tên bảng nói "order" nhưng nội
+    # dung nó vốn đã là túi chính sách chung của brand.
+    #
+    # Mặc định 100 (=100¥) khớp `CashDrawerReconciliationService::DEFAULT_TOLERANCE_MINOR`
+    # để hành vi không đổi khi chưa ai cấu hình.
+    type: Int
+    default: 100
+    displayName:
+      en: Cash variance tolerance (minor)
+      ja: 現金差異の許容額
+      vi: Ngưỡng lệch tiền mặt
+
+  # === Relationships ===
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: CASCADE
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Brand
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  # Mặc định cấp brand cho thời hạn xác nhận đơn (#1127).
+  default_confirmation_timeout_minutes:
+    type: Int
+    default: 3
+    displayName:
+      ja: 確認期限（分）既定
+      en: Default Confirmation Timeout (minutes)
+      vi: Hạn xác nhận mặc định (phút)
+
+  # #491 — trạng thái bàn sau khi thanh toán: free | cleaning.
+  default_table_status_after_payment:
+    type: String
+    length: 16
+    default: free
+    displayName:
+      ja: 支払後テーブル状態（既定）
+      en: Default Table Status After Payment
+      vi: Trạng thái bàn sau thanh toán (mặc định)

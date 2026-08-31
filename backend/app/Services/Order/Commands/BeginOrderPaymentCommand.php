@@ -1,0 +1,19 @@
+<?php
+
+namespace App\Services\Order\Commands;
+
+use App\Services\DomainMutation\MutationCommand;
+use App\Services\DomainMutation\MutationContext;
+
+/** First payment on a checkout order → paying. */
+final readonly class BeginOrderPaymentCommand extends MutationCommand
+{
+    public string $orderId;
+
+    public function __construct(MutationContext $context, string $orderId)
+    {
+        parent::__construct($context);
+        self::requireExpectedVersion($context);
+        $this->orderId = self::uuid($orderId, 'orderId');
+    }
+}

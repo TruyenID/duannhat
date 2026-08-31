@@ -1,0 +1,41 @@
+{
+    "generated_at": "2026-07-27T04:36:47+00:00",
+    "ledger": {
+        "inspected": 4352,
+        "drift_count": 1,
+        "gap_payments": 4310
+    },
+    "shadow_backlog": {
+        "attempt_candidates": 0,
+        "refund_candidates": 0,
+        "total": 0
+    },
+    "refund_pending": {
+        "prepared": 0,
+        "submitted": 0,
+        "pending": 0,
+        "reconciliation_required": 0,
+        "total": 0
+    },
+    "till_sessions_open": {
+        "open": 3,
+        "closing": 1,
+        "total": 4
+    },
+    "orchestrator_runtime": {
+        "enabled": true,
+        "transports": [
+            "pos",
+            "kiosk",
+            "workstation",
+            "customer_web"
+        ],
+        "transport_switches": {
+            "pos": true,
+            "kiosk": true,
+            "workstation": true,
+            "customer_web": true
+        }
+    },
+    "gate_pass": false
+}

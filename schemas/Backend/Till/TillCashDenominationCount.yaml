@@ -1,0 +1,131 @@
+# ==============================================================================
+# TillCashDenominationCount — Per-denomination physical count (opening + closing)
+# ==============================================================================
+#
+# Plan 030 — Cashier Shift.
+# ARTS ODM 7.3: maps to `TillTenderCashDenominationCount`.
+#
+# Một row = một denomination được đếm trong một phase (opening hoặc closing)
+# của một session. Cashier nhập `quantity` (số tờ/đồng); service compute
+# subtotal_amount = denomination_value × quantity.
+#
+# Snapshot pattern (mirror StockCountItem): currency_code / denomination_value
+# / denomination_kind được copy vào row tại thời điểm đếm. Lý do: nếu
+# Denomination master sau này deactivate hoặc đổi label, lịch sử ca đếm
+# KHÔNG bị ảnh hưởng.
+#
+# Written by: TillSessionService::open() (phase=opening) + close() (phase=closing).
+# Read by: GET /pos/till/sessions/{id} (hiển thị denomination breakdown
+#          trong report), reconciliation expected_cash calc.
+#
+# Business Rules:
+#   - BR-CDC01: (session_id, count_phase, denomination_id) unique — không
+#               cho phép đếm trùng cùng 1 mệnh giá trong cùng phase.
+#   - BR-CDC02: quantity ≥ 0 (int). 0 cho phép (cashier xác nhận "không có
+#               mệnh giá này").
+#   - BR-CDC03: subtotal_amount = denomination_value × quantity, service-computed.
+#   - BR-CDC04: NO soft delete (audit).
+# ==============================================================================
+
+displayName:
+  en: Till Cash Denomination Count
+  ja: 額面カウント
+  vi: Đếm theo mệnh giá
+
+kind: object
+
+options:
+  timestamps: true
+  id: Uuid
+  indexes:
+    - columns: [session_id, count_phase]
+    - columns: [session_id, count_phase, denomination_id]
+      unique: true
+      name: till_count_session_phase_denom_unique
+
+properties:
+  count_phase:
+    # opening / closing — xem TillCountPhase enum.
+    type: EnumRef
+    enum: TillCountPhase
+    filterable: true
+    displayName:
+      en: Count Phase
+      ja: カウント段階
+      vi: Giai đoạn đếm
+
+  quantity:
+    # Số tờ / đồng cashier đếm được. Int ≥ 0.
+    type: Int
+    default: 0
+    displayName:
+      en: Quantity
+      ja: 数量
+      vi: Số lượng
+
+  subtotal_amount:
+    # = denomination_value × quantity, service-computed. Persisted để query
+    # nhanh (Σ subtotal_amount cho cash variance) mà không phải JOIN.
+    type: Decimal
+    precision: 15
+    scale: 2
+    default: 0
+    displayName:
+      en: Subtotal
+      ja: 小計
+      vi: Tạm tính
+
+  currency_code:
+    # Snapshot từ Denomination tại thời điểm đếm.
+    type: String
+    length: 3
+    displayName:
+      en: Currency
+      ja: 通貨
+      vi: Tiền tệ
+
+  denomination_value:
+    # Snapshot từ Denomination.value tại thời điểm đếm.
+    type: Decimal
+    precision: 15
+    scale: 2
+    displayName:
+      en: Denomination Value
+      ja: 額面金額
+      vi: Giá trị mệnh giá
+
+  denomination_kind:
+    # Snapshot từ Denomination.kind. Cho phép UI render notes-then-coins
+    # mà không phải JOIN Denomination.
+    type: EnumRef
+    enum: DenominationKind
+    displayName:
+      en: Denomination Kind
+      ja: 額面種別
+      vi: Loại mệnh giá
+
+  # Relationships
+  session:
+    # ManyToOne — TillSession sở hữu count rows. CASCADE: xoá session (lý
+    # thuyết không xảy ra vì session no-softDelete + service immutability)
+    # cũng xoá counts.
+    type: Association
+    relation: ManyToOne
+    target: TillSession
+    onDelete: CASCADE
+    displayName:
+      en: Session
+      ja: セッション
+      vi: Ca
+
+  denomination:
+    # ManyToOne — RESTRICT: cấm xoá Denomination khi đã có count rows
+    # tham chiếu (giữ chain audit). Soft-delete denomination vẫn OK.
+    type: Association
+    relation: ManyToOne
+    target: Denomination
+    onDelete: RESTRICT
+    displayName:
+      en: Denomination
+      ja: 額面
+      vi: Mệnh giá

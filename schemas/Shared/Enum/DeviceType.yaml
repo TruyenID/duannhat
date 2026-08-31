@@ -1,0 +1,62 @@
+# ==============================================================================
+# Device Type Enum (デバイスタイプ / Loại thiết bị)
+# ==============================================================================
+#
+# Loại thiết bị terminal trong hệ thống TempoFast.
+# Mỗi type quyết định scope quyền truy cập API mà device nhận sau khi pair.
+#
+# Giá trị:
+#   - tms: Table Management System — tablet quản lý bàn.
+#   - pos: Point of Sale — máy tính tiền (future).
+#   - kds: Kitchen Display System — màn bếp (future).
+#   - workstation: Workstation — máy trạm quản trị, server trung gian.
+#
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: デバイスタイプ
+  en: Device Type
+  vi: Loại thiết bị
+
+values:
+  - value: tms
+    label:
+      ja: テーブル管理端末
+      en: Table Management Terminal
+      vi: Thiết bị quản lý bàn
+  - value: pos
+    label:
+      ja: POSレジ
+      en: Point of Sale
+      vi: Máy POS
+  - value: kds
+    label:
+      ja: キッチンディスプレイ
+      en: Kitchen Display
+      vi: Màn hình bếp
+  - value: workstation
+    label:
+      ja: ワークステーション
+      en: Workstation
+      vi: Máy trạm
+  - value: kiosk
+    label:
+      ja: キオスク
+      en: Kiosk
+      vi: Kiosk tự thanh toán
+  - value: handy
+    label:
+      ja: ハンディ端末
+      en: Handy Terminal
+      vi: Máy cầm tay
+  # #1085 (Option A, decided 2026-07-27) — self-checkout register. A MONEY-
+  # COLLECTION point (釣銭機 + card terminal, immediate settlement), unlike the
+  # order-taking kiosk which may be cashless-only. First-class so the
+  # Capability gate (plan-047 layer ④) can certify options per channel.
+  - value: self_regi
+    label:
+      ja: セルフレジ
+      en: Self-Checkout Register
+      vi: Máy tự thanh toán

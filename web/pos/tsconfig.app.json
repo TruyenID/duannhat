@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "es2023",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "esnext",
+    /* `vite-plugin-pwa/react` khai module ảo `virtual:pwa-register/react`
+       (#1170). Không có nó thì `src/components/offline-shell.tsx` không
+       typecheck được. */
+    "types": ["vite/client", "vite-plugin-pwa/react"],
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Path aliases (TS 6+: baseUrl removed, paths resolve from tsconfig dir) */
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+
+    /* Strict mode — was silently off. pos-web is the cash-handling
+       POS terminal; payment-critical surface should not tolerate
+       implicit any or null-deref. Turn on. */
+    "strict": true,
+
+    /* Linting */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/**/__tests__/**"]
+}

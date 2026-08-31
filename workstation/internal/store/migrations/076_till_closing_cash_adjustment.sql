@@ -1,0 +1,18 @@
+-- #1986 — 「tiền lẻ」 on the local till replica.
+--
+-- Cloud has had `till_sessions.closing_cash_adjustment_amount` since the close
+-- screen shipped; the workstation mirror never grew the column, so the field
+-- pos-web sends had nowhere to land even once the handler started reading it.
+--
+-- Why it must be STORED and not merely used in the moment: the draft exists so a
+-- cashier can count the drawer, walk away, and come back to the same screen. The
+-- denomination counts already survive a reload (`till_cash_denomination_counts`);
+-- the loose change did not, so the figure that came back was short by exactly the
+-- amount the sheet cannot express — and the close screen then showed a variance
+-- the drawer never had.
+--
+-- NULL means "no value declared", which is not the same as 0. Zero is a claim
+-- about the drawer ("I counted, there is no loose change"); NULL is the absence
+-- of a claim, and an older pos-web build that never sends the key must produce
+-- the second, not the first.
+ALTER TABLE till_sessions ADD COLUMN closing_cash_adjustment_amount REAL;

@@ -1,0 +1,32 @@
+# =============================================================================
+# PointRewardServiceCondition (提供条件 / Điều kiện phục vụ phần thưởng)
+# =============================================================================
+#
+# Phần thưởng đổi điểm này dùng được trong hoàn cảnh nào — ăn tại chỗ, mang
+# về, hay cả hai. Hiện lên thẻ trong catalog `/account/points` để khách biết
+# TRƯỚC khi tiêu điểm, tránh đổi xong mới phát hiện không dùng được.
+#
+#   dine_in  — chỉ phục vụ ăn tại chỗ
+#   takeaway — chỉ mang về
+#   both     — ăn tại chỗ hoặc mang về (mặc định)
+#
+# ⚠️ v1 CHỈ HIỂN THỊ, KHÔNG CƯỠNG CHẾ (#1514). Coupon mint ra vẫn áp được cho
+# mọi loại đơn — `CouponService::apply` không nhận order type nên chặn thật
+# phải sửa đường áp giảm giá, tách issue riêng. Đừng đọc giá trị này ở tầng
+# thanh toán rồi tưởng là nó đang chặn: nó không chặn.
+# =============================================================================
+
+kind: enum
+
+displayName:
+  ja: 提供条件
+  en: Service Condition
+  vi: Điều kiện phục vụ
+
+values:
+  - value: dine_in
+    label: { ja: 店内飲食のみ, en: Dine-in only, vi: Chỉ phục vụ ăn tại chỗ }
+  - value: takeaway
+    label: { ja: テイクアウトのみ, en: Takeaway only, vi: Chỉ mang về }
+  - value: both
+    label: { ja: 店内・テイクアウト, en: Dine-in or takeaway, vi: Ăn tại chỗ hoặc mang về }

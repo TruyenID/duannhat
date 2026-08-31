@@ -1,0 +1,93 @@
+# Nhóm hình thức thanh toán dùng khi đếm két. `branch_id` null nghĩa là nhóm
+# dùng chung toàn tổ chức; có branch_id là bản riêng của chi nhánh đó.
+# `is_system` đánh dấu nhóm do hệ thống tạo — không cho shop xoá.
+kind: object
+
+options:
+  id: Uuid
+  timestamps: true
+  softDelete: true
+  indexes:
+    - columns: [organization_id, branch_id, key]
+      unique: true
+      name: till_tender_cats_org_branch_key_unique
+    - columns: [organization_id, branch_id, is_active]
+
+properties:
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      ja: 組織
+      en: Organization
+      vi: Tổ chức
+
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    nullable: true
+    onDelete: CASCADE
+    displayName:
+      ja: 支店
+      en: Branch
+      vi: Chi nhánh
+
+  key:
+    type: String
+    length: 50
+    displayName:
+      ja: キー
+      en: Key
+      vi: Khoá
+
+  name:
+    # #1156 — CỐ Ý không `translatable`, và đây là một ruling chứ không phải sót.
+    #
+    # Ranh giới đã có sẵn trong chính miền này: `TillTenderType.name` CÓ
+    # translatable vì đó là **từ vựng hệ thống**, seeder cấp sẵn ja/en/vi và v1
+    # không có form admin — quán không tạo ra chúng. Còn category thì NGƯỢC LẠI:
+    # quán tự quản (xem chú thích `category` trong TillTenderType.yaml), nên nó
+    # là **dữ liệu người dùng nhập**, cùng loại với tên một mặt hàng tự thêm.
+    #
+    # Dữ liệu người dùng nhập thì không dịch: chỉ tồn tại đúng một cái tên, bằng
+    # ngôn ngữ người nhập gõ. Người đọc nó là nhân viên của chính quán đó, và một
+    # quán Nhật sẽ gõ tiếng Nhật. Vì vậy `close-page.tsx` lấy thẳng `c.name` là
+    # ĐÚNG, không phải thiếu fallback — không có giá trị theo locale nào để rơi về.
+    #
+    # Đổi ý được, và rẻ hơn hướng ngược lại: thêm `translatable` sau này là một
+    # migration cộng thêm cột dịch, còn gỡ nó đi thì phải quyết bỏ bản dịch nào.
+    # Nếu một quán cần hai ngôn ngữ cho nhân viên, họ gõ cả hai vào một chuỗi —
+    # rẻ hơn nhiều so với DDL + backfill + form đa ngữ ở admin-web.
+    type: String
+    length: 255
+    displayName:
+      ja: 名称
+      en: Name
+      vi: Tên
+
+  sort_order:
+    type: Int
+    default: 100
+    displayName:
+      ja: 表示順
+      en: Sort Order
+      vi: Thứ tự
+
+  is_active:
+    type: Boolean
+    default: true
+    displayName:
+      ja: 有効
+      en: Active
+      vi: Hoạt động
+
+  is_system:
+    type: Boolean
+    default: false
+    displayName:
+      ja: システム定義
+      en: System Defined
+      vi: Do hệ thống tạo

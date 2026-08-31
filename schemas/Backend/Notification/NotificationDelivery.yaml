@@ -1,0 +1,100 @@
+# =============================================================================
+# NotificationDelivery (通知配信記録 / Bản ghi phân phối thông báo)
+# =============================================================================
+#
+# Per-(recipient × channel) delivery attempt ledger (plan-012 T3.5).
+# `NotificationService::dispatch` inserts one row per effective channel
+# inside the parent transaction; `NotificationChannelJob` updates
+# `status` + timestamps after each attempt.
+#
+# Cascade: FK onDelete CASCADE follows `notification_recipients` → the
+# parent `notifications` Prunable cleanup.
+#
+# Retry accounting: `attempts` increments each channel-send invocation.
+# After 3 failures the job marks `status=failed` and stops retrying.
+# =============================================================================
+
+displayName:
+  en: Notification Delivery
+  ja: 通知配信記録
+  vi: Bản ghi phân phối thông báo
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: false
+  id: Uuid
+  indexes:
+    - columns: [notification_recipient_id, channel]
+      unique: true
+    - columns: [status, last_attempted_at]
+
+properties:
+  notificationRecipient:
+    type: Association
+    relation: ManyToOne
+    target: NotificationRecipient
+    onDelete: CASCADE
+    displayName: { en: Notification Recipient, ja: 通知受信者, vi: Người nhận }
+
+  channel:
+    type: EnumRef
+    enum: NotificationChannel
+    filterable: true
+    displayName: { en: Channel, ja: チャンネル, vi: Kênh }
+
+  status:
+    type: EnumRef
+    enum: NotificationDeliveryStatus
+    default: pending
+    filterable: true
+    displayName: { en: Status, ja: ステータス, vi: Trạng thái }
+
+  attempts:
+    type: Int
+    nullable: true
+    displayName: { en: Attempts, ja: 試行回数, vi: Số lần thử }
+    description:
+      en: "Retry counter; incremented by NotificationChannelJob on each send attempt. Null = never attempted (freshly-written row); the job normalizes to 0 before incrementing."
+      ja: "再試行カウンタ。NotificationChannelJobが送信試行毎にインクリメント。null = 未試行（新規行）。ジョブ内で0に正規化してからインクリメント。"
+      vi: "Bộ đếm retry; NotificationChannelJob tăng mỗi lần send. Null = chưa thử (row mới tạo); job chuẩn hoá về 0 trước khi +1."
+
+  last_attempted_at:
+    type: Timestamp
+    nullable: true
+    displayName: { en: Last Attempted At, ja: 最終試行日時, vi: Thử lần cuối }
+
+  sent_at:
+    type: Timestamp
+    nullable: true
+    displayName: { en: Sent At, ja: 送信日時, vi: Gửi lúc }
+
+  delivered_at:
+    type: Timestamp
+    nullable: true
+    displayName: { en: Delivered At, ja: 配信日時, vi: Phân phối lúc }
+
+  failed_at:
+    type: Timestamp
+    nullable: true
+    displayName: { en: Failed At, ja: 失敗日時, vi: Thất bại lúc }
+
+  error:
+    type: Text
+    nullable: true
+    displayName: { en: Error, ja: エラー, vi: Lỗi }
+    description:
+      en: "Exception message from the last failed attempt. Cleared when a subsequent attempt succeeds."
+      ja: "最後に失敗した試行の例外メッセージ。後続の試行が成功するとクリア。"
+      vi: "Message exception của lần thử thất bại gần nhất. Xoá khi attempt sau thành công."
+
+  provider_ref:
+    type: String
+    length: 200
+    nullable: true
+    displayName: { en: Provider Ref, ja: プロバイダー参照, vi: Ref provider }
+    description:
+      en: "Provider-side identifier (email message id, push ticket, broadcast event id). Used to reconcile async delivery webhooks."
+      ja: "プロバイダー側の識別子（メール message id、プッシュ ticket、ブロードキャスト event id）。非同期配信 webhook との突合に使用。"
+      vi: "Mã ở phía provider (email message id, push ticket, broadcast event id). Đối chiếu với webhook phân phối async."

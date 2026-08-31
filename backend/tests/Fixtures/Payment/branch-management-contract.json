@@ -1,0 +1,147 @@
+{
+  "contract_version": "proposal-v1",
+  "source": "platform",
+  "cases": [
+    {
+      "name": "hq_managed",
+      "now": "2026-07-22T00:00:00Z",
+      "branch": {
+        "id": "00000000-0000-4000-8000-000000000101",
+        "brand_id": "00000000-0000-4000-8000-000000000201",
+        "management_model": "hq_managed",
+        "brand_owner_org_unit_id": "00000000-0000-4000-8000-000000000301",
+        "operator_org_unit_id": "00000000-0000-4000-8000-000000000301",
+        "franchise_id": null,
+        "franchise_status": null,
+        "valid_from": null,
+        "valid_to": null,
+        "ownership_revision": "ownership-10"
+      },
+      "expected": "hq_managed"
+    },
+    {
+      "name": "active_franchise",
+      "now": "2026-07-22T00:00:00Z",
+      "branch": {
+        "id": "00000000-0000-4000-8000-000000000102",
+        "brand_id": "00000000-0000-4000-8000-000000000201",
+        "management_model": "franchise_owned",
+        "brand_owner_org_unit_id": "00000000-0000-4000-8000-000000000301",
+        "operator_org_unit_id": "00000000-0000-4000-8000-000000000302",
+        "franchise_id": "00000000-0000-4000-8000-000000000401",
+        "franchise_status": "active",
+        "valid_from": "2026-01-01T00:00:00Z",
+        "valid_to": null,
+        "ownership_revision": "ownership-11"
+      },
+      "expected": "franchise_owned"
+    },
+    {
+      "name": "suspended_franchise",
+      "now": "2026-07-22T00:00:00Z",
+      "branch": {
+        "id": "00000000-0000-4000-8000-000000000103",
+        "brand_id": "00000000-0000-4000-8000-000000000201",
+        "management_model": null,
+        "brand_owner_org_unit_id": "00000000-0000-4000-8000-000000000301",
+        "operator_org_unit_id": "00000000-0000-4000-8000-000000000303",
+        "franchise_id": "00000000-0000-4000-8000-000000000402",
+        "franchise_status": "suspended",
+        "valid_from": "2026-01-01T00:00:00Z",
+        "valid_to": null,
+        "ownership_revision": "ownership-12"
+      },
+      "expected": "unresolved"
+    },
+    {
+      "name": "expired_franchise",
+      "now": "2026-07-22T00:00:00Z",
+      "branch": {
+        "id": "00000000-0000-4000-8000-000000000104",
+        "brand_id": "00000000-0000-4000-8000-000000000201",
+        "management_model": null,
+        "brand_owner_org_unit_id": "00000000-0000-4000-8000-000000000301",
+        "operator_org_unit_id": "00000000-0000-4000-8000-000000000304",
+        "franchise_id": "00000000-0000-4000-8000-000000000403",
+        "franchise_status": "active",
+        "valid_from": "2025-01-01T00:00:00Z",
+        "valid_to": "2026-07-21T23:59:59Z",
+        "ownership_revision": "ownership-13"
+      },
+      "expected": "unresolved"
+    },
+    {
+      "name": "ambiguous_active_franchise",
+      "now": "2026-07-22T00:00:00Z",
+      "branch": {
+        "id": "00000000-0000-4000-8000-000000000105",
+        "brand_id": "00000000-0000-4000-8000-000000000201",
+        "management_model": null,
+        "brand_owner_org_unit_id": "00000000-0000-4000-8000-000000000301",
+        "operator_org_unit_id": null,
+        "franchise_id": null,
+        "franchise_status": null,
+        "valid_from": null,
+        "valid_to": null,
+        "ownership_revision": "ownership-14",
+        "integrity_error": "multiple_active_franchise_grants"
+      },
+      "expected": "unresolved"
+    },
+    {
+      "name": "missing_franchise_grant",
+      "now": "2026-07-22T00:00:00Z",
+      "branch": {
+        "id": "00000000-0000-4000-8000-000000000106",
+        "brand_id": "00000000-0000-4000-8000-000000000201",
+        "management_model": null,
+        "brand_owner_org_unit_id": "00000000-0000-4000-8000-000000000301",
+        "operator_org_unit_id": null,
+        "franchise_id": null,
+        "franchise_status": null,
+        "valid_from": null,
+        "valid_to": null,
+        "ownership_revision": "ownership-15",
+        "integrity_error": "franchise_grant_missing"
+      },
+      "expected": "unresolved"
+    },
+    {
+      "name": "revoked_franchise",
+      "now": "2026-07-22T00:00:00Z",
+      "branch": {
+        "id": "00000000-0000-4000-8000-000000000107",
+        "brand_id": "00000000-0000-4000-8000-000000000201",
+        "management_model": null,
+        "brand_owner_org_unit_id": "00000000-0000-4000-8000-000000000301",
+        "operator_org_unit_id": "00000000-0000-4000-8000-000000000305",
+        "franchise_id": "00000000-0000-4000-8000-000000000404",
+        "franchise_status": "revoked",
+        "valid_from": "2026-01-01T00:00:00Z",
+        "valid_to": null,
+        "ownership_revision": "ownership-16"
+      },
+      "expected": "unresolved"
+    },
+    {
+      "name": "cross_tenant_franchise",
+      "now": "2026-07-22T00:00:00Z",
+      "branch": {
+        "id": "00000000-0000-4000-8000-000000000108",
+        "brand_id": "00000000-0000-4000-8000-000000000201",
+        "management_model": null,
+        "brand_owner_org_unit_id": "00000000-0000-4000-8000-000000000301",
+        "operator_org_unit_id": "00000000-0000-4000-8000-000000000306",
+        "franchise_id": "00000000-0000-4000-8000-000000000405",
+        "franchise_status": "active",
+        "valid_from": "2026-01-01T00:00:00Z",
+        "valid_to": null,
+        "ownership_revision": "ownership-17",
+        "branch_tenant_id": "00000000-0000-4000-8000-000000000501",
+        "grant_tenant_id": "00000000-0000-4000-8000-000000000502",
+        "integrity_error": "cross_tenant_grant"
+      },
+      "expected": "unresolved"
+    }
+  ]
+}

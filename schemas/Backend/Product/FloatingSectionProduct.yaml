@@ -1,0 +1,101 @@
+# ==============================================================================
+# FloatingSectionProduct Schema (フローティングセクション商品 / Sản phẩm trong khung giờ ưu đãi)
+# ==============================================================================
+#
+# A product placed inside a FloatingSection, independent of whether that
+# product also appears in the currently active Menu (per product decision:
+# floating-section products are fully independent, not a pointer into a
+# Menu's own MenuProduct rows).
+#
+# Flatter than MenuProduct: a FloatingSection has ONE flat product list, no
+# sub-section grouping, so the composite unique is just
+# (floating_section_id, product_id).
+#
+# ==============================================================================
+
+displayName:
+  en: Floating Section Product
+  ja: フローティングセクション商品
+  vi: Sản phẩm trong khung giờ ưu đãi
+
+kind: object
+
+options:
+  service: false
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    - columns: [floating_section_id, product_id]
+      unique: true
+    - columns: [floating_section_id, display_order]
+
+properties:
+  floatingSection:
+    type: Association
+    relation: ManyToOne
+    target: FloatingSection
+    onDelete: CASCADE
+    displayName:
+      en: Floating Section
+      ja: フローティングセクション
+      vi: Khung giờ ưu đãi
+
+  product:
+    type: Association
+    relation: ManyToOne
+    target: Product
+    onDelete: CASCADE
+    displayName:
+      en: Product
+      ja: 商品
+      vi: Sản phẩm
+
+  is_active:
+    type: Boolean
+    default: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+
+  # (plan-043 parity with MenuProduct) Override loại thuế ở cấp floating-section
+  # item. NULLABLE = kế thừa từ Product.tax_type_id (tầng resolve tiếp theo).
+  # Override này THẮNG cả product khi resolve thuế cho món trong khung giờ ưu
+  # đãi — cùng cơ chế MenuProduct.taxType nhưng cho floating section.
+  # RESTRICT — không xoá được TaxType còn được override tham chiếu.
+  taxType:
+    type: Association
+    relation: ManyToOne
+    target: TaxType
+    nullable: true
+    onDelete: RESTRICT
+    displayName:
+      en: Tax Type Override
+      ja: 税区分オーバーライド
+      vi: Loại thuế (override)
+    description:
+      en: Floating-section-item tax type override. Null = inherit from the product.
+      ja: フローティングセクション項目の税区分オーバーライド。Null = 商品から継承。
+      vi: Override loại thuế cấp món khung giờ ưu đãi. Null = kế thừa từ sản phẩm.
+
+  display_order:
+    type: Int
+    default: 0
+    displayName:
+      en: Display Order
+      ja: 表示順序
+      vi: Thứ tự hiển thị
+
+  # Promotional pricing lives per-SKU (see FloatingSectionProductSku.yaml) —
+  # a product with variants at different base prices can't share one flat
+  # override. Present on both HQ master and branch clone rows.
+  skus:
+    type: Association
+    relation: OneToMany
+    target: FloatingSectionProductSku
+    mappedBy: floatingSectionProduct
+    displayName:
+      en: Product SKUs
+      ja: 商品SKU
+      vi: SKU của sản phẩm

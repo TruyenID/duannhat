@@ -1,0 +1,198 @@
+#!/usr/bin/env bash
+#
+# Chạy TOÀN BỘ test backend sao cho kết quả CHỨNG MINH ĐƯỢC, không chỉ trông xanh.
+#
+# Vì sao tồn tại (#1971). Ngày 2026-08-06 cùng một commit cho ba kết quả khác
+# nhau — 9114, 9123, 9145 test. Nguyên nhân KHÔNG nằm ở PHPUnit:
+#
+#   1. Suite được chạy ở cây làm việc DÙNG CHUNG của mọi phiên agent. Reflog cho
+#      thấy HEAD đổi 13 lần trong 3 tiếng, trong khi một lượt mất ~11 phút. File
+#      test bị thêm/sửa/xoá GIỮA LÚC CHẠY. Hai lượt đều "đúng" — chúng chỉ không
+#      đo cùng một thứ.
+#   2. Không ai đối chiếu "đáng lẽ chạy bao nhiêu" với "đã chạy bao nhiêu". Pest
+#      cộng passed + failed + skipped rồi in. Thiếu 22 test thì KHÔNG có dòng
+#      cảnh báo nào và exit code vẫn 0.
+#
+# Script này đóng cả hai bằng cấu trúc, không bằng lời dặn:
+#
+#   · luôn dựng worktree MỚI ghim vào một commit — chạy ở cây dùng chung là điều
+#     không thể xảy ra, chứ không phải điều bị khuyên tránh;
+#   · đối chiếu tập test PHÁT HIỆN với tập test ĐÃ CHẠY, theo TỪNG LỚP, và lệch
+#     một test cũng đỏ;
+#   · xác minh cây không đổi trong lúc chạy (HEAD + trạng thái sạch, đo cả trước
+#     lẫn sau);
+#   · xác minh vendor khớp composer.lock, và mọi file mà test golden đọc sang cây
+#     khác (workstation/) đều có mặt — thiếu một file là test đó tự skip mà suite
+#     vẫn xanh;
+#   · bật mọi cờ --fail-on-* (risky · warning · deprecation · notice · incomplete),
+#     vì "không đỏ" phải có nghĩa là "không có vấn đề nào", không phải "không có
+#     vấn đề thuộc loại mặc định bị bỏ qua".
+#
+# Dùng:  backend/bin/full-suite [--ref <commit>] [--keep] [--jobs N]
+#
+set -Eeuo pipefail
+
+log()  { printf '\033[36m▸\033[0m %s\n' "$*"; }
+ok()   { printf '\033[32m✓\033[0m %s\n' "$*"; }
+bad()  { printf '\033[31m✗\033[0m %s\n' "$*" >&2; }
+die()  { bad "$*"; exit 1; }
+
+REF=""
+KEEP=0
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --ref)  REF="${2:?--ref cần một commit}"; shift 2;;
+    --keep) KEEP=1; shift;;
+    -h|--help) sed -n '2,40p' "$0" | sed 's/^# \{0,1\}//'; exit 0;;
+    *) die "tham số lạ: $1";;
+  esac
+done
+
+# Dụng cụ đo phải là bản ĐANG GỌI, không phải bản nằm trong cây bị đo: cây bị đo
+# ghim ở một commit có thể chưa có (hoặc có bản khác) của chính dụng cụ này.
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+RECONCILE="$HERE/reconcile-tests.py"
+[ -f "$RECONCILE" ] || die "không thấy $RECONCILE — dụng cụ đối chiếu phải nằm cạnh script này"
+
+REPO="$(git rev-parse --show-toplevel)"
+[ -d "$REPO/backend" ] || die "không thấy $REPO/backend — chạy từ trong repo tempo"
+REF="${REF:-$(git -C "$REPO" rev-parse HEAD)}"
+SHA="$(git -C "$REPO" rev-parse "$REF")"
+
+# Cảnh báo TRUNG THỰC: thay đổi chưa commit KHÔNG được đo. Nói ra thay vì im
+# lặng đo thiếu — đó chính là loại im lặng script này sinh ra để chống.
+DIRTY="$(git -C "$REPO" status --porcelain -- backend | head -20 || true)"
+if [ -n "$DIRTY" ]; then
+  bad "backend/ có thay đổi CHƯA COMMIT — chúng KHÔNG nằm trong phép đo này:"
+  printf '%s\n' "$DIRTY" | sed 's/^/    /' >&2
+  bad "commit rồi chạy lại, hoặc chấp nhận rằng bạn đang đo commit ${SHA:0:12}."
+fi
+
+WORK="$(mktemp -d "${TMPDIR:-/tmp}/tempo-fullsuite-${SHA:0:8}-XXXXXX")"
+OUT="$WORK/_artifacts"; mkdir -p "$OUT"
+cleanup() {
+  if [ "$KEEP" = "1" ]; then
+    log "giữ lại: $WORK"
+  else
+    git -C "$REPO" worktree remove --force "$WORK/tree" >/dev/null 2>&1 || true
+    rm -rf "$WORK" 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT
+
+log "commit đo: ${SHA:0:12}  ($(git -C "$REPO" log -1 --format=%s "$SHA" | cut -c1-70))"
+log "worktree cô lập: $WORK/tree"
+git -C "$REPO" worktree add --detach --quiet "$WORK/tree" "$SHA"
+TREE="$WORK/tree"
+BE="$TREE/backend"
+
+# ── file cây khác mà test golden ĐỌC: phải có mặt ───────────────────────────
+# Các test parity (print · tax · offline-signing) gọi `markTestSkipped` khi file
+# bên `workstation/` không có. Skip KHÔNG làm đỏ, và cũng KHÔNG lọt lưới đối
+# chiếu — một test bị skip vẫn là một `<testcase>` trong junit — nên thiếu chúng
+# thì suite "xanh" trên một tập đã bị rút bớt, đúng loại im lặng script này sinh
+# ra để chống.
+#
+# macOS đi kèm bash 3.2 — KHÔNG có `mapfile`. Dùng vòng while cho tương thích;
+# đã trả giá một lượt chạy hỏng vì chỗ này.
+NEEDED=()
+while IFS= read -r n; do
+  [ -n "$n" ] && NEEDED+=("$n")
+done < <(grep -rhoE "\.\./workstation/[A-Za-z0-9_/.-]+\.(json|go)" "$BE/tests" 2>/dev/null \
+  | sed 's#^\.\./##' | sort -u)
+# Không tìm thấy tham chiếu nào nghĩa là phép kiểm này đang kiểm RỖNG. Nói ra:
+# một rào im lặng không kiểm gì cả chính là thứ #1971 phải trả giá mới thấy.
+[ "${#NEEDED[@]:-0}" -gt 0 ] \
+  || die "không thấy tham chiếu ../workstation/… nào trong $BE/tests — phép kiểm file parity đang RỖNG, không được coi là đạt"
+MISSING=()
+for rel in "${NEEDED[@]}"; do
+  [ -f "$TREE/$rel" ] || MISSING+=("$rel")
+done
+if [ "${#MISSING[@]:-0}" -gt 0 ]; then
+  bad "thiếu file mà test golden đọc:"
+  printf '%s\n' "${MISSING[@]}" | sed 's/^/    /' >&2
+  die "những test đó sẽ tự markTestSkipped và suite vẫn 'xanh' trên tập thiếu. Dừng."
+fi
+ok "file parity đủ: ${#NEEDED[@]} file test golden đọc tới đều có mặt"
+
+# ── vendor: phải khớp composer.lock của CHÍNH commit này ────────────────────
+lockhash_of() { python3 - "$1" <<'PY'
+import json,sys
+print(json.load(open(sys.argv[1])).get("content-hash",""))
+PY
+}
+WANT_LOCK="$(lockhash_of "$BE/composer.lock")"
+HAVE_LOCK=""
+[ -f "$REPO/backend/composer.lock" ] && HAVE_LOCK="$(lockhash_of "$REPO/backend/composer.lock")"
+if [ -n "$WANT_LOCK" ] && [ "$WANT_LOCK" = "$HAVE_LOCK" ] && [ -d "$REPO/backend/vendor" ]; then
+  log "vendor: composer.lock khớp cây gốc — sao chép (nhanh mà vẫn đúng bản)"
+  cp -a "$REPO/backend/vendor" "$BE/vendor"
+else
+  log "vendor: composer.lock KHÁC cây gốc — cài đúng bản của commit này"
+  (cd "$BE" && composer install --no-interaction --no-progress --prefer-dist -q) \
+    || die "composer install thất bại"
+fi
+[ -x "$BE/vendor/bin/pest" ] || die "không có vendor/bin/pest sau khi dựng vendor"
+
+# ── env: dựng từ .env.example, KHÔNG mượn .env của máy ai ───────────────────
+# Mượn .env cá nhân là mượn cả những biến chỉ máy đó có — kết quả không tái hiện
+# được ở máy khác, mà lại trông y hệt kết quả tái hiện được.
+cp "$BE/.env.example" "$BE/.env"
+(cd "$BE" && php artisan key:generate --quiet --no-interaction)
+
+# ── ảnh chụp TRƯỚC ─────────────────────────────────────────────────────────
+before_head="$(git -C "$TREE" rev-parse HEAD)"
+before_status="$(git -C "$TREE" status --porcelain -- backend | grep -v '^?? backend/\(vendor\|\.env\)' || true)"
+
+# ── 1. tập test ĐÁNG LẼ chạy ───────────────────────────────────────────────
+log "liệt kê test đáng lẽ phải chạy…"
+(cd "$BE" && php -d memory_limit=-1 vendor/bin/pest --list-tests-xml "$OUT/expected.xml" >/dev/null 2>&1) \
+  || die "không liệt kê được test"
+
+# ── 2. chạy ────────────────────────────────────────────────────────────────
+log "chạy toàn bộ suite (mọi --fail-on-* bật)…"
+set +e
+(cd "$BE" && php -d memory_limit=-1 vendor/bin/pest --compact \
+    --fail-on-risky --fail-on-warning --fail-on-deprecation --fail-on-notice \
+    --fail-on-incomplete --fail-on-empty-test-suite \
+    --log-junit "$OUT/executed.xml") 2>&1 | tee "$OUT/run.txt"
+RUN_RC=${PIPESTATUS[0]}
+set -e
+
+# ── ảnh chụp SAU: cây có bị đổi giữa chừng không ────────────────────────────
+after_head="$(git -C "$TREE" rev-parse HEAD)"
+after_status="$(git -C "$TREE" status --porcelain -- backend | grep -v '^?? backend/\(vendor\|\.env\)' || true)"
+MUTATED=0
+[ "$before_head" = "$after_head" ] || { bad "HEAD của worktree ĐỔI giữa lúc chạy: $before_head → $after_head"; MUTATED=1; }
+[ "$before_status" = "$after_status" ] && ok "cây không đổi trong lúc chạy" || { bad "file trong worktree bị SỬA giữa lúc chạy"; MUTATED=1; }
+
+# ── 3. đối chiếu: phát hiện vs đã chạy ─────────────────────────────────────
+log "đối chiếu tập test phát hiện với tập test đã chạy…"
+for f in "$OUT/expected.xml" "$OUT/executed.xml"; do
+  [ -s "$f" ] || die "thiếu $f — không có gì để đối chiếu, KHÔNG được coi là xanh"
+done
+set +e
+python3 "$RECONCILE" "$OUT/expected.xml" "$OUT/executed.xml"
+REC_RC=$?
+set -e
+
+echo
+sed -E 's/\x1b\[[0-9;]*m//g' "$OUT/run.txt" | grep -aE "^  Tests:|^  Duration:" | sed 's/^/  /' || true
+echo
+echo "  commit    : ${SHA:0:12}"
+echo "  worktree  : $TREE"
+echo "  artifacts : $OUT"
+
+RC=0
+[ "$RUN_RC" -eq 0 ] || { bad "có test đỏ / vấn đề bị --fail-on-* bắt (rc=$RUN_RC)"; RC=1; }
+case "$REC_RC" in
+  0) ;;
+  1) bad "tập test phát hiện KHÁC tập đã chạy"; RC=1;;
+  # Bất cứ mã nào khác nghĩa là phép đối chiếu KHÔNG CHẠY ĐƯỢC. Nói đúng như vậy.
+  # Bản đầu của script gộp hai trường hợp này và tuyên bố "tập test khác nhau"
+  # trong khi nó chưa hề so — tức chính cái bệnh nó sinh ra để chống.
+  *) bad "KHÔNG đối chiếu được (rc=$REC_RC) — kết quả suite chưa được chứng minh là đủ"; RC=1;;
+esac
+[ "$MUTATED" -eq 0 ] || { bad "cây bị đổi giữa lúc chạy — kết quả KHÔNG dùng được"; RC=1; }
+[ "$RC" -eq 0 ] && ok "TOÀN BỘ suite xanh, và đã chứng minh chạy đủ số test."
+exit $RC

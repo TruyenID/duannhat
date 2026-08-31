@@ -1,0 +1,35 @@
+# Quyền — danh mục toàn hệ thống, không thuộc tenant nào.
+kind: object
+
+options:
+  id: Uuid
+  timestamps: true
+  softDelete: false
+
+properties:
+  name:
+    type: String
+    length: 100
+    unique: true
+    displayName:
+      ja: 権限名
+      en: Permission Name
+      vi: Tên quyền
+
+  slug:
+    type: String
+    length: 100
+    unique: true
+    displayName:
+      ja: スラッグ
+      en: Slug
+      vi: Slug
+
+  group:
+    type: String
+    length: 50
+    nullable: true
+    displayName:
+      ja: グループ
+      en: Group
+      vi: Nhóm

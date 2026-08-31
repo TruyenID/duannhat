@@ -1,0 +1,3072 @@
+[
+    {
+        "id": 200,
+        "product_id": "019f6ed5-4609-71bb-b9f2-d1e102e0798b",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 201,
+        "product_id": "019f6ed5-4639-70ff-af4f-c200d4dbf2ed",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 202,
+        "product_id": "019f6ed5-4657-732d-b34f-05578097c3f6",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 209,
+        "product_id": "019f6ed5-4f4a-725e-b448-937894a52ea8",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 210,
+        "product_id": "019f6ed5-4f57-70e4-9b24-520e05665997",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 211,
+        "product_id": "019f6ed5-4f5f-7395-8019-5cce0e9eb14f",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 212,
+        "product_id": "019f6ed5-4f6f-71a2-80b1-09dbd4b2cbf1",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 214,
+        "product_id": "019f6ed5-50be-71f7-be57-8aff9b5a02cd",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 216,
+        "product_id": "019f6ed5-5909-72dc-a6a6-666f3dee2b3d",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 223,
+        "product_id": "019f6ed5-4250-732a-a58f-46a85a5f0ebb",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 2,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 226,
+        "product_id": "019f6ed5-42d6-7208-8418-a79213d1d23d",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 2,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 230,
+        "product_id": "019f6ed5-4cde-721f-9c2d-920e7c503310",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 2,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 232,
+        "product_id": "019f6ed5-4f4a-725e-b448-937894a52ea8",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 2,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 233,
+        "product_id": "019f6ed5-4f57-70e4-9b24-520e05665997",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 2,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 234,
+        "product_id": "019f6ed5-4f5f-7395-8019-5cce0e9eb14f",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 2,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 235,
+        "product_id": "019f6ed5-4f6f-71a2-80b1-09dbd4b2cbf1",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 2,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 237,
+        "product_id": "019f6ed5-4609-71bb-b9f2-d1e102e0798b",
+        "topping_group_id": "019f6efc-c931-738f-999a-1c41658655e3",
+        "sort_order": 2,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 238,
+        "product_id": "019f6ed5-4639-70ff-af4f-c200d4dbf2ed",
+        "topping_group_id": "019f6efc-c931-738f-999a-1c41658655e3",
+        "sort_order": 3,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 239,
+        "product_id": "019f6ed5-4657-732d-b34f-05578097c3f6",
+        "topping_group_id": "019f6efc-c931-738f-999a-1c41658655e3",
+        "sort_order": 2,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 242,
+        "product_id": "019f6ed5-50be-71f7-be57-8aff9b5a02cd",
+        "topping_group_id": "019f6efc-c931-738f-999a-1c41658655e3",
+        "sort_order": 2,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 244,
+        "product_id": "019f6ed5-5909-72dc-a6a6-666f3dee2b3d",
+        "topping_group_id": "019f6efc-c931-738f-999a-1c41658655e3",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 247,
+        "product_id": "019f6ed5-41bc-729c-9ab4-0ef2cc96cae9",
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "sort_order": 2,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 248,
+        "product_id": "019f6ed5-475e-71ca-92a0-e9ec80416019",
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "sort_order": 2,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 249,
+        "product_id": "019f6ed5-4773-720c-af5a-2309101b4d4c",
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "sort_order": 2,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 250,
+        "product_id": "019f6ed5-4784-734a-982c-64d4a6f2dbc6",
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "sort_order": 2,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 251,
+        "product_id": "019f6ed5-4796-70f7-9d39-19f0ec1e096a",
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "sort_order": 2,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 252,
+        "product_id": "019f6ed5-4b59-729a-ae2c-f9ad0e309b63",
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "sort_order": 2,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 253,
+        "product_id": "019f6ed5-4b8d-701c-b8f3-7a25f4de8c5d",
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "sort_order": 2,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 254,
+        "product_id": "019f6ed5-4bc2-73ef-97e0-e820232f5043",
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "sort_order": 2,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 255,
+        "product_id": "019f6ed5-504d-73a3-bf83-020656a6faf5",
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "sort_order": 2,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 256,
+        "product_id": "019f6ed5-5084-7013-accd-74dd24277261",
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "sort_order": 2,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 259,
+        "product_id": "019f6ed5-3fd3-70fe-b3bf-55e3c5a5210d",
+        "topping_group_id": "019f6efc-c952-707c-abb3-f4c345f59802",
+        "sort_order": 3,
+        "min_select_override": 0,
+        "max_select_override": 2,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 260,
+        "product_id": "019f6ed5-4104-7146-893b-4fe0b8bcae53",
+        "topping_group_id": "019f6efc-c952-707c-abb3-f4c345f59802",
+        "sort_order": 3,
+        "min_select_override": 0,
+        "max_select_override": 2,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 276,
+        "product_id": "019f6ed5-50a0-7019-b84f-5dd3f44f40ce",
+        "topping_group_id": "019f6efc-c952-707c-abb3-f4c345f59802",
+        "sort_order": 3,
+        "min_select_override": 0,
+        "max_select_override": 2,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 277,
+        "product_id": "019f6ed5-3fd3-70fe-b3bf-55e3c5a5210d",
+        "topping_group_id": "019f6efc-c970-730b-9b24-c7def946a9bf",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 278,
+        "product_id": "019f6ed5-4104-7146-893b-4fe0b8bcae53",
+        "topping_group_id": "019f6efc-c970-730b-9b24-c7def946a9bf",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 281,
+        "product_id": "019f6ed5-4250-732a-a58f-46a85a5f0ebb",
+        "topping_group_id": "019f6efc-c970-730b-9b24-c7def946a9bf",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 284,
+        "product_id": "019f6ed5-42d6-7208-8418-a79213d1d23d",
+        "topping_group_id": "019f6efc-c970-730b-9b24-c7def946a9bf",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 288,
+        "product_id": "019f6ed5-4cde-721f-9c2d-920e7c503310",
+        "topping_group_id": "019f6efc-c970-730b-9b24-c7def946a9bf",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 294,
+        "product_id": "019f6ed5-50a0-7019-b84f-5dd3f44f40ce",
+        "topping_group_id": "019f6efc-c970-730b-9b24-c7def946a9bf",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 07:31:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 342,
+        "product_id": "019f6ed5-51da-7094-afba-aa7af4e6ce08",
+        "topping_group_id": "019f6efc-c8aa-73cd-af12-577a8ec6c3e7",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 343,
+        "product_id": "019f6ed5-51e3-7270-93a9-e7ba353fcbaa",
+        "topping_group_id": "019f6efc-c8aa-73cd-af12-577a8ec6c3e7",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 344,
+        "product_id": "019f6ed5-51eb-71f2-9b12-c7dff58fd244",
+        "topping_group_id": "019f6efc-c8aa-73cd-af12-577a8ec6c3e7",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 345,
+        "product_id": "019f6ed5-51f3-7057-a891-3ab885b7bc49",
+        "topping_group_id": "019f6efc-c8aa-73cd-af12-577a8ec6c3e7",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 346,
+        "product_id": "019f6ed5-51da-7094-afba-aa7af4e6ce08",
+        "topping_group_id": "019f6efc-ca04-7215-960f-a5694f19e6dd",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 347,
+        "product_id": "019f6ed5-51e3-7270-93a9-e7ba353fcbaa",
+        "topping_group_id": "019f6efc-ca04-7215-960f-a5694f19e6dd",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 348,
+        "product_id": "019f6ed5-51eb-71f2-9b12-c7dff58fd244",
+        "topping_group_id": "019f6efc-ca04-7215-960f-a5694f19e6dd",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 349,
+        "product_id": "019f6ed5-51f3-7057-a891-3ab885b7bc49",
+        "topping_group_id": "019f6efc-ca04-7215-960f-a5694f19e6dd",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 350,
+        "product_id": "019f6ed5-57ef-72c6-8c11-4784cabe1035",
+        "topping_group_id": "019f6efc-ca01-73b8-b7f1-196023afa95f",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 352,
+        "product_id": "019f6ed5-57ef-72c6-8c11-4784cabe1035",
+        "topping_group_id": "019f6efc-c881-7224-a7ec-a59a4538ac3e",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 360,
+        "product_id": "019f6ed5-4e72-7123-afdb-57070fee7597",
+        "topping_group_id": "019f6efc-c9c2-71c0-8418-32bc20f6bf5c",
+        "sort_order": 0,
+        "min_select_override": 1,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 361,
+        "product_id": "019f6ed5-4e80-7141-8874-f77dd5748e77",
+        "topping_group_id": "019f6efc-c9c2-71c0-8418-32bc20f6bf5c",
+        "sort_order": 0,
+        "min_select_override": 1,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 362,
+        "product_id": "019f6ed5-4eeb-73d1-abf2-59cf88c5093c",
+        "topping_group_id": "019f6efc-c9c2-71c0-8418-32bc20f6bf5c",
+        "sort_order": 0,
+        "min_select_override": 1,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 363,
+        "product_id": "019f6ed5-4f31-730d-8a25-40f82f3d7f40",
+        "topping_group_id": "019f6efc-c9c2-71c0-8418-32bc20f6bf5c",
+        "sort_order": 0,
+        "min_select_override": 1,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 369,
+        "product_id": "019f6ed5-58f9-70e0-becd-e73706923404",
+        "topping_group_id": "019f6efc-c9bf-72aa-a3f6-9e6a7c70f8bd",
+        "sort_order": 1,
+        "min_select_override": 1,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 371,
+        "product_id": "019f6ed5-4e72-7123-afdb-57070fee7597",
+        "topping_group_id": "019f6efc-c9bf-72aa-a3f6-9e6a7c70f8bd",
+        "sort_order": 1,
+        "min_select_override": 1,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 372,
+        "product_id": "019f6ed5-4e80-7141-8874-f77dd5748e77",
+        "topping_group_id": "019f6efc-c9bf-72aa-a3f6-9e6a7c70f8bd",
+        "sort_order": 1,
+        "min_select_override": 1,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 373,
+        "product_id": "019f6ed5-4eeb-73d1-abf2-59cf88c5093c",
+        "topping_group_id": "019f6efc-c9bf-72aa-a3f6-9e6a7c70f8bd",
+        "sort_order": 1,
+        "min_select_override": 1,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 374,
+        "product_id": "019f6ed5-4f31-730d-8a25-40f82f3d7f40",
+        "topping_group_id": "019f6efc-c9bf-72aa-a3f6-9e6a7c70f8bd",
+        "sort_order": 1,
+        "min_select_override": 1,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 380,
+        "product_id": "019f6ed5-58e3-720f-9a3b-5917449b34f8",
+        "topping_group_id": "019f6efc-c9a6-7139-babf-8486c57889b8",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 381,
+        "product_id": "019f6ed5-58ec-71fe-93d4-b7c5ed840120",
+        "topping_group_id": "019f6efc-c9ad-72c2-9470-1f4cfd1e2ddb",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 382,
+        "product_id": "019f6ed5-58c6-7089-af2a-71cb2d7ff74e",
+        "topping_group_id": "019f6efc-c9b2-710c-8f1f-d9f434a2798d",
+        "sort_order": 0,
+        "min_select_override": 1,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 383,
+        "product_id": "019f6ed5-58ce-72d2-bef2-404e43a75a05",
+        "topping_group_id": "019f6efc-c9b7-731a-862a-998ff0e2f11b",
+        "sort_order": 0,
+        "min_select_override": 1,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 384,
+        "product_id": "019f6ed5-58d6-7063-a8bd-d04c7ef764a0",
+        "topping_group_id": "019f6efc-c9b7-731a-862a-998ff0e2f11b",
+        "sort_order": 0,
+        "min_select_override": 1,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 385,
+        "product_id": "019f6ed5-5c26-711f-9f4a-33657bbc32fd",
+        "topping_group_id": "019f6efc-c9bc-7231-9c42-03b9ea0da6f4",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 08:38:54"
+    },
+    {
+        "id": 386,
+        "product_id": "019f6ed5-4639-70ff-af4f-c200d4dbf2ed",
+        "topping_group_id": "019f6efc-c9a0-7109-89a4-620271a0b4d1",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 391,
+        "product_id": "019f6ed5-5045-7353-87c3-c705faf1b92e",
+        "topping_group_id": "019f6efc-c9fd-703a-9314-ccda45ccb762",
+        "sort_order": 0,
+        "min_select_override": 1,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 393,
+        "product_id": "019f6ed5-4177-73ee-a639-4408132962ae",
+        "topping_group_id": "019f408b-84a9-7353-a7c6-40ba03730b8f",
+        "sort_order": 4,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 396,
+        "product_id": "019f6ed5-5cca-72b7-a64c-b02468d01b7e",
+        "topping_group_id": "019f6efc-c9d0-715c-a8c6-a49ba8bf152c",
+        "sort_order": 0,
+        "min_select_override": 1,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 397,
+        "product_id": "019f6ed5-5b3c-7365-be79-5f2fce48fa58",
+        "topping_group_id": "019f6efc-c9d0-715c-a8c6-a49ba8bf152c",
+        "sort_order": 1,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 08:38:54"
+    },
+    {
+        "id": 398,
+        "product_id": "019f6ed5-5b3f-71ee-bac7-e04c98a1db1e",
+        "topping_group_id": "019f6efc-c9d0-715c-a8c6-a49ba8bf152c",
+        "sort_order": 2,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 08:38:54"
+    },
+    {
+        "id": 399,
+        "product_id": "019f6ed5-5bbc-7105-b99f-5d357632a849",
+        "topping_group_id": "019f6efc-c9d0-715c-a8c6-a49ba8bf152c",
+        "sort_order": 3,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 08:38:54"
+    },
+    {
+        "id": 400,
+        "product_id": "019f6ed5-5bbf-73cd-b4e8-e4203efa07c9",
+        "topping_group_id": "019f6efc-c9d0-715c-a8c6-a49ba8bf152c",
+        "sort_order": 4,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 08:38:54"
+    },
+    {
+        "id": 403,
+        "product_id": "019f6ed5-5b11-7267-91ae-4bbc3eae45d1",
+        "topping_group_id": "019f6efc-ca11-7351-92c5-10c11c039b4c",
+        "sort_order": 2,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 08:38:54"
+    },
+    {
+        "id": 417,
+        "product_id": "019f6ed5-3fd3-70fe-b3bf-55e3c5a5210d",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 2,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 418,
+        "product_id": "019f6ed5-4104-7146-893b-4fe0b8bcae53",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 2,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 421,
+        "product_id": "019f6ed5-50a0-7019-b84f-5dd3f44f40ce",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 2,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 423,
+        "product_id": "019f6ed5-4177-73ee-a639-4408132962ae",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 2,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 428,
+        "product_id": "019f6ed5-4250-732a-a58f-46a85a5f0ebb",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 431,
+        "product_id": "019f6ed5-42d6-7208-8418-a79213d1d23d",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 434,
+        "product_id": "019f6ed5-4cde-721f-9c2d-920e7c503310",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 437,
+        "product_id": "019f6ed5-4609-71bb-b9f2-d1e102e0798b",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 438,
+        "product_id": "019f6ed5-4639-70ff-af4f-c200d4dbf2ed",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 2,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 439,
+        "product_id": "019f6ed5-4657-732d-b34f-05578097c3f6",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 442,
+        "product_id": "019f6ed5-50be-71f7-be57-8aff9b5a02cd",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 448,
+        "product_id": "019f6ed5-4f4a-725e-b448-937894a52ea8",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 449,
+        "product_id": "019f6ed5-4f57-70e4-9b24-520e05665997",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 450,
+        "product_id": "019f6ed5-4f5f-7395-8019-5cce0e9eb14f",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 451,
+        "product_id": "019f6ed5-4f6f-71a2-80b1-09dbd4b2cbf1",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 08:38:54",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 454,
+        "product_id": "019f6ed5-41bc-729c-9ab4-0ef2cc96cae9",
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 455,
+        "product_id": "019f6ed5-41bc-729c-9ab4-0ef2cc96cae9",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 456,
+        "product_id": "019f6ed5-41bc-729c-9ab4-0ef2cc96cae9",
+        "topping_group_id": "019f408b-84a9-7353-a7c6-40ba03730b8f",
+        "sort_order": 3,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 457,
+        "product_id": "019f6ed5-41bc-729c-9ab4-0ef2cc96cae9",
+        "topping_group_id": "019f6efc-c881-7224-a7ec-a59a4538ac3e",
+        "sort_order": 4,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 461,
+        "product_id": "019f6ed5-475e-71ca-92a0-e9ec80416019",
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 462,
+        "product_id": "019f6ed5-475e-71ca-92a0-e9ec80416019",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 463,
+        "product_id": "019f6ed5-475e-71ca-92a0-e9ec80416019",
+        "topping_group_id": "019f6efc-c881-7224-a7ec-a59a4538ac3e",
+        "sort_order": 3,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 464,
+        "product_id": "019f6ed5-4177-73ee-a639-4408132962ae",
+        "topping_group_id": "019f6efc-c9c9-7362-bb06-cd35901b8168",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 465,
+        "product_id": "019f6ed5-4177-73ee-a639-4408132962ae",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 466,
+        "product_id": "019f6ed5-4177-73ee-a639-4408132962ae",
+        "topping_group_id": "019f6efc-c931-738f-999a-1c41658655e3",
+        "sort_order": 3,
+        "min_select_override": 0,
+        "max_select_override": 2,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 467,
+        "product_id": "019f6ed5-4b59-729a-ae2c-f9ad0e309b63",
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 468,
+        "product_id": "019f6ed5-4b59-729a-ae2c-f9ad0e309b63",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 469,
+        "product_id": "019f6ed5-4b59-729a-ae2c-f9ad0e309b63",
+        "topping_group_id": "019f408b-84a9-7353-a7c6-40ba03730b8f",
+        "sort_order": 3,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 470,
+        "product_id": "019f6ed5-4b59-729a-ae2c-f9ad0e309b63",
+        "topping_group_id": "019f6efc-c881-7224-a7ec-a59a4538ac3e",
+        "sort_order": 4,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 471,
+        "product_id": "019f6ed5-4773-720c-af5a-2309101b4d4c",
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 472,
+        "product_id": "019f6ed5-4773-720c-af5a-2309101b4d4c",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 473,
+        "product_id": "019f6ed5-4773-720c-af5a-2309101b4d4c",
+        "topping_group_id": "019f6efc-c881-7224-a7ec-a59a4538ac3e",
+        "sort_order": 3,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 474,
+        "product_id": "019f6ed5-3fd3-70fe-b3bf-55e3c5a5210d",
+        "topping_group_id": "019f6efc-c9c9-7362-bb06-cd35901b8168",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 475,
+        "product_id": "019f6ed5-3fd3-70fe-b3bf-55e3c5a5210d",
+        "topping_group_id": "019f408b-84a9-7353-a7c6-40ba03730b8f",
+        "sort_order": 4,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 479,
+        "product_id": "019f6ed5-4104-7146-893b-4fe0b8bcae53",
+        "topping_group_id": "019f6efc-c9c9-7362-bb06-cd35901b8168",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 480,
+        "product_id": "019f6ed5-4104-7146-893b-4fe0b8bcae53",
+        "topping_group_id": "019f408b-84a9-7353-a7c6-40ba03730b8f",
+        "sort_order": 4,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 481,
+        "product_id": "019f6ed5-4784-734a-982c-64d4a6f2dbc6",
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 482,
+        "product_id": "019f6ed5-4784-734a-982c-64d4a6f2dbc6",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 483,
+        "product_id": "019f6ed5-4784-734a-982c-64d4a6f2dbc6",
+        "topping_group_id": "019f6efc-c881-7224-a7ec-a59a4538ac3e",
+        "sort_order": 3,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 484,
+        "product_id": "019f6ed5-4b8d-701c-b8f3-7a25f4de8c5d",
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 485,
+        "product_id": "019f6ed5-4b8d-701c-b8f3-7a25f4de8c5d",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 486,
+        "product_id": "019f6ed5-4b8d-701c-b8f3-7a25f4de8c5d",
+        "topping_group_id": "019f408b-84a9-7353-a7c6-40ba03730b8f",
+        "sort_order": 3,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 487,
+        "product_id": "019f6ed5-4b8d-701c-b8f3-7a25f4de8c5d",
+        "topping_group_id": "019f6efc-c881-7224-a7ec-a59a4538ac3e",
+        "sort_order": 4,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 491,
+        "product_id": "019f6ed5-4bc2-73ef-97e0-e820232f5043",
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 492,
+        "product_id": "019f6ed5-4bc2-73ef-97e0-e820232f5043",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 493,
+        "product_id": "019f6ed5-4bc2-73ef-97e0-e820232f5043",
+        "topping_group_id": "019f408b-84a9-7353-a7c6-40ba03730b8f",
+        "sort_order": 3,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 494,
+        "product_id": "019f6ed5-4bc2-73ef-97e0-e820232f5043",
+        "topping_group_id": "019f6efc-c881-7224-a7ec-a59a4538ac3e",
+        "sort_order": 4,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 497,
+        "product_id": "019f6ed5-4796-70f7-9d39-19f0ec1e096a",
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 498,
+        "product_id": "019f6ed5-4796-70f7-9d39-19f0ec1e096a",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 499,
+        "product_id": "019f6ed5-4796-70f7-9d39-19f0ec1e096a",
+        "topping_group_id": "019f6efc-c881-7224-a7ec-a59a4538ac3e",
+        "sort_order": 3,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 500,
+        "product_id": "019f6ed5-4e72-7123-afdb-57070fee7597",
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "sort_order": 2,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 501,
+        "product_id": "019f6ed5-4e72-7123-afdb-57070fee7597",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 3,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 502,
+        "product_id": "019f6ed5-4e72-7123-afdb-57070fee7597",
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "sort_order": 4,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 503,
+        "product_id": "019f6ed5-4e80-7141-8874-f77dd5748e77",
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "sort_order": 2,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 504,
+        "product_id": "019f6ed5-4e80-7141-8874-f77dd5748e77",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 3,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 505,
+        "product_id": "019f6ed5-4e80-7141-8874-f77dd5748e77",
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "sort_order": 4,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 506,
+        "product_id": "019f6ed5-4eeb-73d1-abf2-59cf88c5093c",
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "sort_order": 2,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 507,
+        "product_id": "019f6ed5-4eeb-73d1-abf2-59cf88c5093c",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 3,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 508,
+        "product_id": "019f6ed5-4eeb-73d1-abf2-59cf88c5093c",
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "sort_order": 4,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 509,
+        "product_id": "019f6ed5-4f31-730d-8a25-40f82f3d7f40",
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "sort_order": 2,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 510,
+        "product_id": "019f6ed5-4f31-730d-8a25-40f82f3d7f40",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 3,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 511,
+        "product_id": "019f6ed5-4f31-730d-8a25-40f82f3d7f40",
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "sort_order": 4,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 512,
+        "product_id": "019f6ed5-5983-7383-9ed7-4214081819c9",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 513,
+        "product_id": "019f6ed5-5983-7383-9ed7-4214081819c9",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 514,
+        "product_id": "019f6ed5-598b-735a-a84f-6700e6cbdc30",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 515,
+        "product_id": "019f6ed5-598b-735a-a84f-6700e6cbdc30",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 516,
+        "product_id": "019f6ed5-5895-7360-ab98-5d96f57d266e",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 517,
+        "product_id": "019f6ed5-5895-7360-ab98-5d96f57d266e",
+        "topping_group_id": "019f6efc-c931-738f-999a-1c41658655e3",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 518,
+        "product_id": "019f6ed5-58f9-70e0-becd-e73706923404",
+        "topping_group_id": "019f6efc-c9c6-72fa-82aa-c351c5ce26fe",
+        "sort_order": 0,
+        "min_select_override": 1,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 541,
+        "product_id": "019f6ed5-5084-7013-accd-74dd24277261",
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 542,
+        "product_id": "019f6ed5-5084-7013-accd-74dd24277261",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 543,
+        "product_id": "019f6ed5-5084-7013-accd-74dd24277261",
+        "topping_group_id": "019f408b-84a9-7353-a7c6-40ba03730b8f",
+        "sort_order": 3,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 544,
+        "product_id": "019f6ed5-5084-7013-accd-74dd24277261",
+        "topping_group_id": "019f6efc-c881-7224-a7ec-a59a4538ac3e",
+        "sort_order": 4,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 545,
+        "product_id": "019f6ed5-504d-73a3-bf83-020656a6faf5",
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 546,
+        "product_id": "019f6ed5-504d-73a3-bf83-020656a6faf5",
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "sort_order": 1,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 547,
+        "product_id": "019f6ed5-504d-73a3-bf83-020656a6faf5",
+        "topping_group_id": "019f6efc-c881-7224-a7ec-a59a4538ac3e",
+        "sort_order": 3,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 548,
+        "product_id": "019f6ed5-50a0-7019-b84f-5dd3f44f40ce",
+        "topping_group_id": "019f6efc-c9c9-7362-bb06-cd35901b8168",
+        "sort_order": 0,
+        "min_select_override": 0,
+        "max_select_override": 1,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 549,
+        "product_id": "019f6ed5-50a0-7019-b84f-5dd3f44f40ce",
+        "topping_group_id": "019f408b-84a9-7353-a7c6-40ba03730b8f",
+        "sort_order": 4,
+        "min_select_override": 0,
+        "max_select_override": 5,
+        "created_at": "2026-07-17 09:08:28",
+        "updated_at": "2026-07-17 09:08:28"
+    },
+    {
+        "id": 584,
+        "product_id": "019f6ed5-5d4f-704b-8294-34e5439d8487",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-18 10:21:57",
+        "updated_at": "2026-07-18 10:21:57"
+    },
+    {
+        "id": 585,
+        "product_id": "019f6ed5-5d4f-704b-8294-34e5439d8487",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-18 10:21:57",
+        "updated_at": "2026-07-18 10:21:57"
+    },
+    {
+        "id": 586,
+        "product_id": "019f6ed5-5d56-70b0-9a40-1f4956121760",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-18 10:24:13",
+        "updated_at": "2026-07-18 10:24:13"
+    },
+    {
+        "id": 587,
+        "product_id": "019f6ed5-5d56-70b0-9a40-1f4956121760",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-18 10:24:13",
+        "updated_at": "2026-07-18 10:24:13"
+    },
+    {
+        "id": 614,
+        "product_id": "019f6ed5-5b01-73b5-a880-36da292abb47",
+        "topping_group_id": "019f6efc-c970-730b-9b24-c7def946a9bf",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-20 10:24:23",
+        "updated_at": "2026-07-20 10:24:23"
+    },
+    {
+        "id": 615,
+        "product_id": "019f6ed5-5b01-73b5-a880-36da292abb47",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 1,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-20 10:24:23",
+        "updated_at": "2026-07-20 10:24:23"
+    },
+    {
+        "id": 629,
+        "product_id": "019f6ed5-5b0a-72d4-9ed8-e4abfa4521b4",
+        "topping_group_id": "019f6efc-ca11-7351-92c5-10c11c039b4c",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-20 10:27:27",
+        "updated_at": "2026-07-20 10:27:27"
+    },
+    {
+        "id": 630,
+        "product_id": "019f6ed5-5b0a-72d4-9ed8-e4abfa4521b4",
+        "topping_group_id": "019f6efc-c952-707c-abb3-f4c345f59802",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-20 10:27:27",
+        "updated_at": "2026-07-20 10:27:27"
+    },
+    {
+        "id": 631,
+        "product_id": "019f6ed5-5b0a-72d4-9ed8-e4abfa4521b4",
+        "topping_group_id": "019f6efc-c970-730b-9b24-c7def946a9bf",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-20 10:27:27",
+        "updated_at": "2026-07-20 10:27:27"
+    },
+    {
+        "id": 679,
+        "product_id": "019f6ed5-5a3b-713f-9102-9553c926f9f3",
+        "topping_group_id": "019f6efc-ca08-70a7-bddb-10552f751c89",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-20 10:38:12",
+        "updated_at": "2026-07-20 10:38:12"
+    },
+    {
+        "id": 680,
+        "product_id": "019f6ed5-5a3b-713f-9102-9553c926f9f3",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-20 10:38:12",
+        "updated_at": "2026-07-20 10:38:12"
+    },
+    {
+        "id": 681,
+        "product_id": "019f6ed5-5a3b-713f-9102-9553c926f9f3",
+        "topping_group_id": "019f6efc-ca11-7351-92c5-10c11c039b4c",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-20 10:38:12",
+        "updated_at": "2026-07-20 10:38:12"
+    },
+    {
+        "id": 682,
+        "product_id": "019f6ed5-5a4b-700f-9500-d760400dae99",
+        "topping_group_id": "019f6efc-ca08-70a7-bddb-10552f751c89",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-20 10:38:43",
+        "updated_at": "2026-07-20 10:38:43"
+    },
+    {
+        "id": 683,
+        "product_id": "019f6ed5-5a4b-700f-9500-d760400dae99",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-20 10:38:43",
+        "updated_at": "2026-07-20 10:38:43"
+    },
+    {
+        "id": 684,
+        "product_id": "019f6ed5-5a4b-700f-9500-d760400dae99",
+        "topping_group_id": "019f6efc-ca11-7351-92c5-10c11c039b4c",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-20 10:38:43",
+        "updated_at": "2026-07-20 10:38:43"
+    },
+    {
+        "id": 741,
+        "product_id": "019f6ed5-5d3a-73ce-9bf4-14c2a4cc582c",
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:35:49",
+        "updated_at": "2026-07-21 07:35:49"
+    },
+    {
+        "id": 742,
+        "product_id": "019f6ed5-5d3a-73ce-9bf4-14c2a4cc582c",
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "sort_order": 1,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:35:49",
+        "updated_at": "2026-07-21 07:35:49"
+    },
+    {
+        "id": 743,
+        "product_id": "019f6ed5-5d3a-73ce-9bf4-14c2a4cc582c",
+        "topping_group_id": "019f6efc-c881-7224-a7ec-a59a4538ac3e",
+        "sort_order": 2,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:35:49",
+        "updated_at": "2026-07-21 07:35:49"
+    },
+    {
+        "id": 750,
+        "product_id": "019f6ed5-5b2c-7320-b4ae-a88d01bbada5",
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:36:59",
+        "updated_at": "2026-07-21 07:36:59"
+    },
+    {
+        "id": 751,
+        "product_id": "019f6ed5-5b2c-7320-b4ae-a88d01bbada5",
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "sort_order": 1,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:36:59",
+        "updated_at": "2026-07-21 07:36:59"
+    },
+    {
+        "id": 752,
+        "product_id": "019f6ed5-5b2c-7320-b4ae-a88d01bbada5",
+        "topping_group_id": "019f6efc-c881-7224-a7ec-a59a4538ac3e",
+        "sort_order": 2,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:36:59",
+        "updated_at": "2026-07-21 07:36:59"
+    },
+    {
+        "id": 759,
+        "product_id": "019f6ed5-5b37-739c-abfc-becc7580fbf1",
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:43:23",
+        "updated_at": "2026-07-21 07:43:23"
+    },
+    {
+        "id": 760,
+        "product_id": "019f6ed5-5b37-739c-abfc-becc7580fbf1",
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "sort_order": 1,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:43:23",
+        "updated_at": "2026-07-21 07:43:23"
+    },
+    {
+        "id": 761,
+        "product_id": "019f6ed5-5b37-739c-abfc-becc7580fbf1",
+        "topping_group_id": "019f6efc-c881-7224-a7ec-a59a4538ac3e",
+        "sort_order": 2,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:43:23",
+        "updated_at": "2026-07-21 07:43:23"
+    },
+    {
+        "id": 768,
+        "product_id": "019f6ed5-5783-7324-833b-68bd336dfd66",
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:44:14",
+        "updated_at": "2026-07-21 07:44:14"
+    },
+    {
+        "id": 769,
+        "product_id": "019f6ed5-5783-7324-833b-68bd336dfd66",
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "sort_order": 1,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:44:14",
+        "updated_at": "2026-07-21 07:44:14"
+    },
+    {
+        "id": 770,
+        "product_id": "019f6ed5-5783-7324-833b-68bd336dfd66",
+        "topping_group_id": "019f6efc-c881-7224-a7ec-a59a4538ac3e",
+        "sort_order": 2,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:44:14",
+        "updated_at": "2026-07-21 07:44:14"
+    },
+    {
+        "id": 777,
+        "product_id": "019f6ed5-5793-71ca-9b55-4d6dece72f81",
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:44:56",
+        "updated_at": "2026-07-21 07:44:56"
+    },
+    {
+        "id": 778,
+        "product_id": "019f6ed5-5793-71ca-9b55-4d6dece72f81",
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "sort_order": 1,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:44:56",
+        "updated_at": "2026-07-21 07:44:56"
+    },
+    {
+        "id": 779,
+        "product_id": "019f6ed5-5793-71ca-9b55-4d6dece72f81",
+        "topping_group_id": "019f6efc-c881-7224-a7ec-a59a4538ac3e",
+        "sort_order": 2,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:44:56",
+        "updated_at": "2026-07-21 07:44:56"
+    },
+    {
+        "id": 780,
+        "product_id": "019f6ed5-57af-7155-ab29-ce0c1d30ee81",
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:45:11",
+        "updated_at": "2026-07-21 07:45:11"
+    },
+    {
+        "id": 781,
+        "product_id": "019f6ed5-57af-7155-ab29-ce0c1d30ee81",
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "sort_order": 1,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:45:11",
+        "updated_at": "2026-07-21 07:45:11"
+    },
+    {
+        "id": 782,
+        "product_id": "019f6ed5-57af-7155-ab29-ce0c1d30ee81",
+        "topping_group_id": "019f6efc-c881-7224-a7ec-a59a4538ac3e",
+        "sort_order": 2,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:45:11",
+        "updated_at": "2026-07-21 07:45:11"
+    },
+    {
+        "id": 797,
+        "product_id": "019f6ed5-59b1-7103-877b-da9a0dceee9a",
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:46:26",
+        "updated_at": "2026-07-21 07:46:26"
+    },
+    {
+        "id": 798,
+        "product_id": "019f6ed5-59b1-7103-877b-da9a0dceee9a",
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:46:26",
+        "updated_at": "2026-07-21 07:46:26"
+    },
+    {
+        "id": 799,
+        "product_id": "019f6ed5-59b1-7103-877b-da9a0dceee9a",
+        "topping_group_id": "019f6efc-c9bf-72aa-a3f6-9e6a7c70f8bd",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:46:26",
+        "updated_at": "2026-07-21 07:46:26"
+    },
+    {
+        "id": 800,
+        "product_id": "019f6ed5-59b1-7103-877b-da9a0dceee9a",
+        "topping_group_id": "019f6efc-c9c2-71c0-8418-32bc20f6bf5c",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:46:26",
+        "updated_at": "2026-07-21 07:46:26"
+    },
+    {
+        "id": 801,
+        "product_id": "019f6ed5-59b7-7163-b493-823cc2864676",
+        "topping_group_id": "019f6efc-c9c2-71c0-8418-32bc20f6bf5c",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:46:48",
+        "updated_at": "2026-07-21 07:46:48"
+    },
+    {
+        "id": 802,
+        "product_id": "019f6ed5-59b7-7163-b493-823cc2864676",
+        "topping_group_id": "019f6efc-c9bf-72aa-a3f6-9e6a7c70f8bd",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:46:48",
+        "updated_at": "2026-07-21 07:46:48"
+    },
+    {
+        "id": 803,
+        "product_id": "019f6ed5-59b7-7163-b493-823cc2864676",
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:46:48",
+        "updated_at": "2026-07-21 07:46:48"
+    },
+    {
+        "id": 804,
+        "product_id": "019f6ed5-59b7-7163-b493-823cc2864676",
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:46:48",
+        "updated_at": "2026-07-21 07:46:48"
+    },
+    {
+        "id": 821,
+        "product_id": "019f6ed5-59c6-73d7-8088-bcf95d544041",
+        "topping_group_id": "019f6efc-c9c2-71c0-8418-32bc20f6bf5c",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:47:49",
+        "updated_at": "2026-07-21 07:47:49"
+    },
+    {
+        "id": 822,
+        "product_id": "019f6ed5-59c6-73d7-8088-bcf95d544041",
+        "topping_group_id": "019f6efc-c9bf-72aa-a3f6-9e6a7c70f8bd",
+        "sort_order": 1,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:47:49",
+        "updated_at": "2026-07-21 07:47:49"
+    },
+    {
+        "id": 823,
+        "product_id": "019f6ed5-59c6-73d7-8088-bcf95d544041",
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "sort_order": 2,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:47:49",
+        "updated_at": "2026-07-21 07:47:49"
+    },
+    {
+        "id": 824,
+        "product_id": "019f6ed5-59c6-73d7-8088-bcf95d544041",
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "sort_order": 3,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:47:49",
+        "updated_at": "2026-07-21 07:47:49"
+    },
+    {
+        "id": 825,
+        "product_id": "019f6ed5-59be-7138-b859-80c6023de50f",
+        "topping_group_id": "019f6efc-c9c2-71c0-8418-32bc20f6bf5c",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:48:22",
+        "updated_at": "2026-07-21 07:48:22"
+    },
+    {
+        "id": 826,
+        "product_id": "019f6ed5-59be-7138-b859-80c6023de50f",
+        "topping_group_id": "019f6efc-c9bf-72aa-a3f6-9e6a7c70f8bd",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:48:22",
+        "updated_at": "2026-07-21 07:48:22"
+    },
+    {
+        "id": 827,
+        "product_id": "019f6ed5-59be-7138-b859-80c6023de50f",
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:48:22",
+        "updated_at": "2026-07-21 07:48:22"
+    },
+    {
+        "id": 828,
+        "product_id": "019f6ed5-59be-7138-b859-80c6023de50f",
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:48:22",
+        "updated_at": "2026-07-21 07:48:22"
+    },
+    {
+        "id": 841,
+        "product_id": "019f6ed5-5639-739d-8215-a9a42651fed6",
+        "topping_group_id": "019f6efc-c9e7-738f-b305-cdf26cf067bf",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:48:59",
+        "updated_at": "2026-07-21 07:48:59"
+    },
+    {
+        "id": 842,
+        "product_id": "019f6ed5-5639-739d-8215-a9a42651fed6",
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "sort_order": 1,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:48:59",
+        "updated_at": "2026-07-21 07:48:59"
+    },
+    {
+        "id": 843,
+        "product_id": "019f6ed5-5639-739d-8215-a9a42651fed6",
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "sort_order": 2,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:48:59",
+        "updated_at": "2026-07-21 07:48:59"
+    },
+    {
+        "id": 844,
+        "product_id": "019f6ed5-5639-739d-8215-a9a42651fed6",
+        "topping_group_id": "019f6efc-c881-7224-a7ec-a59a4538ac3e",
+        "sort_order": 3,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:48:59",
+        "updated_at": "2026-07-21 07:48:59"
+    },
+    {
+        "id": 845,
+        "product_id": "019f6ed5-5b1f-7117-a322-69867aabf277",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:50:51",
+        "updated_at": "2026-07-21 07:50:51"
+    },
+    {
+        "id": 846,
+        "product_id": "019f6ed5-5b1f-7117-a322-69867aabf277",
+        "topping_group_id": "019f6efc-c931-738f-999a-1c41658655e3",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:50:51",
+        "updated_at": "2026-07-21 07:50:51"
+    },
+    {
+        "id": 849,
+        "product_id": "019f6ed5-5ba7-7177-abb9-61464572a63c",
+        "topping_group_id": "019f6efc-ca11-7351-92c5-10c11c039b4c",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:53:48",
+        "updated_at": "2026-07-21 07:53:48"
+    },
+    {
+        "id": 850,
+        "product_id": "019f6ed5-5ba7-7177-abb9-61464572a63c",
+        "topping_group_id": "019f6efc-c931-738f-999a-1c41658655e3",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:53:48",
+        "updated_at": "2026-07-21 07:53:48"
+    },
+    {
+        "id": 851,
+        "product_id": "019f6ed5-576d-70b8-bda0-420e5f1f167d",
+        "topping_group_id": "019f6efc-c931-738f-999a-1c41658655e3",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:54:57",
+        "updated_at": "2026-07-21 07:54:57"
+    },
+    {
+        "id": 852,
+        "product_id": "019f6ed5-576d-70b8-bda0-420e5f1f167d",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:54:57",
+        "updated_at": "2026-07-21 07:54:57"
+    },
+    {
+        "id": 853,
+        "product_id": "019f6ed5-5b9f-7180-8b01-d3d4b997a4a9",
+        "topping_group_id": "019f6efc-c931-738f-999a-1c41658655e3",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:55:20",
+        "updated_at": "2026-07-21 07:55:20"
+    },
+    {
+        "id": 854,
+        "product_id": "019f6ed5-5b9f-7180-8b01-d3d4b997a4a9",
+        "topping_group_id": "019f6efc-ca11-7351-92c5-10c11c039b4c",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:55:20",
+        "updated_at": "2026-07-21 07:55:20"
+    },
+    {
+        "id": 855,
+        "product_id": "019f6ed5-5b9f-7180-8b01-d3d4b997a4a9",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:55:20",
+        "updated_at": "2026-07-21 07:55:20"
+    },
+    {
+        "id": 859,
+        "product_id": "019f6ed5-5778-71f2-922b-ed40b3d2633b",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:56:38",
+        "updated_at": "2026-07-21 07:56:38"
+    },
+    {
+        "id": 860,
+        "product_id": "019f6ed5-5778-71f2-922b-ed40b3d2633b",
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:56:38",
+        "updated_at": "2026-07-21 07:56:38"
+    },
+    {
+        "id": 861,
+        "product_id": "019f6ed5-5778-71f2-922b-ed40b3d2633b",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:56:38",
+        "updated_at": "2026-07-21 07:56:38"
+    },
+    {
+        "id": 862,
+        "product_id": "019f6ed5-577f-7039-8fae-c8b835a5967b",
+        "topping_group_id": "019f6efc-c931-738f-999a-1c41658655e3",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:57:52",
+        "updated_at": "2026-07-21 07:57:52"
+    },
+    {
+        "id": 863,
+        "product_id": "019f6ed5-577f-7039-8fae-c8b835a5967b",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:57:52",
+        "updated_at": "2026-07-21 07:57:52"
+    },
+    {
+        "id": 867,
+        "product_id": "019f6ed5-563b-71c5-aa7b-c533ad936257",
+        "topping_group_id": "019f6efc-c9df-7210-a702-1314f52bda00",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:58:44",
+        "updated_at": "2026-07-21 07:58:44"
+    },
+    {
+        "id": 868,
+        "product_id": "019f6ed5-563b-71c5-aa7b-c533ad936257",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 1,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:58:44",
+        "updated_at": "2026-07-21 07:58:44"
+    },
+    {
+        "id": 869,
+        "product_id": "019f6ed5-563b-71c5-aa7b-c533ad936257",
+        "topping_group_id": "019f6efc-c931-738f-999a-1c41658655e3",
+        "sort_order": 2,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 07:58:44",
+        "updated_at": "2026-07-21 07:58:44"
+    },
+    {
+        "id": 881,
+        "product_id": "019f6ed5-416a-7233-a8c5-8c55c269d4bb",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 08:01:23",
+        "updated_at": "2026-07-21 08:01:23"
+    },
+    {
+        "id": 882,
+        "product_id": "019f6ed5-416a-7233-a8c5-8c55c269d4bb",
+        "topping_group_id": "019f6efc-c931-738f-999a-1c41658655e3",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 08:01:23",
+        "updated_at": "2026-07-21 08:01:23"
+    },
+    {
+        "id": 883,
+        "product_id": "019f6ed5-416a-7233-a8c5-8c55c269d4bb",
+        "topping_group_id": "019f6efc-ca11-7351-92c5-10c11c039b4c",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 08:01:23",
+        "updated_at": "2026-07-21 08:01:23"
+    },
+    {
+        "id": 891,
+        "product_id": "019f6ed5-41a6-7355-9e73-253ddbee50e6",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 08:14:40",
+        "updated_at": "2026-07-21 08:14:40"
+    },
+    {
+        "id": 892,
+        "product_id": "019f6ed5-41a6-7355-9e73-253ddbee50e6",
+        "topping_group_id": "019f6efc-c931-738f-999a-1c41658655e3",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 08:14:40",
+        "updated_at": "2026-07-21 08:14:40"
+    },
+    {
+        "id": 893,
+        "product_id": "019f6ed5-41a6-7355-9e73-253ddbee50e6",
+        "topping_group_id": "019f6efc-ca11-7351-92c5-10c11c039b4c",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 08:14:40",
+        "updated_at": "2026-07-21 08:14:40"
+    },
+    {
+        "id": 895,
+        "product_id": "019f6ed5-4928-7184-bce7-f21354449534",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 08:15:24",
+        "updated_at": "2026-07-21 08:15:24"
+    },
+    {
+        "id": 896,
+        "product_id": "019f6ed5-4928-7184-bce7-f21354449534",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 08:15:24",
+        "updated_at": "2026-07-21 08:15:24"
+    },
+    {
+        "id": 897,
+        "product_id": "019f6ed5-4c74-704c-9a5c-1fc8c6880ac9",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 08:15:55",
+        "updated_at": "2026-07-21 08:15:55"
+    },
+    {
+        "id": 898,
+        "product_id": "019f6ed5-4c74-704c-9a5c-1fc8c6880ac9",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 08:15:55",
+        "updated_at": "2026-07-21 08:15:55"
+    },
+    {
+        "id": 899,
+        "product_id": "019f6ed5-4707-7283-ac97-3944de5eba76",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 08:17:02",
+        "updated_at": "2026-07-21 08:17:02"
+    },
+    {
+        "id": 900,
+        "product_id": "019f6ed5-4707-7283-ac97-3944de5eba76",
+        "topping_group_id": "019f6efc-c931-738f-999a-1c41658655e3",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 08:17:02",
+        "updated_at": "2026-07-21 08:17:02"
+    },
+    {
+        "id": 907,
+        "product_id": "019f6ed5-5a63-7087-b4d0-dd1a77593905",
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 08:17:38",
+        "updated_at": "2026-07-21 08:17:38"
+    },
+    {
+        "id": 908,
+        "product_id": "019f6ed5-5a63-7087-b4d0-dd1a77593905",
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "sort_order": 1,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 08:17:38",
+        "updated_at": "2026-07-21 08:17:38"
+    },
+    {
+        "id": 909,
+        "product_id": "019f6ed5-5a63-7087-b4d0-dd1a77593905",
+        "topping_group_id": "019f6efc-c881-7224-a7ec-a59a4538ac3e",
+        "sort_order": 2,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-21 08:17:38",
+        "updated_at": "2026-07-21 08:17:38"
+    },
+    {
+        "id": 928,
+        "product_id": "019f6ed5-5b9b-7045-91eb-5486b7e03a5a",
+        "topping_group_id": "019f6efc-c952-707c-abb3-f4c345f59802",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:14:19",
+        "updated_at": "2026-07-22 07:14:19"
+    },
+    {
+        "id": 929,
+        "product_id": "019f6ed5-5b9b-7045-91eb-5486b7e03a5a",
+        "topping_group_id": "019f6efc-ca11-7351-92c5-10c11c039b4c",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:14:19",
+        "updated_at": "2026-07-22 07:14:19"
+    },
+    {
+        "id": 930,
+        "product_id": "019f6ed5-5b9b-7045-91eb-5486b7e03a5a",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:14:19",
+        "updated_at": "2026-07-22 07:14:19"
+    },
+    {
+        "id": 931,
+        "product_id": "019f6ed5-4265-727c-ac78-d23e0afdbf85",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:16:01",
+        "updated_at": "2026-07-22 07:16:01"
+    },
+    {
+        "id": 932,
+        "product_id": "019f6ed5-4265-727c-ac78-d23e0afdbf85",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:16:01",
+        "updated_at": "2026-07-22 07:16:01"
+    },
+    {
+        "id": 933,
+        "product_id": "019f6ed5-4d4f-7020-b776-2ea6674e7580",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:16:48",
+        "updated_at": "2026-07-22 07:16:48"
+    },
+    {
+        "id": 934,
+        "product_id": "019f6ed5-4d4f-7020-b776-2ea6674e7580",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:16:48",
+        "updated_at": "2026-07-22 07:16:48"
+    },
+    {
+        "id": 995,
+        "product_id": "019f6ed5-5634-7255-a4ac-687592a36b98",
+        "topping_group_id": "019f6efc-c9f1-739c-b428-a2ff22d7b61c",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:17:53",
+        "updated_at": "2026-07-22 07:17:53"
+    },
+    {
+        "id": 996,
+        "product_id": "019f6ed5-5634-7255-a4ac-687592a36b98",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 1,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:17:53",
+        "updated_at": "2026-07-22 07:17:53"
+    },
+    {
+        "id": 997,
+        "product_id": "019f6ed5-5634-7255-a4ac-687592a36b98",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 2,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:17:53",
+        "updated_at": "2026-07-22 07:17:53"
+    },
+    {
+        "id": 998,
+        "product_id": "019f6ed5-5634-7255-a4ac-687592a36b98",
+        "topping_group_id": "019f6efc-c9e7-738f-b305-cdf26cf067bf",
+        "sort_order": 3,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:17:53",
+        "updated_at": "2026-07-22 07:17:53"
+    },
+    {
+        "id": 999,
+        "product_id": "019f6ed5-5634-7255-a4ac-687592a36b98",
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "sort_order": 4,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:17:53",
+        "updated_at": "2026-07-22 07:17:53"
+    },
+    {
+        "id": 1000,
+        "product_id": "019f6ed5-5634-7255-a4ac-687592a36b98",
+        "topping_group_id": "019f6efc-c881-7224-a7ec-a59a4538ac3e",
+        "sort_order": 5,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:17:53",
+        "updated_at": "2026-07-22 07:17:53"
+    },
+    {
+        "id": 1001,
+        "product_id": "019f6ed5-57b8-72d8-bd4b-cf688ffdecff",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:18:26",
+        "updated_at": "2026-07-22 07:18:26"
+    },
+    {
+        "id": 1002,
+        "product_id": "019f6ed5-57b8-72d8-bd4b-cf688ffdecff",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:18:26",
+        "updated_at": "2026-07-22 07:18:26"
+    },
+    {
+        "id": 1003,
+        "product_id": "019f6ed5-57be-72fa-9afc-4c382547cf3c",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:18:46",
+        "updated_at": "2026-07-22 07:18:46"
+    },
+    {
+        "id": 1004,
+        "product_id": "019f6ed5-57be-72fa-9afc-4c382547cf3c",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:18:46",
+        "updated_at": "2026-07-22 07:18:46"
+    },
+    {
+        "id": 1005,
+        "product_id": "019f6ed5-412c-73d9-b6e6-2bfefde2837e",
+        "topping_group_id": "019f6efc-c952-707c-abb3-f4c345f59802",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:19:03",
+        "updated_at": "2026-07-22 07:19:03"
+    },
+    {
+        "id": 1006,
+        "product_id": "019f6ed5-412c-73d9-b6e6-2bfefde2837e",
+        "topping_group_id": "019f6efc-ca11-7351-92c5-10c11c039b4c",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:19:03",
+        "updated_at": "2026-07-22 07:19:03"
+    },
+    {
+        "id": 1007,
+        "product_id": "019f6ed5-412c-73d9-b6e6-2bfefde2837e",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:19:03",
+        "updated_at": "2026-07-22 07:19:03"
+    },
+    {
+        "id": 1008,
+        "product_id": "019f6ed5-5b98-72e3-8698-dabc26cca54b",
+        "topping_group_id": "019f6efc-c952-707c-abb3-f4c345f59802",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:19:23",
+        "updated_at": "2026-07-22 07:19:23"
+    },
+    {
+        "id": 1009,
+        "product_id": "019f6ed5-5b98-72e3-8698-dabc26cca54b",
+        "topping_group_id": "019f6efc-ca11-7351-92c5-10c11c039b4c",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:19:23",
+        "updated_at": "2026-07-22 07:19:23"
+    },
+    {
+        "id": 1010,
+        "product_id": "019f6ed5-5b98-72e3-8698-dabc26cca54b",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:19:23",
+        "updated_at": "2026-07-22 07:19:23"
+    },
+    {
+        "id": 1017,
+        "product_id": "019f6ed5-59ab-72ff-9f44-08de7c14da96",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:21:42",
+        "updated_at": "2026-07-22 07:21:42"
+    },
+    {
+        "id": 1018,
+        "product_id": "019f6ed5-59ab-72ff-9f44-08de7c14da96",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:21:42",
+        "updated_at": "2026-07-22 07:21:42"
+    },
+    {
+        "id": 1019,
+        "product_id": "019f6ed5-5747-710c-88e6-f5cce1b89464",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:22:51",
+        "updated_at": "2026-07-22 07:22:51"
+    },
+    {
+        "id": 1020,
+        "product_id": "019f6ed5-5747-710c-88e6-f5cce1b89464",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:22:51",
+        "updated_at": "2026-07-22 07:22:51"
+    },
+    {
+        "id": 1021,
+        "product_id": "019f6ed5-57e5-72b6-a1c6-cb0623c022ea",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:26:31",
+        "updated_at": "2026-07-22 07:26:31"
+    },
+    {
+        "id": 1022,
+        "product_id": "019f6ed5-57e5-72b6-a1c6-cb0623c022ea",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:26:31",
+        "updated_at": "2026-07-22 07:26:31"
+    },
+    {
+        "id": 1026,
+        "product_id": "019f6ed5-5637-704c-885a-eeec767850a9",
+        "topping_group_id": "019f6efc-c9d6-73ab-8dc2-55bc03588b3b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:34:45",
+        "updated_at": "2026-07-22 07:34:45"
+    },
+    {
+        "id": 1027,
+        "product_id": "019f6ed5-5637-704c-885a-eeec767850a9",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 1,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:34:45",
+        "updated_at": "2026-07-22 07:34:45"
+    },
+    {
+        "id": 1028,
+        "product_id": "019f6ed5-5637-704c-885a-eeec767850a9",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 2,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:34:45",
+        "updated_at": "2026-07-22 07:34:45"
+    },
+    {
+        "id": 1032,
+        "product_id": "019f6ed5-5632-7132-b828-abd437a747a2",
+        "topping_group_id": "019f6efc-c9d6-73ab-8dc2-55bc03588b3b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:35:11",
+        "updated_at": "2026-07-22 07:35:11"
+    },
+    {
+        "id": 1033,
+        "product_id": "019f6ed5-5632-7132-b828-abd437a747a2",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 1,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:35:11",
+        "updated_at": "2026-07-22 07:35:11"
+    },
+    {
+        "id": 1034,
+        "product_id": "019f6ed5-5632-7132-b828-abd437a747a2",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 2,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:35:11",
+        "updated_at": "2026-07-22 07:35:11"
+    },
+    {
+        "id": 1038,
+        "product_id": "019f6ed5-5631-73f2-a16a-996fd145749d",
+        "topping_group_id": "019f6efc-c9d6-73ab-8dc2-55bc03588b3b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:35:48",
+        "updated_at": "2026-07-22 07:35:48"
+    },
+    {
+        "id": 1039,
+        "product_id": "019f6ed5-5631-73f2-a16a-996fd145749d",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 1,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:35:48",
+        "updated_at": "2026-07-22 07:35:48"
+    },
+    {
+        "id": 1040,
+        "product_id": "019f6ed5-5631-73f2-a16a-996fd145749d",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 2,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:35:48",
+        "updated_at": "2026-07-22 07:35:48"
+    },
+    {
+        "id": 1041,
+        "product_id": "019f6ed5-5707-70b5-935b-e1b5a71a286b",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:37:15",
+        "updated_at": "2026-07-22 07:37:15"
+    },
+    {
+        "id": 1042,
+        "product_id": "019f6ed5-5707-70b5-935b-e1b5a71a286b",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:37:15",
+        "updated_at": "2026-07-22 07:37:15"
+    },
+    {
+        "id": 1043,
+        "product_id": "019f6ed5-4292-72ec-82de-368dba7dee78",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:37:45",
+        "updated_at": "2026-07-22 07:37:45"
+    },
+    {
+        "id": 1044,
+        "product_id": "019f6ed5-4292-72ec-82de-368dba7dee78",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:37:45",
+        "updated_at": "2026-07-22 07:37:45"
+    },
+    {
+        "id": 1045,
+        "product_id": "019f6ed5-5720-717e-a0d5-4cd2b8929056",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:38:05",
+        "updated_at": "2026-07-22 07:38:05"
+    },
+    {
+        "id": 1046,
+        "product_id": "019f6ed5-5720-717e-a0d5-4cd2b8929056",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:38:05",
+        "updated_at": "2026-07-22 07:38:05"
+    },
+    {
+        "id": 1047,
+        "product_id": "019f6ed5-5b8e-728a-b6fd-4ce2cbbdd2a9",
+        "topping_group_id": "019f6efc-ca01-73b8-b7f1-196023afa95f",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:40:27",
+        "updated_at": "2026-07-22 07:40:27"
+    },
+    {
+        "id": 1048,
+        "product_id": "019f6ed5-5b8e-728a-b6fd-4ce2cbbdd2a9",
+        "topping_group_id": "019f88aa-6d0f-7051-86ed-3de6b68701b0",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-22 07:40:27",
+        "updated_at": "2026-07-22 07:40:27"
+    },
+    {
+        "id": 1049,
+        "product_id": "019f6ed5-4118-70e5-87eb-afd281f845d8",
+        "topping_group_id": "019f6efc-c952-707c-abb3-f4c345f59802",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-28 02:23:51",
+        "updated_at": "2026-07-28 02:23:51"
+    },
+    {
+        "id": 1050,
+        "product_id": "019f6ed5-4118-70e5-87eb-afd281f845d8",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-28 02:23:51",
+        "updated_at": "2026-07-28 02:23:51"
+    },
+    {
+        "id": 1051,
+        "product_id": "019f6ed5-4118-70e5-87eb-afd281f845d8",
+        "topping_group_id": "019f6efc-ca11-7351-92c5-10c11c039b4c",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-28 02:23:51",
+        "updated_at": "2026-07-28 02:23:51"
+    },
+    {
+        "id": 1052,
+        "product_id": "019f6ed5-4194-7060-84c8-59839f36678b",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-28 02:24:27",
+        "updated_at": "2026-07-28 02:24:27"
+    },
+    {
+        "id": 1053,
+        "product_id": "019f6ed5-4194-7060-84c8-59839f36678b",
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-28 02:24:27",
+        "updated_at": "2026-07-28 02:24:27"
+    },
+    {
+        "id": 1054,
+        "product_id": "019f6ed5-4194-7060-84c8-59839f36678b",
+        "topping_group_id": "019f6efc-c952-707c-abb3-f4c345f59802",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-28 02:24:27",
+        "updated_at": "2026-07-28 02:24:27"
+    },
+    {
+        "id": 1055,
+        "product_id": "019f6ed5-4194-7060-84c8-59839f36678b",
+        "topping_group_id": "019f6efc-ca11-7351-92c5-10c11c039b4c",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-28 02:24:27",
+        "updated_at": "2026-07-28 02:24:27"
+    },
+    {
+        "id": 1056,
+        "product_id": "019f6ed5-50e2-7235-b457-e25026fba257",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-28 02:25:23",
+        "updated_at": "2026-07-28 02:25:23"
+    },
+    {
+        "id": 1057,
+        "product_id": "019f6ed5-50e2-7235-b457-e25026fba257",
+        "topping_group_id": "019f6efc-c931-738f-999a-1c41658655e3",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-28 02:25:23",
+        "updated_at": "2026-07-28 02:25:23"
+    },
+    {
+        "id": 1058,
+        "product_id": "019f6ed5-50e2-7235-b457-e25026fba257",
+        "topping_group_id": "019f6efc-ca11-7351-92c5-10c11c039b4c",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-07-28 02:25:23",
+        "updated_at": "2026-07-28 02:25:23"
+    },
+    {
+        "id": 1069,
+        "product_id": "dd8ca5c6-a2c7-47d9-b6a3-b585a56c7467",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-08-07 04:17:03",
+        "updated_at": "2026-08-07 04:17:03"
+    },
+    {
+        "id": 1070,
+        "product_id": "dd8ca5c6-a2c7-47d9-b6a3-b585a56c7467",
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-08-07 04:17:03",
+        "updated_at": "2026-08-07 04:17:03"
+    },
+    {
+        "id": 1071,
+        "product_id": "45580405-787c-435c-a6be-3049b3c09ef2",
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-08-07 04:17:16",
+        "updated_at": "2026-08-07 04:17:16"
+    },
+    {
+        "id": 1072,
+        "product_id": "45580405-787c-435c-a6be-3049b3c09ef2",
+        "topping_group_id": "019fd635-82d5-7152-ba44-c8191e4a8278",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-08-07 04:17:16",
+        "updated_at": "2026-08-07 04:17:16"
+    },
+    {
+        "id": 1113,
+        "product_id": "aca43fe7-1b12-40b6-897f-b350023b352f",
+        "topping_group_id": "019f6efc-c9e7-738f-b305-cdf26cf067bf",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-08-07 04:48:29",
+        "updated_at": "2026-08-07 04:48:29"
+    },
+    {
+        "id": 1114,
+        "product_id": "aca43fe7-1b12-40b6-897f-b350023b352f",
+        "topping_group_id": "019f6efc-c9f6-7353-bffe-7c4478da6ef5",
+        "sort_order": 1,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-08-07 04:48:29",
+        "updated_at": "2026-08-07 04:48:29"
+    },
+    {
+        "id": 1115,
+        "product_id": "aca43fe7-1b12-40b6-897f-b350023b352f",
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "sort_order": 2,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-08-07 04:48:29",
+        "updated_at": "2026-08-07 04:48:29"
+    },
+    {
+        "id": 1116,
+        "product_id": "aca43fe7-1b12-40b6-897f-b350023b352f",
+        "topping_group_id": "019f6efc-c881-7224-a7ec-a59a4538ac3e",
+        "sort_order": 3,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-08-07 04:48:29",
+        "updated_at": "2026-08-07 04:48:29"
+    },
+    {
+        "id": 1117,
+        "product_id": "84b4fad8-f17a-4e27-9717-668f5e9e0777",
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-08-07 04:55:30",
+        "updated_at": "2026-08-07 04:55:30"
+    },
+    {
+        "id": 1118,
+        "product_id": "84b4fad8-f17a-4e27-9717-668f5e9e0777",
+        "topping_group_id": "019f6efc-c9e7-738f-b305-cdf26cf067bf",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-08-07 04:55:30",
+        "updated_at": "2026-08-07 04:55:30"
+    },
+    {
+        "id": 1119,
+        "product_id": "84b4fad8-f17a-4e27-9717-668f5e9e0777",
+        "topping_group_id": "019f6efc-c881-7224-a7ec-a59a4538ac3e",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-08-07 04:55:30",
+        "updated_at": "2026-08-07 04:55:30"
+    },
+    {
+        "id": 1127,
+        "product_id": "251edd2c-fe82-4a91-a751-d814aa99093c",
+        "topping_group_id": "019f6efc-c9e7-738f-b305-cdf26cf067bf",
+        "sort_order": 0,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-08-07 08:10:52",
+        "updated_at": "2026-08-07 08:10:52"
+    },
+    {
+        "id": 1128,
+        "product_id": "251edd2c-fe82-4a91-a751-d814aa99093c",
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "sort_order": 1,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-08-07 08:10:52",
+        "updated_at": "2026-08-07 08:10:52"
+    },
+    {
+        "id": 1129,
+        "product_id": "251edd2c-fe82-4a91-a751-d814aa99093c",
+        "topping_group_id": "019f6efc-c881-7224-a7ec-a59a4538ac3e",
+        "sort_order": 2,
+        "min_select_override": null,
+        "max_select_override": null,
+        "created_at": "2026-08-07 08:10:52",
+        "updated_at": "2026-08-07 08:10:52"
+    }
+]

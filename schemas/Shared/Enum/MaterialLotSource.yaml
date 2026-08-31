@@ -1,0 +1,43 @@
+# ==============================================================================
+# Material Lot Source Enum (材料ロット出所 / Nguồn gốc lô nguyên liệu)
+# ==============================================================================
+#
+# Origin of a MaterialLot row. Drives traceability semantics:
+# `inbound` lots have supplier metadata; `production` lots have a producing batch.
+#
+# Values:
+#   - inbound: Nhập từ NCC (仕入)
+#     Created by: MaterialLotService::receive (Shop receive form)
+#     Carries: supplier_name, supplier_lot_code, received_at, received_temperature
+#     Genealogy: leaf node in backward trace (= top of supply chain in our system)
+#
+#   - production: Từ batch sản xuất (生産)
+#     Created by: MaterialBatchService::complete (output lot mint)
+#     Carries: produced_by_batch_id, computed unit_cost (weighted avg), no supplier
+#     Genealogy: child of every consumed lot via genealogy_links rows
+#
+# Used in:
+#   - MaterialLot.source: distinguishes the two minting paths
+#   - TraceService: forward walk stops at production-leaf, backward walk stops at inbound-leaf
+#   - Recall scope filter: many recalls only target `inbound` lots from a single supplier
+#
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: 材料ロット出所
+  en: Material Lot Source
+  vi: Nguồn gốc lô nguyên liệu
+
+values:
+  - value: inbound
+    label:
+      ja: 仕入
+      en: Inbound
+      vi: Nhập từ NCC
+  - value: production
+    label:
+      ja: 生産
+      en: Production
+      vi: Từ batch sản xuất

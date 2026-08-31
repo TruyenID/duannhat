@@ -1,0 +1,145 @@
+# ==============================================================================
+# CashDeviceInventorySnapshot — 在高 của máy 釣銭機 tại một mốc
+# ==============================================================================
+#
+# T2 của #2876 (issue #2879).
+#
+# Một row = MỘT LẦN HỎI MÁY "trong mày đang có bao nhiêu tiền", tại một ranh ca.
+#
+# ## Vì sao bảng này tồn tại
+#
+# Adapter Glory đã có `GetInventory` (在高取得) và `GetStatus` (状態取得) từ đầu.
+# KHÔNG AI GỌI — đo được:
+#
+#   grep -rn "GetInventory\|GetStatus(" workstation/internal --include=*.go
+#     (trừ file khai + test) → RỖNG
+#
+# Nên chốt ca chỉ có HAI chân: sổ (Σ order_payments tiền mặt) ↔ người đếm tay
+# (till_cash_denomination_counts). Chân thứ ba — hỏi chính cái máy đang GIỮ
+# tiền — chưa bao giờ được nối, dù phía cổng thanh toán đã đủ 3-way từ plan-050
+# (order_payments ↔ payment_settlements ↔ gateway_payouts).
+#
+# ## Máy TỰ KHAI ĐƯỢC là nó KHÔNG CHẮC — và đó là dữ kiện quan trọng nhất
+#
+# `glory.Inventory.CashErrorStatus.Cash` là map per-mệnh-giá đánh dấu 在高不確定.
+# Mệnh giá nào máy nói "tôi không chắc" mà vẫn đem tính lệch là BỊA ra một con
+# số rồi bắt quán đi tìm tiền không mất. `uncertain_denominations` giữ đúng tập
+# đó, và `total_minor` chỉ cộng những mệnh giá CHẮC CHẮN.
+#
+# `bill_reject_count` cùng họ: tiền trong khay từ chối là tiền CÓ THẬT nhưng
+# không nằm trong 在高. Không trừ ra sẽ ra lệch giả.
+#
+# ## Đây là NHÂN CHỨNG, không phải QUAN TOÀ
+#
+# 在高 của máy KHÔNG ghi đè `till_cash_denomination_counts` và không sửa
+# `TillCashEvent`. Máy vẫn đếm sai được (tiền kẹt khe, tiền giả bị giữ lại), nên
+# nó là phép đo thứ ba để ĐỐI CHIẾU, không phải nguồn chân lý mới. Lệch quá
+# ngưỡng ⇒ cảnh báo cho người; không tự sửa gì.
+#
+# Business Rules:
+#   - BR-INV01: UNIQUE (peripheral_device_id, till_session_id, count_phase) —
+#               một mốc một ảnh chụp. Chụp lại cùng mốc là ghi đè, không nhân đôi.
+#   - BR-INV02: `total_minor` = Σ trên mệnh giá KHÔNG thuộc
+#               `uncertain_denominations`. Cộng cả mệnh giá bất định là bịa.
+#   - BR-INV03: NO soft delete — sổ audit.
+#   - BR-INV04: Mọi số là minor units. Máy đếm tờ và đồng xu.
+#
+# Written by: POST /api/v1/workstation/cash-device-inventory (device token).
+# Read by:   đối soát 3 chân (CashDrawerReconciliationService).
+# ==============================================================================
+
+displayName:
+  en: Cash Device Inventory Snapshot
+  ja: 釣銭機在高スナップショット
+  vi: Ảnh chụp tiền trong máy
+
+kind: object
+
+options:
+  timestamps: true
+  id: Uuid
+  softDelete: false
+  indexes:
+    # BR-INV01 — khoá idempotent của đường sync-UP.
+    - columns: [peripheral_device_id, till_session_id, count_phase]
+      unique: true
+      name: cash_device_inv_device_session_phase_unique
+    - columns: [till_session_id, count_phase]
+    - columns: [peripheral_device_id, captured_at]
+
+properties:
+  peripheralDevice:
+    type: Association
+    relation: ManyToOne
+    target: PeripheralDevice
+    onDelete: RESTRICT
+    displayName: { en: Cash Device, ja: 釣銭機, vi: Máy thu tiền }
+
+  tillSession:
+    # Ca thu ngân. NOT NULL có chủ đích: một ảnh chụp 在高 không gắn ca thì
+    # không đối chiếu được với cái gì, và một hàng không đối chiếu được là một
+    # hàng sẽ được tin mà không ai kiểm.
+    type: Association
+    relation: ManyToOne
+    target: TillSession
+    onDelete: RESTRICT
+    displayName: { en: Till Session, ja: レジ精算, vi: Ca thu ngân }
+
+  count_phase:
+    # Dùng lại từ vựng đếm tiền đã có (`opening` / `closing`) thay vì đẻ enum
+    # thứ hai cho cùng khái niệm — bài học #2860.
+    type: EnumRef
+    enum: TillCountPhase
+    filterable: true
+    displayName: { en: Count Phase, ja: 計数段階, vi: Giai đoạn }
+
+  denominations:
+    # {mệnh giá: số tờ/đồng} — NGUYÊN VĂN `Inventory.CashCount.Cash`.
+    type: Json
+    displayName: { en: Denominations, ja: 金種内訳, vi: Theo mệnh giá }
+
+  uncertain_denominations:
+    # Mệnh giá máy TỰ KHAI là 在高不確定 (`CashErrorStatus.Cash`). Báo cáo phải
+    # nói rõ đã loại cái nào — im lặng loại là giấu mất một phần sự thật.
+    type: Json
+    nullable: true
+    displayName: { en: Uncertain Denominations, ja: 在高不確定金種, vi: Mệnh giá không chắc }
+
+  bill_reject_count:
+    # >0 = khay từ chối đang giữ tiền. Tiền thật, ngoài 在高.
+    type: Int
+    default: 0
+    displayName: { en: Bill Reject Count, ja: リジェクト枚数, vi: Tiền khay từ chối }
+
+  total_minor:
+    # BR-INV02 — Σ chỉ trên mệnh giá CHẮC CHẮN.
+    type: BigInt
+    default: 0
+    displayName: { en: Total (minor), ja: 在高合計, vi: Tổng chắc chắn }
+
+  machine_seq_no:
+    # `Inventory.SeqNo` — trọng tài khi gửi lại, cùng luật với
+    # `cash_device_transactions.machine_seq_no`.
+    type: BigInt
+    nullable: true
+    displayName: { en: Machine Seq No, ja: 機器連番, vi: Số thứ tự máy }
+
+  captured_at:
+    # Giờ máy trạm chụp. KHÔNG đi qua BusinessClock — đây là dấu thời gian
+    # thiết bị (#1091); tầng trình bày đổi múi giờ.
+    type: Timestamp
+    displayName: { en: Captured At, ja: 取得日時, vi: Thời điểm chụp }
+
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    onDelete: RESTRICT
+    displayName: { en: Branch, ja: 店舗, vi: Chi nhánh }
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: RESTRICT
+    displayName: { en: Organization, ja: 組織, vi: Tổ chức }

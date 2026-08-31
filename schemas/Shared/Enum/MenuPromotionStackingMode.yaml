@@ -1,0 +1,43 @@
+# =============================================================================
+# MenuPromotionStackingMode (スタッキングモード / Chế độ cộng dồn)
+# =============================================================================
+#
+# Per-promotion flag controlling whether items hưởng promotion này có
+# stack được với Coupon code-driven hay không. Decision B5 — flag để
+# ở từng promotion thay vì global per-shop, vì shop manager muốn chạy
+# đa chiến dịch song song với rule khác nhau (vd: "Đồ uống happy hour
+# có thể stack" + "Set premium 50% off chỉ thuần").
+#
+# Effect tại CouponService::apply():
+#   exclusive_with_coupons → nếu order có ANY item promotion cờ này
+#                            → 422 coupon_excluded_by_active_promotion.
+#                            Customer phải remove items hoặc bỏ coupon.
+#   stackable_with_coupons → coupon áp được; coupon discount tính trên
+#                            subtotal SAU promotion (giá đã giảm), nên
+#                            cộng dồn nhưng không phá rule rounding.
+#
+# Effect tại CustomerOrderService::addItems() (Decision B7):
+#   exclusive khi order đã có coupon → throw
+#   CannotAddPromotionItemWithCouponException → POS hiển thị Confirm
+#   Dialog "Auto-remove coupon để add món?" → nếu user OK, FE call
+#   release-coupon trước rồi retry addItem.
+# =============================================================================
+
+kind: enum
+
+displayName:
+  ja: スタッキングモード
+  en: Stacking Mode
+  vi: Chế độ cộng dồn
+
+values:
+  - value: exclusive_with_coupons
+    label:
+      ja: クーポンと併用不可
+      en: Exclusive with Coupons
+      vi: Không cộng dồn coupon
+  - value: stackable_with_coupons
+    label:
+      ja: クーポンと併用可能
+      en: Stackable with Coupons
+      vi: Cộng dồn được coupon

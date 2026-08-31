@@ -1,0 +1,126 @@
+# =============================================================================
+# ProductOption (商品オプション / Tùy chọn sản phẩm)
+# =============================================================================
+#
+# Một "trục" tùy chọn của Product (vd: Size, Color, Material). Mỗi Product có
+# tối đa 3 ProductOption — cap cứng theo pattern Shopify để giữ ProductSku
+# flat (3 FK columns thay vì pivot table).
+#
+# Quan hệ:
+#   Product (1) ──< ProductOption (1) ──< ProductOptionValue
+#                                            │
+#                                            └── referenced bởi
+#                                                ProductSku.optionValue{N}_id
+#
+# Position rules (CRITICAL):
+#   - position ∈ {1, 2, 3}, unique trong cùng Product.
+#   - position MAPS 1-1 với ProductSku.optionValue{N}_id: option có position=1
+#     thì các value của nó CHỈ được gán vào ProductSku.optionValue1_id.
+#   - **KHÔNG bao giờ được đổi position** khi đã có ProductSku tham chiếu —
+#     enforce ở ProductOptionService::update (không express được trong YAML).
+#   - **KHÔNG bao giờ được đổi key** khi đã có ProductSku tham chiếu —
+#     tránh phá vỡ ý nghĩa nghiệp vụ (vd "color" → "size" sẽ làm SKU vô nghĩa).
+#
+# Khi thêm ProductOption mới (vd thêm Material làm position=3):
+#   - SKU cũ tự động có optionValue3_id = NULL (preserve, không phá history)
+#   - Có thể tạo SKU mới với đầy đủ 3 option_value
+#   - SKU cũ và mới cùng tồn tại — option_signature đảm bảo không trùng
+#
+# i18n:
+#   - `name` translatable → table `product_option_translations` qua Astrotomic.
+#
+# =============================================================================
+
+displayName:
+  en: Product Option
+  ja: 商品オプション
+  vi: Tùy chọn sản phẩm
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+
+  audit:
+    createdBy: true
+    updatedBy: true
+
+  indexes:
+    # 1 product không bao giờ có 2 option cùng position. Cũng đảm bảo
+    # position 1/2/3 là unique slot.
+    - columns: [product_id, position]
+      unique: true
+    # Key (vd "color") duy nhất trong scope của product.
+    - columns: [product_id, key]
+      unique: true
+
+properties:
+  # Product chứa option này. CASCADE — xoá product thì xoá option theo.
+  product:
+    type: Association
+    relation: ManyToOne
+    target: Product
+    onDelete: CASCADE
+    displayName:
+      en: Product
+      ja: 商品
+      vi: Sản phẩm
+
+  # Slug nội bộ, vd "color", "size", "material". Dùng cho logic code, KHÔNG
+  # hiển thị end-user. IMMUTABLE khi đã có SKU tham chiếu.
+  key:
+    type: String
+    length: 50
+    displayName:
+      en: Option Key
+      ja: オプションキー
+      vi: Key tùy chọn
+    description:
+      en: Internal slug. Immutable once any ProductSku references this option.
+      ja: 内部スラッグ。SKUがこのオプションを参照している場合は変更不可。
+      vi: Slug nội bộ. Không đổi được khi đã có SKU tham chiếu.
+
+  # Tên hiển thị end-user. Translatable → product_option_translations.
+  name:
+    type: String
+    length: 100
+    translatable: true
+    displayName:
+      en: Option Name
+      ja: オプション名
+      vi: Tên tùy chọn
+
+  # 1, 2, hoặc 3. Map 1-1 với ProductSku.optionValue{N}_id.
+  # IMMUTABLE khi có SKU tham chiếu — enforce ở ProductOptionService.
+  position:
+    type: TinyInt
+    unsigned: true
+    displayName:
+      en: Position
+      ja: 順序
+      vi: Thứ tự
+    description:
+      en: 1..3. Maps to ProductSku.optionValue{N}_id. NEVER reassign once SKUs exist.
+      ja: 1..3。ProductSku.optionValue{N}_idと対応。SKU存在時は再割当て禁止。
+      vi: 1..3. Map tới ProductSku.optionValue{N}_id. KHÔNG được đổi khi đã có SKU.
+
+  is_active:
+    type: Boolean
+    default: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+
+  # Các giá trị của option (vd Size có S/M/L).
+  values:
+    type: Association
+    relation: OneToMany
+    target: ProductOptionValue
+    mappedBy: option
+    displayName:
+      en: Values
+      ja: 値
+      vi: Giá trị

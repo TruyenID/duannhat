@@ -1,0 +1,1592 @@
+{
+  "receipt": {
+    "schema": "tempo.print.v1",
+    "kind": "receipt",
+    "paper": {
+      "columns_58mm": 32,
+      "columns_80mm": 48
+    },
+    "blocks": [
+      {
+        "id": "logo",
+        "type": "image",
+        "enabled": false,
+        "source": "brand_logo",
+        "align": "center"
+      },
+      {
+        "id": "store_info",
+        "type": "params",
+        "enabled": true,
+        "align": "left",
+        "fields": [
+          "store_organization",
+          "store_sub_name",
+          "store_name",
+          "store_address",
+          "store_phone"
+        ]
+      },
+      {
+        "id": "title",
+        "type": "text",
+        "enabled": false,
+        "align": "right",
+        "bold": true,
+        "i18n": {
+          "ja": "支払済",
+          "en": "PAID",
+          "vi": "DA THANH TOAN"
+        }
+      },
+      {
+        "id": "issued_at",
+        "type": "locked"
+      },
+      {
+        "id": "split_banner",
+        "type": "locked"
+      },
+      {
+        "id": "order_meta",
+        "type": "params",
+        "enabled": true,
+        "fields": [
+          "order_no",
+          "table"
+        ]
+      },
+      {
+        "id": "customer_header",
+        "type": "params",
+        "enabled": true,
+        "fields": [
+          "customer_name",
+          "customer_phone",
+          "pickup_time"
+        ]
+      },
+      {
+        "id": "order_note",
+        "type": "params",
+        "enabled": true
+      },
+      {
+        "id": "header_text",
+        "type": "text",
+        "enabled": false,
+        "align": "center",
+        "fallback": true,
+        "i18n": {}
+      },
+      {
+        "id": "column_header",
+        "type": "text",
+        "enabled": true,
+        "i18n": {
+          "ja": "商品                          合計",
+          "en": "Item                        Total",
+          "vi": "San pham                      Tong"
+        }
+      },
+      {
+        "id": "items",
+        "type": "line_items",
+        "columns": [
+          "name",
+          "qty",
+          "amount"
+        ]
+      },
+      {
+        "id": "subtotal",
+        "type": "locked"
+      },
+      {
+        "id": "discounts",
+        "type": "locked"
+      },
+      {
+        "id": "service_charge",
+        "type": "locked"
+      },
+      {
+        "id": "grand_total",
+        "type": "locked"
+      },
+      {
+        "id": "tax_breakdown",
+        "type": "locked"
+      },
+      {
+        "id": "tax_legend",
+        "type": "locked"
+      },
+      {
+        "id": "registration_number",
+        "type": "locked",
+        "enabled": true
+      },
+      {
+        "id": "payments",
+        "type": "locked"
+      },
+      {
+        "id": "change_due",
+        "type": "locked"
+      },
+      {
+        "id": "remaining",
+        "type": "locked"
+      },
+      {
+        "id": "invoice_number",
+        "type": "locked"
+      },
+      {
+        "id": "reprint_marker",
+        "type": "locked"
+      },
+      {
+        "id": "qr_block",
+        "type": "qr",
+        "enabled": false,
+        "source": "order_url",
+        "align": "center"
+      },
+      {
+        "id": "footer_text",
+        "type": "text",
+        "enabled": false,
+        "align": "center",
+        "fallback": true,
+        "i18n": {}
+      },
+      {
+        "id": "greeting",
+        "type": "text",
+        "enabled": false,
+        "align": "center",
+        "fallback": true,
+        "i18n": {}
+      }
+    ]
+  },
+  "kitchen": {
+    "schema": "tempo.print.v1",
+    "paper": {
+      "columns_58mm": 32,
+      "columns_80mm": 48
+    },
+    "kind": "kitchen",
+    "top_feed": 3,
+    "blocks": [
+      {
+        "id": "store_info",
+        "type": "params",
+        "enabled": true,
+        "align": "left",
+        "fields": [
+          "store_organization",
+          "store_sub_name",
+          "store_name",
+          "store_address",
+          "store_phone"
+        ]
+      },
+      {
+        "id": "title",
+        "type": "text",
+        "enabled": false,
+        "align": "right",
+        "bold": true,
+        "i18n": {
+          "ja": "厨房伝票",
+          "en": "KITCHEN",
+          "vi": "PHIEU BEP"
+        }
+      },
+      {
+        "id": "issued_at",
+        "type": "locked"
+      },
+      {
+        "id": "order_meta",
+        "type": "params",
+        "enabled": true,
+        "fields": [
+          "order_no",
+          "table",
+          "order_type",
+          "ticket_seq"
+        ]
+      },
+      {
+        "id": "customer_header",
+        "type": "params",
+        "enabled": true,
+        "fields": [
+          "customer_name",
+          "customer_phone",
+          "pickup_time"
+        ]
+      },
+      {
+        "id": "order_note",
+        "type": "params",
+        "enabled": true
+      },
+      {
+        "id": "column_header",
+        "type": "text",
+        "enabled": true,
+        "i18n": {
+          "ja": "商品                          合計",
+          "en": "Item                        Total",
+          "vi": "San pham                      Tong"
+        }
+      },
+      {
+        "id": "items",
+        "type": "line_items",
+        "columns": [
+          "name",
+          "qty",
+          "amount"
+        ]
+      },
+      {
+        "id": "subtotal",
+        "type": "locked"
+      },
+      {
+        "id": "service_charge",
+        "type": "locked"
+      },
+      {
+        "id": "grand_total",
+        "type": "locked"
+      },
+      {
+        "id": "tax_breakdown",
+        "type": "locked"
+      },
+      {
+        "id": "tax_legend",
+        "type": "locked"
+      },
+      {
+        "id": "registration_number",
+        "type": "locked",
+        "enabled": false
+      },
+      {
+        "id": "remaining",
+        "type": "locked"
+      },
+      {
+        "id": "footer_text",
+        "type": "text",
+        "enabled": false,
+        "align": "center",
+        "fallback": true
+      }
+    ]
+  },
+  "runner": {
+    "schema": "tempo.print.v1",
+    "paper": {
+      "columns_58mm": 32,
+      "columns_80mm": 48
+    },
+    "kind": "runner",
+    "blocks": [
+      {
+        "id": "logo",
+        "type": "image",
+        "enabled": false,
+        "source": "brand_logo",
+        "align": "center"
+      },
+      {
+        "id": "store_info",
+        "type": "params",
+        "enabled": true,
+        "align": "left",
+        "fields": [
+          "store_organization",
+          "store_sub_name",
+          "store_name",
+          "store_address",
+          "store_phone"
+        ]
+      },
+      {
+        "id": "title",
+        "type": "text",
+        "enabled": false,
+        "align": "right",
+        "bold": true,
+        "i18n": {
+          "ja": "テーブル伝票",
+          "en": "TABLE BILL",
+          "vi": "HOA DON BAN"
+        }
+      },
+      {
+        "id": "issued_at",
+        "type": "locked"
+      },
+      {
+        "id": "order_meta",
+        "type": "params",
+        "enabled": true,
+        "fields": [
+          "order_no",
+          "table"
+        ]
+      },
+      {
+        "id": "customer_header",
+        "type": "params",
+        "enabled": true,
+        "fields": [
+          "customer_name",
+          "customer_phone",
+          "pickup_time"
+        ]
+      },
+      {
+        "id": "order_note",
+        "type": "params",
+        "enabled": true
+      },
+      {
+        "id": "column_header",
+        "type": "text",
+        "enabled": true,
+        "i18n": {
+          "ja": "商品                          合計",
+          "en": "Item                        Total",
+          "vi": "San pham                      Tong"
+        }
+      },
+      {
+        "id": "items",
+        "type": "line_items",
+        "columns": [
+          "name",
+          "qty",
+          "amount"
+        ]
+      },
+      {
+        "id": "subtotal",
+        "type": "locked"
+      },
+      {
+        "id": "service_charge",
+        "type": "locked"
+      },
+      {
+        "id": "grand_total",
+        "type": "locked"
+      },
+      {
+        "id": "tax_breakdown",
+        "type": "locked"
+      },
+      {
+        "id": "tax_legend",
+        "type": "locked"
+      },
+      {
+        "id": "registration_number",
+        "type": "locked",
+        "enabled": true
+      },
+      {
+        "id": "remaining",
+        "type": "locked"
+      },
+      {
+        "id": "reprint_marker",
+        "type": "locked"
+      },
+      {
+        "id": "qr_block",
+        "type": "qr",
+        "enabled": true,
+        "source": "order_url",
+        "align": "center"
+      },
+      {
+        "id": "footer_text",
+        "type": "text",
+        "enabled": false,
+        "align": "center",
+        "fallback": true
+      }
+    ]
+  },
+  "delta_qr": {
+    "schema": "tempo.print.v1",
+    "kind": "delta_qr",
+    "paper": {
+      "columns_58mm": 32,
+      "columns_80mm": 48
+    },
+    "blocks": [
+      {
+        "id": "logo",
+        "type": "image",
+        "enabled": false,
+        "source": "brand_logo",
+        "align": "center"
+      },
+      {
+        "id": "store_info",
+        "type": "params",
+        "enabled": true,
+        "align": "left",
+        "fields": [
+          "store_organization",
+          "store_sub_name",
+          "store_name",
+          "store_address",
+          "store_phone"
+        ]
+      },
+      {
+        "id": "title",
+        "type": "text",
+        "enabled": false,
+        "align": "right",
+        "bold": true,
+        "i18n": {
+          "ja": "追加商品",
+          "en": "NEW ITEMS",
+          "vi": "MON VUA THEM"
+        }
+      },
+      {
+        "id": "issued_at",
+        "type": "locked"
+      },
+      {
+        "id": "order_meta",
+        "type": "params",
+        "enabled": true,
+        "fields": [
+          "order_no",
+          "table"
+        ]
+      },
+      {
+        "id": "customer_header",
+        "type": "params",
+        "enabled": true,
+        "fields": [
+          "customer_name",
+          "customer_phone",
+          "pickup_time"
+        ]
+      },
+      {
+        "id": "order_note",
+        "type": "params",
+        "enabled": true
+      },
+      {
+        "id": "column_header",
+        "type": "text",
+        "enabled": true,
+        "i18n": {
+          "ja": "商品                          合計",
+          "en": "Item                        Total",
+          "vi": "San pham                      Tong"
+        }
+      },
+      {
+        "id": "items",
+        "type": "line_items",
+        "columns": [
+          "name",
+          "qty",
+          "amount"
+        ]
+      },
+      {
+        "id": "grand_total",
+        "type": "locked"
+      },
+      {
+        "id": "tax_breakdown",
+        "type": "locked"
+      },
+      {
+        "id": "tax_legend",
+        "type": "locked"
+      },
+      {
+        "id": "registration_number",
+        "type": "locked",
+        "enabled": true
+      },
+      {
+        "id": "reprint_marker",
+        "type": "locked"
+      },
+      {
+        "id": "qr_block",
+        "type": "qr",
+        "enabled": true,
+        "source": "order_url",
+        "align": "center"
+      },
+      {
+        "id": "footer_text",
+        "type": "text",
+        "enabled": false,
+        "align": "center",
+        "fallback": true,
+        "i18n": {}
+      }
+    ]
+  },
+  "remaining": {
+    "schema": "tempo.print.v1",
+    "kind": "remaining",
+    "paper": {
+      "columns_58mm": 32,
+      "columns_80mm": 48
+    },
+    "blocks": [
+      {
+        "id": "logo",
+        "type": "image",
+        "enabled": false,
+        "source": "brand_logo",
+        "align": "center"
+      },
+      {
+        "id": "store_info",
+        "type": "params",
+        "enabled": true,
+        "align": "left",
+        "fields": [
+          "store_organization",
+          "store_sub_name",
+          "store_name",
+          "store_address",
+          "store_phone"
+        ]
+      },
+      {
+        "id": "title",
+        "type": "text",
+        "enabled": true,
+        "align": "right",
+        "bold": true,
+        "i18n": {
+          "ja": "残額",
+          "en": "REMAINING",
+          "vi": "PHAN CON LAI"
+        }
+      },
+      {
+        "id": "issued_at",
+        "type": "locked"
+      },
+      {
+        "id": "order_meta",
+        "type": "params",
+        "enabled": true,
+        "fields": [
+          "order_no",
+          "table"
+        ]
+      },
+      {
+        "id": "customer_header",
+        "type": "params",
+        "enabled": true,
+        "fields": [
+          "customer_name",
+          "customer_phone",
+          "pickup_time"
+        ]
+      },
+      {
+        "id": "order_note",
+        "type": "params",
+        "enabled": true
+      },
+      {
+        "id": "column_header",
+        "type": "text",
+        "enabled": true,
+        "i18n": {
+          "ja": "商品                          合計",
+          "en": "Item                        Total",
+          "vi": "San pham                      Tong"
+        }
+      },
+      {
+        "id": "items",
+        "type": "line_items",
+        "columns": [
+          "name",
+          "qty",
+          "amount"
+        ]
+      },
+      {
+        "id": "subtotal",
+        "type": "locked"
+      },
+      {
+        "id": "service_charge",
+        "type": "locked"
+      },
+      {
+        "id": "grand_total",
+        "type": "locked"
+      },
+      {
+        "id": "tax_breakdown",
+        "type": "locked"
+      },
+      {
+        "id": "tax_legend",
+        "type": "locked"
+      },
+      {
+        "id": "registration_number",
+        "type": "locked",
+        "enabled": true
+      },
+      {
+        "id": "payments",
+        "type": "locked"
+      },
+      {
+        "id": "change_due",
+        "type": "locked"
+      },
+      {
+        "id": "remaining",
+        "type": "locked"
+      },
+      {
+        "id": "reprint_marker",
+        "type": "locked"
+      },
+      {
+        "id": "qr_block",
+        "type": "qr",
+        "enabled": true,
+        "source": "order_url",
+        "align": "center"
+      },
+      {
+        "id": "footer_text",
+        "type": "text",
+        "enabled": false,
+        "align": "center",
+        "fallback": true,
+        "i18n": {}
+      }
+    ]
+  },
+  "red_invoice": {
+    "schema": "tempo.print.v1",
+    "kind": "red_invoice",
+    "paper": {
+      "columns_58mm": 32,
+      "columns_80mm": 48
+    },
+    "blocks": [
+      {
+        "id": "logo",
+        "type": "image",
+        "enabled": false,
+        "source": "brand_logo",
+        "align": "center"
+      },
+      {
+        "id": "store_info",
+        "type": "params",
+        "enabled": true,
+        "align": "left",
+        "fields": [
+          "store_organization",
+          "store_sub_name",
+          "store_name",
+          "store_address",
+          "store_phone"
+        ]
+      },
+      {
+        "id": "title",
+        "type": "text",
+        "enabled": true,
+        "align": "right",
+        "bold": true,
+        "i18n": {
+          "ja": "領収書",
+          "en": "PAYMENT RECEIPT",
+          "vi": "PHIEU THANH TOAN"
+        }
+      },
+      {
+        "id": "red_invoice_marker",
+        "type": "locked"
+      },
+      {
+        "id": "issued_at",
+        "type": "locked"
+      },
+      {
+        "id": "split_banner",
+        "type": "locked"
+      },
+      {
+        "id": "order_meta",
+        "type": "params",
+        "enabled": true,
+        "fields": [
+          "order_no",
+          "table"
+        ]
+      },
+      {
+        "id": "customer_header",
+        "type": "params",
+        "enabled": true,
+        "fields": [
+          "customer_name"
+        ]
+      },
+      {
+        "id": "order_note",
+        "type": "params",
+        "enabled": true
+      },
+      {
+        "id": "column_header",
+        "type": "text",
+        "enabled": true,
+        "i18n": {
+          "ja": "商品                          合計",
+          "en": "Item                        Total",
+          "vi": "San pham                      Tong"
+        }
+      },
+      {
+        "id": "items",
+        "type": "line_items",
+        "columns": [
+          "name",
+          "qty",
+          "amount"
+        ]
+      },
+      {
+        "id": "subtotal",
+        "type": "locked"
+      },
+      {
+        "id": "service_charge",
+        "type": "locked"
+      },
+      {
+        "id": "grand_total",
+        "type": "locked"
+      },
+      {
+        "id": "tax_breakdown",
+        "type": "locked"
+      },
+      {
+        "id": "tax_legend",
+        "type": "locked"
+      },
+      {
+        "id": "registration_number",
+        "type": "locked",
+        "enabled": true
+      },
+      {
+        "id": "payments",
+        "type": "locked"
+      },
+      {
+        "id": "change_due",
+        "type": "locked"
+      },
+      {
+        "id": "remaining",
+        "type": "locked"
+      },
+      {
+        "id": "invoice_number",
+        "type": "locked"
+      },
+      {
+        "id": "reprint_marker",
+        "type": "locked"
+      },
+      {
+        "id": "qr_block",
+        "type": "qr",
+        "enabled": false,
+        "source": "order_url",
+        "align": "center"
+      },
+      {
+        "id": "footer_text",
+        "type": "text",
+        "enabled": false,
+        "align": "center",
+        "fallback": true,
+        "i18n": {}
+      }
+    ]
+  },
+  "vat_invoice": {
+    "schema": "tempo.print.v1",
+    "kind": "vat_invoice",
+    "paper": {
+      "columns_58mm": 32,
+      "columns_80mm": 48
+    },
+    "blocks": [
+      {
+        "id": "logo",
+        "type": "image",
+        "enabled": false,
+        "source": "brand_logo",
+        "align": "center"
+      },
+      {
+        "id": "store_info",
+        "type": "params",
+        "enabled": true,
+        "align": "left",
+        "fields": [
+          "store_organization",
+          "store_sub_name",
+          "store_name",
+          "store_address",
+          "store_phone"
+        ]
+      },
+      {
+        "id": "title",
+        "type": "text",
+        "enabled": true,
+        "align": "right",
+        "bold": true,
+        "i18n": {
+          "ja": "HOA DON GIA TRI GIA TANG",
+          "en": "HOA DON GIA TRI GIA TANG",
+          "vi": "HOA DON GIA TRI GIA TANG"
+        },
+        "i18n_narrow": {
+          "ja": "HOA DON GTGT",
+          "en": "HOA DON GTGT",
+          "vi": "HOA DON GTGT"
+        }
+      },
+      {
+        "id": "reprint_marker",
+        "type": "locked"
+      },
+      {
+        "id": "invoice_number",
+        "type": "locked"
+      },
+      {
+        "id": "customer_header",
+        "type": "params",
+        "enabled": true,
+        "fields": [
+          "customer_name",
+          "customer_tax_code",
+          "customer_address"
+        ]
+      },
+      {
+        "id": "column_header",
+        "type": "text",
+        "enabled": true,
+        "fallback": true
+      },
+      {
+        "id": "items",
+        "type": "line_items",
+        "columns": [
+          "name",
+          "qty",
+          "unit_price",
+          "amount"
+        ]
+      },
+      {
+        "id": "subtotal",
+        "type": "locked"
+      },
+      {
+        "id": "tax_breakdown",
+        "type": "locked"
+      },
+      {
+        "id": "grand_total",
+        "type": "locked"
+      },
+      {
+        "id": "registration_number",
+        "type": "locked",
+        "enabled": true
+      },
+      {
+        "id": "payments",
+        "type": "locked"
+      },
+      {
+        "id": "footer_text",
+        "type": "text",
+        "enabled": true,
+        "align": "center",
+        "fallback": true
+      }
+    ]
+  },
+  "qualified_simplified_invoice": {
+    "schema": "tempo.print.v1",
+    "kind": "qualified_simplified_invoice",
+    "paper": {
+      "columns_58mm": 32,
+      "columns_80mm": 48
+    },
+    "blocks": [
+      {
+        "id": "logo",
+        "type": "image",
+        "enabled": false,
+        "source": "brand_logo",
+        "align": "center"
+      },
+      {
+        "id": "store_info",
+        "type": "params",
+        "enabled": true,
+        "align": "left",
+        "fields": [
+          "store_organization",
+          "store_sub_name",
+          "store_name",
+          "store_address",
+          "store_phone"
+        ]
+      },
+      {
+        "id": "title",
+        "type": "text",
+        "enabled": true,
+        "align": "right",
+        "bold": true,
+        "i18n": {
+          "ja": "適格簡易請求書",
+          "en": "適格簡易請求書",
+          "vi": "適格簡易請求書"
+        },
+        "i18n_narrow": {
+          "ja": "簡易請求書",
+          "en": "簡易請求書",
+          "vi": "簡易請求書"
+        }
+      },
+      {
+        "id": "reprint_marker",
+        "type": "locked"
+      },
+      {
+        "id": "invoice_number",
+        "type": "locked"
+      },
+      {
+        "id": "customer_header",
+        "type": "params",
+        "enabled": true,
+        "fields": [
+          "customer_name",
+          "customer_tax_code",
+          "customer_address"
+        ]
+      },
+      {
+        "id": "column_header",
+        "type": "text",
+        "enabled": true,
+        "fallback": true
+      },
+      {
+        "id": "items",
+        "type": "line_items",
+        "columns": [
+          "name",
+          "qty",
+          "unit_price",
+          "amount"
+        ]
+      },
+      {
+        "id": "subtotal",
+        "type": "locked"
+      },
+      {
+        "id": "tax_breakdown",
+        "type": "locked"
+      },
+      {
+        "id": "grand_total",
+        "type": "locked"
+      },
+      {
+        "id": "registration_number",
+        "type": "locked",
+        "enabled": true
+      },
+      {
+        "id": "payments",
+        "type": "locked"
+      },
+      {
+        "id": "footer_text",
+        "type": "text",
+        "enabled": true,
+        "align": "center",
+        "fallback": true
+      }
+    ]
+  },
+  "void_notice": {
+    "schema": "tempo.print.v1",
+    "kind": "void_notice",
+    "paper": {
+      "columns_58mm": 32,
+      "columns_80mm": 48
+    },
+    "blocks": [
+      {
+        "id": "logo",
+        "type": "image",
+        "enabled": false,
+        "source": "brand_logo",
+        "align": "center"
+      },
+      {
+        "id": "void_marker",
+        "type": "locked"
+      },
+      {
+        "id": "invoice_number",
+        "type": "locked"
+      },
+      {
+        "id": "issued_at",
+        "type": "locked"
+      },
+      {
+        "id": "order_meta",
+        "type": "params",
+        "enabled": true,
+        "fields": []
+      },
+      {
+        "id": "footer_text",
+        "type": "text",
+        "enabled": true,
+        "align": "center",
+        "fallback": true,
+        "i18n": {}
+      }
+    ]
+  },
+  "debt_slip": {
+    "schema": "tempo.print.v1",
+    "kind": "debt_slip",
+    "paper": {
+      "columns_58mm": 32,
+      "columns_80mm": 48
+    },
+    "blocks": [
+      {
+        "id": "logo",
+        "type": "image",
+        "enabled": false,
+        "source": "brand_logo",
+        "align": "center"
+      },
+      {
+        "id": "store_info",
+        "type": "params",
+        "enabled": true,
+        "align": "left",
+        "fields": [
+          "store_organization",
+          "store_sub_name",
+          "store_name",
+          "store_address",
+          "store_phone"
+        ]
+      },
+      {
+        "id": "title",
+        "type": "text",
+        "enabled": true,
+        "align": "right",
+        "bold": true,
+        "i18n": {
+          "ja": "PHIEU GHI NO",
+          "en": "PHIEU GHI NO",
+          "vi": "PHIEU GHI NO"
+        }
+      },
+      {
+        "id": "reprint_marker",
+        "type": "locked"
+      },
+      {
+        "id": "issued_at",
+        "type": "locked"
+      },
+      {
+        "id": "order_meta",
+        "type": "params",
+        "enabled": true,
+        "fields": [
+          "order_no",
+          "table"
+        ]
+      },
+      {
+        "id": "customer_header",
+        "type": "params",
+        "enabled": true,
+        "fields": [
+          "customer_name",
+          "customer_phone"
+        ]
+      },
+      {
+        "id": "column_header",
+        "type": "text",
+        "enabled": true,
+        "i18n": {
+          "ja": "San pham                Thanh tien",
+          "en": "San pham                Thanh tien",
+          "vi": "San pham                Thanh tien"
+        }
+      },
+      {
+        "id": "items",
+        "type": "line_items",
+        "columns": [
+          "name",
+          "qty",
+          "amount"
+        ]
+      },
+      {
+        "id": "grand_total",
+        "type": "locked"
+      },
+      {
+        "id": "payments",
+        "type": "locked"
+      },
+      {
+        "id": "debt_summary",
+        "type": "locked"
+      },
+      {
+        "id": "debt_signature",
+        "type": "text",
+        "enabled": true,
+        "align": "left",
+        "i18n": {}
+      },
+      {
+        "id": "footer_text",
+        "type": "text",
+        "enabled": false,
+        "align": "center",
+        "fallback": true,
+        "i18n": {}
+      }
+    ]
+  },
+  "table_paid": {
+    "schema": "tempo.print.v1",
+    "kind": "table_paid",
+    "paper": {
+      "columns_58mm": 32,
+      "columns_80mm": 48
+    },
+    "blocks": [
+      {
+        "id": "logo",
+        "type": "image",
+        "enabled": false,
+        "source": "brand_logo",
+        "align": "center"
+      },
+      {
+        "id": "store_info",
+        "type": "params",
+        "enabled": true,
+        "align": "left",
+        "fields": [
+          "store_name"
+        ]
+      },
+      {
+        "id": "issued_at",
+        "type": "locked"
+      },
+      {
+        "id": "order_meta",
+        "type": "params",
+        "enabled": true,
+        "fields": [
+          "order_no"
+        ]
+      },
+      {
+        "id": "paid_summary",
+        "type": "locked"
+      },
+      {
+        "id": "footer_text",
+        "type": "text",
+        "enabled": false,
+        "align": "center",
+        "fallback": true,
+        "i18n": {}
+      }
+    ]
+  },
+  "shift_open": {
+    "schema": "tempo.print.v1",
+    "kind": "shift_open",
+    "paper": {
+      "columns_58mm": 32,
+      "columns_80mm": 48
+    },
+    "blocks": [
+      {
+        "id": "logo",
+        "type": "image",
+        "enabled": false,
+        "source": "brand_logo",
+        "align": "center"
+      },
+      {
+        "id": "store_info",
+        "type": "params",
+        "enabled": true,
+        "align": "center",
+        "fields": [
+          "store_name"
+        ]
+      },
+      {
+        "id": "title",
+        "type": "text",
+        "enabled": true,
+        "align": "center",
+        "bold": true,
+        "i18n": {
+          "ja": "開始",
+          "en": "SHIFT OPEN",
+          "vi": "MO CA"
+        }
+      },
+      {
+        "id": "shift_meta",
+        "type": "params",
+        "enabled": true,
+        "fields": [
+          "device_name",
+          "cashier_name",
+          "opened_at"
+        ]
+      },
+      {
+        "id": "denomination_table",
+        "type": "locked"
+      },
+      {
+        "id": "float_count",
+        "type": "locked"
+      },
+      {
+        "id": "order_note",
+        "type": "params",
+        "enabled": true
+      },
+      {
+        "id": "shift_signature",
+        "type": "text",
+        "enabled": false,
+        "align": "left",
+        "fallback": true,
+        "i18n": {}
+      },
+      {
+        "id": "footer_text",
+        "type": "text",
+        "enabled": false,
+        "align": "center",
+        "fallback": true,
+        "i18n": {}
+      }
+    ]
+  },
+  "shift_report": {
+    "schema": "tempo.print.v1",
+    "kind": "shift_report",
+    "paper": {
+      "columns_58mm": 32,
+      "columns_80mm": 48
+    },
+    "blocks": [
+      {
+        "id": "logo",
+        "type": "image",
+        "enabled": false,
+        "source": "brand_logo",
+        "align": "center"
+      },
+      {
+        "id": "store_info",
+        "type": "params",
+        "enabled": true,
+        "align": "center",
+        "fields": [
+          "store_name"
+        ]
+      },
+      {
+        "id": "title",
+        "type": "text",
+        "enabled": true,
+        "align": "center",
+        "bold": true,
+        "i18n": {
+          "ja": "精算",
+          "en": "SETTLEMENT",
+          "vi": "KET CA"
+        }
+      },
+      {
+        "id": "shift_meta",
+        "type": "params",
+        "enabled": true,
+        "fields": [
+          "device_name",
+          "business_date",
+          "opened_at",
+          "closed_at"
+        ]
+      },
+      {
+        "id": "chain_summary",
+        "type": "locked"
+      },
+      {
+        "id": "sales_summary",
+        "type": "locked"
+      },
+      {
+        "id": "tax_breakdown",
+        "type": "locked"
+      },
+      {
+        "id": "tender_summary",
+        "type": "locked"
+      },
+      {
+        "id": "non_cash_change",
+        "type": "locked"
+      },
+      {
+        "id": "discount_summary",
+        "type": "locked"
+      },
+      {
+        "id": "service_charge",
+        "type": "locked"
+      },
+      {
+        "id": "acct_correction",
+        "type": "locked"
+      },
+      {
+        "id": "check_count",
+        "type": "locked"
+      },
+      {
+        "id": "cash_movement",
+        "type": "locked"
+      },
+      {
+        "id": "void_summary",
+        "type": "locked"
+      },
+      {
+        "id": "variance",
+        "type": "locked"
+      },
+      {
+        "id": "denomination_table",
+        "type": "locked"
+      },
+      {
+        "id": "shift_signature",
+        "type": "text",
+        "enabled": false,
+        "align": "left",
+        "fallback": true,
+        "i18n": {}
+      },
+      {
+        "id": "footer_text",
+        "type": "text",
+        "enabled": false,
+        "align": "center",
+        "fallback": true,
+        "i18n": {}
+      }
+    ]
+  },
+  "chain_report": {
+    "schema": "tempo.print.v1",
+    "kind": "chain_report",
+    "paper": {
+      "columns_58mm": 32,
+      "columns_80mm": 48
+    },
+    "blocks": [
+      {
+        "id": "logo",
+        "type": "image",
+        "enabled": false,
+        "source": "brand_logo",
+        "align": "center"
+      },
+      {
+        "id": "store_info",
+        "type": "params",
+        "enabled": true,
+        "align": "center",
+        "fields": [
+          "store_name"
+        ]
+      },
+      {
+        "id": "title",
+        "type": "text",
+        "enabled": true,
+        "align": "center",
+        "bold": true,
+        "i18n": {
+          "ja": "精算（チェーン）",
+          "en": "CHAIN SETTLEMENT",
+          "vi": "KET CA CUOI (CHUOI)"
+        }
+      },
+      {
+        "id": "shift_meta",
+        "type": "params",
+        "enabled": true,
+        "fields": [
+          "device_name",
+          "business_date",
+          "chain_sequence"
+        ]
+      },
+      {
+        "id": "chain_summary",
+        "type": "locked"
+      },
+      {
+        "id": "sales_summary",
+        "type": "locked"
+      },
+      {
+        "id": "tax_breakdown",
+        "type": "locked"
+      },
+      {
+        "id": "tender_summary",
+        "type": "locked"
+      },
+      {
+        "id": "non_cash_change",
+        "type": "locked"
+      },
+      {
+        "id": "discount_summary",
+        "type": "locked"
+      },
+      {
+        "id": "service_charge",
+        "type": "locked"
+      },
+      {
+        "id": "acct_correction",
+        "type": "locked"
+      },
+      {
+        "id": "check_count",
+        "type": "locked"
+      },
+      {
+        "id": "cash_movement",
+        "type": "locked"
+      },
+      {
+        "id": "void_summary",
+        "type": "locked"
+      },
+      {
+        "id": "variance",
+        "type": "locked"
+      },
+      {
+        "id": "denomination_table",
+        "type": "locked"
+      },
+      {
+        "id": "shift_signature",
+        "type": "text",
+        "enabled": false,
+        "align": "left",
+        "fallback": true,
+        "i18n": {}
+      },
+      {
+        "id": "footer_text",
+        "type": "text",
+        "enabled": false,
+        "align": "center",
+        "fallback": true,
+        "i18n": {}
+      }
+    ]
+  }
+}

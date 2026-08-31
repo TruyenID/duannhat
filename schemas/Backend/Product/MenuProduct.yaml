@@ -1,0 +1,203 @@
+# ==============================================================================
+# MenuProduct Schema (メニュー商品 / Sản phẩm trong Menu)
+# ==============================================================================
+#
+# MenuProduct là liên kết cấp Product trong menu. Brand chỉ quản lý ở cấp này
+# (chọn product nào vào menu, bật/tắt product). Khi clone sang branch,
+# hệ thống tạo thêm MenuProductSku cho từng SKU của product.
+#
+# Key Features:
+#   - is_active: Brand/Branch bật/tắt nguyên product
+#   - display_order: Thứ tự hiển thị trong menu
+#   - master_menu_product_id: Tracking clone từ master menu
+#
+# ==============================================================================
+
+displayName:
+  en: Menu Product
+  ja: メニュー商品
+  vi: Sản phẩm trong Menu
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    # Composite unique allows the same product to appear in multiple sections
+    # of the same menu (one menu_products row per product/section combination).
+    - columns: [menu_id, product_id, menu_section_id]
+      unique: true
+    - columns: [menu_id, display_order]
+    - columns: [master_menu_product_id]
+    - columns: [menu_section_id]
+
+properties:
+  menu:
+    type: Association
+    relation: ManyToOne
+    target: Menu
+    onDelete: CASCADE
+    displayName:
+      en: Menu
+      ja: メニュー
+      vi: Menu
+    description:
+      en: Parent menu
+      ja: 親メニュー
+      vi: Menu chứa sản phẩm này
+
+  product:
+    type: Association
+    relation: ManyToOne
+    target: Product
+    onDelete: CASCADE
+    displayName:
+      en: Product
+      ja: 商品
+      vi: Sản phẩm
+    description:
+      en: The product added to this menu
+      ja: このメニューに追加された商品
+      vi: Sản phẩm được thêm vào menu
+
+  # (plan-043) Override loại thuế ở cấp menu item. NULLABLE = kế thừa từ
+  # Product.tax_type_id (tầng 1 của chuỗi resolve §7 — override này THẮNG
+  # cả product). Đặt ở MenuProduct (brand-level), KHÔNG đặt ở MenuProductSku
+  # (branch-level) — thuế Nhật là toàn quốc, không có nhu cầu override theo
+  # branch (spec §6.2). Đường resolve lúc thêm món: client gửi
+  # menu_product_sku_id → lần lên MenuProduct để lấy override này.
+  # RESTRICT — không xoá được TaxType còn được override tham chiếu.
+  # không được override sang loại giảm (422 — A1, BR-TT03).
+  taxType:
+    type: Association
+    relation: ManyToOne
+    target: TaxType
+    nullable: true
+    onDelete: RESTRICT
+    displayName:
+      en: Tax Type Override
+      ja: 税区分オーバーライド
+      vi: Loại thuế (override)
+    description:
+      en: Menu-level tax type override. Null = inherit from the product (resolver §7 tier 1).
+      ja: メニューレベルの税区分オーバーライド。Null = 商品から継承（§7 tier 1）。
+      vi: Override loại thuế cấp menu. Null = kế thừa từ sản phẩm (tầng 1 chuỗi resolve §7).
+
+  # Section grouping within the menu. The composite unique on
+  # (menu_id, product_id, menu_section_id) allows the SAME product to appear
+  # in multiple sections of the same menu by having one menu_products row per
+  # (product, section) pair. NULL is permitted (legacy / "ungrouped").
+  menuSection:
+    type: Association
+    relation: ManyToOne
+    target: MenuSection
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Menu Section
+      ja: メニューセクション
+      vi: Nhóm danh mục
+    description:
+      en: Section this product is grouped under inside the menu. To put one product in multiple sections, create multiple menu_products rows with the same product_id but different menu_section_id values.
+      ja: メニュー内でこの商品が属するセクション。同じ商品を複数のセクションに表示するには、同じproduct_idで異なるmenu_section_idを持つ複数のmenu_products行を作成します。
+      vi: Section mà product này thuộc về trong menu. Để 1 product nằm nhiều sections, tạo nhiều row menu_products với cùng product_id nhưng khác menu_section_id.
+
+  is_active:
+    type: Boolean
+    default: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+    description:
+      en: Product-level toggle. When false, all SKUs under this product are hidden regardless of their individual is_active.
+      ja: 商品レベルのトグル。falseの場合、この商品のすべてのSKUは個別のis_activeに関わらず非表示になります。
+      vi: Toggle cấp product. Khi false, tất cả SKU của product này bị ẩn bất kể is_active riêng của từng SKU.
+
+  # ==========================================================================
+  # (plan-056) Vì sao món này đang tắt — ảnh chụp trạng thái HIỆN TẠI
+  # ==========================================================================
+  #
+  # Ba cột dưới đây đi THÀNH BỘ với `is_active`: tắt thì cả ba được ghi, bật
+  # lại thì cả ba về NULL. Chúng chỉ trả lời "tại sao món này đang tắt LÚC
+  # NÀY" — lịch sử nằm ở `menu_availability_events`, không phải ở đây.
+  #
+  # `nullable: true` KHÔNG phải nhánh tương thích ngược (#2188 cấm thứ đó): một
+  # món đang BẬT thì không có lý do gì để mang, và admin-web là một actor hợp lệ
+  # dùng đường `toggle` cũ không gửi lý do. NULL ở đây nghĩa là "đang bật hoặc
+  # không ai nêu lý do", chứ không phải "dữ liệu cũ chưa kịp vá".
+
+  disabled_reason:
+    type: String
+    length: 255
+    nullable: true
+    displayName:
+      en: Disabled Reason
+      ja: 停止理由
+      vi: Lý do tắt
+    description:
+      en: Why this dish is currently off. Free text; NO minimum length is enforced at any layer.
+      ja: 現在停止している理由。自由記述で、最小文字数の制約はどの層にもない。
+      vi: Vì sao món đang tắt. Chữ tự do; KHÔNG tầng nào ràng buộc độ dài tối thiểu.
+
+  disabled_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Disabled At
+      ja: 停止日時
+      vi: Thời điểm tắt
+    description:
+      en: When the shop turned it off — the moment the operator tapped, not the moment Cloud received it (an offline shop syncs hours later).
+      ja: 店舗が停止した時刻。クラウド受信時刻ではなく操作者がタップした時刻（オフライン店舗は数時間後に同期）。
+      vi: Lúc quán tắt món — thời điểm NGƯỜI BẤM bấm, không phải lúc Cloud nhận (quán offline có thể sync sau hàng giờ).
+
+  # Ảnh chụp tên, không join sang users lúc đọc: nhân viên nghỉ việc thì màn
+  # hình vẫn phải hiện được ai đã tắt món, và tên lúc đó là dữ kiện lịch sử.
+  disabled_by_name:
+    type: String
+    length: 100
+    nullable: true
+    displayName:
+      en: Disabled By (snapshot)
+      ja: 停止操作者（スナップショット）
+      vi: Người tắt (ảnh chụp)
+
+  display_order:
+    type: Int
+    default: 0
+    displayName:
+      en: Display Order
+      ja: 表示順序
+      vi: Thứ tự hiển thị
+    description:
+      en: Order for display within the menu (lower = first)
+      ja: メニュー内の表示順序（小さいほど先）
+      vi: Thứ tự hiển thị trong menu (nhỏ hơn = trước)
+
+  masterMenuProduct:
+    type: Association
+    relation: ManyToOne
+    target: MenuProduct
+    nullable: true
+    displayName:
+      en: Master Menu Product
+      ja: マスターメニュー商品
+      vi: Sản phẩm trong Master Menu
+    description:
+      en: Points to the master menu's row for sync tracking. Null for master menus.
+      ja: 同期追跡用のマスターメニュー行へのポインタ。マスターメニューではNull。
+      vi: Trỏ về row trong master menu để tracking sync. Null với master menu.
+
+  # Reverse associations
+  menuProductSkus:
+    type: Association
+    relation: OneToMany
+    target: MenuProductSku
+    mappedBy: menuProduct
+    displayName:
+      en: Menu Product SKUs
+      ja: メニュー商品SKU
+      vi: SKU của sản phẩm trong menu

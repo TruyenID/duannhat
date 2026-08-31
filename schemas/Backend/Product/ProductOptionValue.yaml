@@ -1,0 +1,101 @@
+# =============================================================================
+# ProductOptionValue (商品オプション値 / Giá trị tùy chọn)
+# =============================================================================
+#
+# Một giá trị cụ thể của ProductOption (vd Color → Red, Blue, Green).
+# Được ProductSku.optionValue{N}_id tham chiếu.
+#
+# Quan hệ:
+#   ProductOption (1) ──< ProductOptionValue (1) ──< ProductSku (qua FK)
+#
+# Lifecycle:
+#   - Tạo: tự do thêm value mới vào ProductOption.
+#   - Update: label translatable, có thể đổi label theo locale; KHÔNG nên đổi
+#     `value` slug nếu đã có SKU tham chiếu.
+#   - Delete: bị BLOCK ở DB level — ProductSku.optionValue{N} có
+#     onDelete: RESTRICT. Phải xoá hết SKU dùng value này trước khi xoá value.
+#     Trong app layer dùng soft delete + check.
+#
+# Vì sao dùng RESTRICT thay vì SET NULL:
+#   Nếu SET NULL khi xoá value, SKU sẽ mất ngữ nghĩa "Áo Đỏ XL" → "Áo NULL XL".
+#   StockMovement, OrderItem... đã reference SKU này — sẽ tạo ra dữ liệu mồ côi.
+#   RESTRICT buộc user phải xử lý SKU trước, đảm bảo nhất quán.
+#
+# i18n:
+#   - `label` translatable → table `product_option_value_translations`.
+#
+# =============================================================================
+
+displayName:
+  en: Product Option Value
+  ja: 商品オプション値
+  vi: Giá trị tùy chọn
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+
+  audit:
+    createdBy: true
+    updatedBy: true
+
+  indexes:
+    # Slug `value` unique trong scope của 1 option (vd Color không thể có 2 "red").
+    - columns: [option_id, value]
+      unique: true
+
+properties:
+  # Option chứa value này. CASCADE — xoá option thì xoá hết value (chỉ xảy ra
+  # khi product không còn SKU nào, vì RESTRICT FK ở SKU sẽ block trước).
+  option:
+    type: Association
+    relation: ManyToOne
+    target: ProductOption
+    onDelete: CASCADE
+    displayName:
+      en: Option
+      ja: オプション
+      vi: Tùy chọn
+
+  # Slug nội bộ, vd "red", "xl", "cotton". Dùng cho code logic, không hiển thị.
+  value:
+    type: String
+    length: 100
+    displayName:
+      en: Value
+      ja: 値
+      vi: Giá trị
+    description:
+      en: Internal slug. Avoid changing once any ProductSku references this value.
+      vi: Slug nội bộ. Không nên đổi khi đã có SKU tham chiếu.
+
+  # Hiển thị end-user. Translatable → product_option_value_translations.
+  label:
+    type: String
+    length: 150
+    translatable: true
+    displayName:
+      en: Label
+      ja: ラベル
+      vi: Nhãn hiển thị
+
+  # Thứ tự hiển thị trong danh sách value của option (vd S → M → L).
+  position:
+    type: Int
+    unsigned: true
+    default: 0
+    displayName:
+      en: Position
+      ja: 順序
+      vi: Thứ tự
+
+  is_active:
+    type: Boolean
+    default: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động

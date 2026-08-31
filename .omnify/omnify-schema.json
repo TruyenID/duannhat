@@ -1,0 +1,1195 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://omnify.dev/schemas/omnify-schema.json",
+  "title": "Omnify Schema Definition",
+  "description": "Schema definition for Omnify - a database-first schema generator for Laravel, TypeScript, and more.",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Schema name (usually derived from filename, but can be specified explicitly)"
+    },
+    "connection": {
+      "type": "string",
+      "description": "Database connection name (matches a key in omnify.yaml connections). Defaults to the 'default' connection if not specified."
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "object",
+        "enum",
+        "partial",
+        "pivot"
+      ],
+      "default": "object",
+      "description": "Schema kind - 'object' for database tables, 'enum' for enumeration types, 'partial' for extending existing schemas, 'pivot' for many-to-many join tables"
+    },
+    "target": {
+      "type": "string",
+      "description": "Target schema name for partial schemas (only used when kind is 'partial'). The partial schema's properties will be merged into the target."
+    },
+    "displayName": {
+      "$ref": "#/definitions/LocalizedString",
+      "description": "Human-readable display name (supports multi-language)"
+    },
+    "titleIndex": {
+      "type": "string",
+      "description": "Property to use as the title/label for records (e.g., 'name', 'title')"
+    },
+    "group": {
+      "type": "string",
+      "description": "Schema group for organization (e.g., 'auth', 'blog', 'shop')"
+    },
+    "options": {
+      "$ref": "#/definitions/SchemaOptions"
+    },
+    "properties": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/PropertyDefinition"
+      },
+      "description": "Property definitions for this schema"
+    },
+    "values": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "$ref": "#/definitions/EnumValue"
+          }
+        ]
+      },
+      "description": "Enum values (only when kind is 'enum')"
+    },
+    "policies": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/PolicyDefinition"
+      },
+      "description": "Cedar-style ABAC policy definitions (only for kind: object schemas). Generates Laravel Policy classes."
+    }
+  },
+  "definitions": {
+    "LocalizedString": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Locale map (e.g., { ja: '日本語', en: 'English', vi: 'Tiếng Việt' })"
+        }
+      ],
+      "description": "A string or locale map for multi-language support"
+    },
+    "SchemaOptions": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "oneOf": [
+            { "type": "boolean" },
+            { "type": "string", "enum": ["BigInt", "Int", "Uuid", "Ulid", "String"] }
+          ],
+          "default": true,
+          "description": "ID column: true (BigInt), false (no ID), or type string (BigInt, Int, Uuid, Ulid, String)"
+        },
+        "primaryKey": {
+          "oneOf": [
+            {
+              "type": "string",
+              "description": "Single column as primary key"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "description": "Composite primary key (multiple columns)"
+            }
+          ],
+          "description": "Custom primary key column(s). When set, automatically implies id: false (no auto-generated ID column)"
+        },
+        "timestamps": {
+          "type": "boolean",
+          "default": true,
+          "description": "Add created_at and updated_at timestamp columns"
+        },
+        "softDelete": {
+          "type": "boolean",
+          "default": false,
+          "description": "Add deleted_at column for soft deletes"
+        },
+        "tableName": {
+          "type": "string",
+          "description": "Custom table name (defaults to pluralized snake_case of schema name)"
+        },
+        "authenticatable": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable authenticatable trait (for User-like schemas)"
+        },
+        "indexes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/IndexDefinition"
+          },
+          "description": "Database indexes for query optimization"
+        },
+        "hidden": {
+          "type": "boolean",
+          "default": false,
+          "description": "Hide from model generation (migrations still generated, but no Laravel/TypeScript models)"
+        },
+        "defaultOrder": {
+          "description": "Schema-level default ordering. Generates a global Eloquent scope on the base model so every query is sorted (bypass with ->withoutGlobalScope('defaultOrder')). Issue #40.",
+          "oneOf": [
+            { "type": "string" },
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "column": { "type": "string" },
+                  "direction": { "type": "string", "enum": ["asc", "desc", "ASC", "DESC"] }
+                },
+                "required": ["column"]
+              }
+            }
+          ]
+        },
+        "service": {
+          "type": "object",
+          "description": "Service layer codegen options — controls BaseService generation (searchable, filterable, eager loading, etc.)",
+          "additionalProperties": false,
+          "properties": {
+            "searchable": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Property names included in full-text search (?search=keyword). Overrides property-level searchable flags."
+            },
+            "filterable": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Property names available as exact-match filters. Overrides property-level filterable flags."
+            },
+            "defaultSort": {
+              "type": "string",
+              "description": "Default sort column. Prefix with '-' for descending (e.g., '-created_at')."
+            },
+            "eagerLoad": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Relations to eager-load (with()) on list/findById queries."
+            },
+            "eagerCount": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Relations to count (withCount()) on list/findById queries."
+            },
+            "lookupFields": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Fields returned by the lookup() method (lightweight select for dropdowns)."
+            }
+          }
+        },
+        "api": {
+          "type": "object",
+          "description": "CRUD API generation options",
+          "additionalProperties": false,
+          "properties": {
+            "prefix": {
+              "type": "string",
+              "description": "Route prefix (defaults to snake_plural schema name)"
+            },
+            "actions": {
+              "type": "array",
+              "items": { "type": "string", "enum": ["index", "store", "show", "update", "destroy"] },
+              "description": "CRUD actions to generate (defaults to all 5)"
+            },
+            "lookup": {
+              "type": "boolean",
+              "default": true,
+              "description": "Generate GET /lookup endpoint"
+            },
+            "bulkDelete": {
+              "type": "boolean",
+              "default": false,
+              "description": "Generate POST /bulk-delete endpoint"
+            },
+            "restore": {
+              "type": "boolean",
+              "description": "Generate POST /{id}/restore endpoint (requires softDelete)"
+            },
+            "middleware": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Additional middleware for API routes"
+            },
+            "perPage": {
+              "type": "integer",
+              "default": 15,
+              "description": "Default pagination size"
+            }
+          }
+        }
+      }
+    },
+    "IndexDefinition": {
+      "type": "object",
+      "required": [
+        "columns"
+      ],
+      "properties": {
+        "columns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Columns to include in the index"
+        },
+        "unique": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this is a unique index"
+        },
+        "name": {
+          "type": "string",
+          "description": "Custom index name"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "btree",
+            "hash",
+            "fulltext",
+            "spatial",
+            "gin",
+            "gist"
+          ],
+          "description": "Index type"
+        }
+      }
+    },
+    "PropertyDefinition": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/StringProperty"
+        },
+        {
+          "$ref": "#/definitions/NumericProperty"
+        },
+        {
+          "$ref": "#/definitions/BooleanProperty"
+        },
+        {
+          "$ref": "#/definitions/TextProperty"
+        },
+        {
+          "$ref": "#/definitions/DateTimeProperty"
+        },
+        {
+          "$ref": "#/definitions/TimestampProperty"
+        },
+        {
+          "$ref": "#/definitions/JsonProperty"
+        },
+        {
+          "$ref": "#/definitions/EnumProperty"
+        },
+        {
+          "$ref": "#/definitions/EnumRefProperty"
+        },
+        {
+          "$ref": "#/definitions/FileProperty"
+        },
+        {
+          "$ref": "#/definitions/AssociationProperty"
+        },
+        {
+          "$ref": "#/definitions/UuidProperty"
+        },
+        {
+          "$ref": "#/definitions/SpatialProperty"
+        }
+      ]
+    },
+    "ValidationRules": {
+      "type": "object",
+      "description": "Validation rules (application-level only, NOT database structure). Rules are additive — generators infer base rules from type, rules: adds/overrides on top. Each rule is only valid for specific types. Mutually exclusive: lowercase+uppercase, alpha/alphaNum/alphaDash/numeric (pick one), url+uuid, min+gt, max+lt, between+min/max/gt/lt, digits+digitsBetween.",
+      "properties": {
+        "required": {
+          "type": "boolean",
+          "default": false,
+          "description": "[All types] Override required/nullable inference. Does NOT affect database nullable."
+        },
+        "minLength": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "[String types only] Minimum length. Must be <= maxLength when both set."
+        },
+        "maxLength": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "[String types only] Maximum length. Overrides length-based max validation. If both maxLength and length are set and differ, omnify warns."
+        },
+        "url": {
+          "type": "boolean",
+          "description": "[String types only] Must be a valid URL. Mutually exclusive with uuid."
+        },
+        "uuid": {
+          "type": "boolean",
+          "description": "[String types only] Must be a valid UUID. Mutually exclusive with url."
+        },
+        "ip": {
+          "type": "boolean",
+          "description": "[String types only] Must be a valid IP address (v4 or v6). Makes ipv4/ipv6 redundant if set."
+        },
+        "ipv4": {
+          "type": "boolean",
+          "description": "[String types only] Must be a valid IPv4 address. Redundant when ip is set."
+        },
+        "ipv6": {
+          "type": "boolean",
+          "description": "[String types only] Must be a valid IPv6 address. Redundant when ip is set."
+        },
+        "alpha": {
+          "type": "boolean",
+          "description": "[String types only] Only alphabetic characters (a-z, A-Z). Mutually exclusive with alphaNum, alphaDash, numeric."
+        },
+        "alphaNum": {
+          "type": "boolean",
+          "description": "[String types only] Only alphanumeric characters (a-z, A-Z, 0-9). Mutually exclusive with alpha, alphaDash, numeric."
+        },
+        "alphaDash": {
+          "type": "boolean",
+          "description": "[String types only] Only alphanumeric, dash, underscore (a-z, A-Z, 0-9, -, _). Mutually exclusive with alpha, alphaNum, numeric."
+        },
+        "numeric": {
+          "type": "boolean",
+          "description": "[String types only] Only numeric characters (0-9). Mutually exclusive with alpha, alphaNum, alphaDash."
+        },
+        "digits": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "[String types only] Must be exactly n digits. Mutually exclusive with digitsBetween."
+        },
+        "digitsBetween": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "[String types only] Digit count between min and max. Format: [min, max], min <= max, both >= 1. Mutually exclusive with digits."
+        },
+        "startsWith": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ],
+          "description": "[String types only] Must start with prefix(es)."
+        },
+        "endsWith": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ],
+          "description": "[String types only] Must end with suffix(es)."
+        },
+        "lowercase": {
+          "type": "boolean",
+          "description": "[String types only] Must be entirely lowercase. Mutually exclusive with uppercase."
+        },
+        "uppercase": {
+          "type": "boolean",
+          "description": "[String types only] Must be entirely uppercase. Mutually exclusive with lowercase."
+        },
+        "min": {
+          "type": "number",
+          "description": "[Numeric types only] Minimum value (inclusive). Must be <= max when both set. Mutually exclusive with gt. Redundant when between is set."
+        },
+        "max": {
+          "type": "number",
+          "description": "[Numeric types only] Maximum value (inclusive). Must be >= min when both set. Mutually exclusive with lt. Redundant when between is set."
+        },
+        "between": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "[Numeric types only] Value between min and max (inclusive). Format: [min, max], min <= max. Do not combine with min/max/gt/lt."
+        },
+        "gt": {
+          "type": "number",
+          "description": "[Numeric types only] Must be greater than value (exclusive). Must be < lt when both set. Mutually exclusive with min. Redundant when between is set."
+        },
+        "lt": {
+          "type": "number",
+          "description": "[Numeric types only] Must be less than value (exclusive). Must be > gt when both set. Mutually exclusive with max. Redundant when between is set."
+        },
+        "multipleOf": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "[Numeric types only] Must be a multiple of value. Must be > 0."
+        },
+        "arrayMin": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "[Array/Json types only] Minimum number of items. Must be <= arrayMax when both set."
+        },
+        "arrayMax": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "[Array/Json types only] Maximum number of items. Must be >= arrayMin when both set."
+        }
+      }
+    },
+    "BaseProperty": {
+      "type": "object",
+      "properties": {
+        "displayName": {
+          "$ref": "#/definitions/LocalizedString",
+          "description": "Human-readable display name (supports multi-language)"
+        },
+        "description": {
+          "$ref": "#/definitions/LocalizedString",
+          "description": "Field description/comment"
+        },
+        "placeholder": {
+          "$ref": "#/definitions/LocalizedString",
+          "description": "Placeholder text for form inputs (supports multi-language)"
+        },
+        "nullable": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether the field can be null in database"
+        },
+        "unique": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this field must be unique"
+        },
+        "primary": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this field is the primary key. Use with options.id: false for tables with custom primary keys (e.g., cache tables)"
+        },
+        "default": {
+          "description": "Default value for the field"
+        },
+        "rules": {
+          "$ref": "#/definitions/ValidationRules",
+          "description": "Validation rules (application-level only, NOT database)"
+        },
+        "hidden": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this field should be hidden in API responses/serialization"
+        },
+        "fillable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether this field is mass assignable (Laravel)"
+        },
+        "searchable": {
+          "type": "boolean",
+          "description": "Include in full-text search (?search=keyword)"
+        },
+        "filterable": {
+          "type": "boolean",
+          "description": "Allow filtering (?field=value or ?field_min=N&field_max=N)"
+        },
+        "sortable": {
+          "type": "boolean",
+          "description": "Allow sorting (?sort=field or ?sort=-field)"
+        },
+        "fields": {
+          "$ref": "#/definitions/CompoundFieldOverrides",
+          "description": "Per-field settings for compound types (nullable, hidden, fillable, placeholder overrides)"
+        }
+      }
+    },
+    "CompoundFieldOverrides": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/CompoundFieldOverride"
+      },
+      "description": "Per-field overrides for compound types. Keys are field suffixes (e.g., 'Lastname', 'PostalCode')"
+    },
+    "CompoundFieldOverride": {
+      "type": "object",
+      "properties": {
+        "nullable": {
+          "type": "boolean",
+          "description": "Override nullable for this field"
+        },
+        "hidden": {
+          "type": "boolean",
+          "description": "Override hidden for this field"
+        },
+        "fillable": {
+          "type": "boolean",
+          "description": "Override fillable for this field"
+        },
+        "length": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Override length for string fields"
+        },
+        "displayName": {
+          "$ref": "#/definitions/LocalizedString",
+          "description": "Override display name (label) for this field (supports multi-language)"
+        },
+        "placeholder": {
+          "$ref": "#/definitions/LocalizedString",
+          "description": "Override placeholder for this field (supports multi-language)"
+        }
+      }
+    },
+    "StringProperty": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/BaseProperty"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "String",
+                "Email",
+                "Password"
+              ],
+              "description": "String type"
+            },
+            "length": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 65535,
+              "default": 255,
+              "description": "Database column size (NOT validation). Use rules.maxLength for validation."
+            }
+          }
+        }
+      ]
+    },
+    "NumericProperty": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/BaseProperty"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "TinyInt",
+                "Int",
+                "BigInt",
+                "Float",
+                "Decimal"
+              ],
+              "description": "Numeric type - TinyInt (8-bit), Int (32-bit), BigInt (64-bit)"
+            },
+            "unsigned": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether the number is unsigned (positive only)"
+            },
+            "precision": {
+              "type": "integer",
+              "description": "Total number of digits for Decimal (default: 8)"
+            },
+            "scale": {
+              "type": "integer",
+              "description": "Number of decimal places for Decimal (default: 2)"
+            }
+          }
+        }
+      ]
+    },
+    "BooleanProperty": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/BaseProperty"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "const": "Boolean",
+              "description": "Boolean type"
+            }
+          }
+        }
+      ]
+    },
+    "TextProperty": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/BaseProperty"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "Text",
+                "MediumText",
+                "LongText"
+              ],
+              "description": "Text type - Text (~65KB), MediumText (~16MB), LongText (~4GB)"
+            }
+          }
+        }
+      ]
+    },
+    "DateTimeProperty": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/BaseProperty"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "Date",
+                "DateTime",
+                "Time"
+              ],
+              "description": "Date/Time type"
+            }
+          }
+        }
+      ]
+    },
+    "TimestampProperty": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/BaseProperty"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "const": "Timestamp",
+              "description": "Timestamp type"
+            },
+            "useCurrent": {
+              "type": "boolean",
+              "default": false,
+              "description": "Use CURRENT_TIMESTAMP as default value (Laravel: useCurrent())"
+            },
+            "useCurrentOnUpdate": {
+              "type": "boolean",
+              "default": false,
+              "description": "Update to CURRENT_TIMESTAMP on row update (Laravel: useCurrentOnUpdate())"
+            }
+          }
+        }
+      ]
+    },
+    "JsonProperty": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/BaseProperty"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "const": "Json",
+              "description": "JSON type for storing structured data"
+            }
+          }
+        }
+      ]
+    },
+    "EnumProperty": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/BaseProperty"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "enum"
+          ],
+          "properties": {
+            "type": {
+              "const": "Enum",
+              "description": "Inline enum type"
+            },
+            "enum": {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "$ref": "#/definitions/EnumValue"
+                  }
+                ]
+              },
+              "description": "Inline enum values"
+            }
+          }
+        }
+      ]
+    },
+    "EnumRefProperty": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/BaseProperty"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "enum"
+          ],
+          "properties": {
+            "type": {
+              "const": "EnumRef",
+              "description": "Reference to a shared enum schema"
+            },
+            "enum": {
+              "type": "string",
+              "description": "Name of the enum schema to reference"
+            }
+          }
+        }
+      ]
+    },
+    "EnumValue": {
+      "type": "object",
+      "required": [
+        "value"
+      ],
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Enum value (stored in database)"
+        },
+        "label": {
+          "$ref": "#/definitions/LocalizedString",
+          "description": "Human-readable label (supports multi-language)"
+        },
+        "extra": {
+          "type": "object",
+          "description": "Additional metadata for the enum value"
+        }
+      }
+    },
+    "FileProperty": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/BaseProperty"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "const": "File",
+              "description": "File attachment (polymorphic relation)"
+            },
+            "multiple": {
+              "type": "boolean",
+              "default": false,
+              "description": "Allow multiple files"
+            },
+            "maxFiles": {
+              "type": "integer",
+              "description": "Maximum number of files (only when multiple=true)"
+            },
+            "accept": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Accepted file extensions (e.g., ['jpg', 'png', 'pdf'])"
+            },
+            "maxSize": {
+              "type": "integer",
+              "description": "Maximum file size in KB"
+            },
+            "collection": {
+              "type": "string",
+              "description": "Logical file collection name (defaults to property name)"
+            }
+          }
+        }
+      ]
+    },
+    "UuidProperty": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/BaseProperty"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "const": "Uuid",
+              "description": "UUID type - stored as CHAR(36)"
+            }
+          }
+        }
+      ]
+    },
+    "SpatialProperty": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/BaseProperty"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "Point",
+                "Coordinates"
+              ],
+              "description": "Spatial type - Point (single lat/lng), Coordinates (lat/lng pair columns)"
+            }
+          }
+        }
+      ]
+    },
+    "PolicyDefinition": {
+      "type": "object",
+      "required": ["effect", "actions"],
+      "properties": {
+        "effect": {
+          "type": "string",
+          "enum": ["permit", "forbid"],
+          "description": "Policy effect — permit allows access, forbid denies access"
+        },
+        "actions": {
+          "oneOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["view", "list", "create", "edit", "delete", "*"]
+              }
+            },
+            {
+              "type": "string",
+              "enum": ["view", "list", "create", "edit", "delete", "*"]
+            }
+          ],
+          "description": "Actions this policy applies to. Use '*' for all actions."
+        },
+        "when": {
+          "oneOf": [
+            { "type": "string" },
+            {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          ],
+          "description": "Condition(s) for this policy. String for single condition, array for AND conditions."
+        },
+        "desc": {
+          "type": "string",
+          "description": "Human-readable description (becomes PHP comment in generated code)"
+        }
+      }
+    },
+    "AssociationProperty": {
+      "type": "object",
+      "required": [
+        "type",
+        "relation"
+      ],
+      "properties": {
+        "type": {
+          "const": "Association",
+          "description": "Relationship to another schema"
+        },
+        "relation": {
+          "type": "string",
+          "enum": [
+            "OneToOne",
+            "OneToMany",
+            "ManyToOne",
+            "ManyToMany",
+            "MorphTo",
+            "MorphOne",
+            "MorphMany",
+            "MorphToMany",
+            "MorphedByMany"
+          ],
+          "description": "Relationship cardinality type"
+        },
+        "target": {
+          "type": "string",
+          "description": "Target schema name (e.g., 'User', 'Post')"
+        },
+        "displayName": {
+          "$ref": "#/definitions/LocalizedString",
+          "description": "Human-readable display name"
+        },
+        "onDelete": {
+          "type": "string",
+          "enum": [
+            "CASCADE",
+            "SET NULL",
+            "SET DEFAULT",
+            "RESTRICT",
+            "NO ACTION"
+          ],
+          "description": "Action when referenced record is deleted"
+        },
+        "onUpdate": {
+          "type": "string",
+          "enum": [
+            "CASCADE",
+            "SET NULL",
+            "SET DEFAULT",
+            "RESTRICT",
+            "NO ACTION"
+          ],
+          "description": "Action when referenced record is updated"
+        },
+        "joinTable": {
+          "type": "string",
+          "description": "Custom join table name for ManyToMany"
+        },
+        "inversedBy": {
+          "type": "string",
+          "description": "Property name on target that maps back"
+        },
+        "mappedBy": {
+          "type": "string",
+          "description": "Property name that is mapped by target"
+        },
+        "orderBy": {
+          "description": "Default ordering for OneToMany/ManyToMany/MorphMany. Single column shorthand or list of {column, direction}. Issue #40.",
+          "oneOf": [
+            { "type": "string" },
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "column": { "type": "string" },
+                  "direction": { "type": "string", "enum": ["asc", "desc", "ASC", "DESC"] }
+                },
+                "required": ["column"]
+              }
+            }
+          ]
+        },
+        "targets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Target schema names for MorphTo (e.g., ['Post', 'Video'])"
+        },
+        "morphName": {
+          "type": "string",
+          "description": "Custom morph name for polymorphic relations"
+        },
+        "nullable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether the relation columns are nullable (default: true for MorphTo)"
+        },
+        "targetNamespace": {
+          "type": "string",
+          "description": "Target model namespace for external packages (e.g., 'Omnify\\SsoClient\\Models')"
+        },
+        "idType": {
+          "type": "string",
+          "enum": ["Int", "BigInt", "Uuid", "Ulid", "String"],
+          "description": "Target primary key type for FK column generation"
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "name": "User",
+      "displayName": {
+        "ja": "ユーザー",
+        "en": "User"
+      },
+      "options": {
+        "softDelete": true,
+        "authenticatable": true
+      },
+      "properties": {
+        "name": {
+          "type": "String",
+          "displayName": {
+            "ja": "氏名",
+            "en": "Full Name"
+          }
+        },
+        "email": {
+          "type": "Email",
+          "unique": true,
+          "displayName": {
+            "ja": "メールアドレス",
+            "en": "Email"
+          }
+        },
+        "password": {
+          "type": "Password"
+        },
+        "posts": {
+          "type": "Association",
+          "relation": "OneToMany",
+          "target": "Post"
+        }
+      }
+    },
+    {
+      "name": "Post",
+      "displayName": {
+        "ja": "投稿",
+        "en": "Post"
+      },
+      "options": {
+        "softDelete": true,
+        "indexes": [
+          {
+            "columns": [
+              "published_at"
+            ]
+          },
+          {
+            "columns": [
+              "status",
+              "published_at"
+            ]
+          }
+        ]
+      },
+      "properties": {
+        "title": {
+          "type": "String",
+          "displayName": {
+            "ja": "タイトル",
+            "en": "Title"
+          }
+        },
+        "content": {
+          "type": "LongText",
+          "displayName": {
+            "ja": "本文",
+            "en": "Content"
+          }
+        },
+        "status": {
+          "type": "EnumRef",
+          "enum": "PostStatus",
+          "default": "draft"
+        },
+        "author": {
+          "type": "Association",
+          "relation": "ManyToOne",
+          "target": "User",
+          "onDelete": "CASCADE"
+        }
+      }
+    },
+    {
+      "name": "PostStatus",
+      "kind": "enum",
+      "displayName": {
+        "ja": "投稿ステータス",
+        "en": "Post Status"
+      },
+      "values": [
+        {
+          "value": "draft",
+          "label": {
+            "ja": "下書き",
+            "en": "Draft"
+          }
+        },
+        {
+          "value": "published",
+          "label": {
+            "ja": "公開済み",
+            "en": "Published"
+          }
+        },
+        {
+          "value": "archived",
+          "label": {
+            "ja": "アーカイブ",
+            "en": "Archived"
+          }
+        }
+      ]
+    }
+  ]
+}

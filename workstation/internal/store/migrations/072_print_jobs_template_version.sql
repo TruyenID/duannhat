@@ -1,0 +1,27 @@
+-- plan-053 TR-28 (#1171) — WHICH layout definition drew this sheet.
+--
+-- Without it, "phiếu tháng trước in bằng layout nào" has no answer once the
+-- paper is out of the printer, and a reprint issued after the brand changed its
+-- logo comes out DIFFERENT from the original with nothing anywhere recording
+-- that it did. Reconciling a 赤伝 against the invoice it reverses needs the two
+-- sheets to be byte-honest with each other, so the version has to be a fact on
+-- the row, not a re-resolution done later against whatever is current.
+--
+-- Shape: `<scope>:<version>` — `system:0`, `brand:7`, `shop:12`. A version
+-- number alone does not identify a definition (brand v3 and shop v3 are
+-- different documents), and Cloud's reprint resolver addresses a version by
+-- BOTH fields.
+--
+-- NULL is a real, distinct state and must stay distinguishable: it means the
+-- sheet was drawn by the LEGACY FORMATTER, which is Go code rather than a
+-- published definition and therefore carries no version at all. That is the
+-- state every shop was in before #1945 — legacy formatter only, or explicit
+-- `print_template_renderer_enabled=false` rollback. Filling NULL in with `system:0`
+-- would send a future reprint looking for the embedded default while the
+-- original came off a formatter, which is exactly the silent divergence this
+-- column exists to make impossible.
+--
+-- Nothing is backfilled for the same reason: rows written before this column
+-- existed genuinely do not record their layout, and inventing one would be a
+-- claim about the past that nobody can check. Applies to NEW prints only.
+ALTER TABLE print_jobs ADD COLUMN template_version TEXT;

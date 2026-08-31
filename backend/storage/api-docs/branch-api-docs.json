@@ -1,0 +1,215 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "TempoFast API — Branch-scoped",
+        "description": "## TempoFast — Branch-scoped APIs\n\nAPIs under `/api/v1/branch/{branchSlug}/...` for branch-level operations that are\ndistinct from the shop-staff (POS) surface mounted at `/api/v1/shops/...`. The\nbranch surface is intended for branch managers managing per-branch overrides on\nHQ-controlled resources.\n\n### Resources\n| Resource | Endpoints |\n|----------|-----------|\n| Branch Schedule Overrides | `/api/v1/branch/{branchSlug}/menus/{menu}/schedules`, `/api/v1/branch/{branchSlug}/menus/{menu}/schedules/{schedule}/override` |\n\n### Authentication\nAll endpoints require Bearer token in the `Authorization` header.",
+        "contact": {
+            "name": "TempoFast"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:5400",
+            "description": "Local Development"
+        }
+    ],
+    "paths": {
+        "/api/v1/branch/{branchSlug}/menus/{menu}/schedules": {
+            "get": {
+                "tags": [
+                    "Branch Schedule Overrides"
+                ],
+                "summary": "List effective schedules for a menu (branch view)",
+                "description": "Returns active schedules with COALESCED effective times — branch override times where set, HQ defaults otherwise. Includes hq_defaults and is_overridden for tooltip display.",
+                "operationId": "17b531c50ea3f7b718fe793884030096",
+                "parameters": [
+                    {
+                        "name": "branchSlug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "menu",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Effective schedule list with COALESCED times"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden — user cannot view this menu"
+                    },
+                    "404": {
+                        "description": "Menu or branch not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/branch/{branchSlug}/menus/{menu}/schedules/{schedule}/override": {
+            "put": {
+                "tags": [
+                    "Branch Schedule Overrides"
+                ],
+                "summary": "Upsert a branch time override for a schedule",
+                "description": "Creates or updates the branch-specific start_time/end_time override. Each field is independently overridable — send only the field(s) to change. Send null to reset a field to the HQ default. Cross-field validation runs on effective (COALESCED) values.",
+                "operationId": "09a73a191602858dea7ffc088a5330a8",
+                "parameters": [
+                    {
+                        "name": "branchSlug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "menu",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "schedule",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "start_time": {
+                                        "description": "HH:MM or HH:MM:SS. null resets to HQ default.",
+                                        "type": "string",
+                                        "example": "07:00",
+                                        "nullable": true
+                                    },
+                                    "end_time": {
+                                        "description": "HH:MM or HH:MM:SS. null resets to HQ default.",
+                                        "type": "string",
+                                        "example": "10:00",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Override saved — effective schedule returned"
+                    },
+                    "403": {
+                        "description": "Forbidden — branch manager of own branch only"
+                    },
+                    "404": {
+                        "description": "Schedule not found or does not belong to this menu"
+                    },
+                    "422": {
+                        "description": "Validation failed — effective end time must be after effective start time"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Branch Schedule Overrides"
+                ],
+                "summary": "Reset a branch schedule override to HQ defaults",
+                "description": "Deletes the branch override row, reverting effective times to the HQ schedule values. Returns 404 if no override exists.",
+                "operationId": "46bde9be976e98c44aaf5d507f6108a0",
+                "parameters": [
+                    {
+                        "name": "branchSlug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "menu",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "schedule",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Override deleted — effective times revert to HQ defaults"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "No override exists for this schedule+branch pair"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "sanctum": {
+                "type": "http",
+                "description": "Bearer token from login or SSO callback",
+                "scheme": "bearer",
+                "bearerFormat": "Token"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Branch Schedule Overrides",
+            "description": "Branch manager APIs for per-branch start/end-time overrides on HQ-defined menu schedule windows. Each `branch_schedule_overrides` row stores nullable start/end times that override the parent `menu_schedule` row when present; missing fields fall back to the HQ default at query time via COALESCE."
+        }
+    ]
+}

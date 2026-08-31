@@ -1,0 +1,120 @@
+# MaterialLotReservation schema
+# ============================================================================
+# Plan-018 Group B.1 — Lot reservation for production planning.
+#
+# Reserves a portion of a MaterialLot's qty_on_hand so that FEFO picking
+# considers `available_qty` (= qty_on_hand - SUM(active reservations))
+# instead of raw qty_on_hand. Prevents two production batches from both
+# claiming the same stock.
+#
+# Lifecycle: active → consumed (picked by StockTransaction)
+#                   → cancelled (manual release)
+#                   → expired (cron after 7-day TTL)
+#
+# Written by:
+#   - MaterialLotReservationService::reserve() — creates active row
+#   - MaterialLotReservationService::release() — active → cancelled
+#   - MaterialLotReservationService::consume() — active → consumed
+#   - Cron material-lot-reservations:expire — active → expired
+#
+# Read by:
+#   - StockTransactionService::pickLotsForConsumption() — available_qty calc
+#   - HQ production batch form — reservation step
+#   - HQ lot detail — reserved qty display
+# ============================================================================
+
+displayName:
+  en: Material Lot Reservation
+  ja: 材料ロット予約
+  vi: Đặt trước lô nguyên liệu
+
+kind: object
+
+options:
+  timestamps: true
+  id: Uuid
+  indexes:
+    - columns: [material_lot_id, status]
+    - columns: [material_batch_id]
+    - columns: [status, expected_consume_at]
+
+properties:
+  materialLot:
+    # The lot being reserved against.
+    type: Association
+    relation: ManyToOne
+    target: MaterialLot
+    onDelete: CASCADE
+    displayName:
+      en: Material Lot
+      ja: 材料ロット
+      vi: Lô nguyên liệu
+
+  qty_reserved:
+    # Amount reserved from the lot. Must be > 0 and <= available_qty at reserve time.
+    type: Decimal
+    precision: 18
+    scale: 4
+    displayName:
+      en: Quantity Reserved
+      ja: 予約数量
+      vi: Số lượng đặt trước
+
+  reservedBy:
+    # The user who created the reservation.
+    type: Association
+    relation: ManyToOne
+    target: User
+    onDelete: RESTRICT
+    displayName:
+      en: Reserved By
+      ja: 予約者
+      vi: Người đặt trước
+
+  expected_consume_at:
+    # When the reservation is expected to be consumed (e.g. batch start date).
+    # Cron uses this + 7-day TTL to expire stale reservations.
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Expected Consume At
+      ja: 消費予定日時
+      vi: Thời điểm dự kiến tiêu thụ
+
+  materialBatch:
+    # Optional link to the production batch this reservation is for.
+    type: Association
+    relation: ManyToOne
+    target: MaterialBatch
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Material Batch
+      ja: 材料バッチ
+      vi: Lô sản xuất
+
+  status:
+    # active | consumed | cancelled | expired
+    type: String
+    length: 16
+    displayName:
+      en: Status
+      ja: ステータス
+      vi: Trạng thái
+
+  reason:
+    # Optional note explaining why this reservation was created.
+    type: Text
+    nullable: true
+    displayName:
+      en: Reason
+      ja: 理由
+      vi: Lý do
+
+  organization_id:
+    # Denormalized for policy scoping. Copied from lot.organization_id at reserve time.
+    type: Uuid
+    displayName:
+      en: Organization ID
+      ja: 組織ID
+      vi: ID tổ chức

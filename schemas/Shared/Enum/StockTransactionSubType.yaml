@@ -1,0 +1,119 @@
+# ==============================================================================
+# Stock Transaction Sub Type Enum (在庫取引サブタイプ / Loại chi tiết phiếu kho)
+# ==============================================================================
+#
+# Phân loại chi tiết mục đích nhập/xuất kho.
+# Xác định nguồn gốc và lý do biến động kho.
+#
+# Giá trị (Values):
+#   --- Nhập kho (stock_in) ---
+#   - purchase: Mua hàng nhập kho (仕入入庫)
+#     Tạo bởi: User thủ công (F3)
+#
+#   - production: Nhập từ sản xuất (生産入庫)
+#     Tạo bởi: Tự động từ F5/F6
+#
+#   - transfer_in: Nhận chuyển kho (転入)
+#     Tạo bởi: Tự động từ F4
+#
+#   - return: Trả hàng/nhận lại (返品)
+#     Tạo bởi: User thủ công (F3) — áp dụng cả nhập và xuất
+#
+#   - adjustment_in: Điều chỉnh tăng (棚卸調整+)
+#     Tạo bởi: Tự động từ F7 (kiểm kê)
+#
+#   --- Xuất kho (stock_out) ---
+#   - sales: Xuất bán hàng (販売出庫)
+#     Tạo bởi: User thủ công (F3) HOẶC auto từ OrderClosingService (plan-024)
+#     — track-stock SKU stock-out khi order paid+closed.
+#
+#   - sales_material_consumption: Xuất NVL theo công thức (販売：レシピ経由)
+#     Tạo bởi: Tự động từ OrderClosingService (plan-024) — khi SKU có
+#     inventory_mode=track_stock VÀ có Recipe.ingredients, một phiếu xuất
+#     phụ aggregate qua tất cả ingredient materials được tạo cùng lúc với
+#     phiếu sales. FEFO pre-pass trong completeTransaction tự xử lý lot
+#     allocation. Tách biệt với `sales` để báo cáo có thể phân biệt
+#     "doanh thu bán món" vs "tiêu hao NVL gián tiếp".
+#
+#   - transfer_out: Chuyển kho đi (転出)
+#     Tạo bởi: Tự động từ F4
+#
+#   - disposal: Hủy hàng (廃棄)
+#     Tạo bởi: Tự động từ F9
+#
+#   - adjustment_out: Điều chỉnh giảm (棚卸調整-)
+#     Tạo bởi: Tự động từ F7 (kiểm kê)
+#
+#   --- Chung ---
+#   - other: Khác (その他)
+#     Tạo bởi: User thủ công — áp dụng cả nhập và xuất
+#
+# Sử dụng trong:
+#   - StockTransaction.sub_type: Phân loại chi tiết phiếu
+#   - Báo cáo: Thống kê theo loại biến động
+#
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: 在庫取引サブタイプ
+  en: Stock Transaction Sub Type
+  vi: Loại chi tiết phiếu kho
+
+values:
+  - value: purchase
+    label:
+      ja: 仕入入庫
+      en: Purchase
+      vi: Mua hàng nhập kho
+  - value: sales
+    label:
+      ja: 販売出庫
+      en: Sales
+      vi: Xuất bán hàng
+  - value: sales_material_consumption
+    label:
+      ja: 販売（レシピ経由）
+      en: Sales (Material via Recipe)
+      vi: Bán hàng (NVL qua công thức)
+  - value: production
+    label:
+      ja: 生産入庫
+      en: Production
+      vi: Nhập từ sản xuất
+  - value: transfer_in
+    label:
+      ja: 転入
+      en: Transfer In
+      vi: Nhận chuyển kho
+  - value: transfer_out
+    label:
+      ja: 転出
+      en: Transfer Out
+      vi: Chuyển kho đi
+  - value: return
+    label:
+      ja: 返品
+      en: Return
+      vi: Trả hàng
+  - value: disposal
+    label:
+      ja: 廃棄
+      en: Disposal
+      vi: Hủy hàng
+  - value: adjustment_in
+    label:
+      ja: 棚卸調整（増）
+      en: Adjustment In
+      vi: Điều chỉnh tăng
+  - value: adjustment_out
+    label:
+      ja: 棚卸調整（減）
+      en: Adjustment Out
+      vi: Điều chỉnh giảm
+  - value: other
+    label:
+      ja: その他
+      en: Other
+      vi: Khác

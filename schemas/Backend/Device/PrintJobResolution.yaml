@@ -1,0 +1,55 @@
+# Cách một lệnh in hỏng được đóng lại bằng tay: in tay hay bỏ. `reason` bắt
+# buộc — một quyết định không kèm lý do thì không phải vết kiểm toán.
+kind: object
+
+options:
+  id: Uuid
+  timestamps: true
+  softDelete: false
+  indexes:
+    - columns: [branch_id, resolved_at]
+
+properties:
+  printJob:
+    type: Association
+    relation: ManyToOne
+    target: PrintJob
+    unique: true
+    onDelete: CASCADE
+    displayName: { ja: 印刷ジョブ, en: Print Job, vi: Lệnh in }
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName: { ja: 組織, en: Organization, vi: Tổ chức }
+
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    onDelete: CASCADE
+    displayName: { ja: 支店, en: Branch, vi: Chi nhánh }
+
+  resolution:
+    type: String
+    length: 32
+    displayName: { ja: 処理, en: Resolution, vi: Cách xử lý }
+
+  reason:
+    type: String
+    length: 255
+    displayName: { ja: 理由, en: Reason, vi: Lý do }
+
+  resolvedBy:
+    type: Association
+    relation: ManyToOne
+    target: User
+    nullable: true
+    onDelete: SET NULL
+    displayName: { ja: 処理者, en: Resolved By, vi: Người xử lý }
+
+  resolved_at:
+    type: Timestamp
+    displayName: { ja: 処理日時, en: Resolved At, vi: Xử lý lúc }

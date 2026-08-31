@@ -1,0 +1,334 @@
+# =============================================================================
+# Coupon (クーポン / Mã giảm giá)
+# =============================================================================
+#
+# Code-driven, brand-scoped, order-level discount. HQ admin tạo coupon kèm
+# code (e.g. WELCOME10), staff/customer nhập code để áp giảm giá lên subtotal
+# của một CustomerOrder. Mỗi order tối đa 1 coupon (BR-COUP01) — apply lần
+# sau replace coupon trước.
+#
+# Written by:  HQ admin (org-admin / org-manager) qua CouponService::create()
+#              hoặc seeder (CouponSeeder via service.create — convention #3).
+# Read by:     POS apply flow, customer-web checkout preview/submit, HQ list
+#              + redemption history reporting, receipt printing.
+# Lifecycle:   soft-deletable; in-use guard (CouponInUseException) blocks
+#              delete khi `times_used > 0`. Update có locked-fields guard
+#              cùng điều kiện (Decision: locked = code/discount_type/
+#              discount_value/min_order_subtotal/max_discount_cap/
+#              applicable_branch_ids/usage_limit_per_customer; usage_limit_
+#              total chỉ cho phép tăng; valid_until chỉ cho phép kéo dài).
+#
+# State machine (storable status):
+#
+#   [draft] --activate--> (auto when published) --pause--> [paused]
+#                                                          ^   |
+#                                                          |   resume
+#                                                          +---+
+#
+# Display states scheduled / active / expired / exhausted are DERIVED bởi
+# CouponService::computeStatus() từ valid_from/valid_until + usage counter
+# (xem CouponStatus.yaml header). Không persist, không index.
+#
+# Atomic counter (BR-COUP-COUNT, Decision 1):
+#   apply()   → DB::transaction + lockForUpdate trên Coupon row → bump
+#               times_used. DB CHECK constraint coupons_times_used_within_limit
+#               là defensive last-resort.
+#   release() → DB::transaction + lockForUpdate → set redemption.released_at
+#               + decrement times_used. Chỉ chạy khi order chưa closed.
+#
+# Scope:
+#   organization_id + brand_id   : hard scope (FK CASCADE qua brand).
+#   coupon_branch (M2M, separate)
+#                                : optional whitelist; trống = brand-wide.
+#                                  Apply rejects nếu branch không match.
+#
+# Business Rules (BR-COUP*):
+#   - BR-COUP01: 1 coupon per order. Apply lần 2 với code khác → release
+#                coupon hiện tại, apply coupon mới (atomic in same tx).
+#   - BR-COUP02: code unique scope (organization_id, brand_id, code).
+#                Lookup case-insensitive (FE auto-uppercase input).
+#   - BR-COUP03: usage_limit_per_customer = 0 ⇒ walk-in allowed (customer_id
+#                nullable). >0 ⇒ apply yêu cầu customer_id.
+#   - BR-COUP04: usage_limit_total NULL = unlimited. Khi non-null + bump
+#                vượt limit → 422 coupon_exhausted (race-safe via lock).
+#   - BR-COUP05: discount_type=percent → max_discount_cap clamps áp dụng
+#                (e.g. 10% off cap 50k). discount_type=fixed → cap không có
+#                ý nghĩa (validate must be null at request layer).
+#   - BR-COUP06: min_order_subtotal: subtotal phải ≥ this để áp được.
+#                Apply trên subtotal AFTER promotion item discounts (so coupon
+#                stacks ON TOP of menu promotion when stacking_mode allows).
+#   - BR-COUP07: void order TRƯỚC closed → release tự động (counter giảm).
+#                voided sau closed → counter NOT giảm (closed = immutable).
+# =============================================================================
+
+displayName:
+  en: Coupon
+  ja: クーポン
+  vi: Mã giảm giá
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  audit:
+    createdBy: true
+    updatedBy: true
+  indexes:
+    # BR-COUP02 unique lookup scope
+    - columns: [organization_id, brand_id, code]
+      unique: true
+      name: coupons_org_brand_code_unique
+    # Filtered listing in HQ
+    - columns: [brand_id, status]
+    # Range scans for "currently active" filters
+    - columns: [valid_from, valid_until]
+  service: {}
+
+properties:
+  code:
+    # Mã coupon — uppercase A-Z 0-9 _- by convention. Case-insensitive
+    # lookup tại apply (FE auto-uppercase trước khi POST). Không đổi sau
+    # tạo (BR-COUP02 — locked field). Length 50 đủ cho slug + prefix
+    # campaign (e.g. CAMPAIGN-VINH-2026-WELCOME10).
+    type: String
+    length: 50
+    searchable: true
+    lookupable: true
+    displayName:
+      en: Code
+      ja: コード
+      vi: Mã
+
+  name:
+    # Tên hiển thị cho admin + customer (3 ngôn ngữ). Persist ở
+    # coupon_translations (Astrotomic) — service phải route locale-keyed
+    # payload qua fill() (KHÔNG dùng Coupon::create raw).
+    type: String
+    length: 255
+    translatable: true
+    searchable: true
+    sortable: true
+    displayName:
+      en: Name
+      ja: 名称
+      vi: Tên
+
+  description:
+    # Mô tả dài cho landing page / popup khách. Nullable.
+    type: Text
+    nullable: true
+    translatable: true
+    displayName:
+      en: Description
+      ja: 説明
+      vi: Mô tả
+
+  discount_type:
+    # fixed = absolute VND, percent = % of subtotal (BR-COUP05).
+    # FE switch dựa trên field này: hiện max_discount_cap chỉ khi `percent`.
+    type: EnumRef
+    enum: CouponDiscountType
+    filterable: true
+    displayName:
+      en: Discount Type
+      ja: 割引種別
+      vi: Loại giảm giá
+
+  discount_value:
+    # Khi fixed: VND amount (e.g. 50000). Khi percent: số phần trăm
+    # 0 < x ≤ 100 (validate ở request layer). Locked sau khi
+    # times_used > 0 (BR-COUP-LOCK).
+    type: Decimal
+    precision: 12
+    scale: 2
+    displayName:
+      en: Discount Value
+      ja: 割引額
+      vi: Giá trị giảm
+
+  max_discount_cap:
+    # Trần giảm tuyệt đối khi discount_type=percent (BR-COUP05). NULL
+    # ⇒ không cap. KHÔNG có ý nghĩa khi discount_type=fixed (request
+    # validate must be null).
+    type: Decimal
+    precision: 12
+    scale: 2
+    nullable: true
+    displayName:
+      en: Max Discount Cap
+      ja: 最大割引額
+      vi: Giảm tối đa
+
+  min_order_subtotal:
+    # Subtotal tối thiểu để áp được (BR-COUP06). 0 = không yêu cầu.
+    type: Decimal
+    precision: 12
+    scale: 2
+    default: 0
+    displayName:
+      en: Minimum Order Subtotal
+      ja: 最低注文金額
+      vi: Hóa đơn tối thiểu
+
+  usage_limit_total:
+    # NULL = không giới hạn. Non-null = lượt sử dụng tối đa toàn cục
+    # (atomic bump via lockForUpdate). Update chỉ cho phép tăng (locked
+    # giảm — vì giảm có thể gây oversell so với redemption đã ghi).
+    type: Int
+    nullable: true
+    displayName:
+      en: Usage Limit (Total)
+      ja: 使用上限（全体）
+      vi: Lượt dùng tối đa
+
+  usage_limit_per_customer:
+    # 0 = walk-in allowed (BR-COUP03). >0 = mỗi customer_id chỉ được
+    # apply đến số này. Counter dùng coupon_redemptions WHERE
+    # customer_id=? AND released_at IS NULL.
+    type: Int
+    default: 0
+    displayName:
+      en: Usage Limit per Customer
+      ja: 顧客あたり上限
+      vi: Lượt mỗi khách
+
+  times_used:
+    # Atomic counter — ghi tăng tại apply(), giảm tại release(). DB
+    # CHECK constraint coupons_times_used_within_limit là defensive
+    # guard (xem manual migration T1.8).
+    type: Int
+    default: 0
+    displayName:
+      en: Times Used
+      ja: 使用回数
+      vi: Số lượt đã dùng
+
+  valid_from:
+    # Inclusive. Nếu now < valid_from → derived status "scheduled" → apply
+    # 422 coupon_not_yet_valid.
+    type: Timestamp
+    displayName:
+      en: Valid From
+      ja: 有効開始
+      vi: Bắt đầu
+
+  valid_until:
+    # Inclusive. Nếu now > valid_until → derived "expired" → apply 422
+    # coupon_expired. Update có thể kéo dài (allowed extension), không
+    # rút ngắn dưới max(now, current).
+    type: Timestamp
+    displayName:
+      en: Valid Until
+      ja: 有効終了
+      vi: Kết thúc
+
+  status:
+    # Chỉ 2 storable: draft | paused. Display states (scheduled/active/
+    # expired/exhausted) DERIVED runtime — xem CouponStatus.yaml header.
+    # pause/resume action mutate field này; UI list filter dùng cả
+    # storable + derived predicates.
+    type: EnumRef
+    enum: CouponStatus
+    default: draft
+    filterable: true
+    displayName:
+      en: Status
+      ja: ステータス
+      vi: Trạng thái
+
+  # === Relationships ===
+
+  brand:
+    # Hard scope — tất cả query gắn brand_id. CASCADE: xóa brand kéo theo
+    # coupons (rare; brand thường soft-delete).
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: CASCADE
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu
+
+  organization:
+    # Denormalized từ brand.organization để policy check trực tiếp
+    # (CouponPolicy compares user.console_organization_id == coupon.
+    # organization_id) mà không cần join.
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  branches:
+    # M2M whitelist qua coupon_branch. Trống ⇒ brand-wide. Có row ⇒
+    # apply chỉ chấp nhận branch trong whitelist (else 422
+    # coupon_branch_not_eligible).
+    type: Association
+    relation: ManyToMany
+    target: Branch
+    joinTable: coupon_branch
+    displayName:
+      en: Applicable Branches
+      ja: 対象店舗
+      vi: Chi nhánh áp dụng
+
+  redemptions:
+    # Immutable ledger — service KHÔNG update redemption sau insert,
+    # chỉ set released_at khi rollback. Cascade RESTRICT từ coupon
+    # ngược lại (delete coupon đòi 0 redemption).
+    type: Association
+    relation: OneToMany
+    target: CouponRedemption
+    mappedBy: coupon
+    displayName:
+      en: Redemptions
+      ja: 利用履歴
+      vi: Lịch sử dùng
+
+  customer:
+    # Non-null ⇒ coupon CÁ NHÂN: chỉ đúng khách này áp được (apply() so
+    # customer_id, lệch thì 422 coupon_not_yours).
+    #
+    # Không có cột này thì coupon mint từ đổi điểm là một tấm vé vô danh:
+    # `usage_limit_per_customer = 1` chỉ giới hạn MỖI khách một lượt, nó
+    # không nói lượt đó phải là của ai — ai đọc được mã cũng tiêu được phần
+    # thưởng mà người khác đã trả điểm để đổi. Mã sinh ngẫu nhiên chỉ là
+    # bí mật, không phải quyền sở hữu.
+    #
+    # NULL cho mọi coupon HQ phát công khai (WELCOME10…) — đó là hành vi cũ,
+    # không đổi.
+    type: Association
+    relation: ManyToOne
+    target: Customer
+    nullable: true
+    onDelete: CASCADE
+    displayName:
+      en: Owner
+      ja: 所有者
+      vi: Khách sở hữu
+
+  pointReward:
+    # Non-null ⇒ coupon này KHÔNG do HQ tạo, mà được mint ra khi một khách
+    # đổi điểm lấy phần thưởng tương ứng (xem PointReward.yaml).
+    #
+    # Vì sao cần cột này: mint coupon cá nhân là cách rẻ nhất để điểm đổi
+    # được thành tiền ở quầy (tái dùng nguyên đường CouponService::apply),
+    # nhưng cái giá là mỗi lượt đổi đẻ một dòng trong bảng `coupons`. Không
+    # có cột này thì màn quản trị coupon của HQ sẽ ngập coupon cá nhân trong
+    # vài tuần. CouponService::list mặc định lọc bỏ chúng
+    # (`include_point_rewards` để xem).
+    type: Association
+    relation: ManyToOne
+    target: PointReward
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Point Reward
+      ja: 交換商品
+      vi: Phần thưởng đổi điểm

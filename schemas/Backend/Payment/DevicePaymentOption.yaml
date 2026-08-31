@@ -1,0 +1,91 @@
+# =============================================================================
+# DevicePaymentOption — device-only narrowing override
+# =============================================================================
+#
+# A device can inherit or disable a shop option. The schema intentionally uses a
+# two-value inline enum so DB/application input cannot enable or unblock anything.
+# Effective resolution still verifies tenant/branch/device ownership.
+# =============================================================================
+
+displayName:
+  en: Device Payment Option
+  ja: デバイス決済オプション
+  vi: Tuỳ chọn thanh toán thiết bị
+
+kind: object
+
+options:
+  id: Uuid
+  timestamps: true
+  softDelete: false
+  indexes:
+    # One override per device and shop option.
+    - columns: [device_id, shop_payment_option_id]
+      unique: true
+      name: device_payment_options_device_shop_option_unique
+    # Tenant/branch snapshot publication scan.
+    - columns: [organization_id, branch_id, preference]
+      name: device_payment_options_scope_lookup
+
+properties:
+  organization:
+    # Must match branch, device, and the parent shop option organization.
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: RESTRICT
+    displayName: { en: Organization, ja: 組織, vi: Tổ chức }
+
+  branch:
+    # Must match Device.branch and ShopPaymentOption.branch.
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    onDelete: RESTRICT
+    displayName: { en: Shop, ja: 店舗, vi: Cửa hàng }
+
+  device:
+    # Registered device whose effective set is narrowed.
+    type: Association
+    relation: ManyToOne
+    target: Device
+    onDelete: RESTRICT
+    displayName: { en: Device, ja: デバイス, vi: Thiết bị }
+
+  shop_payment_option:
+    # Parent shop preference/capability. Device can never select another connection.
+    type: Association
+    relation: ManyToOne
+    target: ShopPaymentOption
+    onDelete: RESTRICT
+    displayName: { en: Shop Payment Option, ja: 店舗決済オプション, vi: Tuỳ chọn cửa hàng }
+
+  preference:
+    # Hard DB vocabulary: inherit or disabled only; no enabled/blocked widening states.
+    type: Enum
+    enum: [inherit, disabled]
+    default: inherit
+    filterable: true
+    displayName: { en: Restriction, ja: 制限, vi: Hạn chế }
+
+  change_reason:
+    # Safe operator reason for audit/support.
+    type: String
+    length: 500
+    nullable: true
+    displayName: { en: Change Reason, ja: 変更理由, vi: Lý do thay đổi }
+
+  version:
+    # Optimistic concurrency version for device settings writes.
+    type: BigInt
+    unsigned: true
+    default: 1
+    rules:
+      min: 1
+    displayName: { en: Version, ja: バージョン, vi: Phiên bản }
+
+policies:
+  - forbid: [create, delete]
+    desc: Device overrides are upserted through scoped admin flows; hard delete uses reset semantics
+  - permit: [view, list, edit]
+    desc: Device restriction may only inherit or disable; widening is enforced in authorization service

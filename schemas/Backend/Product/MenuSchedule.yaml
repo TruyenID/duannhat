@@ -1,0 +1,224 @@
+# =============================================================================
+# MenuSchedule (メニュースケジュール / Lịch trình menu)
+# =============================================================================
+#
+# One menu → many schedule windows. Each window defines a recurring time slot
+# (start_time–end_time) and the days of the week it applies (days_of_week
+# bitmask). MenuService::getCurrentMenu() uses these rows to decide which
+# menu is active at any given moment.
+#
+# Written by: HQ admin (hq_manager role) via MenuScheduleService.
+# Read by:    MenuService::getCurrentMenu() (backend schedule resolution),
+#             HQ admin UI (Schedules tab on menu detail page),
+#             Workstation sync /workstation/menu (Iteration 2 — deferred).
+#
+# Lifecycle:
+#   - Created: HQ manager adds a time window to a menu.
+#   - Updated: HQ manager edits time/days/active toggle.
+#   - Soft-deleted: HQ manager removes the window; audit row is retained.
+#     Soft-deleted rows are excluded from getCurrentMenu() immediately —
+#     they are treated as removed from the user's perspective and cause the
+#     menu to fall back to always-on if no non-deleted rows remain.
+#
+# Backward compatibility note:
+#   Menus with zero non-deleted schedule rows are treated as always-on
+#   (same behaviour as before this feature existed).
+#
+# =============================================================================
+
+displayName:
+  en: Menu Schedule
+  ja: メニュースケジュール
+  vi: Lịch trình menu
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    # Composite index for getCurrentMenu() subquery — filters by menu + active status.
+    - columns: [menu_id, is_active]
+    # Composite index for time-slot filter — bitmask check + start/end range scan.
+    - columns: [days_of_week, start_time, end_time]
+
+properties:
+  # Start of the recurring time window (HH:MM:SS).
+  # Must be strictly less than end_time (enforced by FormRequest validation).
+  # Crossing midnight (e.g. 23:00–01:00) is out of scope for Iteration 1.
+  # Written by: HQ admin on create/update. Read by: getCurrentMenu() + admin UI.
+  start_time:
+    type: Time
+    displayName:
+      en: Start Time
+      ja: 開始時刻
+      vi: Giờ bắt đầu
+
+  # End of the recurring time window (HH:MM:SS).
+  # Must be strictly greater than start_time (enforced by FormRequest validation).
+  # Written by: HQ admin on create/update. Read by: getCurrentMenu() + admin UI.
+  end_time:
+    type: Time
+    displayName:
+      en: End Time
+      ja: 終了時刻
+      vi: Giờ kết thúc
+
+  # Optional calendar-date lower bound (inclusive). NULL = no lower bound, so
+  # the window behaves exactly as before this field existed (TC-MSCH-103).
+  # When set, the window only applies on/after this date — combined with
+  # days_of_week + time, e.g. "Mon–Fri 06:00–10:00, but only during summer".
+  # Written by: HQ admin. Read by: getCurrentMenu() date-range check + admin UI.
+  start_date:
+    type: Date
+    nullable: true
+    displayName:
+      en: Start Date
+      ja: 開始日
+      vi: Ngày bắt đầu
+
+  # Optional calendar-date upper bound (inclusive). NULL = no upper bound.
+  # Must be >= start_date when both are set (enforced by FormRequest validation).
+  # Written by: HQ admin. Read by: getCurrentMenu() date-range check + admin UI.
+  end_date:
+    type: Date
+    nullable: true
+    displayName:
+      en: End Date
+      ja: 終了日
+      vi: Ngày kết thúc
+
+  # Day-of-week bitmask (TINYINT UNSIGNED). Bit 0 = Sunday, bit 6 = Saturday.
+  # Bit positions match PHP Carbon dayOfWeek (0=Sun…6=Sat) and MySQL
+  # DAYOFWEEK()-1 (1=Sun…7=Sat, normalised by subtracting 1).
+  # Valid range: 1–127. 0 is rejected by FormRequest (no days selected).
+  # Examples: 1=Sun only, 62=Mon–Fri, 65=Sat+Sun, 127=all days.
+  # Written by: HQ admin. Read by: getCurrentMenu() bitmask check + admin UI decoder.
+  days_of_week:
+    type: TinyInt
+    displayName:
+      en: Days of Week
+      ja: 曜日
+      vi: Ngày trong tuần
+
+  # HOW this row repeats (#1979). Weekly = the pre-#1979 behaviour, so it is the
+  # default and every existing row means exactly what it meant before.
+  # `days_of_week` is only consulted when this is Weekly; `days_of_month` only
+  # when Monthly; `menu_schedule_dates` only when SpecificDates. See
+  # MenuScheduleRecurrence.yaml for why one kind per row rather than combining.
+  recurrence_kind:
+    type: EnumRef
+    enum: MenuScheduleRecurrence
+    default: Weekly
+    filterable: true
+    displayName:
+      en: Recurrence Kind
+      ja: 繰り返し種別
+      vi: Kiểu lặp
+
+  # Day-of-month bitmask for recurrence_kind = Monthly (#1979): bit0 = the 1st …
+  # bit30 = the 31st. Same shape as days_of_week deliberately — matching with a
+  # bare `&` behaves identically on MySQL and on the SQLite the tests run, which
+  # a JSON column would not.
+  #
+  # BigInt, not Int: all 31 bits set is 2_147_483_647, exactly the signed-INT
+  # ceiling. It fits by one, and a type that fits by one is a type that breaks
+  # the day someone adds a 32nd flag.
+  #
+  # NULL = no day-of-month restriction. Only read when recurrence_kind is
+  # Monthly; a stale value on a Weekly row is inert, not a bug.
+  days_of_month:
+    type: BigInt
+    nullable: true
+    displayName:
+      en: Days of Month
+      ja: 日付（毎月）
+      vi: Ngày trong tháng
+
+  # Soft toggle — when false, the schedule window is ignored by getCurrentMenu()
+  # without requiring deletion. The menu still has non-deleted schedule rows,
+  # so it is NOT treated as always-on; it simply has no active windows.
+  # Written by: HQ admin (inline toggle in admin UI). Read by: activeSchedules() relation.
+  is_active:
+    type: Boolean
+    default: true
+    filterable: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+
+  # Tiebreak priority when multiple schedule windows overlap within the same menu.
+  # Lower number = higher priority (same convention as menus.priority).
+  # INTENTIONALLY defaults to 0, not 10 — schedule priority is a local ordinal
+  # tiebreak within one menu, not a branch-level ranking like menus.priority.
+  # Written by: HQ admin (optional). Read by: activeSchedules() ORDER BY priority ASC.
+  priority:
+    type: Int
+    default: 0
+    sortable: true
+    displayName:
+      en: Priority
+      ja: 優先度
+      vi: Độ ưu tiên
+
+  # User UUID who created this schedule. Set automatically from auth()->id() on create.
+  # Nullable because system-generated rows (e.g. seeder) may have no auth context.
+  # Written by: MenuScheduleService::create() — never from request body.
+  # Read by: audit trails.
+  created_by_id:
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Created By
+      ja: 作成者
+      vi: Người tạo
+
+  # ==========================================================================
+  # Associations
+  # ==========================================================================
+
+  # Parent menu. CASCADE — when a menu is hard-deleted, its schedules go with it.
+  # Scoped route binding ({menu}/schedules/{schedule}) enforces that a schedule
+  # can only be accessed through its own menu — cross-menu access returns 404.
+  # Written by: route parameter (menu_id injected from URL). Read by: all queries.
+  menu:
+    type: Association
+    relation: ManyToOne
+    target: Menu
+    onDelete: CASCADE
+    displayName:
+      en: Menu
+      ja: メニュー
+      vi: Menu
+
+  # Concrete dates for recurrence_kind = SpecificDates (#1979). Empty for the
+  # other two kinds. Rows left over from a kind change are inert by BR-MSD03,
+  # so flipping kind back and forth does not destroy the user's list.
+  scheduleDates:
+    type: Association
+    relation: OneToMany
+    target: MenuScheduleDate
+    mappedBy: menuSchedule
+    displayName:
+      en: Specific Dates
+      ja: 特定日
+      vi: Ngày cụ thể
+
+  # Origin link for BRANCH menu schedules: points at the master menu's schedule
+  # row this one mirrors (menu-sync fix). Null = master schedule itself or a
+  # legacy row. Enables identity-based reconciliation on syncFromMaster — HQ
+  # time edits update the branch row in place, so branch_schedule_overrides
+  # attached to it survive. SET NULL on hard delete (masters are soft-deleted
+  # in practice).
+  masterSchedule:
+    type: Association
+    relation: ManyToOne
+    target: MenuSchedule
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Master Schedule
+      ja: マスタースケジュール
+      vi: Lịch gốc (HQ)

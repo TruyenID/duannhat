@@ -1,0 +1,99 @@
+# =============================================================================
+# BranchFloatingSectionOverride (店舗フローティングセクション上書き / Ghi đè khung giờ ưu đãi chi nhánh)
+# =============================================================================
+#
+# Branch managers may override the `start_time`, `end_time`, and
+# `days_of_week` of an HQ-created FloatingSectionSchedule window without
+# touching the HQ row — same COALESCE pattern as BranchScheduleOverride (see
+# schemas/Backend/Product/BranchScheduleOverride.yaml).
+#
+# Reserved for a future iteration: no Controller/Service/route/UI consumes
+# this model yet. Iteration 1 (HQ-only floating section management) does not
+# expose a branch-side override screen — this schema exists now purely so the
+# migration lands alongside FloatingSection/FloatingSectionSchedule and a
+# later iteration does not need another migration.
+#
+# =============================================================================
+
+displayName:
+  en: Branch Floating Section Override
+  ja: 店舗フローティングセクション上書き
+  vi: Ghi đè khung giờ ưu đãi chi nhánh
+
+kind: object
+
+options:
+  service: false
+  timestamps: true
+  softDelete: false
+  id: Uuid
+  indexes:
+    - columns: [floating_section_schedule_id, branch_id]
+      unique: true
+
+properties:
+  start_time:
+    type: Time
+    nullable: true
+    displayName:
+      en: Start Time (Override)
+      ja: 開始時刻（上書き）
+      vi: Giờ bắt đầu (ghi đè)
+
+  end_time:
+    type: Time
+    nullable: true
+    displayName:
+      en: End Time (Override)
+      ja: 終了時刻（上書き）
+      vi: Giờ kết thúc (ghi đè)
+
+  days_of_week:
+    type: TinyInt
+    nullable: true
+    displayName:
+      en: Days of Week (Override)
+      ja: 曜日（上書き）
+      vi: Ngày trong tuần (ghi đè)
+
+  floatingSectionSchedule:
+    type: Association
+    relation: ManyToOne
+    target: FloatingSectionSchedule
+    nullable: false
+    onDelete: CASCADE
+    displayName:
+      en: Floating Section Schedule
+      ja: フローティングセクションスケジュール
+      vi: Lịch trình khung giờ ưu đãi
+
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    nullable: false
+    onDelete: CASCADE
+    displayName:
+      en: Branch
+      ja: 店舗
+      vi: Chi nhánh
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    nullable: false
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  updatedBy:
+    type: Association
+    relation: ManyToOne
+    target: User
+    nullable: true
+    displayName:
+      en: Updated By
+      ja: 更新者
+      vi: Người cập nhật

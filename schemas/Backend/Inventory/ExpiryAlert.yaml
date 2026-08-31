@@ -1,0 +1,85 @@
+# ExpiryAlert schema
+# ============================================================================
+# Plan-017 Tier 1.C — de-dup record for the daily expiry-scan cron.
+#
+# `ExpiryAlertService::scan()` runs once a day (07:00 Asia/Tokyo via the
+# Laravel scheduler) and walks every Active MaterialLot. For each
+# (lot, threshold) pair from the lot's parent Material's
+# expiry_alert_thresholds (default [7, 3, 1] days), it firstOrCreate's
+# a row in this table — guaranteeing exactly one notification per lot
+# per threshold per day, even if the cron runs multiple times.
+#
+# Once the lot's status flips off Active (depleted, disposed, expired),
+# alerts are no longer generated; existing rows stay for audit.
+#
+# Read by:
+#   - HQ MaterialLot detail page sidebar ("Next alert in N days")
+#   - Notification audit log
+#
+# Written by:
+#   - ExpiryAlertService::scan() — never updated or deleted
+#
+# This is an append-only table — no updated_at, no soft delete.
+# ============================================================================
+
+displayName:
+  en: Expiry Alert
+  ja: 期限アラート
+  vi: Cảnh báo hạn
+
+kind: object
+
+options:
+  timestamps: false
+  id: Uuid
+  indexes:
+    - columns: [material_lot_id, threshold_days]
+      unique: true
+    - columns: [material_lot_id]
+    - columns: [fired_at]
+
+properties:
+  materialLot:
+    type: Association
+    relation: ManyToOne
+    target: MaterialLot
+    onDelete: CASCADE
+    displayName:
+      en: Material Lot
+      ja: 材料ロット
+      vi: Lô nguyên liệu
+
+  threshold_days:
+    type: Int
+    displayName:
+      en: Threshold (days)
+      ja: 閾値（日）
+      vi: Ngưỡng (ngày)
+    description:
+      en: "Days-out window that fired this alert (e.g. 7, 3, 1)."
+      ja: "このアラートをトリガーした日数ウィンドウ（例：7、3、1）。"
+      vi: "Ngưỡng số ngày kích hoạt cảnh báo (VD: 7, 3, 1)."
+
+  fired_at:
+    type: Timestamp
+    useCurrent: true
+    displayName:
+      en: Fired At
+      ja: 発火日時
+      vi: Thời điểm kích hoạt
+    description:
+      en: "When ExpiryAlertService::scan() created this row. Set on insert via DB DEFAULT."
+      ja: "ExpiryAlertService::scan()がこの行を作成した日時。DB DEFAULT で挿入時に設定。"
+      vi: "Thời điểm ExpiryAlertService::scan() tạo row. Set khi insert qua DB DEFAULT."
+
+  notification_id:
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Notification ID
+      ja: 通知ID
+      vi: ID thông báo
+    description:
+      en: "Soft FK to notifications.id when a notification was successfully dispatched. NULL = create-only path (notification deferred to a future Tier 1.C polish)."
+      ja: "通知が正常にディスパッチされた場合のnotifications.idへのソフトFK。NULL = 作成のみのパス（通知は将来のTier 1.C仕上げに延期）。"
+      vi: "Soft FK đến notifications.id khi thông báo được dispatch thành công. NULL = chỉ tạo row (thông báo để sau)."

@@ -1,0 +1,1029 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "TempoFast API — Console SSO",
+        "description": "## TempoFast — Console SSO Authentication API\n\nOAuth2 Single Sign-On integration with DXS Console (Identity Provider).\n\n### SSO Flow\n\n```\nFrontend                     TempoFast API            DXS Console (IDP)\n────────                     ───────────────            ─────────────────\n1. User clicks \"Login\"\n2. Redirect to Console ─────────────────────────────→ /sso/authorize?\n                                                       service_slug=dxs-product&\n                                                       redirect_uri=...\n3.                                                    User authenticates\n4. Console redirects back ←──────────────────────── ?code=AUTH_CODE\n5. POST /api/v1/auth/sso/callback ──→\n   { code: \"AUTH_CODE\" }        Exchange code ──────→ POST /api/sso/token\n                                Verify JWT          ← { access_token, refresh_token }\n                                Create/update user\n                                Sync orgs & roles\n                             ←── { user, organizations, token }\n6. Use token for API calls\n```\n\n### Endpoints\n\n| Method | Endpoint | Auth | Description |\n|--------|----------|------|-------------|\n| POST | `/api/v1/auth/sso/callback` | - | Exchange SSO code for tokens |\n| POST | `/api/v1/auth/sso/logout` | Bearer | Logout & revoke Console tokens |\n| GET | `/api/v1/auth/sso/user` | Bearer | Get user + organizations |\n| POST | `/api/v1/auth/webhook/cache-purge` | HMAC | Console webhook for cache invalidation |\n\n### Authentication\n\nAfter SSO callback, include the Bearer token in all requests:\n```\nAuthorization: Bearer {token}\n```\n\n**With `device_name`** in callback → returns API token (mobile/SPA).\n**Without `device_name`** → creates session cookie (same-origin web).\n\n### Multi-Tenancy Headers\n\nAPI endpoints that operate within an organization context require:\n```\nX-Organization-Id: {organization_slug}    # Required — which org to operate in\nX-Branch-Id: {branch_uuid}                # Optional — which branch (for branch-level permissions)\n```\n\nOrganizations and roles are synced automatically during SSO callback.\n\n### Webhook Security\n\nThe `cache-purge` webhook requires HMAC-SHA256 signature verification:\n```\nX-Omnify-Signature: HMAC-SHA256(request_body, SSO_SERVICE_SECRET)\n```\n\n### Error Format\n```json\n{\n  \"error\": \"ERROR_CODE\",\n  \"message\": \"Human-readable description\"\n}\n```\n\n| Code | Error | Description |\n|------|-------|-------------|\n| 401 | `INVALID_CODE` | SSO code exchange failed |\n| 401 | `INVALID_TOKEN` | JWT verification failed |\n| 401 | `UNAUTHENTICATED` | No valid Bearer token |\n| 400 | `MISSING_ORGANIZATION` | X-Organization-Id header missing |\n| 403 | `ACCESS_DENIED` | No access to organization |\n| 403 | `INSUFFICIENT_ROLE` | Role level too low |\n| 403 | `PERMISSION_DENIED` | Missing required permission |",
+        "contact": {
+            "name": "TempoFast"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:5400",
+            "description": "Local Development"
+        }
+    ],
+    "paths": {
+        "/api/v1/locale": {
+            "post": {
+                "tags": [
+                    "User Context"
+                ],
+                "summary": "Update user locale",
+                "description": "Sets the locale for the authenticated user. Persists to user profile + cookie.",
+                "operationId": "07ba1371d1ca9183f2a235a1f8150539",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "locale"
+                                ],
+                                "properties": {
+                                    "locale": {
+                                        "type": "string",
+                                        "enum": [
+                                            "ja",
+                                            "en",
+                                            "vi"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Locale updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "locale": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Invalid locale"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/timezone": {
+            "post": {
+                "tags": [
+                    "User Context"
+                ],
+                "summary": "Update user timezone",
+                "description": "Sets the timezone for the authenticated user. Persists to user profile + cookie.",
+                "operationId": "790bd0debd74f1b535dd0cf5cdfbfd4c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "timezone"
+                                ],
+                                "properties": {
+                                    "timezone": {
+                                        "description": "Valid IANA timezone identifier",
+                                        "type": "string",
+                                        "example": "Asia/Tokyo"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Timezone updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "timezone": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Invalid timezone"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/me/notifications": {
+            "get": {
+                "tags": [
+                    "Me - Notifications"
+                ],
+                "summary": "List the authenticated user's inbox",
+                "operationId": "d7c6be993c987cfd81c557a1345fa913",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "unread",
+                                "read",
+                                "all"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "priority",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "low",
+                                "normal",
+                                "high",
+                                "urgent"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "since",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 25,
+                            "maximum": 100
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "include_dismissed",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated inbox"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Invalid filter"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Me - Notifications"
+                ],
+                "summary": "GDPR right-to-be-forgotten — wipe own inbox",
+                "description": "GDPR right-to-be-forgotten endpoint (issue #179 part C).\n\nPurges every NotificationRecipient row addressed to the caller plus\nthe cascading NotificationDelivery children. Other recipients of the\nsame parent Notification are NOT affected — a stock alert sent to 5\nmanagers stays visible to the other 4 if one purges their inbox.\n\nIdempotent — second call returns count=0. Always 200, never 204, so\nthe count is observable to the caller (UI can confirm \"wiped 87 rows\").",
+                "operationId": "0089efc33a2dfb0d6e0392553a6891a6",
+                "responses": {
+                    "200": {
+                        "description": "Wiped count",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "wiped_count": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/me/notifications/summary": {
+            "get": {
+                "tags": [
+                    "Me - Notifications"
+                ],
+                "summary": "Unread count + per-priority breakdown for the bell badge",
+                "operationId": "bc95ce260b3e6df3d1344ecdd10c233a",
+                "responses": {
+                    "200": {
+                        "description": "Summary"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/me/notifications/{notificationId}/seen": {
+            "patch": {
+                "tags": [
+                    "Me - Notifications"
+                ],
+                "summary": "Mark single notification as seen",
+                "operationId": "affa35df15af9381ccbd6562a6347285",
+                "parameters": [
+                    {
+                        "name": "notificationId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Seen"
+                    },
+                    "404": {
+                        "description": "Not a recipient / notification does not exist"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/me/notifications/{notificationId}/read": {
+            "patch": {
+                "tags": [
+                    "Me - Notifications"
+                ],
+                "summary": "Mark single notification as read (implies seen)",
+                "operationId": "afb269c3e61a072416f1e772e16c032f",
+                "parameters": [
+                    {
+                        "name": "notificationId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Read"
+                    },
+                    "404": {
+                        "description": "Not a recipient"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/me/notifications/{notificationId}/dismissed": {
+            "patch": {
+                "tags": [
+                    "Me - Notifications"
+                ],
+                "summary": "Archive a notification",
+                "operationId": "7d6c0e3bc335ffa8e1901109d57738a7",
+                "parameters": [
+                    {
+                        "name": "notificationId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Dismissed"
+                    },
+                    "404": {
+                        "description": "Not a recipient"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/me/notifications/bulk-read": {
+            "post": {
+                "tags": [
+                    "Me - Notifications"
+                ],
+                "summary": "Mark many / all unread as read",
+                "operationId": "ac887165e0277b66b279b40687a249af",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "uuid"
+                                        }
+                                    },
+                                    "all_unread": {
+                                        "type": "boolean"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Marked count"
+                    },
+                    "422": {
+                        "description": "Validation error — neither or both of ids / all_unread"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/me/notifications/bulk-dismiss": {
+            "post": {
+                "tags": [
+                    "Me - Notifications"
+                ],
+                "summary": "Dismiss many / all",
+                "operationId": "e79f53dca62a3c91472ac5d2c9b82390",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "uuid"
+                                        }
+                                    },
+                                    "all_read": {
+                                        "type": "boolean"
+                                    },
+                                    "all": {
+                                        "type": "boolean"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Dismissed count"
+                    },
+                    "422": {
+                        "description": "Validation error — exactly one of ids/all_read/all required"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/me/notification-preferences": {
+            "get": {
+                "tags": [
+                    "Me - Notifications"
+                ],
+                "summary": "Get the authenticated user's preferences + master mute + quiet hours",
+                "operationId": "188fd3315878390e25f0a44f9feb9067",
+                "responses": {
+                    "200": {
+                        "description": "Preference matrix + master settings"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/me/notification-preferences/{type}/{channel}": {
+            "put": {
+                "tags": [
+                    "Me - Notifications"
+                ],
+                "summary": "Toggle a per-(type × channel) opt-out",
+                "operationId": "fc2a2e0c14fe847884134b176f27fc72",
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "channel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "in_app",
+                                "realtime",
+                                "email",
+                                "push"
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "enabled"
+                                ],
+                                "properties": {
+                                    "enabled": {
+                                        "type": "boolean"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Upserted preference"
+                    },
+                    "422": {
+                        "description": "Invalid input"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/me/notification-preferences/master-mute": {
+            "put": {
+                "tags": [
+                    "Me - Notifications"
+                ],
+                "summary": "Toggle the master mute on the authenticated user's master pref row",
+                "operationId": "e6b7898a8921bbafc678f0a47ccd6c35",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "master_mute"
+                                ],
+                                "properties": {
+                                    "master_mute": {
+                                        "type": "boolean"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Master row updated"
+                    },
+                    "422": {
+                        "description": "Invalid input"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/me/notification-preferences/quiet-hours": {
+            "put": {
+                "tags": [
+                    "Me - Notifications"
+                ],
+                "summary": "Update quiet-hours window on the master pref row",
+                "operationId": "8c0b12c49c05bcde4538439279b3ef7f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "from",
+                                    "to",
+                                    "tz"
+                                ],
+                                "properties": {
+                                    "from": {
+                                        "type": "string",
+                                        "example": "22:00"
+                                    },
+                                    "to": {
+                                        "type": "string",
+                                        "example": "07:00"
+                                    },
+                                    "tz": {
+                                        "type": "string",
+                                        "example": "Asia/Tokyo"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Quiet hours updated"
+                    },
+                    "422": {
+                        "description": "Invalid input"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/me/notification-preferences/digest": {
+            "get": {
+                "tags": [
+                    "Me - Notifications"
+                ],
+                "summary": "Read the digest preference row for the authenticated user",
+                "operationId": "7e9becabd7bfc45395b8e7798527ced3",
+                "responses": {
+                    "200": {
+                        "description": "Digest preference"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Me - Notifications"
+                ],
+                "summary": "Update the digest preference (cadence / time / weekday / priorities)",
+                "operationId": "451db1342c5cf20a69c1161dcf19a966",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "cadence": {
+                                        "type": "string",
+                                        "enum": [
+                                            "off",
+                                            "daily",
+                                            "weekly"
+                                        ]
+                                    },
+                                    "delivery_time": {
+                                        "type": "string",
+                                        "pattern": "^\\d{2}:\\d{2}$"
+                                    },
+                                    "timezone": {
+                                        "type": "string"
+                                    },
+                                    "weekday": {
+                                        "type": "integer",
+                                        "maximum": 6,
+                                        "minimum": 0,
+                                        "nullable": true
+                                    },
+                                    "include_priorities": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "enum": [
+                                                "low",
+                                                "normal",
+                                                "high",
+                                                "urgent"
+                                            ]
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/me/notifications/types": {
+            "get": {
+                "tags": [
+                    "Me - Notifications"
+                ],
+                "summary": "Distinct types present in the authenticated user's inbox (for prefs matrix grouping)",
+                "operationId": "825c9f2518666efdb3a45e6529d0776b",
+                "responses": {
+                    "200": {
+                        "description": "Array of type strings"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/me/reverb-config": {
+            "get": {
+                "tags": [
+                    "Me - Notifications"
+                ],
+                "summary": "Return the Reverb public creds the user's browser should use",
+                "operationId": "0a08eb9eb6f42ce2945adb8363778d4d",
+                "parameters": [
+                    {
+                        "name": "brand",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "shop",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Reverb client creds"
+                    },
+                    "403": {
+                        "description": "User does not belong to the requested brand"
+                    },
+                    "404": {
+                        "description": "Brand not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/me/context": {
+            "get": {
+                "tags": [
+                    "User Context"
+                ],
+                "summary": "Get current user context",
+                "description": "Returns the authenticated user profile and the count of brands/shops they can access. Use /api/v1/me/brands and /api/v1/me/shops to fetch the actual lists (paginated).",
+                "operationId": "028b12b03f71a813090115d7dd984145",
+                "responses": {
+                    "200": {
+                        "description": "User profile + counts",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "user": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "format": "uuid"
+                                                },
+                                                "name": {
+                                                    "type": "string"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "format": "email"
+                                                },
+                                                "locale": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "timezone": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "brand_count": {
+                                            "type": "integer"
+                                        },
+                                        "shop_count": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/me/brands": {
+            "get": {
+                "tags": [
+                    "User Context"
+                ],
+                "summary": "List brands the current user can access (paginated)",
+                "description": "Paginated brand list scoped to the user organization, with optional name/slug search. Replaces the unbounded brands array that /me/context used to return.",
+                "operationId": "360248ce3939709188893d4084875287",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 25,
+                            "maximum": 100
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated brands"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/me/shops": {
+            "get": {
+                "tags": [
+                    "User Context"
+                ],
+                "summary": "List shops the current user can access (paginated)",
+                "description": "Paginated shop list scoped to the user organization, with optional name/slug search, brand_slug filter, is_active filter, and with_trashed support.",
+                "operationId": "a9328b61c6b3060f3d98b69b04f4422f",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "brand_slug",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "is_active",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "description": "Omit to return all, true for active only, false for inactive only",
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "with_trashed",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "description": "Include soft-deleted shops",
+                            "type": "boolean",
+                            "default": false
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 25,
+                            "maximum": 100
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated shops"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "sanctum": {
+                "type": "http",
+                "description": "Bearer token from login or SSO callback",
+                "scheme": "bearer",
+                "bearerFormat": "Token"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "User Context",
+            "description": "User profile, brands, shops, locale, timezone"
+        },
+        {
+            "name": "Me - Notifications",
+            "description": "Me - Notifications"
+        }
+    ]
+}

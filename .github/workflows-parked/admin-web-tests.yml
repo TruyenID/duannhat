@@ -1,0 +1,95 @@
+# #1182 — admin-web test gate: tsc + lint + vitest on every push/PR.
+# (deploy.yml only smoke-tests at deploy time — this is the merge gate.)
+#
+# RUNNER: self-hosted ONLY. GitHub-hosted runners are forbidden for this org
+# (no Actions billing — a hosted job dies in ~4s), and deploy.yml already
+# targets [self-hosted, Linux, X64]. Do NOT reintroduce ubuntu-latest.
+# Node + corepack are asserted, not installed: the runner provides them.
+name: tests
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    branches: [dev, main]
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: [self-hosted, Linux, X64]
+    timeout-minutes: 45
+    steps:
+      # SELF-HOSTED RUNNER HYGIENE: ~/.gitconfig is SHARED by every job and every
+      # repo on this machine. A leftover url.insteadOf rewrite makes
+      # actions/checkout try SSH and fail with "Permission denied (publickey)"
+      # for unrelated repos. Strip any inherited rewrite before doing anything.
+      - name: Sanitize inherited git config
+        run: |
+          git config --global --unset-all url."git@github.com:".insteadOf || true
+          git config --global --unset-all url."https://github.com/".insteadOf || true
+
+      - uses: actions/checkout@v4
+
+      - name: Assert Node toolchain
+        run: |
+          node -v
+          node -e 'process.exit(parseInt(process.versions.node) >= 20 ? 0 : 1)' \
+            || { echo "::error::runner needs Node >= 20"; exit 1; }
+          # No corepack: enabling it needs write access to the runner's global
+          # node_modules (EACCES) and pnpm is already installed there.
+          pnpm --version
+
+      # @godxjp/ui is a PRIVATE GitHub dependency (github:godx-jp/godx-tempo-ui).
+      # Auth is a READ-ONLY DEPLOY KEY scoped to that ONE repo — deliberately
+      # not a personal PAT, which would hand CI the whole account's scope.
+      # The https→ssh rewrite is passed through GIT_CONFIG_* ENV (process-scoped)
+      # instead of `git config --global`, which on a self-hosted runner would
+      # leak into every other job on the machine.
+      # Revoke: gh repo deploy-key list --repo godx-jp/godx-tempo-ui
+      - name: Authenticate private npm dependencies
+        env:
+          UI_DEPLOY_KEY: ${{ secrets.UI_DEPLOY_KEY }}
+        run: |
+          if [ -z "$UI_DEPLOY_KEY" ]; then
+            echo "::error::secret UI_DEPLOY_KEY is missing — add the read-only deploy key for godx-jp/godx-tempo-ui"
+            exit 1
+          fi
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$UI_DEPLOY_KEY" > ~/.ssh/ui_deploy_key
+          chmod 600 ~/.ssh/ui_deploy_key
+          ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts 2>/dev/null
+          # DIAGNOSED: the runner's ~/.gitconfig carries
+          #   url.https://<TOKEN>@github.com/.insteadOf = git@github.com:
+          # i.e. a token-embedded rewrite whose token has no access to
+          # godx-tempo-ui — that is why pnpm's `git clone git@github.com:…`
+          # reports "Authentication failed for https://…". Its key name embeds
+          # the token, so `--unset url."git@github.com:".insteadOf` never
+          # matched it, and we must NOT rewrite a shared runner's config
+          # anyway.
+          # GIT_CONFIG_GLOBAL points git at an EMPTY global config for this job
+          # only: the runner's rewrite disappears for our process, nothing on
+          # the machine is modified, and the deploy key gets to authenticate.
+          echo "--- inherited insteadOf rules (diagnostic) ---"
+          git config --list --show-origin | grep -i insteadof || echo "(none)"
+          : > "$RUNNER_TEMP/empty-gitconfig"
+          {
+            echo "GIT_CONFIG_GLOBAL=$RUNNER_TEMP/empty-gitconfig"
+            echo "GIT_SSH_COMMAND=ssh -i $HOME/.ssh/ui_deploy_key -o IdentitiesOnly=yes"
+            echo "GIT_CONFIG_COUNT=1"
+            echo "GIT_CONFIG_KEY_0=url.ssh://git@github.com/.insteadOf"
+            echo "GIT_CONFIG_VALUE_0=https://github.com/"
+          } >> "$GITHUB_ENV"
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: TypeScript
+        run: npx tsc --noEmit
+
+      - name: ESLint
+        run: pnpm lint
+
+      - name: Vitest (unit project — jsdom, no browser binary)
+        run: pnpm test

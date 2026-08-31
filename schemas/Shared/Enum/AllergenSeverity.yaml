@@ -1,0 +1,25 @@
+# =============================================================================
+# AllergenSeverity (アレルゲン重要度 / Mức độ bắt buộc dị ứng)
+# =============================================================================
+#
+# Regulatory severity of allergen declaration. Matches the Japan CAA Food
+# Labeling Standards split between `tokutei-genryou` (mandatory 8) and
+# `junkan-tokutei-genryou` (recommended 20); maps onto US / EU regulations
+# where all declared allergens are effectively `mandatory`.
+#
+# Used to filter allergens by regulatory weight and to drive UI warnings
+# (e.g. "this recipe contains recommended-to-declare allergens").
+# =============================================================================
+
+kind: enum
+
+displayName:
+  ja: アレルゲン重要度
+  en: Allergen Severity
+  vi: Mức độ bắt buộc dị ứng
+
+values:
+  - value: mandatory
+    label: { ja: 表示義務, en: Mandatory, vi: Bắt buộc }
+  - value: recommended
+    label: { ja: 表示推奨, en: Recommended, vi: Khuyến nghị }

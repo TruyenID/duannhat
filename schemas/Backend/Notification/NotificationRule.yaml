@@ -1,0 +1,252 @@
+# =============================================================================
+# NotificationRule (通知ルール / Rule thông báo)
+# =============================================================================
+#
+# Plan-023 M7 — admin-authored "when X then notify Y" rule. Pre-M7
+# every emitter was code-driven: adding a new notification type meant a
+# backend PR. M7 layers a model-event listener + condition DSL on top
+# of NotificationService::dispatch so admins can declare new
+# notifications without touching code.
+#
+# Wire-up:
+#
+#   Eloquent event (created / updated / deleted) — ModelEventToRuleBridge
+#       ↓ (matches trigger_event + trigger_model_type, blocklisted models
+#         are skipped to break the infinite-loop hazard)
+#   EvaluateRuleJob (queued)
+#       ↓ (loads fresh model, cooldown check, RuleEvaluatorService::evaluate
+#         applies the condition DSL)
+#   NotificationService::dispatch  ↔  notification_rule_firings (audit)
+#
+# Fields:
+#
+#   trigger_event       — `model.created` / `model.updated` / `model.deleted`
+#                         OR `custom.<name>` for non-Eloquent triggers
+#                         (scheduled detectors etc, plan-023 M8).
+#   trigger_model_type  — morph alias when trigger is model.*; null on
+#                         custom.* (matched by trigger_event alone).
+#   conditions          — DSL tree:
+#                           { combinator: 'and'|'or', children: [...] }
+#                         leaves:
+#                           { field: 'status', op: 'changed_to', value: 'approved' }
+#                         13 ops supported (=, !=, >, <, >=, <=, in, not_in,
+#                         is_null, is_not_null, matches, changed, changed_to,
+#                         changed_from). Dotted field paths supported up to
+#                         depth 3 — caller must eager-load referenced relations.
+#   action              — { template_key, audience_rule, priority, channels }
+#   cooldown_minutes    — min minutes between consecutive fires for the
+#                         same (rule, model_id). 0 = always fire.
+#   is_active           — rules ship inactive by default. Admin explicitly
+#                         enables after dry-run. System rules seeded by
+#                         SystemNotificationRuleSeeder also start inactive
+#                         until parallel-shadow validates parity (M7 T7.11).
+#
+# Tenancy: scoped by `organization_id`. Optional brand_id (HQ) and
+# branch_id (shop) narrow the scope.
+#
+# Infinite-loop protection: Notification, NotificationRecipient,
+# NotificationDelivery, NotificationRuleFiring are blocklisted in
+# ModelEventToRuleBridge — a rule whose action dispatches a Notification
+# cannot fire on its own emission. Static blocklist + arch test enforce.
+# =============================================================================
+
+displayName:
+  en: Notification Rule
+  ja: 通知ルール
+  vi: Rule thông báo
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: false
+  id: Uuid
+  indexes:
+    # Bridge lookup — "active rules for this event + model"
+    - columns: [trigger_event, trigger_model_type, is_active]
+    # Shop / HQ admin list
+    - columns: [brand_id, is_active]
+    - columns: [branch_id, is_active]
+
+properties:
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+    description:
+      en: Tenancy boundary. Every bridge lookup filters by this.
+      ja: テナンシー境界。全てのブリッジルックアップはこれでフィルタ。
+      vi: Phạm vi tenancy. Mọi bridge lookup filter theo cột này.
+
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    nullable: true
+    onDelete: CASCADE
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu
+    description:
+      en: Brand scope. Set → rule editable only under HQ. Null = org-scoped.
+      ja: ブランドスコープ。セット → HQ でのみ編集可。Null = 組織スコープ。
+      vi: Phạm vi brand. Set → chỉ sửa được trong HQ. Null = org-scoped.
+
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    nullable: true
+    onDelete: CASCADE
+    displayName:
+      en: Shop
+      ja: 店舗
+      vi: Cửa hàng
+    description:
+      en: Shop (branch) scope. Set → editable only by shop_admin of that branch; the shop rule editor inherits brand-level rules read-only.
+      ja: 店舗（ブランチ）スコープ。セット → そのブランチの shop_admin のみ編集可；店舗ルールエディタはブランドレベルのルールを読み取り専用で継承。
+      vi: Phạm vi shop (branch). Set → chỉ shop_admin của branch đó sửa được; shop rule editor inherit rule level brand ở read-only.
+
+  name:
+    type: String
+    length: 200
+    filterable: true
+    displayName:
+      en: Name
+      ja: 名前
+      vi: Tên
+    description:
+      en: Human-readable rule label rendered in admin lists. Free-text.
+      ja: 管理リストでレンダリングされる可読ルールラベル。自由テキスト。
+      vi: Label rule dạng readable, hiển thị trong admin list. Free-text.
+
+  description:
+    type: Text
+    nullable: true
+    displayName:
+      en: Description
+      ja: 説明
+      vi: Mô tả
+    description:
+      en: Free-form admin notes; not shown to recipients.
+      ja: 管理者の自由記述メモ；受信者には表示されない。
+      vi: Ghi chú tự do của admin; không hiển thị tới recipient.
+
+  trigger_event:
+    type: String
+    length: 100
+    filterable: true
+    displayName:
+      en: Trigger Event
+      ja: トリガーイベント
+      vi: Trigger event
+    description:
+      en: "`model.created` / `model.updated` / `model.deleted` for Eloquent triggers, OR `custom.<name>` for non-Eloquent triggers (plan-023 M8 scheduled detectors)."
+      ja: "Eloquent トリガー用の `model.created` / `model.updated` / `model.deleted`、または非 Eloquent トリガー（plan-023 M8 スケジュール検出器）用の `custom.<name>`。"
+      vi: "`model.created` / `model.updated` / `model.deleted` cho Eloquent triggers, HOẶC `custom.<name>` cho trigger không phải Eloquent (plan-023 M8 scheduled detector)."
+
+  trigger_model_type:
+    type: String
+    length: 100
+    nullable: true
+    filterable: true
+    displayName:
+      en: Trigger Model Type
+      ja: トリガーモデル型
+      vi: Trigger model type
+    description:
+      en: 'Morph alias of the watched Eloquent model when trigger_event is `model.*` (e.g. "Recipe", "CustomerOrder"). Null on `custom.*` triggers.'
+      ja: 'trigger_event が `model.*` の場合に監視する Eloquent モデルのモーフエイリアス（例：「Recipe」、「CustomerOrder」）。`custom.*` トリガーでは null。'
+      vi: 'Morph alias của Eloquent model được watch khi trigger_event là `model.*` (VD: "Recipe", "CustomerOrder"). Null cho trigger `custom.*`.'
+
+  conditions:
+    type: Json
+    displayName:
+      en: Conditions
+      ja: 条件
+      vi: Điều kiện
+    description:
+      en: 'JSON DSL tree. Node = `{combinator: and|or, children: [...]}`. Leaf = `{field, op, value?}`. 13 supported ops; dotted field paths up to depth 3 (data_get). Validated by `RuleDslValidator`; max depth 5, max 50 leaves.'
+      ja: 'JSON DSL ツリー。ノード = `{combinator: and|or, children: [...]}`。リーフ = `{field, op, value?}`。13 のサポート op；ドット区切りフィールドパスは最大深さ 3（data_get）。`RuleDslValidator` で検証；最大深さ 5、最大 50 リーフ。'
+      vi: 'JSON DSL tree. Node = `{combinator: and|or, children: [...]}`. Leaf = `{field, op, value?}`. 13 op hỗ trợ; dotted field path tối đa depth 3 (data_get). Validate bằng `RuleDslValidator`; max depth 5, max 50 leaves.'
+
+  action:
+    type: Json
+    displayName:
+      en: Action
+      ja: アクション
+      vi: Action
+    description:
+      en: '`{template_key, audience_rule, priority, channels, param_template?}`. param_template lets the admin reference fields off the firing model (e.g. `{warehouse_name: "$model.warehouse.name"}`).'
+      ja: '`{template_key, audience_rule, priority, channels, param_template?}`。param_template により管理者は発火モデルのフィールドを参照可能（例：`{warehouse_name: "$model.warehouse.name"}`）。'
+      vi: '`{template_key, audience_rule, priority, channels, param_template?}`. param_template cho phép admin reference field từ firing model (VD: `{warehouse_name: "$model.warehouse.name"}`).'
+
+  cooldown_minutes:
+    type: Int
+    default: 0
+    displayName:
+      en: Cooldown Minutes
+      ja: クールダウン分
+      vi: Cooldown
+    description:
+      en: 'Minimum minutes between consecutive fires for the same (rule, model_id). 0 = always fire. The EvaluateRuleJob queries notification_rule_firings BEFORE evaluating conditions, so a cooldown skip writes one firing row but no notification.'
+      ja: '同じ (rule, model_id) の連続発火間の最小分数。0 = 常に発火。EvaluateRuleJob は条件評価前に notification_rule_firings をクエリするため、クールダウンスキップは 1 firing 行を書き込むが通知は書き込まない。'
+      vi: 'Số phút tối thiểu giữa các lần fire liên tiếp cho cùng (rule, model_id). 0 = luôn fire. EvaluateRuleJob query notification_rule_firings TRƯỚC khi evaluate condition, nên cooldown skip ghi 1 row firing nhưng không có notification.'
+
+  is_active:
+    type: Boolean
+    default: false
+    filterable: true
+    displayName:
+      en: Is Active
+      ja: アクティブ
+      vi: Đang hoạt động
+    description:
+      en: 'Rules ship inactive — admin enables explicitly after dry-run. System rules (SystemNotificationRuleSeeder) also start inactive; parallel-shadow validates parity with hardcoded emitters before flip.'
+      ja: 'ルールは非アクティブで出荷 — 管理者はドライランの後で明示的に有効化。システムルール（SystemNotificationRuleSeeder）も非アクティブで開始；パラレルシャドウがハードコード化されたエミッターとのパリティをフリップ前に検証。'
+      vi: 'Rule ship inactive — admin enable explicit sau dry-run. System rule (SystemNotificationRuleSeeder) cũng start inactive; parallel-shadow validate parity với hardcoded emitter trước khi flip.'
+
+  last_fired_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Last Fired At
+      ja: 最終発火日時
+      vi: Lần fire cuối
+    description:
+      en: Updated by EvaluateRuleJob after a successful (outcome=matched) fire. NOT updated for skipped_cooldown / skipped_condition outcomes.
+      ja: 成功（outcome=matched）発火後に EvaluateRuleJob が更新。skipped_cooldown / skipped_condition の結果では更新されない。
+      vi: Update bởi EvaluateRuleJob sau khi fire thành công (outcome=matched). KHÔNG update cho skipped_cooldown / skipped_condition.
+
+  fire_count:
+    type: Int
+    default: 0
+    displayName:
+      en: Fire Count
+      ja: 発火回数
+      vi: Số lần fire
+    description:
+      en: Total successful (outcome=matched) fires since rule creation. Diagnostics counter; the audit trail in notification_rule_firings is authoritative.
+      ja: ルール作成以降の成功（outcome=matched）発火の合計。診断カウンタ；notification_rule_firings の監査証跡が権威。
+      vi: Tổng số fire thành công (outcome=matched) kể từ khi rule tạo. Counter diagnostic; audit trail trong notification_rule_firings là authoritative.
+
+  createdBy:
+    type: Association
+    relation: ManyToOne
+    target: User
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Created By
+      ja: 作成者
+      vi: Người tạo
+    description:
+      en: User who authored the rule. SET NULL on user deletion so rules outlive their author.
+      ja: ルールを作成したユーザー。ユーザー削除時は SET NULL — ルールは作成者より長く存続。
+      vi: User tạo rule. SET NULL khi user xoá — rule sống lâu hơn creator.

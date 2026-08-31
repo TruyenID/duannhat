@@ -1,0 +1,140 @@
+# ProductionOrderItem schema
+# Line items for a production order — each represents one component (NVL) needed.
+# Components are auto-calculated from the variant's recipe × recipe_multiplier × planned_quantity (BR-02).
+#
+# Key Design:
+#   - component_type determines which FK is active:
+#     - material → material_id NOT NULL (BR-04)
+#     - variant → product_sku_id NOT NULL (BR-05)
+#   - planned_quantity = recipe.component.qty × recipe_multiplier × planned_quantity
+#   - actual_quantity: recorded on order completion (may differ from planned)
+#   - stock_available: snapshot of stock at order creation time (for UI display)
+#   - CASCADE delete: items deleted when parent order is deleted
+#
+# Business Rules:
+#   - BR-02: planned_quantity = component.qty × recipe_multiplier × order.planned_quantity
+#   - BR-04: material components → lookup stock via material_id
+#   - BR-05: variant components → lookup stock via product_sku_id
+#   - BR-09: unit must match base unit in stock_levels
+
+displayName:
+  en: Production Order Item
+  ja: 製造指示明細
+  vi: Chi tiết lệnh SX
+
+kind: object
+
+options:
+  timestamps: true
+  id: Uuid
+
+properties:
+  productionOrder:
+    type: Association
+    relation: ManyToOne
+    target: ProductionOrder
+    onDelete: CASCADE
+    displayName:
+      en: Production Order
+      ja: 製造指示
+      vi: Lệnh sản xuất
+    description:
+      en: Parent production order. Items are cascade-deleted with the order.
+      ja: 親製造指示。指示と一緒にカスケード削除される。
+      vi: Lệnh SX cha. Items bị xóa cascade khi xóa lệnh.
+
+  component_type:
+    type: EnumRef
+    enum: ComponentType
+    displayName:
+      en: Component Type
+      ja: 原材料タイプ
+      vi: Loại thành phần
+    description:
+      en: "material = raw material (BR-04), variant = product variant (BR-05)"
+      ja: "material = 原材料（BR-04）、variant = 商品バリエーション（BR-05）"
+      vi: "material = nguyên liệu (BR-04), variant = biến thể sản phẩm (BR-05)"
+
+  productSku:
+    type: Association
+    relation: ManyToOne
+    target: ProductSku
+    onDelete: RESTRICT
+    nullable: true
+    displayName:
+      en: Product Variant
+      ja: 商品バリエーション
+      vi: Biến thể sản phẩm
+    description:
+      en: "Product variant component. Active when component_type = variant (BR-05)"
+      ja: "商品バリエーション原材料。component_type = variantの場合有効（BR-05）"
+      vi: "Biến thể sản phẩm. Khi component_type = variant (BR-05)"
+
+  material:
+    type: Association
+    relation: ManyToOne
+    target: Material
+    onDelete: RESTRICT
+    nullable: true
+    displayName:
+      en: Material
+      ja: 材料
+      vi: Nguyên liệu
+    description:
+      en: "Raw material component. Active when component_type = material (BR-04)"
+      ja: "原材料。component_type = materialの場合有効（BR-04）"
+      vi: "Nguyên liệu. Khi component_type = material (BR-04)"
+
+  planned_quantity:
+    type: Decimal
+    precision: 15
+    scale: 4
+    displayName:
+      en: Planned Quantity
+      ja: 計画数量
+      vi: Số lượng kế hoạch
+    description:
+      en: "Auto-calculated: component.qty × recipe_multiplier × order.planned_quantity (BR-02)"
+      ja: "自動計算：component.qty × recipe_multiplier × order.planned_quantity（BR-02）"
+      vi: "Tự động tính: component.qty × recipe_multiplier × SL sản xuất (BR-02)"
+
+  actual_quantity:
+    type: Decimal
+    precision: 15
+    scale: 4
+    nullable: true
+    displayName:
+      en: Actual Quantity
+      ja: 実際数量
+      vi: Số lượng thực tế
+    description:
+      en: "Actual amount used, recorded on order completion. May differ from planned."
+      ja: "実際に使用された量。指示完了時に記録。計画と異なる場合あり。"
+      vi: "Số lượng thực tế sử dụng, ghi nhận khi hoàn thành. Có thể khác kế hoạch."
+
+  unit:
+    type: String
+    length: 50
+    nullable: true
+    displayName:
+      en: Unit
+      ja: 単位
+      vi: Đơn vị
+    description:
+      en: "Base unit for this component. Must match stock_levels.unit (BR-09)"
+      ja: "この原材料の基本単位。stock_levels.unitと一致する必要あり（BR-09）"
+      vi: "Đơn vị cơ bản. Phải khớp stock_levels.unit (BR-09)"
+
+  stock_available:
+    type: Decimal
+    precision: 15
+    scale: 4
+    nullable: true
+    displayName:
+      en: Stock Available
+      ja: 在庫数量
+      vi: Tồn kho hiện có
+    description:
+      en: "Snapshot of available stock at order creation time (for UI display only)"
+      ja: "指示作成時の在庫スナップショット（UI表示用のみ）"
+      vi: "Snapshot tồn kho tại thời điểm tạo lệnh (chỉ hiển thị trên UI)"

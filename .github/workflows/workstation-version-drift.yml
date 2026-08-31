@@ -1,0 +1,302 @@
+name: workstation-version-drift
+
+# #3065 — canh KẾT QUẢ, không canh quá trình.
+#
+# Mọi cổng khác trong repo này hỏi "lượt chạy này xanh không". Không cái nào
+# hỏi "**quán đang chạy bản nào**". Ngày 2026-08-16 hai thứ đó rời nhau 12 ngày:
+# `workstation-release` đỏ 6 lượt liên tiếp vì hạn mức artifact storage, trang
+# tải kẹt ở v0.8.4 trong khi `main` đã 0.8.13, và **không một tín hiệu nào**.
+# Nó chỉ lộ ra vì có người tình cờ mở bảng run vì việc khác.
+#
+# Rào #2783 không thể bắt được ca này: nó chạy TRONG lượt phát hành, nên nó câm
+# đúng lúc lượt phát hành không bao giờ chạy.
+#
+# Chạy theo LỊCH chứ không theo push, vì hỏng kiểu này xảy ra khi **không có gì
+# chạy cả** — treo vào `push` là dựng lại đúng điểm mù.
+
+on:
+  schedule:
+    # Mỗi 6 giờ. Khớp cửa sổ ân hạn 6h của script: lệch thật thì bị bắt trong
+    # vòng một chu kỳ, còn một lần merge bình thường (build + rsync mất vài
+    # phút) không bao giờ kịp thành báo động.
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      grace_hours:
+        description: 'Cửa sổ ân hạn (giờ) — mặc định 6'
+        required: false
+        default: '6'
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: workstation-version-drift
+  cancel-in-progress: false
+
+env:
+  SSH_HOST: famgia.xbiz.jp
+  SSH_PORT: "10022"
+  SSH_USER: famgia
+  APP_DIR: apps/tempo
+  PHP_BIN: /opt/php-8.4/bin/php
+
+jobs:
+  check:
+    name: main VERSION có lên trang tải không (khâu 1→2)
+    runs-on: [self-hosted, Linux, X64]
+    outputs:
+      latest: ${{ steps.measure.outputs.latest }}
+      install_due: ${{ steps.measure.outputs.install_due }}
+      # Bản máy quán ĐÁNG LẼ phải có = bản mới nhất đã phát hành quá 72h.
+      # KHÔNG phải `latest`: hỏi theo `latest` thì mỗi lần publish lại làm mới
+      # cửa sổ và khâu 3 không bao giờ được hỏi (đo 2026-08-17: job SKIP vì
+      # v0.8.13 ra 35 phút trước, trong khi máy quán đang ở v0.6.0).
+      install_target: ${{ steps.measure.outputs.install_target }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          # Cần lịch sử để biết `VERSION` được bump LÚC NÀO. Đếm từ lúc chạy rào
+          # thì cửa sổ tự làm mới mỗi lượt và nó không bao giờ kêu.
+          fetch-depth: 0
+
+      - name: Self-test logic (không cần mạng)
+        run: python3 .github/scripts/warn-workstation-version-drift.py --self-test
+
+      - name: Đo
+        id: measure
+        run: |
+          set -uo pipefail
+          VERSION="$(tr -d '[:space:]' < VERSION)"
+          BUMPED="$(git log -1 --format=%cI -- VERSION)"
+          echo "main VERSION=$VERSION, bump lúc $BUMPED"
+          set +e
+          python3 .github/scripts/warn-workstation-version-drift.py \
+            --version "$VERSION" \
+            --bumped-at "$BUMPED" \
+            --grace-hours "${{ github.event.inputs.grace_hours || '6' }}"
+          echo "rc=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Mở hoặc cập nhật issue theo dõi
+        if: steps.measure.outputs.rc != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          KIND: ${{ steps.measure.outputs.kind }}
+          DETAIL: ${{ steps.measure.outputs.detail }}
+          MAIN_VERSION: ${{ steps.measure.outputs.version }}
+          SHOP_VERSION: ${{ steps.measure.outputs.latest }}
+        run: |
+          set -euo pipefail
+          TITLE="[ops] Bản workstation trên main chưa tới quán"
+          # MỘT issue duy nhất, luôn cập nhật THÂN chứ không thêm comment. Rào
+          # chạy 4 lần/ngày; bình luận mỗi lượt là cách nhanh nhất để người ta
+          # tắt thông báo của cả repo, và lúc đó rào coi như đã chết.
+          BODY="$(cat <<EOF
+          **$DETAIL**
+
+          | | |
+          |---|---|
+          | \`VERSION\` trên \`main\` | \`$MAIN_VERSION\` |
+          | \`latest\` quán tải được | \`${SHOP_VERSION:-—}\` |
+          | kết luận | \`$KIND\` |
+          | đo lúc | $(date -u +%FT%TZ) |
+
+          Nguồn: https://tempo-prod.godx.jp/downloads/workstation/manifest.json
+
+          ### Đọc thế nào
+
+          - \`drift\` — bản đã merge vào \`main\` KHÔNG tới được quán. Xem lượt
+            \`workstation-release\` gần nhất trên \`main\`; ca 2026-08-16 nó đỏ ở
+            bước upload artifact chứ không đỏ ở test.
+          - \`unknown\` — manifest không có \`latest\`, hoặc không đọc được. Mất
+            khả năng ĐO cũng là một tin; nó không đồng nghĩa với "không sao".
+
+          Issue này do \`workstation-version-drift\` tự mở và **tự đóng** khi hai
+          số khớp lại. Đóng tay mà lệch chưa hết thì lượt sau nó mở lại.
+
+          <!-- workstation-version-drift -->
+          EOF
+          )"
+          BODY="$(printf '%s' "$BODY" | sed 's/^          //')"
+
+          NUM="$(gh issue list --state open --limit 50 \
+                   --search "\"workstation-version-drift\" in:body" \
+                   --json number -q '.[0].number // empty')"
+          if [ -n "$NUM" ]; then
+            gh issue edit "$NUM" --body "$BODY"
+            echo "cập nhật #$NUM"
+          else
+            gh issue create --title "$TITLE" --body "$BODY" --label "status:blocked"
+          fi
+
+      - name: Đóng issue khi đã khớp lại
+        if: steps.measure.outputs.rc == '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          # Vế "biết IM". Một monitor chỉ biết kêu sẽ để lại issue cũ nằm đó sau
+          # khi sự cố đã hết, và issue cũ dạy người ta rằng báo động của nó
+          # không đáng đọc.
+          NUM="$(gh issue list --state open --limit 50 \
+                   --search "\"workstation-version-drift\" in:body" \
+                   --json number -q '.[0].number // empty')"
+          if [ -n "$NUM" ]; then
+            gh issue comment "$NUM" --body "Đã khớp lại: \`main\` và trang tải cùng ở \`$(tr -d '[:space:]' < VERSION)\`. Tự đóng."
+            gh issue close "$NUM"
+            echo "đóng #$NUM"
+          else
+            echo "khớp, không có issue nào đang mở"
+          fi
+
+      - name: Kết luận
+        if: steps.measure.outputs.rc != '0'
+        run: |
+          echo "::error::${{ steps.measure.outputs.detail }}"
+          exit 1
+
+  fleet:
+    name: bản đã phát hành có tới MÁY QUÁN không (khâu 2→3)
+    runs-on: [self-hosted, Linux, X64]
+    needs: check
+    # Chạy cả khi `check` đỏ: hai khâu hỏng độc lập nhau, và khâu 2→3 đang hở
+    # RỘNG HƠN — đo 2026-08-17: trang tải v0.8.13, hai máy đang bán chạy v0.6.0.
+    if: always() && needs.check.outputs.install_due == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Đo fleet qua SSH (chỉ ĐỌC)
+        id: fleet
+        env:
+          SSH_KEY: ${{ secrets.X_SERVER_SSH_KEY }}
+          LATEST: ${{ needs.check.outputs.install_target }}
+        run: |
+          set -uo pipefail
+          install -m 700 -d "$RUNNER_TEMP/ssh"
+          printf '%s\n' "$SSH_KEY" > "$RUNNER_TEMP/ssh/id_ro"
+          chmod 600 "$RUNNER_TEMP/ssh/id_ro"
+          ssh-keyscan -p "$SSH_PORT" "$SSH_HOST" > "$RUNNER_TEMP/ssh/known_hosts" 2>/dev/null
+
+          # `--active-within=7` là MẪU SỐ, không phải cách nới rào. Không có nó,
+          # hai máy chưa từng báo phiên bản lần nào (`WS-jp`, `POS-10`) làm báo
+          # động ĐỎ VĨNH VIỄN — và một báo động không thể xanh thì không ai đọc.
+          # Máy bị loại được LIỆT KÊ trong `excluded_inactive`, không nuốt im.
+          OUT="$(ssh -p "$SSH_PORT" -i "$RUNNER_TEMP/ssh/id_ro" \
+            -o UserKnownHostsFile="$RUNNER_TEMP/ssh/known_hosts" -o IdentitiesOnly=yes \
+            -o BatchMode=yes -o ConnectTimeout=20 \
+            "$SSH_USER@$SSH_HOST" \
+            "cd ~/$APP_DIR && $PHP_BIN artisan devices:fleet-versions \
+               --type=workstation --min-version='$LATEST' --active-within=7 --json" 2>&1)"
+          RC=$?
+          rm -rf "$RUNNER_TEMP/ssh"
+
+          if [ "$RC" != "0" ]; then
+            echo "::error::không đo được fleet (ssh/artisan rc=$RC)"
+            printf '%s\n' "$OUT" | tail -5
+            # KHÔNG so được ≠ đã cài đủ. Mất khả năng đo cũng là một tin.
+            echo "rc=3" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          printf '%s\n' "$OUT"
+          printf '%s' "$OUT" > "$RUNNER_TEMP/fleet.json"
+          python3 - "$RUNNER_TEMP/fleet.json" <<'PY' >> "$GITHUB_OUTPUT"
+          import json, sys
+          data = json.load(open(sys.argv[1]))
+          below = data.get("below") or []
+          skipped = data.get("excluded_inactive") or []
+          names = ", ".join(f"{d['name']}={d.get('version') or '?'}" for d in below)
+          drop = ", ".join(f"{d['name']}(last_seen {d.get('last_seen_at') or 'chưa bao giờ'})" for d in skipped)
+          print(f"below={len(below)}")
+          print(f"skipped={len(skipped)}")
+          print(f"names={names}")
+          print(f"dropped={drop}")
+          print("rc=" + ("1" if below else "0"))
+          PY
+
+      - name: Mở hoặc cập nhật issue "quán chưa cài"
+        if: steps.fleet.outputs.rc != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LATEST: ${{ needs.check.outputs.install_target }}
+          NEWEST: ${{ needs.check.outputs.latest }}
+          BELOW: ${{ steps.fleet.outputs.below }}
+          NAMES: ${{ steps.fleet.outputs.names }}
+          SKIPPED: ${{ steps.fleet.outputs.skipped }}
+          DROPPED: ${{ steps.fleet.outputs.dropped }}
+          RC: ${{ steps.fleet.outputs.rc }}
+        run: |
+          set -euo pipefail
+          # Issue RIÊNG, marker RIÊNG. Hai khâu hỏng vì hai lý do và chữa bằng
+          # hai việc khác nhau — gộp vào một issue thì "đã xong" của khâu này
+          # đóng luôn báo động của khâu kia.
+          BODY="$(cat <<EOF
+          Máy quán đáng lẽ phải có: \`${LATEST}\` (bản mới nhất đã phát hành quá 72h).
+          Còn dưới bản đó: **${BELOW:-?}** máy. Bản mới nhất trên trang tải: \`${NEWEST}\`.
+
+          ${NAMES:+Máy cần cài: \`$NAMES\`}
+
+          $( [ "$RC" = "3" ] && echo '⚠️ **Không đo được** — ssh/artisan lỗi. Không so được KHÔNG đồng nghĩa đã cài đủ.' )
+
+          | | |
+          |---|---|
+          | đo lúc | $(date -u +%FT%TZ) |
+          | mẫu số | máy workstation có \`last_seen_at\` trong **7 ngày** qua |
+          | đã loại | ${SKIPPED:-0} máy im lâu${DROPPED:+ — \`$DROPPED\`} |
+
+          ### Vì sao có mẫu số 7 ngày
+
+          Đo 2026-08-17: 2 trong 4 máy \`workstation\` **chưa từng** báo phiên bản
+          lần nào (\`WS-jp\`, \`POS-10\`). Tính cả chúng thì báo động này ĐỎ VĨNH
+          VIỄN dù có đi cài hết máy — và một báo động không bao giờ xanh được thì
+          không ai đọc nó nữa. Máy im lâu tự rụng khỏi mẫu số, nên không ai phải
+          dọn tay; máy bị loại được liệt kê ở trên chứ không nuốt im.
+
+          ### Chữa thế nào
+
+          Fleet là máy Windows cài **TAY**, không tự cập nhật. Tải bản mới ở
+          https://tempo-prod.godx.jp/downloads/ rồi cài lên từng máy.
+
+          Issue này do \`workstation-version-drift\` tự mở và **tự đóng** khi mọi
+          máy đang hoạt động đã lên bản đang phát hành.
+
+          <!-- workstation-fleet-lag -->
+          EOF
+          )"
+          BODY="$(printf '%s' "$BODY" | sed 's/^          //')"
+
+          NUM="$(gh issue list --state open --limit 50 \
+                   --search "\"workstation-fleet-lag\" in:body" \
+                   --json number -q '.[0].number // empty')"
+          if [ -n "$NUM" ]; then
+            gh issue edit "$NUM" --body "$BODY"
+            echo "cập nhật #$NUM"
+          else
+            gh issue create --title "[ops] Máy quán chưa cài bản workstation đang phát hành" \
+              --body "$BODY" --label "status:blocked"
+          fi
+
+      - name: Đóng issue khi mọi máy đã lên bản mới
+        if: steps.fleet.outputs.rc == '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LATEST: ${{ needs.check.outputs.install_target }}
+        run: |
+          set -euo pipefail
+          NUM="$(gh issue list --state open --limit 50 \
+                   --search "\"workstation-fleet-lag\" in:body" \
+                   --json number -q '.[0].number // empty')"
+          if [ -n "$NUM" ]; then
+            gh issue comment "$NUM" --body "Mọi máy đang hoạt động đã lên \`$LATEST\`. Tự đóng."
+            gh issue close "$NUM"
+          else
+            echo "fleet đã đủ, không có issue nào đang mở"
+          fi
+
+      - name: Kết luận
+        if: steps.fleet.outputs.rc != '0'
+        run: |
+          echo "::error::${{ steps.fleet.outputs.below }} máy quán còn dưới ${{ needs.check.outputs.install_target }} — ${{ steps.fleet.outputs.names }}"
+          exit 1

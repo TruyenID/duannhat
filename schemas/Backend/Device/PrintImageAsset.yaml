@@ -1,0 +1,145 @@
+# Ảnh gốc do brand/shop tải lên để in (#1957 mảnh B). MỘT hàng = một ảnh nguồn.
+#
+# Vì sao KHÔNG dùng lại `Brand.logo_url`: `logo_url` là một URL để HIỂN THỊ trên
+# web. Thứ cần ở đây là một artifact sẽ được raster hoá — nó có hash nội dung,
+# có bản ghi đè theo chi nhánh, và đẻ ra nhiều bitmap khác nhau theo khổ giấy.
+# Nhét hai khái niệm vào cùng một cột chính là kiểu lẫn lộn đã sinh ra #1965 và
+# #1969: hai thứ khác nhau sống chung một hình dạng rồi bị đọc nhầm cho nhau.
+#
+# Bitmap đã raster hoá KHÔNG nằm ở đây — xem `PrintImageRaster`. Tách ra vì một
+# ảnh gốc sinh nhiều bitmap (mỗi `max_width_dots` một cái), nên gộp lại sẽ lặp
+# đúng lỗi vừa nói ở trên.
+kind: object
+
+options:
+  id: Uuid
+  timestamps: true
+  softDelete: true
+  indexes:
+    # Một `source` chỉ có MỘT bản đang hiệu lực trong mỗi phạm vi, nhưng nhiều
+    # phiên bản theo thời gian — nên khoá theo cả `version` như print_templates.
+    - columns: [source, scope, brand_id, branch_id, version]
+      unique: true
+      name: print_image_assets_scope_version_unique
+    - columns: [source, scope, brand_id, branch_id, status]
+      name: print_image_assets_scope_status_idx
+    - columns: [branch_id, status]
+      name: print_image_assets_branch_status_idx
+    - columns: [updated_at]
+      name: print_image_assets_updated_at_idx
+
+properties:
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    nullable: true
+    onDelete: CASCADE
+    displayName: { ja: 組織, en: Organization, vi: Tổ chức }
+
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    nullable: true
+    onDelete: CASCADE
+    displayName: { ja: ブランド, en: Brand, vi: Thương hiệu }
+
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    nullable: true
+    onDelete: CASCADE
+    displayName: { ja: 支店, en: Branch, vi: Chi nhánh }
+
+  # Định danh trong allow-list của `print_blocks.image.sources` — `brand_logo`,
+  # `branch_logo`. CỐ Ý là một định danh chứ không phải URL: TR-21 nói definition
+  # không bao giờ mang URL, và mở rộng sau này (quảng cáo, coupon) thêm định danh
+  # vào CÙNG allow-list chứ không mở cửa cho URL tuỳ ý.
+  source:
+    type: String
+    length: 32
+    displayName: { ja: 用途, en: Source, vi: Nguồn }
+
+  scope:
+    type: String
+    length: 16
+    displayName: { ja: スコープ, en: Scope, vi: Phạm vi }
+
+  version:
+    type: Int
+    unsigned: true
+    displayName: { ja: バージョン, en: Version, vi: Phiên bản }
+
+  status:
+    type: String
+    length: 16
+    default: draft
+    displayName: { ja: 状態, en: Status, vi: Trạng thái }
+
+  # Đường dẫn trong object storage. Ảnh gốc KHÔNG đi xuống máy trạm bao giờ —
+  # nó chỉ cần ở lại đây để raster lại được khi có khổ giấy mới, mà không bắt
+  # người dùng tải lên lần nữa.
+  original_path:
+    type: String
+    length: 500
+    displayName: { ja: 元画像パス, en: Original Path, vi: Đường dẫn ảnh gốc }
+
+  original_mime:
+    type: String
+    length: 64
+    displayName: { ja: MIME, en: Original MIME, vi: MIME ảnh gốc }
+
+  original_filename:
+    type: String
+    length: 255
+    nullable: true
+    displayName: { ja: 元ファイル名, en: Original Filename, vi: Tên tệp gốc }
+
+  original_bytes:
+    type: Int
+    unsigned: true
+    displayName: { ja: 元サイズ, en: Original Size, vi: Dung lượng gốc }
+
+  # sha256 của CHÍNH byte đã tải lên. Tải lại đúng ảnh cũ thì hash trùng, nên
+  # không sinh phiên bản mới và máy trạm không phải kéo lại gì.
+  original_hash:
+    type: String
+    length: 64
+    displayName: { ja: 元ハッシュ, en: Original Hash, vi: Hash ảnh gốc }
+
+  # Giờ treo tường của chi nhánh; null = hiệu lực ngay khi publish. Giống hệt
+  # `print_templates.effective_from` vì cùng một bài toán: một tài nguyên do
+  # brand phát hành, phải tới được máy quán, và phải in lại được đúng bản cũ.
+  effective_from:
+    type: DateTime
+    nullable: true
+    displayName: { ja: 適用開始, en: Effective From, vi: Hiệu lực từ }
+
+  notes:
+    type: String
+    length: 500
+    nullable: true
+    displayName: { ja: 変更メモ, en: Notes, vi: Ghi chú }
+
+  createdBy:
+    type: Association
+    relation: ManyToOne
+    target: User
+    nullable: true
+    onDelete: SET NULL
+    displayName: { ja: 作成者, en: Created By, vi: Người tạo }
+
+  publishedBy:
+    type: Association
+    relation: ManyToOne
+    target: User
+    nullable: true
+    onDelete: SET NULL
+    displayName: { ja: 公開者, en: Published By, vi: Người phát hành }
+
+  published_at:
+    type: DateTime
+    nullable: true
+    displayName: { ja: 公開日時, en: Published At, vi: Phát hành lúc }

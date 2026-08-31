@@ -1,0 +1,1 @@
+{"success":false,"message":"Failed: 1","data":{"success_count":0,"error_count":1,"created_count":0,"updated_count":0,"errors":[{"row":0,"errors":["Invalid CSV headers. Please use the import template."]}]}}

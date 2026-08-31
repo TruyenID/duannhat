@@ -1,0 +1,18 @@
+# Policy lattice value. `inherit` restores the upstream decision; `enabled` cannot widen an
+# upstream deny; `disabled` narrows it; `blocked` is an owner/HQ hard deny downstream cannot undo.
+kind: enum
+
+displayName:
+  en: Payment Policy Preference
+  ja: 決済ポリシー設定
+  vi: Tuỳ chọn chính sách thanh toán
+
+values:
+  - value: inherit
+    label: { en: Inherit, ja: 継承, vi: Kế thừa }
+  - value: enabled
+    label: { en: Enabled, ja: 有効, vi: Bật }
+  - value: disabled
+    label: { en: Disabled, ja: 無効, vi: Tắt }
+  - value: blocked
+    label: { en: Blocked Upstream, ja: 上位でブロック, vi: Bị chặn ở cấp trên }

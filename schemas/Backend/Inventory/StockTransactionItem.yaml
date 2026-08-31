@@ -1,0 +1,174 @@
+# StockTransactionItem schema
+# Line items within a stock transaction (phiếu kho chi tiết).
+# Each item represents one product variant or material in the transaction.
+#
+# Key Design:
+#   - quantity: Amount in user-selected unit (e.g., 4 bags)
+#   - base_quantity: Converted amount in base unit (e.g., 100 kg)
+#   - unit: The unit user selected (may differ from base unit)
+#   - unit_price: Only for purchase sub_type (cost tracking)
+#   - CASCADE delete: items are deleted when parent transaction is deleted
+#   - One of (product_sku_id, material_id) must be NOT NULL (app-level CHECK)
+#
+# Business Rules:
+#   - BR-06: base_quantity = quantity × conversion_ratio (from VariantUnit/MaterialUnit)
+#   - unit_price only applicable for purchase transactions
+
+displayName:
+  en: Stock Transaction Item
+  ja: 在庫取引明細
+  vi: Chi tiết phiếu kho
+
+kind: object
+
+options:
+  timestamps: true
+  id: Uuid
+
+properties:
+  stockTransaction:
+    type: Association
+    relation: ManyToOne
+    target: StockTransaction
+    onDelete: CASCADE
+    displayName:
+      en: Stock Transaction
+      ja: 在庫取引
+      vi: Phiếu kho
+    description:
+      en: Parent transaction. Items are cascade-deleted with the transaction.
+      ja: 親取引。取引と一緒にカスケード削除される。
+      vi: Phiếu kho cha. Items bị xóa cascade khi xóa phiếu.
+
+  productSku:
+    type: Association
+    relation: ManyToOne
+    target: ProductSku
+    onDelete: RESTRICT
+    nullable: true
+    displayName:
+      en: Product Variant
+      ja: 商品バリエーション
+      vi: Biến thể sản phẩm
+    description:
+      en: "Product variant. Mutually exclusive with material_id"
+      ja: "商品バリエーション。material_idと排他的"
+      vi: "Biến thể sản phẩm. Loại trừ với material_id"
+
+  material:
+    type: Association
+    relation: ManyToOne
+    target: Material
+    onDelete: RESTRICT
+    nullable: true
+    displayName:
+      en: Material
+      ja: 材料
+      vi: Nguyên liệu
+    description:
+      en: "Raw material. Mutually exclusive with product_sku_id"
+      ja: "原材料。product_sku_idと排他的"
+      vi: "Nguyên liệu. Loại trừ với product_sku_id"
+
+  materialLot:
+    type: Association
+    relation: ManyToOne
+    target: MaterialLot
+    onDelete: SET NULL
+    nullable: true
+    # Plan-017: stamps the lot the qty was drawn FROM (stock_out) or deposited
+    # INTO (stock_in). Stamped by StockTransactionService::completeTransaction
+    # via FEFO pick on stock_out and by MaterialLotService::receive on stock_in.
+    # NULL = legacy line that pre-dates lot tracking (kept for backward compat).
+    # SET NULL on lot delete so historical txns survive.
+    #
+    # On stock_out a single requested qty may be allocated across multiple
+    # lots — in that case StockTransactionService rewrites the input single
+    # line into N item rows (one per lot), each with its own material_lot_id.
+    displayName:
+      en: Material Lot
+      ja: 材料ロット
+      vi: Lô nguyên liệu
+    description:
+      en: "Lot the qty was drawn FROM (stock_out, FEFO) or deposited INTO (stock_in, receive). NULL = legacy/pre-lot-tracking. Multi-lot allocations split into N rows."
+      ja: "数量を引き出す（stock_out, FEFO）または預け入れる（stock_in, receive）ロット。NULL = レガシー/ロット追跡前。マルチロット配分は N 行に分割。"
+      vi: "Lô được rút (stock_out, FEFO) hoặc nhập vào (stock_in, receive). NULL = legacy/trước khi có lot tracking. Multi-lot allocation tách thành N dòng."
+
+  quantity:
+    type: Decimal
+    precision: 15
+    scale: 4
+    displayName:
+      en: Quantity
+      ja: 数量
+      vi: Số lượng
+    description:
+      en: "Amount in user-selected unit (e.g., 4 bags)"
+      ja: "ユーザー選択単位での数量（例：4袋）"
+      vi: "Số lượng theo đơn vị user chọn (VD: 4 bao)"
+
+  base_quantity:
+    type: Decimal
+    precision: 15
+    scale: 4
+    displayName:
+      en: Base Quantity
+      ja: 基本数量
+      vi: Số lượng quy đổi
+    description:
+      en: "Converted quantity in base unit (e.g., 100 kg). base_quantity = quantity × ratio (BR-06)"
+      ja: "基本単位での換算数量（例：100 kg）。base_quantity = quantity × ratio（BR-06）"
+      vi: "Số lượng quy đổi về đơn vị cơ bản (VD: 100 kg). base_quantity = quantity × ratio (BR-06)"
+
+  unit:
+    type: String
+    length: 50
+    nullable: true
+    displayName:
+      en: Unit
+      ja: 単位
+      vi: Đơn vị
+    description:
+      en: "Unit user selected (may differ from base unit)"
+      ja: "ユーザーが選択した単位（基本単位と異なる場合あり）"
+      vi: "Đơn vị user chọn (có thể khác đơn vị cơ bản)"
+
+  cost_basis_amount:
+    type: Decimal
+    precision: 18
+    scale: 4
+    nullable: true
+    # Plan-017 Tier 1.B — denormalized (unit_cost × base_quantity) at the
+    # moment of consumption. Stamped by StockTransactionService FEFO pick
+    # so COGS reports prefer the lot-grain figure over
+    # material.calculated_cost (the historical fallback).
+    displayName:
+      en: Cost Basis Amount
+      ja: 原価額
+      vi: Giá vốn ghi nhận
+    description:
+      en: "Lot's unit_cost × base_quantity at consumption time. NULL for stock_in or pre-Tier-1.B legacy items."
+      ja: "消費時のロットの単価 × base_quantity。stock_inまたはTier-1.B以前のレガシーアイテムではNULL。"
+      vi: "unit_cost của lô × base_quantity tại thời điểm tiêu thụ. NULL với stock_in hoặc legacy trước Tier-1.B."
+
+  unit_price:
+    type: Decimal
+    precision: 15
+    scale: 2
+    nullable: true
+    displayName:
+      en: Unit Price
+      ja: 単価
+      vi: Đơn giá
+    description:
+      en: "Unit price for purchase transactions only. Null for other sub_types."
+      ja: "仕入取引の単価のみ。他のサブタイプではNull。"
+      vi: "Đơn giá chỉ cho phiếu mua hàng. Null cho các loại khác."
+
+  note:
+    type: Text
+    nullable: true
+    displayName:
+      en: Note
+      ja: 備考
+      vi: Ghi chú

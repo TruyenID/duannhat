@@ -1,0 +1,1492 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "TempoFast API — Workstation (Cloud side)",
+        "description": "## TempoFast — Workstation ↔ Cloud\n\nHợp đồng giữa Cloud và máy trạm đặt tại quán, dưới tiền tố\n`/api/v1/workstation/...`. Nguồn chân lý của danh sách route là\n`backend/routes/api/workstation.php`.\n\nMọi endpoint xác thực bằng **device token** (cấp qua `POST /api/v1/devices/pair`\n— endpoint CHUNG, không có bản riêng cho workstation).\n\n### Nhóm\n| Nhóm | Nội dung |\n|---|---|\n| Catalog pull-DOWN | `menu`, `menu/handy`, `menu-catalog`, `branch`, `lots`, `sync-manifest` |\n| Replica pull-DOWN | `payment-methods`, `customers`, `printers`, `staff`, `coupons`… |\n| Orders sync-UP | `orders`, `orders/replay-offline` (#1097 có chữ ký), vòng đời đơn |\n| Payments | `payments`, xác nhận/huỷ, `payments/{payment}/attribution` |\n| Till / ca thu ngân | `till`, phiên, sự kiện tiền mặt, đóng ca |\n\n`sync/pull`, `sync/push`, `menu/changes`, `heartbeat`, `config` **chưa bao giờ\nđược cài đặt** — workstation pull trực tiếp và tự theo dõi kết nối (#1323).",
+        "contact": {
+            "name": "TempoFast"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:5400",
+            "description": "Local Development"
+        }
+    ],
+    "paths": {
+        "/api/v1/devices/broadcasting/auth": {
+            "post": {
+                "tags": [
+                    "Devices"
+                ],
+                "summary": "Device-authenticated broadcast channel auth",
+                "description": "Pusher-protocol auth endpoint for Reverb private channels subscribed by paired devices. Laravel's default /broadcasting/auth is sso.auth gated; this route provides the device-token equivalent. Channel authorization callbacks in routes/channels.php receive the resolved Device as the first argument.",
+                "operationId": "dd8df0bf88d657948be85725d1ab65cc",
+                "responses": {
+                    "200": {
+                        "description": "Signed auth payload"
+                    },
+                    "401": {
+                        "description": "Missing/invalid device token"
+                    },
+                    "403": {
+                        "description": "Device not authorized for requested channel"
+                    }
+                },
+                "security": [
+                    {
+                        "deviceToken": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/devices/me": {
+            "get": {
+                "tags": [
+                    "Devices"
+                ],
+                "summary": "Neutral device-token verify",
+                "description": "Accepts any active device type. Used by workstation CloudVerifier and any device-side client that needs to confirm its identity + branch.",
+                "operationId": "fa700d52c8db166f028f5bd53f356697",
+                "responses": {
+                    "200": {
+                        "description": "Device info (token stripped)"
+                    },
+                    "401": {
+                        "description": "Missing/invalid/inactive token"
+                    }
+                },
+                "security": [
+                    {
+                        "deviceToken": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/devices/reverb-config": {
+            "get": {
+                "tags": [
+                    "Devices"
+                ],
+                "summary": "Return the Reverb public creds for device-paired Echo clients",
+                "operationId": "af09f6196d5dd8161cfce45a848d1327",
+                "responses": {
+                    "200": {
+                        "description": "Reverb client creds"
+                    },
+                    "401": {
+                        "description": "Missing/invalid device token"
+                    },
+                    "422": {
+                        "description": "Device branch not linked to a Reverb-provisioned brand"
+                    }
+                },
+                "security": [
+                    {
+                        "deviceToken": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/workstation/alerts": {
+            "post": {
+                "tags": [
+                    "Workstation"
+                ],
+                "summary": "Máy trạm đẩy alert đang mở lên HQ (#1806 S3)",
+                "operationId": "ebbc07b60a9452e5dd9e914c29f00cb4",
+                "responses": {
+                    "202": {
+                        "description": "Đã nhận"
+                    }
+                }
+            }
+        },
+        "/api/v1/workstation/branch": {
+            "get": {
+                "tags": [
+                    "Workstation"
+                ],
+                "summary": "Pull branch info + shop order settings for the workstation device",
+                "description": "Sync DOWN endpoint. Workstation refreshes its local cache of branch metadata (name, currency, timezone, cart timeout) and per-branch order settings (service_charge_rate, currency_code, operating_country). Branch resolved from the device token.",
+                "operationId": "2aebca9320aaf953f5600fd34811c60d",
+                "responses": {
+                    "200": {
+                        "description": "Branch + settings payload (settings=null when no shop_order_setting row exists).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        },
+                                        "generated_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Missing/invalid device token"
+                    },
+                    "403": {
+                        "description": "Device type not allowed"
+                    }
+                },
+                "security": [
+                    {
+                        "device_token": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/workstation/cash-device-inventory": {
+            "post": {
+                "tags": [
+                    "Workstation"
+                ],
+                "summary": "Máy trạm đẩy 在高 (số tiền trong máy) tại ranh ca (#2879)",
+                "operationId": "4f2613f6d9593cc637e798c19107b55a",
+                "responses": {
+                    "202": {
+                        "description": "Đã nhận"
+                    }
+                }
+            }
+        },
+        "/api/v1/workstation/cash-device-errors": {
+            "post": {
+                "tags": [
+                    "Workstation"
+                ],
+                "summary": "Máy trạm đẩy sự cố máy 釣銭機 có dấu thời gian (#2882)",
+                "operationId": "d834e8b723162baad4da5516e0b215b5",
+                "responses": {
+                    "202": {
+                        "description": "Đã nhận"
+                    }
+                }
+            }
+        },
+        "/api/v1/workstation/cash-device-transactions": {
+            "post": {
+                "tags": [
+                    "Workstation"
+                ],
+                "summary": "Máy trạm đẩy sổ lượt thu tiền 釣銭機 lên Cloud (#2878)",
+                "operationId": "dda8eec0498ae9102f2bfd42e1976929",
+                "responses": {
+                    "202": {
+                        "description": "Đã nhận"
+                    }
+                }
+            }
+        },
+        "/api/v1/workstation/customers/find-or-create": {
+            "post": {
+                "tags": [
+                    "Workstation"
+                ],
+                "summary": "Find a customer by exact phone, or create one (device-authed)",
+                "description": "Workstation sync-UP twin of the POS find-or-create. Dedupes by phone within the device's org+branch: returns the existing customer (200) or creates one with the supplied phone/name/email (201). first_name falls back to \"Khách\" when omitted.",
+                "operationId": "2538be4da9fd2d672e923d90ef187619",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "phone"
+                                ],
+                                "properties": {
+                                    "phone": {
+                                        "type": "string",
+                                        "maxLength": 20,
+                                        "minLength": 1
+                                    },
+                                    "first_name": {
+                                        "type": "string",
+                                        "maxLength": 100,
+                                        "nullable": true
+                                    },
+                                    "last_name": {
+                                        "type": "string",
+                                        "maxLength": 100,
+                                        "nullable": true
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "maxLength": 255,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Existing customer returned",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Customer"
+                                        },
+                                        "created": {
+                                            "type": "boolean",
+                                            "example": false
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "New customer created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Customer"
+                                        },
+                                        "created": {
+                                            "type": "boolean",
+                                            "example": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Missing/invalid device token"
+                    },
+                    "422": {
+                        "description": "Validation failed, or device has no active branch"
+                    }
+                },
+                "security": [
+                    {
+                        "device_token": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/workstation/self-revoke": {
+            "post": {
+                "tags": [
+                    "Workstation"
+                ],
+                "summary": "Workstation revokes its own pairing (logout)",
+                "description": "Called by workstation when operator clicks Unpair. Marks device.status=revoked and clears device_token + paired_at. Idempotent — re-call on already-revoked token returns 401 from device.auth middleware (good — token already invalidated). After this call, the token no longer authenticates against any /workstation/* or /kiosk/* endpoint.",
+                "operationId": "bd6a2687c502a8b0b5a97b317e0f8263",
+                "responses": {
+                    "200": {
+                        "description": "Device revoked. Body: status=revoked + device_id."
+                    },
+                    "401": {
+                        "description": "Missing/invalid device token"
+                    },
+                    "403": {
+                        "description": "Device type not allowed"
+                    }
+                },
+                "security": [
+                    {
+                        "device_token": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/workstation/keys/rotate": {
+            "post": {
+                "tags": [
+                    "Workstation"
+                ],
+                "summary": "Register a fresh Ed25519 signing key (rotation)",
+                "description": "The device generates a new keypair locally and registers the public half. The PREVIOUS key stays valid until its own expires_at (grace window) so offline orders signed before the rotation still verify on sync UP (#1093 BR-DSK01). Returns the new key id + expiry.",
+                "operationId": "eebf2dcdc9f761a0a9db1943e0f1b3e3",
+                "responses": {
+                    "200": {
+                        "description": "New key registered. Body: key_id + expires_at."
+                    },
+                    "401": {
+                        "description": "Missing/invalid device token"
+                    },
+                    "422": {
+                        "description": "Malformed public key"
+                    }
+                },
+                "security": [
+                    {
+                        "device_token": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/workstation/expected-build": {
+            "get": {
+                "tags": [
+                    "Workstation"
+                ],
+                "summary": "Bản phát hành mà HQ mong đợi máy trạm đang chạy (#1806 S4)",
+                "operationId": "32f21b19a2cb70e48a3cb7a24a770ebf",
+                "responses": {
+                    "200": {
+                        "description": "Có thể trả version = null"
+                    }
+                }
+            }
+        },
+        "/api/v1/workstation/lots": {
+            "get": {
+                "tags": [
+                    "Workstation"
+                ],
+                "summary": "List material lots for workstation display",
+                "description": "Returns lots filtered by material, warehouse, or expiry. Rate limited to 60/min per device.",
+                "operationId": "c36629475c3eae8718b4fdd4fe6e2673",
+                "parameters": [
+                    {
+                        "name": "material_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "warehouse_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "expiring_within_days",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lot list with generated_at timestamp"
+                    },
+                    "429": {
+                        "description": "Rate limit exceeded"
+                    }
+                },
+                "security": [
+                    {
+                        "device_token": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/workstation/menu-products/{menuProduct}/availability": {
+            "post": {
+                "tags": [
+                    "Workstation"
+                ],
+                "summary": "Sync UP a LAN dish on/off toggle",
+                "operationId": "3f11823422d4ec1ba233734ffa76b4e7",
+                "parameters": [
+                    {
+                        "name": "menuProduct",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "is_active"
+                                ],
+                                "properties": {
+                                    "is_active": {
+                                        "type": "boolean"
+                                    },
+                                    "reason": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "nullable": true
+                                    },
+                                    "acted_by_user_id": {
+                                        "description": "Vetted against the branch org; dropped to null when it does not check out.",
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "actor_name": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "occurred_at": {
+                                        "description": "When the operator tapped — hours before now for an offline shop.",
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Applied"
+                    },
+                    "401": {
+                        "description": "Missing/invalid device token"
+                    },
+                    "404": {
+                        "description": "Not in this device branch"
+                    },
+                    "422": {
+                        "description": "Malformed body"
+                    }
+                },
+                "security": [
+                    {
+                        "device_token": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/workstation/menu-product-skus/{menuProductSku}/availability": {
+            "post": {
+                "tags": [
+                    "Workstation"
+                ],
+                "summary": "Sync UP a LAN variant on/off toggle",
+                "operationId": "7fbff13aba4c0246f5996aa522b8c82f",
+                "parameters": [
+                    {
+                        "name": "menuProductSku",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "is_active"
+                                ],
+                                "properties": {
+                                    "is_active": {
+                                        "type": "boolean"
+                                    },
+                                    "reason": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "nullable": true
+                                    },
+                                    "acted_by_user_id": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "actor_name": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "occurred_at": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Applied"
+                    },
+                    "404": {
+                        "description": "Not in this device branch"
+                    },
+                    "422": {
+                        "description": "Malformed body"
+                    }
+                },
+                "security": [
+                    {
+                        "device_token": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/workstation/menu-availability/bulk": {
+            "post": {
+                "tags": [
+                    "Workstation"
+                ],
+                "summary": "Sync UP a LAN section-wide toggle, as an EXPLICIT id list",
+                "description": "The workstation expands \"whole section\" into the ids that were on screen and sends those. Replaying a section NAME could reach dishes HQ added while the shop was offline — dishes the operator never saw.",
+                "operationId": "3004d68af81f9871394d9a6283218739",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "menu_id",
+                                    "menu_product_ids",
+                                    "is_active"
+                                ],
+                                "properties": {
+                                    "menu_id": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    },
+                                    "menu_product_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "uuid"
+                                        }
+                                    },
+                                    "is_active": {
+                                        "type": "boolean"
+                                    },
+                                    "reason": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "nullable": true
+                                    },
+                                    "acted_by_user_id": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "actor_name": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "occurred_at": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Applied",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "updated": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Menu not in this device branch"
+                    },
+                    "422": {
+                        "description": "Malformed body"
+                    }
+                },
+                "security": [
+                    {
+                        "device_token": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/workstation/menu-availability/skus/bulk": {
+            "post": {
+                "tags": [
+                    "Workstation"
+                ],
+                "summary": "Sync UP a LAN option-value toggle",
+                "description": "Backs \"turn off size Lon for this dish\". Takes the EXPLICIT menu_product_sku id list the workstation resolved when the switch was pressed — an option value has no branch-scoped row, so the write lands on the variant rows that carry it.",
+                "operationId": "8f4c9bc9aa1b18526e4a89bab1988827",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "menu_id",
+                                    "menu_product_sku_ids",
+                                    "is_active"
+                                ],
+                                "properties": {
+                                    "menu_id": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    },
+                                    "menu_product_sku_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "uuid"
+                                        }
+                                    },
+                                    "is_active": {
+                                        "type": "boolean"
+                                    },
+                                    "reason": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Applied"
+                    }
+                },
+                "security": [
+                    {
+                        "device_token": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/workstation/menu-products/{menuProduct}/toppings/{toppingItem}/availability": {
+            "post": {
+                "tags": [
+                    "Workstation"
+                ],
+                "summary": "Sync UP a LAN topping hide/show",
+                "description": "Writes ONE shop override row. The admin sync endpoint replaces every override of the group and would wipe the shop topping prices as a side effect.",
+                "operationId": "8d94b743240db1e32657edafcd95e27d",
+                "parameters": [
+                    {
+                        "name": "menuProduct",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "toppingItem",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "is_hidden"
+                                ],
+                                "properties": {
+                                    "is_hidden": {
+                                        "description": "The STORED sense. The LAN wire speaks is_active; the workstation inverts at its own boundary.",
+                                        "type": "boolean"
+                                    },
+                                    "reason": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "nullable": true
+                                    },
+                                    "acted_by_user_id": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "actor_name": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "occurred_at": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Applied"
+                    },
+                    "404": {
+                        "description": "Not in this device branch"
+                    },
+                    "422": {
+                        "description": "Malformed body"
+                    }
+                },
+                "security": [
+                    {
+                        "device_token": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/workstation/menu": {
+            "get": {
+                "tags": [
+                    "Workstation"
+                ],
+                "summary": "Pull the active menu for the workstation device branch (kiosk shape)",
+                "description": "Sync DOWN endpoint for kiosk/customer-web. Returns CustomerMenuService shape (categories→items, single default SKU per item).",
+                "operationId": "0c21b1804a6ad47286c45676b40215e7",
+                "responses": {
+                    "200": {
+                        "description": "Active menu (data=null when branch has no active menu).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "nullable": true
+                                        },
+                                        "generated_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Missing/invalid device token"
+                    },
+                    "403": {
+                        "description": "Device type not allowed"
+                    }
+                },
+                "security": [
+                    {
+                        "device_token": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/workstation/menu/handy": {
+            "get": {
+                "tags": [
+                    "Workstation"
+                ],
+                "summary": "Pull full handy-shaped menus for the workstation branch",
+                "description": "Sync DOWN endpoint for godx-handy. Returns the same ShopMenuByDayResource[] shape as Cloud /handy/menus/by-day/{day} so workstation can cache it locally and serve handy clients on the LAN without a round-trip to Cloud. Includes all active menus for today (day-of-week resolved from branch timezone). Each menu entry carries full ShopMenuProduct[] (multi-SKU, toppings, promotions, sections).",
+                "operationId": "ae9b786201632cd47118d8fc3e3b452d",
+                "responses": {
+                    "200": {
+                        "description": "Array of active menus for today with full product list.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "generated_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Missing/invalid device token"
+                    }
+                },
+                "security": [
+                    {
+                        "device_token": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/workstation/orders": {
+            "get": {
+                "tags": [
+                    "Workstation"
+                ],
+                "summary": "List recent orders for the device branch (recovery + read)",
+                "description": "Pulls orders the workstation can use to rebuild local state after a re-pair or crash. Filters by `since` (default 30 days ago) or `updated_since` for status-change-aware cursors, OR by `id` for an on-demand single-order projection (used by `PullOrderNow` to close the 5 s sync race when pos-web prints a freshly-created order). Limit 500 per call. Returns embedded `items`. Branch is resolved from the device token.",
+                "operationId": "58374f851b20ed7a2c06729932e5f58d",
+                "parameters": [
+                    {
+                        "name": "since",
+                        "in": "query",
+                        "description": "Filter orders created on or after this timestamp. Defaults to 30 days ago. Mutually exclusive with `updated_since` and `id`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "updated_since",
+                        "in": "query",
+                        "description": "Filter orders updated (status-changed) on or after this timestamp. Mutually exclusive with `since` and `id`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "On-demand single-order projection. When set, ignores `since` / `updated_since` / `limit` and returns 0 or 1 orders matching the id within the device branch. Used by workstation force-pull (plan-038 T1.1).",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 500,
+                            "maximum": 1000,
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of orders with items embedded."
+                    },
+                    "401": {
+                        "description": "Missing/invalid device token"
+                    },
+                    "403": {
+                        "description": "Device type not allowed"
+                    },
+                    "422": {
+                        "description": "Validation failure (e.g., conflicting filter params)"
+                    }
+                },
+                "security": [
+                    {
+                        "device_token": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Workstation"
+                ],
+                "summary": "Sync UP an order from workstation to Cloud",
+                "description": "Workstation owns orders locally (SQLite). Background sync worker pushes each new order here. Pass `Idempotency-Key` header so retries after network failures do not create duplicates — the same key returns the same Cloud order id. Branch/organization are resolved from the device token.",
+                "operationId": "0742fb357bd614fad5735e4be0ca755f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "order_type"
+                                ],
+                                "properties": {
+                                    "client_order_id": {
+                                        "description": "Workstation's local order UUID. Durable idempotency key: a re-sync maps to the same Cloud order without minting a second ORD-#### number (plan-041). Cloud is the authority for order_code.",
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "nullable": true
+                                    },
+                                    "order_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "spot",
+                                            "dine_in",
+                                            "takeaway"
+                                        ]
+                                    },
+                                    "table_id": {
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "nullable": true
+                                    },
+                                    "guest_count": {
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "customer_takeaway_name": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "nullable": true
+                                    },
+                                    "customer_takeaway_phone": {
+                                        "type": "string",
+                                        "maxLength": 50,
+                                        "nullable": true
+                                    },
+                                    "customer_phone": {
+                                        "description": "Phone of the linked loyalty/contact customer. The workstation sends this alongside `customer_id` because a LAN-minted `customer_id` is unknown to Cloud; Cloud find-or-creates the canonical customer by phone (org+branch scoped) and links that instead.",
+                                        "type": "string",
+                                        "maxLength": 50,
+                                        "nullable": true
+                                    },
+                                    "note": {
+                                        "type": "string",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Order created (or replayed on idempotency hit)."
+                    },
+                    "401": {
+                        "description": "Missing/invalid device token"
+                    },
+                    "403": {
+                        "description": "Device type not allowed"
+                    },
+                    "422": {
+                        "description": "Validation failure"
+                    }
+                },
+                "security": [
+                    {
+                        "device_token": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/workstation/orders/{customerOrder}": {
+            "get": {
+                "tags": [
+                    "Workstation"
+                ],
+                "summary": "Check a workstation order still exists on Cloud (recover-order existence check)",
+                "description": "plan-042 GAP-2. Returns 200 with the order when it exists so the workstation refuses to duplicate it; 404 when it is gone so the workstation may safely re-create it. Branch-scoped to the device.",
+                "operationId": "af5ba02674d91a09e59c8cedd1d8a3ee",
+                "parameters": [
+                    {
+                        "name": "customerOrder",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Order exists"
+                    },
+                    "401": {
+                        "description": "Missing/invalid device token"
+                    },
+                    "404": {
+                        "description": "Order not found (gone) or different branch"
+                    }
+                },
+                "security": [
+                    {
+                        "device_token": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/workstation/orders/{customerOrder}/items/{item}/status": {
+            "patch": {
+                "tags": [
+                    "Workstation"
+                ],
+                "summary": "Sync-UP KDS item status bump from workstation",
+                "description": "Receives a KDS item bump that originated on LAN (workstation forwarding from KDS via sync queue). Requires `Idempotency-Key` header. `actor_kds_device_id` is logged to the `kds-bumps` daily channel (90-day retention) but not persisted as a column. Auth scope: workstation device token only.",
+                "operationId": "d1e23583812e5442a163d80dcb593939",
+                "parameters": [
+                    {
+                        "name": "customerOrder",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "item",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "preparing",
+                                            "ready",
+                                            "served"
+                                        ]
+                                    },
+                                    "actor_kds_device_id": {
+                                        "type": "string",
+                                        "maxLength": 100,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated item resource (or idempotency replay)."
+                    },
+                    "401": {
+                        "description": "Missing/invalid device token"
+                    },
+                    "403": {
+                        "description": "Device type not workstation, or branch mismatch"
+                    },
+                    "404": {
+                        "description": "Order or item not found"
+                    },
+                    "409": {
+                        "description": "Invalid status transition"
+                    },
+                    "422": {
+                        "description": "Validation failure or missing Idempotency-Key"
+                    }
+                },
+                "security": [
+                    {
+                        "device_token": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/workstation/payments": {
+            "post": {
+                "tags": [
+                    "Workstation"
+                ],
+                "summary": "Record a payment from a workstation-attached terminal",
+                "description": "Workstation owns the payment locally (SQLite) and forwards each new payment here. Pass `Idempotency-Key` header so retries after network failures dedupe to the same Cloud row.",
+                "operationId": "c29780b38268ec7b9a88732887e0cbeb",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "order_id",
+                                    "payment_method",
+                                    "amount"
+                                ],
+                                "properties": {
+                                    "order_id": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    },
+                                    "payment_method": {
+                                        "description": "PaymentMethod code (e.g. cash, card, qr, emoney)",
+                                        "type": "string",
+                                        "maxLength": 50
+                                    },
+                                    "amount": {
+                                        "type": "integer",
+                                        "maximum": 99999999,
+                                        "minimum": 1
+                                    },
+                                    "tip_amount": {
+                                        "description": "Cash tip retained in the drawer (default 0). reconcile() adds cash-method tips back into expected_cash.",
+                                        "type": "integer",
+                                        "maximum": 99999999,
+                                        "minimum": 0,
+                                        "nullable": true
+                                    },
+                                    "tendered_amount": {
+                                        "description": "Cash the customer actually handed over, for methods with requires_tendered. change_amount is derived as tendered − amount − tip. Omitted, or short of amount + tip, falls back to auto-tendering amount + tip — never a 422, since the money is already in the drawer.",
+                                        "type": "integer",
+                                        "maximum": 99999999,
+                                        "minimum": 0,
+                                        "nullable": true
+                                    },
+                                    "terminal_response": {
+                                        "type": "string",
+                                        "maxLength": 1000,
+                                        "nullable": true
+                                    },
+                                    "till_session_id": {
+                                        "description": "Cloud cashier-shift id the workstation attributes this payment to (local→cloud remapped before send). Cloud-authoritative (plan-044 R6): kept only if it belongs to this branch and is still in-progress, else dropped to the branch current shift; an invalid value is tolerated, never 422.",
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Payment created"
+                    },
+                    "404": {
+                        "description": "Order not found in this branch"
+                    },
+                    "409": {
+                        "description": "Order can no longer accept a payment (e.g. the customer already settled it online while the cashier was collecting). Terminal for the sync queue; the refused amount is alarmed on the `payment_orchestration` channel as `workstation_payment_stranded_at_the_drawer`."
+                    },
+                    "422": {
+                        "description": "Validation failed or payment method unavailable"
+                    }
+                },
+                "security": [
+                    {
+                        "device_token": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/workstation/payments/{id}/status": {
+            "get": {
+                "tags": [
+                    "Workstation"
+                ],
+                "summary": "Poll payment status",
+                "operationId": "12d7e554df78ab66d5d8aad97c0af002",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Status returned"
+                    },
+                    "404": {
+                        "description": "Payment not found in this branch"
+                    }
+                },
+                "security": [
+                    {
+                        "device_token": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/workstation/payments/{payment}/confirm": {
+            "post": {
+                "tags": [
+                    "Workstation"
+                ],
+                "summary": "Confirm a pending payment",
+                "description": "Manual-confirm methods (cash, e-money) record the payment as pending and confirm separately after physical settlement.",
+                "operationId": "c55349c7c746fd3a477fa32114b18edf",
+                "responses": {
+                    "200": {
+                        "description": "Confirmed"
+                    },
+                    "404": {
+                        "description": "Payment not found in this branch"
+                    },
+                    "409": {
+                        "description": "Payment not in pending state"
+                    }
+                },
+                "security": [
+                    {
+                        "device_token": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/workstation/payments/{payment}/attribution": {
+            "post": {
+                "tags": [
+                    "Workstation"
+                ],
+                "summary": "Propagate a gap-claim cashier-shift attribution (plan-044 R2, endpoint D)",
+                "description": "Workstation-initiated sync of a POST-CREATION till_session_id change (a gap payment claimed at a local shift open). R6: applied ONLY if the id resolves to a session of the device's branch; a foreign/unknown id is a no-op that NEVER nullifies an existing attribution and NEVER 422s (attribution must not dead-letter a money-bearing sync). Idempotent — re-posting the same value changes nothing.",
+                "operationId": "56054aec2ba0e119f2d8f97f1a3e0868",
+                "parameters": [
+                    {
+                        "name": "payment",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "till_session_id": {
+                                        "description": "Cloud cashier-shift id (workstation remaps local→cloud before send).",
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Applied or no-op; returns the payment id + resolved till_session_id."
+                    },
+                    "404": {
+                        "description": "Payment not found in the device branch."
+                    }
+                },
+                "security": [
+                    {
+                        "device_token": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/workstation/payments/{payment}/fail": {
+            "post": {
+                "tags": [
+                    "Workstation"
+                ],
+                "summary": "Mark a pending payment as failed",
+                "description": "Used when a terminal/auto-confirm method reports an unrecoverable error.",
+                "operationId": "9bb0f81ed69fff5332fe0f8c9a42403e",
+                "responses": {
+                    "200": {
+                        "description": "Marked failed"
+                    },
+                    "404": {
+                        "description": "Payment not found in this branch"
+                    },
+                    "409": {
+                        "description": "Payment not in pending state"
+                    }
+                },
+                "security": [
+                    {
+                        "device_token": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/workstation/sync-manifest": {
+            "get": {
+                "tags": [
+                    "Workstation"
+                ],
+                "summary": "Per-feed sync version manifest for the workstation pull tick",
+                "description": "Returns an opaque version per replica feed plus an aggregate manifest_version (also sent as ETag). Send If-None-Match with the previous ETag to get a cheap empty 304 when nothing changed. Feed keys are a frozen contract.",
+                "operationId": "0f4c076d14ccd476a81d32c659c6b1d2",
+                "parameters": [
+                    {
+                        "name": "If-None-Match",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Manifest payload {data: {manifest_version, feeds}} + ETag header"
+                    },
+                    "304": {
+                        "description": "Nothing changed since the presented ETag (empty body)"
+                    },
+                    "401": {
+                        "description": "Missing/invalid device token"
+                    }
+                },
+                "security": [
+                    {
+                        "device_token": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Customer": {
+                "properties": {
+                    "id": {
+                        "description": "Khai LẶP schema `Customer` — cùng khuôn `HQApiInfo`/`ShopApiInfo` đã dùng.\n\n`Api/V1/Workstation/CustomerController` tham chiếu `#/components/schemas/Customer`,\nvà mỗi bucket l5-swagger là một tài liệu ĐỘC LẬP: nó chỉ thấy những gì chính\nnó quét. Không khai ở đây thì generate chết với *\"$ref … not found\"* — đúng\nlỗi lộ ra ngay lần đầu bucket này được dựng, và là bằng chứng rằng 124\nattribute OA trong namespace đó **chưa từng được kiểm** bởi bất cứ lượt\ngenerate nào.",
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "email": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "address": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "tax_code": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "note": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "brand_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "branch_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "organization_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "deleted_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "deviceToken": {
+                "type": "http",
+                "description": "Device token cấp bởi POST /api/v1/devices/pair",
+                "bearerFormat": "Token",
+                "scheme": "bearer"
+            },
+            "sanctum": {
+                "type": "http",
+                "description": "Bearer token from login or SSO callback",
+                "scheme": "bearer",
+                "bearerFormat": "Token"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Devices",
+            "description": "Devices"
+        },
+        {
+            "name": "Workstation",
+            "description": "Workstation"
+        }
+    ]
+}

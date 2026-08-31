@@ -1,0 +1,23 @@
+kind: enum
+
+displayName:
+  ja: 在庫切れ操作の対象
+  en: Availability Entity Type
+  vi: Đối tượng bật/tắt
+
+# Ba tầng mà một quán bật/tắt được, và chúng KHÔNG quy về nhau:
+#   menu_product     — cả món (`menu_products.is_active`).
+#   menu_product_sku — một biến thể của món (`menu_product_skus.is_active`),
+#                      ví dụ hết size lớn nhưng size nhỏ vẫn bán.
+#   topping_item     — một topping bị ẩn cho riêng món này
+#                      (`menu_product_topping_item_overrides.is_hidden`).
+#                      Lưu ý chiều nghĩa: ở bảng đó `is_hidden = true` nghĩa là
+#                      TẮT, nên khi ghi sự kiện phải đảo về `is_active` để ba
+#                      tầng đọc chung được một cột.
+values:
+  - value: menu_product
+    label: { ja: メニュー商品, en: Menu Product, vi: Món trong menu }
+  - value: menu_product_sku
+    label: { ja: メニュー商品SKU, en: Menu Product SKU, vi: Biến thể }
+  - value: topping_item
+    label: { ja: トッピング項目, en: Topping Item, vi: Topping }

@@ -1,0 +1,211 @@
+[
+    {
+        "id": "019f878c-3aa3-731f-afb0-3c21b70d7918",
+        "organization_id": "019f84bb-5dff-7329-bfc7-fb519a447dac",
+        "branch_id": "019fcffa-3297-72d3-a17b-7f7d935ba538",
+        "table_id": "019f7451-f41b-70d9-b94b-caae6864e1b9",
+        "status": "closed",
+        "opened_at": "2026-07-24 08:03:00",
+        "closed_at": "2026-07-24 08:03:00",
+        "created_at": "2026-07-22 01:59:02",
+        "updated_at": "2026-07-24 08:03:00"
+    },
+    {
+        "id": "019f87a1-38f3-7321-88ad-651e476276aa",
+        "organization_id": "019f84bb-5dff-7329-bfc7-fb519a447dac",
+        "branch_id": "019fcffa-32a0-72d9-a1a8-b817a5aed29f",
+        "table_id": "019f6f23-b35e-7170-94e5-17433d70803c",
+        "status": "open",
+        "opened_at": "2026-07-22 02:21:57",
+        "closed_at": null,
+        "created_at": "2026-07-22 02:21:57",
+        "updated_at": "2026-07-22 02:21:57"
+    },
+    {
+        "id": "019f87a1-6b78-738e-96b4-0f415fef80db",
+        "organization_id": "019f84bb-5dff-7329-bfc7-fb519a447dac",
+        "branch_id": "019fcffa-32a0-72d9-a1a8-b817a5aed29f",
+        "table_id": "019f6f23-b357-7263-9276-444ae91fcb72",
+        "status": "open",
+        "opened_at": "2026-07-22 02:22:10",
+        "closed_at": null,
+        "created_at": "2026-07-22 02:22:10",
+        "updated_at": "2026-07-22 02:22:10"
+    },
+    {
+        "id": "019f8822-29e1-7365-9f39-62778ed4b1b9",
+        "organization_id": "019f84bb-5dff-7329-bfc7-fb519a447dac",
+        "branch_id": "019fcffa-32a0-72d9-a1a8-b817a5aed29f",
+        "table_id": "019f6f23-b353-7349-a7fd-a33cb4fb30e3",
+        "status": "open",
+        "opened_at": "2026-07-22 04:42:48",
+        "closed_at": null,
+        "created_at": "2026-07-22 04:42:48",
+        "updated_at": "2026-07-22 04:42:48"
+    },
+    {
+        "id": "019f88f7-7511-7172-8356-20aaffdbdef6",
+        "organization_id": "019f84bb-5dff-7329-bfc7-fb519a447dac",
+        "branch_id": "019fcffa-32a0-72d9-a1a8-b817a5aed29f",
+        "table_id": "019f6f23-b354-708f-ae97-9ee4ccceadeb",
+        "status": "open",
+        "opened_at": "2026-07-22 08:35:46",
+        "closed_at": null,
+        "created_at": "2026-07-22 08:35:46",
+        "updated_at": "2026-07-22 08:35:46"
+    },
+    {
+        "id": "019f88f8-371f-71a4-8bb5-54a3a0d196fc",
+        "organization_id": "019f84bb-5dff-7329-bfc7-fb519a447dac",
+        "branch_id": "019fcffa-32a0-72d9-a1a8-b817a5aed29f",
+        "table_id": "019f6f23-b354-708f-ae97-9ee4cd7001e7",
+        "status": "open",
+        "opened_at": "2026-07-22 08:36:36",
+        "closed_at": null,
+        "created_at": "2026-07-22 08:36:36",
+        "updated_at": "2026-07-22 08:36:36"
+    },
+    {
+        "id": "019f88f9-4bd5-7263-a8df-8db915c9613e",
+        "organization_id": "019f84bb-5dff-7329-bfc7-fb519a447dac",
+        "branch_id": "019fcffa-32a0-72d9-a1a8-b817a5aed29f",
+        "table_id": "019f6f23-b356-7079-bfda-03b1a25bb78e",
+        "status": "open",
+        "opened_at": "2026-07-22 08:37:47",
+        "closed_at": null,
+        "created_at": "2026-07-22 08:37:47",
+        "updated_at": "2026-07-22 08:37:47"
+    },
+    {
+        "id": "019f88fa-1e75-72c2-a9ef-f7bc71caf79f",
+        "organization_id": "019f84bb-5dff-7329-bfc7-fb519a447dac",
+        "branch_id": "019fcffa-32a0-72d9-a1a8-b817a5aed29f",
+        "table_id": "019f6f23-b35e-7170-94e5-17433de4b9a3",
+        "status": "open",
+        "opened_at": "2026-07-22 08:38:41",
+        "closed_at": null,
+        "created_at": "2026-07-22 08:38:41",
+        "updated_at": "2026-07-22 08:38:41"
+    },
+    {
+        "id": "019f8933-56a2-7377-8638-6a1bdfc732bd",
+        "organization_id": "019f84bb-5dff-7329-bfc7-fb519a447dac",
+        "branch_id": "019fcffa-329b-7008-8149-7dffa3440f20",
+        "table_id": "019f6f23-b3b7-72a1-87ba-0feec21267fb",
+        "status": "open",
+        "opened_at": "2026-07-22 09:41:10",
+        "closed_at": null,
+        "created_at": "2026-07-22 09:41:10",
+        "updated_at": "2026-07-22 09:41:10"
+    },
+    {
+        "id": "019f8cbd-3da3-73ca-9381-cb7b2c3e78d5",
+        "organization_id": "019f84bb-5dff-7329-bfc7-fb519a447dac",
+        "branch_id": "019fcffa-3297-72d3-a17b-7f7d935ba538",
+        "table_id": "019f7454-d279-73bf-a293-a75abc8c0ec1",
+        "status": "open",
+        "opened_at": "2026-07-23 02:10:40",
+        "closed_at": null,
+        "created_at": "2026-07-23 02:10:40",
+        "updated_at": "2026-07-23 02:10:40"
+    },
+    {
+        "id": "019f8cf0-83b6-723e-ada9-afab7c308fd8",
+        "organization_id": "019f84bb-5dff-7329-bfc7-fb519a447dac",
+        "branch_id": "019fcffa-3295-7129-8573-32ffdc3759c7",
+        "table_id": "019f6f23-b3cf-7314-8a10-ea07b0a77bb9",
+        "status": "open",
+        "opened_at": "2026-07-23 03:06:40",
+        "closed_at": null,
+        "created_at": "2026-07-23 03:06:40",
+        "updated_at": "2026-07-23 03:06:40"
+    },
+    {
+        "id": "019f8cf3-8780-71b3-b05c-35e03704d635",
+        "organization_id": "019f84bb-5dff-7329-bfc7-fb519a447dac",
+        "branch_id": "019fcffa-3297-72d3-a17b-7f7d935ba538",
+        "table_id": "019f7453-d091-738c-b9b2-c1742b06f86d",
+        "status": "open",
+        "opened_at": "2026-07-23 03:09:58",
+        "closed_at": null,
+        "created_at": "2026-07-23 03:09:58",
+        "updated_at": "2026-07-23 03:09:58"
+    },
+    {
+        "id": "019f8d23-d9b9-7125-8681-802dea84afdf",
+        "organization_id": "019f84bb-5dff-7329-bfc7-fb519a447dac",
+        "branch_id": "019fcffa-3295-7129-8573-32ffdc3759c7",
+        "table_id": "019f6f23-b3d1-73e2-9f55-27b669784386",
+        "status": "open",
+        "opened_at": "2026-07-23 04:02:44",
+        "closed_at": null,
+        "created_at": "2026-07-23 04:02:44",
+        "updated_at": "2026-07-23 04:02:44"
+    },
+    {
+        "id": "019f937d-b603-71fb-aaf5-b18f48eb4915",
+        "organization_id": "019f84bb-5dff-7329-bfc7-fb519a447dac",
+        "branch_id": "019fcffa-3297-72d3-a17b-7f7d935ba538",
+        "table_id": "019f7453-e513-708e-b6b1-2a4d48b6660f",
+        "status": "open",
+        "opened_at": "2026-07-24 09:38:37",
+        "closed_at": null,
+        "created_at": "2026-07-24 09:38:37",
+        "updated_at": "2026-07-24 09:38:37"
+    },
+    {
+        "id": "019f9382-eddf-72ac-976c-5a7324dcbf72",
+        "organization_id": "019f84bb-5dff-7329-bfc7-fb519a447dac",
+        "branch_id": "019fcffa-3297-72d3-a17b-7f7d935ba538",
+        "table_id": "019f7452-c7c6-72b4-a97d-eefc77de4e5a",
+        "status": "open",
+        "opened_at": "2026-07-24 09:44:19",
+        "closed_at": null,
+        "created_at": "2026-07-24 09:44:19",
+        "updated_at": "2026-07-24 09:44:19"
+    },
+    {
+        "id": "019f9383-6ce5-7112-b085-d67e06a72c37",
+        "organization_id": "019f84bb-5dff-7329-bfc7-fb519a447dac",
+        "branch_id": "019fcffa-3297-72d3-a17b-7f7d935ba538",
+        "table_id": "019f7453-f8ea-7145-bd86-03e9a0777ec6",
+        "status": "open",
+        "opened_at": "2026-07-24 09:44:51",
+        "closed_at": null,
+        "created_at": "2026-07-24 09:44:51",
+        "updated_at": "2026-07-24 09:44:51"
+    },
+    {
+        "id": "019f9392-6a79-725e-95bd-76f7495c5e5b",
+        "organization_id": "019f84bb-5dff-7329-bfc7-fb519a447dac",
+        "branch_id": "019fcffa-3297-72d3-a17b-7f7d935ba538",
+        "table_id": "019f7452-10da-72d5-a402-8db8b6a95682",
+        "status": "open",
+        "opened_at": "2026-07-24 10:01:14",
+        "closed_at": null,
+        "created_at": "2026-07-24 10:01:14",
+        "updated_at": "2026-07-24 10:01:14"
+    },
+    {
+        "id": "019fa2c6-7300-729c-8a7c-ddd3de64c7e5",
+        "organization_id": "019f84bb-5dff-7329-bfc7-fb519a447dac",
+        "branch_id": "019fcffa-3297-72d3-a17b-7f7d935ba538",
+        "table_id": "019f7451-f41b-70d9-b94b-caae6864e1b9",
+        "status": "open",
+        "opened_at": "2026-07-27 08:52:22",
+        "closed_at": null,
+        "created_at": "2026-07-27 08:52:22",
+        "updated_at": "2026-07-27 08:52:22"
+    },
+    {
+        "id": "019fac91-2a39-7363-8f7c-e21cf73633a7",
+        "organization_id": "019f84bb-5dff-7329-bfc7-fb519a447dac",
+        "branch_id": "019fcffa-3297-72d3-a17b-7f7d935ba538",
+        "table_id": "019f878b-db11-7279-9c7d-628282df3197",
+        "status": "open",
+        "opened_at": "2026-07-29 06:30:22",
+        "closed_at": null,
+        "created_at": "2026-07-29 06:30:22",
+        "updated_at": "2026-07-29 06:30:22"
+    }
+]

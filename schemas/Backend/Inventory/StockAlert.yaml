@@ -1,0 +1,165 @@
+# StockAlert schema
+# Records stock level alerts when quantity drops below min_stock threshold.
+# Alerts are auto-created by StockAlertService and auto-resolved when stock recovers.
+#
+# Key Design:
+#   - IMMUTABLE-ish: Only status + resolved_at are updated (active → resolved)
+#   - No updated_at (timestamps: false), only created_at with useCurrent
+#   - No soft delete — alerts are resolved, not deleted (kept for history)
+#   - One of (product_sku_id, material_id) must be NOT NULL (app-level CHECK)
+#
+# Business Rules:
+#   - BR-01: Threshold per (warehouse + variant/material)
+#   - BR-02: Only 1 active alert per (warehouse + item) — no duplicates
+#   - BR-03: Auto-resolve when quantity > min_stock
+#   - BR-04: Skip alert when alert_enabled = false on stock_level
+#
+# Trigger: StockLevelService::adjustQuantity() → StockAlertService::checkAndCreateAlert()
+
+displayName:
+  en: Stock Alert
+  ja: 在庫アラート
+  vi: Cảnh báo tồn kho
+
+kind: object
+
+options:
+  timestamps: false
+  id: Uuid
+  indexes:
+    - columns: [organization_id, status]
+    - columns: [warehouse_id, product_sku_id, status]
+    - columns: [warehouse_id, material_id, status]
+
+properties:
+  warehouse:
+    type: Association
+    relation: ManyToOne
+    target: Warehouse
+    onDelete: RESTRICT
+    # plan-040 M24: RESTRICT (was CASCADE) to align with StockLevel/StockMovement —
+    # a warehouse with alert history cannot be hard-deleted out from under it.
+    # Alerts are append/resolve-only (no soft delete); cascading them away on
+    # warehouse delete would silently drop audit history.
+    displayName:
+      en: Warehouse
+      ja: 倉庫
+      vi: Kho hàng
+
+  productSku:
+    type: Association
+    relation: ManyToOne
+    target: ProductSku
+    onDelete: RESTRICT
+    nullable: true
+    displayName:
+      en: Product Variant
+      ja: 商品バリエーション
+      vi: Biến thể sản phẩm
+    description:
+      en: "Product variant. Mutually exclusive with material_id"
+      ja: "商品バリエーション。material_idと排他的"
+      vi: "Biến thể sản phẩm. Loại trừ với material_id"
+
+  material:
+    type: Association
+    relation: ManyToOne
+    target: Material
+    onDelete: RESTRICT
+    nullable: true
+    displayName:
+      en: Material
+      ja: 材料
+      vi: Nguyên liệu
+    description:
+      en: "Raw material. Mutually exclusive with product_sku_id"
+      ja: "原材料。product_sku_idと排他的"
+      vi: "Nguyên liệu. Loại trừ với product_sku_id"
+
+  alert_type:
+    type: EnumRef
+    enum: StockAlertType
+    displayName:
+      en: Alert Type
+      ja: アラートタイプ
+      vi: Loại cảnh báo
+    description:
+      en: "low_stock (0 < qty <= min_stock) or out_of_stock (qty <= 0)"
+      ja: "low_stock (0 < 数量 <= 最小在庫) または out_of_stock (数量 <= 0)"
+      vi: "low_stock (0 < tồn ≤ min_stock) hoặc out_of_stock (tồn ≤ 0)"
+
+  current_quantity:
+    type: Decimal
+    precision: 15
+    scale: 4
+    displayName:
+      en: Current Quantity
+      ja: 現在数量
+      vi: Tồn kho hiện tại
+    description:
+      en: "Snapshot of stock quantity at alert creation/update time"
+      ja: "アラート作成/更新時の在庫数量スナップショット"
+      vi: "Snapshot tồn kho tại thời điểm tạo/cập nhật alert"
+
+  min_stock:
+    type: Decimal
+    precision: 15
+    scale: 4
+    # Plan-024 — nullable to support out_of_stock alerts fired by the
+    # allow-negative sales path. Those alerts can fire on a StockLevel
+    # that has no `min_stock` configured (the negative quantity itself
+    # is the signal). For alerts created from a threshold cross, this
+    # remains the snapshot value from stock_levels at creation time.
+    nullable: true
+    displayName:
+      en: Min Stock Threshold
+      ja: 最小在庫しきい値
+      vi: Ngưỡng tối thiểu
+    description:
+      en: "Snapshot of min_stock threshold from stock_levels at alert creation. NULL when the alert was fired by allow-negative shortage on a StockLevel with no threshold configured."
+      ja: "アラート作成時のstock_levelsの最小在庫しきい値スナップショット。閾値未設定のStockLevelで allow_negative_sales 経由で発火した場合は NULL。"
+      vi: "Snapshot ngưỡng min_stock từ stock_levels tại thời điểm tạo alert. NULL nếu alert do allow_negative_sales kích hoạt trên StockLevel chưa cấu hình ngưỡng."
+
+  unit:
+    type: String
+    length: 50
+    nullable: true
+    displayName:
+      en: Unit
+      ja: 単位
+      vi: Đơn vị
+
+  status:
+    type: EnumRef
+    enum: StockAlertStatus
+    default: active
+    displayName:
+      en: Status
+      ja: ステータス
+      vi: Trạng thái
+
+  resolved_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Resolved At
+      ja: 解決日時
+      vi: Thời điểm giải quyết
+
+  created_at:
+    type: Timestamp
+    useCurrent: true
+    displayName:
+      en: Created At
+      ja: 作成日時
+      vi: Ngày tạo
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức

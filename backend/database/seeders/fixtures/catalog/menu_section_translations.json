@@ -1,0 +1,2252 @@
+[
+    {
+        "id": 1,
+        "menu_section_id": "019f408b-2b81-729f-bcb5-f91300228aa1",
+        "locale": "ja",
+        "name": "🔥 おすすめ"
+    },
+    {
+        "id": 2,
+        "menu_section_id": "019f408b-2b81-729f-bcb5-f91300228aa1",
+        "locale": "en",
+        "name": "🔥 Recommended"
+    },
+    {
+        "id": 3,
+        "menu_section_id": "019f408b-2b81-729f-bcb5-f91300228aa1",
+        "locale": "vi",
+        "name": "🔥 Đề xuất"
+    },
+    {
+        "id": 4,
+        "menu_section_id": "019f408b-2b85-7289-86ec-0ceb772ec4cb",
+        "locale": "ja",
+        "name": "🍜 メイン"
+    },
+    {
+        "id": 5,
+        "menu_section_id": "019f408b-2b85-7289-86ec-0ceb772ec4cb",
+        "locale": "en",
+        "name": "🍜 Mains"
+    },
+    {
+        "id": 6,
+        "menu_section_id": "019f408b-2b85-7289-86ec-0ceb772ec4cb",
+        "locale": "vi",
+        "name": "🍜 Món chính"
+    },
+    {
+        "id": 7,
+        "menu_section_id": "019f408b-2b88-70d2-81b0-516f4abcf6ef",
+        "locale": "ja",
+        "name": "🥗 サイド"
+    },
+    {
+        "id": 8,
+        "menu_section_id": "019f408b-2b88-70d2-81b0-516f4abcf6ef",
+        "locale": "en",
+        "name": "🥗 Sides"
+    },
+    {
+        "id": 9,
+        "menu_section_id": "019f408b-2b88-70d2-81b0-516f4abcf6ef",
+        "locale": "vi",
+        "name": "🥗 Món ăn kèm"
+    },
+    {
+        "id": 10,
+        "menu_section_id": "019f408b-2b8b-725f-a6aa-a114c6bb8a2f",
+        "locale": "ja",
+        "name": "🥤 ドリンク"
+    },
+    {
+        "id": 11,
+        "menu_section_id": "019f408b-2b8b-725f-a6aa-a114c6bb8a2f",
+        "locale": "en",
+        "name": "🥤 Drinks"
+    },
+    {
+        "id": 12,
+        "menu_section_id": "019f408b-2b8b-725f-a6aa-a114c6bb8a2f",
+        "locale": "vi",
+        "name": "🥤 Đồ uống"
+    },
+    {
+        "id": 13,
+        "menu_section_id": "019f408b-2b8e-7281-af44-33574c269c30",
+        "locale": "ja",
+        "name": "💰 ランチセット"
+    },
+    {
+        "id": 14,
+        "menu_section_id": "019f408b-2b8e-7281-af44-33574c269c30",
+        "locale": "en",
+        "name": "💰 Lunch Sets"
+    },
+    {
+        "id": 15,
+        "menu_section_id": "019f408b-2b8e-7281-af44-33574c269c30",
+        "locale": "vi",
+        "name": "💰 Combo bữa trưa"
+    },
+    {
+        "id": 16,
+        "menu_section_id": "019f6efa-2fb7-73c7-92f3-d24ac20603dd",
+        "locale": "ja",
+        "name": "フォー"
+    },
+    {
+        "id": 17,
+        "menu_section_id": "019f6efa-2fb7-73c7-92f3-d24ac20603dd",
+        "locale": "en",
+        "name": "Pho"
+    },
+    {
+        "id": 18,
+        "menu_section_id": "019f6efa-2fb7-73c7-92f3-d24ac20603dd",
+        "locale": "vi",
+        "name": "Phở"
+    },
+    {
+        "id": 19,
+        "menu_section_id": "019f6efa-30b5-723e-a72b-fc65dc1b5b60",
+        "locale": "ja",
+        "name": "お持ち帰りソースつき"
+    },
+    {
+        "id": 20,
+        "menu_section_id": "019f6efa-30b5-723e-a72b-fc65dc1b5b60",
+        "locale": "en",
+        "name": "Takeaway with Sauce"
+    },
+    {
+        "id": 21,
+        "menu_section_id": "019f6efa-30b5-723e-a72b-fc65dc1b5b60",
+        "locale": "vi",
+        "name": "Mang về kèm sốt"
+    },
+    {
+        "id": 22,
+        "menu_section_id": "019f6efa-30e9-72c9-812b-f34242d2b57b",
+        "locale": "ja",
+        "name": "30円容器必要"
+    },
+    {
+        "id": 23,
+        "menu_section_id": "019f6efa-30e9-72c9-812b-f34242d2b57b",
+        "locale": "en",
+        "name": "30-yen Container Required"
+    },
+    {
+        "id": 24,
+        "menu_section_id": "019f6efa-30e9-72c9-812b-f34242d2b57b",
+        "locale": "vi",
+        "name": "Cần hộp 30 yên"
+    },
+    {
+        "id": 25,
+        "menu_section_id": "019f6efa-312a-7051-be78-08235d8b2f7f",
+        "locale": "ja",
+        "name": "バインミー"
+    },
+    {
+        "id": 26,
+        "menu_section_id": "019f6efa-312a-7051-be78-08235d8b2f7f",
+        "locale": "en",
+        "name": "Banh Mi"
+    },
+    {
+        "id": 27,
+        "menu_section_id": "019f6efa-312a-7051-be78-08235d8b2f7f",
+        "locale": "vi",
+        "name": "Bánh mì"
+    },
+    {
+        "id": 28,
+        "menu_section_id": "019f6efa-313e-715c-9a75-533b8626a374",
+        "locale": "ja",
+        "name": "デザート・飲み物"
+    },
+    {
+        "id": 29,
+        "menu_section_id": "019f6efa-313e-715c-9a75-533b8626a374",
+        "locale": "en",
+        "name": "Desserts & Drinks"
+    },
+    {
+        "id": 30,
+        "menu_section_id": "019f6efa-313e-715c-9a75-533b8626a374",
+        "locale": "vi",
+        "name": "Tráng miệng & đồ uống"
+    },
+    {
+        "id": 31,
+        "menu_section_id": "019f6efa-3179-7363-a5b6-50b4f1cccd8f",
+        "locale": "ja",
+        "name": "小皿料理・春巻き"
+    },
+    {
+        "id": 32,
+        "menu_section_id": "019f6efa-3179-7363-a5b6-50b4f1cccd8f",
+        "locale": "en",
+        "name": "Small Plates & Spring Rolls"
+    },
+    {
+        "id": 33,
+        "menu_section_id": "019f6efa-3179-7363-a5b6-50b4f1cccd8f",
+        "locale": "vi",
+        "name": "Món nhỏ & nem cuốn"
+    },
+    {
+        "id": 34,
+        "menu_section_id": "019f6efa-322f-730e-b0e2-b99d6adec69a",
+        "locale": "ja",
+        "name": "オプション用"
+    },
+    {
+        "id": 35,
+        "menu_section_id": "019f6efa-322f-730e-b0e2-b99d6adec69a",
+        "locale": "en",
+        "name": "Options"
+    },
+    {
+        "id": 36,
+        "menu_section_id": "019f6efa-322f-730e-b0e2-b99d6adec69a",
+        "locale": "vi",
+        "name": "Tùy chọn"
+    },
+    {
+        "id": 37,
+        "menu_section_id": "019f6efa-3266-72b6-91f6-9b6fb938d5fe",
+        "locale": "ja",
+        "name": "ブン"
+    },
+    {
+        "id": 38,
+        "menu_section_id": "019f6efa-3266-72b6-91f6-9b6fb938d5fe",
+        "locale": "en",
+        "name": "Bun Noodles"
+    },
+    {
+        "id": 39,
+        "menu_section_id": "019f6efa-3266-72b6-91f6-9b6fb938d5fe",
+        "locale": "vi",
+        "name": "Bún"
+    },
+    {
+        "id": 40,
+        "menu_section_id": "019f6efa-3465-7116-aa29-441043d485ec",
+        "locale": "ja",
+        "name": "ホームページ おすすめ"
+    },
+    {
+        "id": 41,
+        "menu_section_id": "019f6efa-3465-7116-aa29-441043d485ec",
+        "locale": "en",
+        "name": "Website Recommendations"
+    },
+    {
+        "id": 42,
+        "menu_section_id": "019f6efa-3465-7116-aa29-441043d485ec",
+        "locale": "vi",
+        "name": "Đề xuất trên website"
+    },
+    {
+        "id": 43,
+        "menu_section_id": "019f6efa-349a-7332-8766-75bef623e8b4",
+        "locale": "ja",
+        "name": "サラダ・野菜"
+    },
+    {
+        "id": 44,
+        "menu_section_id": "019f6efa-349a-7332-8766-75bef623e8b4",
+        "locale": "en",
+        "name": "Salads & Vegetables"
+    },
+    {
+        "id": 45,
+        "menu_section_id": "019f6efa-349a-7332-8766-75bef623e8b4",
+        "locale": "vi",
+        "name": "Salad & rau"
+    },
+    {
+        "id": 46,
+        "menu_section_id": "019f6efa-34b4-714f-8fd6-4e1521e1e12c",
+        "locale": "ja",
+        "name": "小皿料理"
+    },
+    {
+        "id": 47,
+        "menu_section_id": "019f6efa-34b4-714f-8fd6-4e1521e1e12c",
+        "locale": "en",
+        "name": "Small Plates"
+    },
+    {
+        "id": 48,
+        "menu_section_id": "019f6efa-34b4-714f-8fd6-4e1521e1e12c",
+        "locale": "vi",
+        "name": "Món ăn nhỏ"
+    },
+    {
+        "id": 49,
+        "menu_section_id": "019f6efa-3520-730e-976a-342bc067a633",
+        "locale": "ja",
+        "name": "アルコール"
+    },
+    {
+        "id": 50,
+        "menu_section_id": "019f6efa-3520-730e-976a-342bc067a633",
+        "locale": "en",
+        "name": "Alcohol"
+    },
+    {
+        "id": 51,
+        "menu_section_id": "019f6efa-3520-730e-976a-342bc067a633",
+        "locale": "vi",
+        "name": "Đồ uống có cồn"
+    },
+    {
+        "id": 52,
+        "menu_section_id": "019f6efa-3625-7214-a060-d25e8049f435",
+        "locale": "ja",
+        "name": "お持ち帰りドーム"
+    },
+    {
+        "id": 53,
+        "menu_section_id": "019f6efa-3625-7214-a060-d25e8049f435",
+        "locale": "en",
+        "name": "Takeaway Bowls"
+    },
+    {
+        "id": 54,
+        "menu_section_id": "019f6efa-3625-7214-a060-d25e8049f435",
+        "locale": "vi",
+        "name": "Tô mang về"
+    },
+    {
+        "id": 55,
+        "menu_section_id": "019f6efa-362b-71e9-add9-fc41417d91c4",
+        "locale": "ja",
+        "name": "お持ち帰り-朝"
+    },
+    {
+        "id": 56,
+        "menu_section_id": "019f6efa-362b-71e9-add9-fc41417d91c4",
+        "locale": "en",
+        "name": "Morning Takeaway"
+    },
+    {
+        "id": 57,
+        "menu_section_id": "019f6efa-362b-71e9-add9-fc41417d91c4",
+        "locale": "vi",
+        "name": "Mang về buổi sáng"
+    },
+    {
+        "id": 58,
+        "menu_section_id": "019f6efa-3660-71a1-a716-288370885866",
+        "locale": "ja",
+        "name": "春巻き"
+    },
+    {
+        "id": 59,
+        "menu_section_id": "019f6efa-3660-71a1-a716-288370885866",
+        "locale": "en",
+        "name": "Spring Rolls"
+    },
+    {
+        "id": 60,
+        "menu_section_id": "019f6efa-3660-71a1-a716-288370885866",
+        "locale": "vi",
+        "name": "Nem cuốn"
+    },
+    {
+        "id": 61,
+        "menu_section_id": "019f6efa-3736-702b-b6f6-09d5815fa0b1",
+        "locale": "ja",
+        "name": "お持ち帰り"
+    },
+    {
+        "id": 62,
+        "menu_section_id": "019f6efa-3736-702b-b6f6-09d5815fa0b1",
+        "locale": "en",
+        "name": "Takeaway"
+    },
+    {
+        "id": 63,
+        "menu_section_id": "019f6efa-3736-702b-b6f6-09d5815fa0b1",
+        "locale": "vi",
+        "name": "Mang về"
+    },
+    {
+        "id": 64,
+        "menu_section_id": "019f6efa-38a8-7107-8147-c90a3dd95c2d",
+        "locale": "ja",
+        "name": "オリジナル・グッズ"
+    },
+    {
+        "id": 65,
+        "menu_section_id": "019f6efa-38a8-7107-8147-c90a3dd95c2d",
+        "locale": "en",
+        "name": "Original Goods"
+    },
+    {
+        "id": 66,
+        "menu_section_id": "019f6efa-38a8-7107-8147-c90a3dd95c2d",
+        "locale": "vi",
+        "name": "Sản phẩm thương hiệu"
+    },
+    {
+        "id": 67,
+        "menu_section_id": "019f6efa-38db-737e-80d6-fb2e1ecfaa58",
+        "locale": "ja",
+        "name": "おすすめ"
+    },
+    {
+        "id": 68,
+        "menu_section_id": "019f6efa-38db-737e-80d6-fb2e1ecfaa58",
+        "locale": "en",
+        "name": "Recommended"
+    },
+    {
+        "id": 69,
+        "menu_section_id": "019f6efa-38db-737e-80d6-fb2e1ecfaa58",
+        "locale": "vi",
+        "name": "Đề xuất"
+    },
+    {
+        "id": 70,
+        "menu_section_id": "019f6efa-3980-73d7-a72e-ebd7c1ab2987",
+        "locale": "ja",
+        "name": "その他"
+    },
+    {
+        "id": 71,
+        "menu_section_id": "019f6efa-3980-73d7-a72e-ebd7c1ab2987",
+        "locale": "en",
+        "name": "Other"
+    },
+    {
+        "id": 72,
+        "menu_section_id": "019f6efa-3980-73d7-a72e-ebd7c1ab2987",
+        "locale": "vi",
+        "name": "Khác"
+    },
+    {
+        "id": 73,
+        "menu_section_id": "019f6efa-39c7-73b8-be63-674de5316eea",
+        "locale": "ja",
+        "name": "ランチセット"
+    },
+    {
+        "id": 74,
+        "menu_section_id": "019f6efa-39c7-73b8-be63-674de5316eea",
+        "locale": "en",
+        "name": "Lunch Sets"
+    },
+    {
+        "id": 75,
+        "menu_section_id": "019f6efa-39c7-73b8-be63-674de5316eea",
+        "locale": "vi",
+        "name": "Combo bữa trưa"
+    },
+    {
+        "id": 76,
+        "menu_section_id": "019f6efa-3de9-735b-9486-18da770d12e4",
+        "locale": "ja",
+        "name": "コーヒー"
+    },
+    {
+        "id": 77,
+        "menu_section_id": "019f6efa-3de9-735b-9486-18da770d12e4",
+        "locale": "en",
+        "name": "Coffee"
+    },
+    {
+        "id": 78,
+        "menu_section_id": "019f6efa-3de9-735b-9486-18da770d12e4",
+        "locale": "vi",
+        "name": "Cà phê"
+    },
+    {
+        "id": 79,
+        "menu_section_id": "019f6efa-3fb3-70c6-80fe-247f9d30ebaf",
+        "locale": "ja",
+        "name": "キッチンカー"
+    },
+    {
+        "id": 80,
+        "menu_section_id": "019f6efa-3fb3-70c6-80fe-247f9d30ebaf",
+        "locale": "en",
+        "name": "Food Truck"
+    },
+    {
+        "id": 81,
+        "menu_section_id": "019f6efa-3fb3-70c6-80fe-247f9d30ebaf",
+        "locale": "vi",
+        "name": "Xe bán đồ ăn"
+    },
+    {
+        "id": 82,
+        "menu_section_id": "019f6efa-3fca-72be-8e44-3e32aaadd2cc",
+        "locale": "ja",
+        "name": "店内"
+    },
+    {
+        "id": 83,
+        "menu_section_id": "019f6efa-3fca-72be-8e44-3e32aaadd2cc",
+        "locale": "en",
+        "name": "Dine-in"
+    },
+    {
+        "id": 84,
+        "menu_section_id": "019f6efa-3fca-72be-8e44-3e32aaadd2cc",
+        "locale": "vi",
+        "name": "Ăn tại chỗ"
+    },
+    {
+        "id": 85,
+        "menu_section_id": "019f6efa-3fdf-72ea-87cc-30e5184b7301",
+        "locale": "ja",
+        "name": "事前予約"
+    },
+    {
+        "id": 86,
+        "menu_section_id": "019f6efa-3fdf-72ea-87cc-30e5184b7301",
+        "locale": "en",
+        "name": "Pre-order"
+    },
+    {
+        "id": 87,
+        "menu_section_id": "019f6efa-3fdf-72ea-87cc-30e5184b7301",
+        "locale": "vi",
+        "name": "Đặt trước"
+    },
+    {
+        "id": 88,
+        "menu_section_id": "019f6efa-4088-7348-96e2-84bd370925ef",
+        "locale": "ja",
+        "name": "PE 店内"
+    },
+    {
+        "id": 89,
+        "menu_section_id": "019f6efa-4088-7348-96e2-84bd370925ef",
+        "locale": "en",
+        "name": "PHO EXPRESS Dine-in"
+    },
+    {
+        "id": 90,
+        "menu_section_id": "019f6efa-4088-7348-96e2-84bd370925ef",
+        "locale": "vi",
+        "name": "Ăn tại chỗ PHO EXPRESS"
+    },
+    {
+        "id": 91,
+        "menu_section_id": "019f6efa-40b0-739e-b0ef-0a23347c7324",
+        "locale": "ja",
+        "name": "PE 持ち帰り"
+    },
+    {
+        "id": 92,
+        "menu_section_id": "019f6efa-40b0-739e-b0ef-0a23347c7324",
+        "locale": "en",
+        "name": "PHO EXPRESS Takeaway"
+    },
+    {
+        "id": 93,
+        "menu_section_id": "019f6efa-40b0-739e-b0ef-0a23347c7324",
+        "locale": "vi",
+        "name": "Mang về PHO EXPRESS"
+    },
+    {
+        "id": 94,
+        "menu_section_id": "019f6efa-4101-7028-8634-3c0ccb3e005c",
+        "locale": "ja",
+        "name": "無料サービス"
+    },
+    {
+        "id": 95,
+        "menu_section_id": "019f6efa-4101-7028-8634-3c0ccb3e005c",
+        "locale": "en",
+        "name": "Complimentary Items"
+    },
+    {
+        "id": 96,
+        "menu_section_id": "019f6efa-4101-7028-8634-3c0ccb3e005c",
+        "locale": "vi",
+        "name": "Phục vụ miễn phí"
+    },
+    {
+        "id": 97,
+        "menu_section_id": "019f6efa-4123-72f1-8471-dcae1857f210",
+        "locale": "ja",
+        "name": "期間限定"
+    },
+    {
+        "id": 98,
+        "menu_section_id": "019f6efa-4123-72f1-8471-dcae1857f210",
+        "locale": "en",
+        "name": "Limited Time"
+    },
+    {
+        "id": 99,
+        "menu_section_id": "019f6efa-4123-72f1-8471-dcae1857f210",
+        "locale": "vi",
+        "name": "Có thời hạn"
+    },
+    {
+        "id": 100,
+        "menu_section_id": "019f6efa-416f-7060-b4d1-ff5023b564eb",
+        "locale": "ja",
+        "name": "店内-ディナー"
+    },
+    {
+        "id": 101,
+        "menu_section_id": "019f6efa-416f-7060-b4d1-ff5023b564eb",
+        "locale": "en",
+        "name": "Dine-in Dinner"
+    },
+    {
+        "id": 102,
+        "menu_section_id": "019f6efa-416f-7060-b4d1-ff5023b564eb",
+        "locale": "vi",
+        "name": "Bữa tối tại quán"
+    },
+    {
+        "id": 103,
+        "menu_section_id": "019f6f3d-2557-7397-bbc7-c60755d4ebef",
+        "locale": "ja",
+        "name": "追加"
+    },
+    {
+        "id": 104,
+        "menu_section_id": "019f6f3d-2557-7397-bbc7-c60755d4ebef",
+        "locale": "en",
+        "name": "Extras"
+    },
+    {
+        "id": 105,
+        "menu_section_id": "019f6f3d-2557-7397-bbc7-c60755d4ebef",
+        "locale": "vi",
+        "name": "Gọi thêm"
+    },
+    {
+        "id": 106,
+        "menu_section_id": "019f6f3d-2561-73fc-b29a-f0da8418feda",
+        "locale": "ja",
+        "name": "店内-ランチ"
+    },
+    {
+        "id": 107,
+        "menu_section_id": "019f6f3d-2561-73fc-b29a-f0da8418feda",
+        "locale": "en",
+        "name": "Dine-in Lunch"
+    },
+    {
+        "id": 108,
+        "menu_section_id": "019f6f3d-2561-73fc-b29a-f0da8418feda",
+        "locale": "vi",
+        "name": "Bữa trưa tại quán"
+    },
+    {
+        "id": 109,
+        "menu_section_id": "019f6f8f-75ac-7351-b885-58a2c971dff6",
+        "locale": "ja",
+        "name": "デフォルト"
+    },
+    {
+        "id": 110,
+        "menu_section_id": "019f6f8f-75ac-7351-b885-58a2c971dff6",
+        "locale": "en",
+        "name": "Default"
+    },
+    {
+        "id": 111,
+        "menu_section_id": "019f6f8f-75ac-7351-b885-58a2c971dff6",
+        "locale": "vi",
+        "name": "Mặc định"
+    },
+    {
+        "id": 112,
+        "menu_section_id": "019f6f9c-74cd-711a-9ffa-55fa6128e1d4",
+        "locale": "ja",
+        "name": "セット"
+    },
+    {
+        "id": 113,
+        "menu_section_id": "019f6f9c-74cd-711a-9ffa-55fa6128e1d4",
+        "locale": "en",
+        "name": "Sets"
+    },
+    {
+        "id": 114,
+        "menu_section_id": "019f6f9c-74cd-711a-9ffa-55fa6128e1d4",
+        "locale": "vi",
+        "name": "Combo"
+    },
+    {
+        "id": 115,
+        "menu_section_id": "019f6fb7-cdb3-7138-a268-cf074a435b2e",
+        "locale": "ja",
+        "name": "フォー"
+    },
+    {
+        "id": 116,
+        "menu_section_id": "019f6fb7-cdb3-7138-a268-cf074a435b2e",
+        "locale": "en",
+        "name": "Pho"
+    },
+    {
+        "id": 117,
+        "menu_section_id": "019f6fb7-cdb3-7138-a268-cf074a435b2e",
+        "locale": "vi",
+        "name": "Phở"
+    },
+    {
+        "id": 118,
+        "menu_section_id": "019f6fb7-cdbb-7283-b369-fd30d244b8ea",
+        "locale": "ja",
+        "name": "ブン"
+    },
+    {
+        "id": 119,
+        "menu_section_id": "019f6fb7-cdbb-7283-b369-fd30d244b8ea",
+        "locale": "en",
+        "name": "Bun Noodles"
+    },
+    {
+        "id": 120,
+        "menu_section_id": "019f6fb7-cdbb-7283-b369-fd30d244b8ea",
+        "locale": "vi",
+        "name": "Bún"
+    },
+    {
+        "id": 121,
+        "menu_section_id": "019f6fb7-cdbc-727b-8fbd-737c18e72696",
+        "locale": "ja",
+        "name": "デザート・飲み物"
+    },
+    {
+        "id": 122,
+        "menu_section_id": "019f6fb7-cdbc-727b-8fbd-737c18e72696",
+        "locale": "en",
+        "name": "Desserts & Drinks"
+    },
+    {
+        "id": 123,
+        "menu_section_id": "019f6fb7-cdbc-727b-8fbd-737c18e72696",
+        "locale": "vi",
+        "name": "Tráng miệng & đồ uống"
+    },
+    {
+        "id": 124,
+        "menu_section_id": "019f6fb7-cdbc-727b-8fbd-737c192d1e02",
+        "locale": "ja",
+        "name": "アルコル"
+    },
+    {
+        "id": 125,
+        "menu_section_id": "019f6fb7-cdbc-727b-8fbd-737c192d1e02",
+        "locale": "en",
+        "name": "Alcohol"
+    },
+    {
+        "id": 126,
+        "menu_section_id": "019f6fb7-cdbc-727b-8fbd-737c192d1e02",
+        "locale": "vi",
+        "name": "Đồ uống có cồn"
+    },
+    {
+        "id": 127,
+        "menu_section_id": "019f7412-132d-715a-9f1d-a740ea2bfbf8",
+        "locale": "ja",
+        "name": "期間限定"
+    },
+    {
+        "id": 128,
+        "menu_section_id": "019f7412-132d-715a-9f1d-a740ea2bfbf8",
+        "locale": "en",
+        "name": "Limited Time"
+    },
+    {
+        "id": 129,
+        "menu_section_id": "019f7412-132d-715a-9f1d-a740ea2bfbf8",
+        "locale": "vi",
+        "name": "Có thời hạn"
+    },
+    {
+        "id": 130,
+        "menu_section_id": "019f7412-1331-70ff-8005-fc1143edf35c",
+        "locale": "ja",
+        "name": "ランチセット"
+    },
+    {
+        "id": 131,
+        "menu_section_id": "019f7412-1331-70ff-8005-fc1143edf35c",
+        "locale": "en",
+        "name": "Lunch Sets"
+    },
+    {
+        "id": 132,
+        "menu_section_id": "019f7412-1331-70ff-8005-fc1143edf35c",
+        "locale": "vi",
+        "name": "Combo bữa trưa"
+    },
+    {
+        "id": 133,
+        "menu_section_id": "019f7412-1331-70ff-8005-fc1144a6dd80",
+        "locale": "ja",
+        "name": "小皿料理・春巻き"
+    },
+    {
+        "id": 134,
+        "menu_section_id": "019f7412-1331-70ff-8005-fc1144a6dd80",
+        "locale": "en",
+        "name": "Small Plates & Spring Rolls"
+    },
+    {
+        "id": 135,
+        "menu_section_id": "019f7412-1331-70ff-8005-fc1144a6dd80",
+        "locale": "vi",
+        "name": "Món nhỏ & nem cuốn"
+    },
+    {
+        "id": 136,
+        "menu_section_id": "019f7412-1332-715b-98b3-72de34d2df01",
+        "locale": "ja",
+        "name": "追加"
+    },
+    {
+        "id": 137,
+        "menu_section_id": "019f7412-1332-715b-98b3-72de34d2df01",
+        "locale": "en",
+        "name": "Extras"
+    },
+    {
+        "id": 138,
+        "menu_section_id": "019f7412-1332-715b-98b3-72de34d2df01",
+        "locale": "vi",
+        "name": "Gọi thêm"
+    },
+    {
+        "id": 139,
+        "menu_section_id": "019f7412-1332-715b-98b3-72de35cce2b6",
+        "locale": "ja",
+        "name": "無料サービス"
+    },
+    {
+        "id": 140,
+        "menu_section_id": "019f7412-1332-715b-98b3-72de35cce2b6",
+        "locale": "en",
+        "name": "Complimentary Items"
+    },
+    {
+        "id": 141,
+        "menu_section_id": "019f7412-1332-715b-98b3-72de35cce2b6",
+        "locale": "vi",
+        "name": "Phục vụ miễn phí"
+    },
+    {
+        "id": 142,
+        "menu_section_id": "019f7e8e-0bb7-736f-8e62-fe70c1b184fc",
+        "locale": "ja",
+        "name": "期間限定"
+    },
+    {
+        "id": 143,
+        "menu_section_id": "019f7e8e-0bb7-736f-8e62-fe70c1b184fc",
+        "locale": "en",
+        "name": "Limited Time"
+    },
+    {
+        "id": 144,
+        "menu_section_id": "019f7e8e-0bb7-736f-8e62-fe70c1b184fc",
+        "locale": "vi",
+        "name": "Có thời hạn"
+    },
+    {
+        "id": 145,
+        "menu_section_id": "019f7e8e-0bc5-73e4-aab3-f57177c190c2",
+        "locale": "ja",
+        "name": "おすすめ"
+    },
+    {
+        "id": 146,
+        "menu_section_id": "019f7e8e-0bc5-73e4-aab3-f57177c190c2",
+        "locale": "en",
+        "name": "Recommended"
+    },
+    {
+        "id": 147,
+        "menu_section_id": "019f7e8e-0bc5-73e4-aab3-f57177c190c2",
+        "locale": "vi",
+        "name": "Đề xuất"
+    },
+    {
+        "id": 148,
+        "menu_section_id": "019f7e8e-0bc5-73e4-aab3-f571780226b8",
+        "locale": "ja",
+        "name": "サラダ・野菜"
+    },
+    {
+        "id": 149,
+        "menu_section_id": "019f7e8e-0bc5-73e4-aab3-f571780226b8",
+        "locale": "en",
+        "name": "Salads & Vegetables"
+    },
+    {
+        "id": 150,
+        "menu_section_id": "019f7e8e-0bc5-73e4-aab3-f571780226b8",
+        "locale": "vi",
+        "name": "Salad & rau"
+    },
+    {
+        "id": 151,
+        "menu_section_id": "019f7e8e-0bc5-73e4-aab3-f57178f740af",
+        "locale": "ja",
+        "name": "春巻き"
+    },
+    {
+        "id": 152,
+        "menu_section_id": "019f7e8e-0bc5-73e4-aab3-f57178f740af",
+        "locale": "en",
+        "name": "Spring Rolls"
+    },
+    {
+        "id": 153,
+        "menu_section_id": "019f7e8e-0bc5-73e4-aab3-f57178f740af",
+        "locale": "vi",
+        "name": "Nem cuốn"
+    },
+    {
+        "id": 154,
+        "menu_section_id": "019f7e8e-0bc6-70e9-9339-47244baa5402",
+        "locale": "ja",
+        "name": "小皿料理"
+    },
+    {
+        "id": 155,
+        "menu_section_id": "019f7e8e-0bc6-70e9-9339-47244baa5402",
+        "locale": "en",
+        "name": "Small Plates"
+    },
+    {
+        "id": 156,
+        "menu_section_id": "019f7e8e-0bc6-70e9-9339-47244baa5402",
+        "locale": "vi",
+        "name": "Món ăn nhỏ"
+    },
+    {
+        "id": 157,
+        "menu_section_id": "019f7e8e-0bc6-70e9-9339-47244c66f2f3",
+        "locale": "ja",
+        "name": "デザート・飲み物"
+    },
+    {
+        "id": 158,
+        "menu_section_id": "019f7e8e-0bc6-70e9-9339-47244c66f2f3",
+        "locale": "en",
+        "name": "Desserts & Drinks"
+    },
+    {
+        "id": 159,
+        "menu_section_id": "019f7e8e-0bc6-70e9-9339-47244c66f2f3",
+        "locale": "vi",
+        "name": "Tráng miệng & đồ uống"
+    },
+    {
+        "id": 160,
+        "menu_section_id": "019f7e8e-0bc6-70e9-9339-47244d5773ec",
+        "locale": "ja",
+        "name": "アルコール"
+    },
+    {
+        "id": 161,
+        "menu_section_id": "019f7e8e-0bc6-70e9-9339-47244d5773ec",
+        "locale": "en",
+        "name": "Alcohol"
+    },
+    {
+        "id": 162,
+        "menu_section_id": "019f7e8e-0bc6-70e9-9339-47244d5773ec",
+        "locale": "vi",
+        "name": "Đồ uống có cồn"
+    },
+    {
+        "id": 163,
+        "menu_section_id": "019f7e8e-0bc6-70e9-9339-47244e0fddb5",
+        "locale": "ja",
+        "name": "バインミー"
+    },
+    {
+        "id": 164,
+        "menu_section_id": "019f7e8e-0bc6-70e9-9339-47244e0fddb5",
+        "locale": "en",
+        "name": "Banh Mi"
+    },
+    {
+        "id": 165,
+        "menu_section_id": "019f7e8e-0bc6-70e9-9339-47244e0fddb5",
+        "locale": "vi",
+        "name": "Bánh mì"
+    },
+    {
+        "id": 166,
+        "menu_section_id": "019f7e8e-0bc7-7202-864a-5a53eef212c4",
+        "locale": "ja",
+        "name": "フォー"
+    },
+    {
+        "id": 167,
+        "menu_section_id": "019f7e8e-0bc7-7202-864a-5a53eef212c4",
+        "locale": "en",
+        "name": "Pho"
+    },
+    {
+        "id": 168,
+        "menu_section_id": "019f7e8e-0bc7-7202-864a-5a53eef212c4",
+        "locale": "vi",
+        "name": "Phở"
+    },
+    {
+        "id": 169,
+        "menu_section_id": "019f7e8e-0bc7-7202-864a-5a53efc35018",
+        "locale": "ja",
+        "name": "ブン"
+    },
+    {
+        "id": 170,
+        "menu_section_id": "019f7e8e-0bc7-7202-864a-5a53efc35018",
+        "locale": "en",
+        "name": "Bun Noodles"
+    },
+    {
+        "id": 171,
+        "menu_section_id": "019f7e8e-0bc7-7202-864a-5a53efc35018",
+        "locale": "vi",
+        "name": "Bún"
+    },
+    {
+        "id": 172,
+        "menu_section_id": "019f7e8e-0bc7-7202-864a-5a53f097d58c",
+        "locale": "ja",
+        "name": "無料サービス"
+    },
+    {
+        "id": 173,
+        "menu_section_id": "019f7e8e-0bc7-7202-864a-5a53f097d58c",
+        "locale": "en",
+        "name": "Complimentary Items"
+    },
+    {
+        "id": 174,
+        "menu_section_id": "019f7e8e-0bc7-7202-864a-5a53f097d58c",
+        "locale": "vi",
+        "name": "Phục vụ miễn phí"
+    },
+    {
+        "id": 175,
+        "menu_section_id": "019f7ee3-ade2-72e3-b2c1-8a94e0bd2f16",
+        "locale": "ja",
+        "name": "フォー"
+    },
+    {
+        "id": 176,
+        "menu_section_id": "019f7ee3-ade2-72e3-b2c1-8a94e0bd2f16",
+        "locale": "en",
+        "name": "Pho"
+    },
+    {
+        "id": 177,
+        "menu_section_id": "019f7ee3-ade2-72e3-b2c1-8a94e0bd2f16",
+        "locale": "vi",
+        "name": "Phở"
+    },
+    {
+        "id": 178,
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f19aeb7c",
+        "locale": "ja",
+        "name": "ブン"
+    },
+    {
+        "id": 179,
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f19aeb7c",
+        "locale": "en",
+        "name": "Bun Noodles"
+    },
+    {
+        "id": 180,
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f19aeb7c",
+        "locale": "vi",
+        "name": "Bún"
+    },
+    {
+        "id": 181,
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f220edb4",
+        "locale": "ja",
+        "name": "バインミー"
+    },
+    {
+        "id": 182,
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f220edb4",
+        "locale": "en",
+        "name": "Banh Mi"
+    },
+    {
+        "id": 183,
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f220edb4",
+        "locale": "vi",
+        "name": "Bánh mì"
+    },
+    {
+        "id": 184,
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f2c111dc",
+        "locale": "ja",
+        "name": "春巻き"
+    },
+    {
+        "id": 185,
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f2c111dc",
+        "locale": "en",
+        "name": "Spring Rolls"
+    },
+    {
+        "id": 186,
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f2c111dc",
+        "locale": "vi",
+        "name": "Nem cuốn"
+    },
+    {
+        "id": 187,
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f387c78d",
+        "locale": "ja",
+        "name": "サラダ・野菜"
+    },
+    {
+        "id": 188,
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f387c78d",
+        "locale": "en",
+        "name": "Salads & Vegetables"
+    },
+    {
+        "id": 189,
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f387c78d",
+        "locale": "vi",
+        "name": "Salad & rau"
+    },
+    {
+        "id": 190,
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdea34c28f",
+        "locale": "ja",
+        "name": "小皿料理・春巻き"
+    },
+    {
+        "id": 191,
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdea34c28f",
+        "locale": "en",
+        "name": "Small Plates & Spring Rolls"
+    },
+    {
+        "id": 192,
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdea34c28f",
+        "locale": "vi",
+        "name": "Món nhỏ & nem cuốn"
+    },
+    {
+        "id": 193,
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdeb188d28",
+        "locale": "ja",
+        "name": "デザート・飲み物"
+    },
+    {
+        "id": 194,
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdeb188d28",
+        "locale": "en",
+        "name": "Desserts & Drinks"
+    },
+    {
+        "id": 195,
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdeb188d28",
+        "locale": "vi",
+        "name": "Tráng miệng & đồ uống"
+    },
+    {
+        "id": 196,
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdebf91efc",
+        "locale": "ja",
+        "name": "オリジナル・グッズ"
+    },
+    {
+        "id": 197,
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdebf91efc",
+        "locale": "en",
+        "name": "Original Goods"
+    },
+    {
+        "id": 198,
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdebf91efc",
+        "locale": "vi",
+        "name": "Sản phẩm thương hiệu"
+    },
+    {
+        "id": 199,
+        "menu_section_id": "019f88da-6666-72f6-9fe2-99f6c8ecc7d3",
+        "locale": "ja",
+        "name": "コーヒーターム"
+    },
+    {
+        "id": 200,
+        "menu_section_id": "019f88da-6666-72f6-9fe2-99f6c8ecc7d3",
+        "locale": "en",
+        "name": "コーヒーターム"
+    },
+    {
+        "id": 201,
+        "menu_section_id": "019f88da-6666-72f6-9fe2-99f6c8ecc7d3",
+        "locale": "vi",
+        "name": "コーヒーターム"
+    },
+    {
+        "id": 202,
+        "menu_section_id": "019f88d4-df8e-7217-865d-50931d071807",
+        "locale": "ja",
+        "name": "コーヒーターム"
+    },
+    {
+        "id": 203,
+        "menu_section_id": "019f88d4-df8e-7217-865d-50931d071807",
+        "locale": "en",
+        "name": "コーヒーターム"
+    },
+    {
+        "id": 204,
+        "menu_section_id": "019f88d4-df8e-7217-865d-50931d071807",
+        "locale": "vi",
+        "name": "コーヒーターム"
+    },
+    {
+        "id": 205,
+        "menu_section_id": "019fda95-aa59-71c2-843d-c08e0b5becdd",
+        "locale": "vi",
+        "name": "Có thời hạn"
+    },
+    {
+        "id": 206,
+        "menu_section_id": "019fda95-aa5c-73de-acda-75471d2a0cb5",
+        "locale": "vi",
+        "name": "Đề xuất"
+    },
+    {
+        "id": 207,
+        "menu_section_id": "019fda95-aa5d-71ba-af0f-78c70f4647d1",
+        "locale": "vi",
+        "name": "Salad & rau"
+    },
+    {
+        "id": 208,
+        "menu_section_id": "019fda95-aa5e-7337-ac2e-05b3bd4b7b72",
+        "locale": "vi",
+        "name": "Nem cuốn"
+    },
+    {
+        "id": 209,
+        "menu_section_id": "019fda95-aa5f-7330-94e5-98c28c39c0ff",
+        "locale": "vi",
+        "name": "Món ăn nhỏ"
+    },
+    {
+        "id": 210,
+        "menu_section_id": "019fda95-aa63-7290-a51a-f32779fd9318",
+        "locale": "vi",
+        "name": "Tráng miệng & đồ uống"
+    },
+    {
+        "id": 211,
+        "menu_section_id": "019fda95-aa64-726b-a1bf-3eb9f7896858",
+        "locale": "vi",
+        "name": "Đồ uống có cồn"
+    },
+    {
+        "id": 212,
+        "menu_section_id": "019fda95-aa65-7350-a409-7f187e70238e",
+        "locale": "vi",
+        "name": "Bánh mì"
+    },
+    {
+        "id": 213,
+        "menu_section_id": "019fda95-aa66-71da-9b8e-71f7061a5aca",
+        "locale": "vi",
+        "name": "Phở"
+    },
+    {
+        "id": 214,
+        "menu_section_id": "019fda95-aa68-72ea-959e-e43992baf3cd",
+        "locale": "vi",
+        "name": "Bún"
+    },
+    {
+        "id": 215,
+        "menu_section_id": "019fda95-aa69-718d-808d-6be0f6ce3f25",
+        "locale": "vi",
+        "name": "Phục vụ miễn phí"
+    },
+    {
+        "id": 216,
+        "menu_section_id": "019fda95-aa64-726b-a1bf-3eb9f7896858",
+        "locale": "ja",
+        "name": "アルコール"
+    },
+    {
+        "id": 217,
+        "menu_section_id": "019fda95-aa64-726b-a1bf-3eb9f7896858",
+        "locale": "en",
+        "name": "Alcohol"
+    },
+    {
+        "id": 218,
+        "menu_section_id": "019fda95-aa5d-71ba-af0f-78c70f4647d1",
+        "locale": "ja",
+        "name": "サラダ・野菜"
+    },
+    {
+        "id": 219,
+        "menu_section_id": "019fda95-aa5d-71ba-af0f-78c70f4647d1",
+        "locale": "en",
+        "name": "Salads & Vegetables"
+    },
+    {
+        "id": 220,
+        "menu_section_id": "019fda95-aa5e-7337-ac2e-05b3bd4b7b72",
+        "locale": "ja",
+        "name": "春巻き"
+    },
+    {
+        "id": 221,
+        "menu_section_id": "019fda95-aa5e-7337-ac2e-05b3bd4b7b72",
+        "locale": "en",
+        "name": "Spring Rolls"
+    },
+    {
+        "id": 222,
+        "menu_section_id": "019fda95-aa59-71c2-843d-c08e0b5becdd",
+        "locale": "ja",
+        "name": "期間限定"
+    },
+    {
+        "id": 223,
+        "menu_section_id": "019fda95-aa59-71c2-843d-c08e0b5becdd",
+        "locale": "en",
+        "name": "Limited Time"
+    },
+    {
+        "id": 224,
+        "menu_section_id": "019fda95-aa5c-73de-acda-75471d2a0cb5",
+        "locale": "ja",
+        "name": "おすすめ"
+    },
+    {
+        "id": 225,
+        "menu_section_id": "019fda95-aa5c-73de-acda-75471d2a0cb5",
+        "locale": "en",
+        "name": "Recommended"
+    },
+    {
+        "id": 226,
+        "menu_section_id": "019fda95-aa68-72ea-959e-e43992baf3cd",
+        "locale": "ja",
+        "name": "ブン"
+    },
+    {
+        "id": 227,
+        "menu_section_id": "019fda95-aa68-72ea-959e-e43992baf3cd",
+        "locale": "en",
+        "name": "Bun Noodles"
+    },
+    {
+        "id": 228,
+        "menu_section_id": "019fda95-aa66-71da-9b8e-71f7061a5aca",
+        "locale": "ja",
+        "name": "フォー"
+    },
+    {
+        "id": 229,
+        "menu_section_id": "019fda95-aa66-71da-9b8e-71f7061a5aca",
+        "locale": "en",
+        "name": "Pho"
+    },
+    {
+        "id": 230,
+        "menu_section_id": "019fda95-aa69-718d-808d-6be0f6ce3f25",
+        "locale": "ja",
+        "name": "無料サービス"
+    },
+    {
+        "id": 231,
+        "menu_section_id": "019fda95-aa69-718d-808d-6be0f6ce3f25",
+        "locale": "en",
+        "name": "Complimentary Items"
+    },
+    {
+        "id": 232,
+        "menu_section_id": "019fda95-aa65-7350-a409-7f187e70238e",
+        "locale": "ja",
+        "name": "バインミー"
+    },
+    {
+        "id": 233,
+        "menu_section_id": "019fda95-aa65-7350-a409-7f187e70238e",
+        "locale": "en",
+        "name": "Banh Mi"
+    },
+    {
+        "id": 234,
+        "menu_section_id": "019fda95-aa5f-7330-94e5-98c28c39c0ff",
+        "locale": "ja",
+        "name": "小皿料理"
+    },
+    {
+        "id": 235,
+        "menu_section_id": "019fda95-aa5f-7330-94e5-98c28c39c0ff",
+        "locale": "en",
+        "name": "Small Plates"
+    },
+    {
+        "id": 236,
+        "menu_section_id": "019fda95-aa63-7290-a51a-f32779fd9318",
+        "locale": "ja",
+        "name": "デザート・飲み物"
+    },
+    {
+        "id": 237,
+        "menu_section_id": "019fda95-aa63-7290-a51a-f32779fd9318",
+        "locale": "en",
+        "name": "Desserts & Drinks"
+    },
+    {
+        "id": 238,
+        "menu_section_id": "019fdb27-5f84-70c4-911f-6bc855a7ea53",
+        "locale": "vi",
+        "name": "Có thời hạn"
+    },
+    {
+        "id": 239,
+        "menu_section_id": "019fdb27-5f8a-7361-8171-08dad11d62be",
+        "locale": "vi",
+        "name": "Đề xuất"
+    },
+    {
+        "id": 240,
+        "menu_section_id": "019fdb27-5f8c-7183-8e57-fbba2f34f76a",
+        "locale": "vi",
+        "name": "Salad & rau"
+    },
+    {
+        "id": 241,
+        "menu_section_id": "019fdb27-5f8d-70f0-b072-1df1d0e3f7fd",
+        "locale": "vi",
+        "name": "Nem cuốn"
+    },
+    {
+        "id": 242,
+        "menu_section_id": "019fdb27-5f8e-7198-ad00-e437795d9379",
+        "locale": "vi",
+        "name": "Món ăn nhỏ"
+    },
+    {
+        "id": 243,
+        "menu_section_id": "019fdb27-5f8f-700f-9624-0a61abb6466b",
+        "locale": "vi",
+        "name": "Tráng miệng & đồ uống"
+    },
+    {
+        "id": 244,
+        "menu_section_id": "019fdb27-5f90-73b7-b08c-82569be1e923",
+        "locale": "vi",
+        "name": "Đồ uống có cồn"
+    },
+    {
+        "id": 245,
+        "menu_section_id": "019fdb27-5f92-7392-ac5f-37037a370706",
+        "locale": "vi",
+        "name": "Bánh mì"
+    },
+    {
+        "id": 246,
+        "menu_section_id": "019fdb27-5f93-7385-a98f-e67bc91bf91a",
+        "locale": "vi",
+        "name": "Phở"
+    },
+    {
+        "id": 247,
+        "menu_section_id": "019fdb27-5f94-7061-a32d-77836fe40959",
+        "locale": "vi",
+        "name": "Bún"
+    },
+    {
+        "id": 248,
+        "menu_section_id": "019fdb27-5f95-7361-b69f-82ec523374c8",
+        "locale": "vi",
+        "name": "Phục vụ miễn phí"
+    },
+    {
+        "id": 249,
+        "menu_section_id": "019fdb27-5f8f-700f-9624-0a61abb6466b",
+        "locale": "ja",
+        "name": "デザート・飲み物"
+    },
+    {
+        "id": 250,
+        "menu_section_id": "019fdb27-5f8f-700f-9624-0a61abb6466b",
+        "locale": "en",
+        "name": "Desserts & Drinks"
+    },
+    {
+        "id": 251,
+        "menu_section_id": "019fdb27-5f8d-70f0-b072-1df1d0e3f7fd",
+        "locale": "ja",
+        "name": "春巻き"
+    },
+    {
+        "id": 252,
+        "menu_section_id": "019fdb27-5f8d-70f0-b072-1df1d0e3f7fd",
+        "locale": "en",
+        "name": "Spring Rolls"
+    },
+    {
+        "id": 253,
+        "menu_section_id": "019fdb27-5f84-70c4-911f-6bc855a7ea53",
+        "locale": "ja",
+        "name": "期間限定"
+    },
+    {
+        "id": 254,
+        "menu_section_id": "019fdb27-5f84-70c4-911f-6bc855a7ea53",
+        "locale": "en",
+        "name": "Limited Time"
+    },
+    {
+        "id": 255,
+        "menu_section_id": "019fdb27-5f8a-7361-8171-08dad11d62be",
+        "locale": "ja",
+        "name": "おすすめ"
+    },
+    {
+        "id": 256,
+        "menu_section_id": "019fdb27-5f8c-7183-8e57-fbba2f34f76a",
+        "locale": "ja",
+        "name": "サラダ・野菜"
+    },
+    {
+        "id": 257,
+        "menu_section_id": "019fdb27-5f90-73b7-b08c-82569be1e923",
+        "locale": "ja",
+        "name": "アルコール"
+    },
+    {
+        "id": 258,
+        "menu_section_id": "019fdb27-5f8a-7361-8171-08dad11d62be",
+        "locale": "en",
+        "name": "Recommended"
+    },
+    {
+        "id": 259,
+        "menu_section_id": "019fdb27-5f8c-7183-8e57-fbba2f34f76a",
+        "locale": "en",
+        "name": "Salads & Vegetables"
+    },
+    {
+        "id": 260,
+        "menu_section_id": "019fdb27-5f90-73b7-b08c-82569be1e923",
+        "locale": "en",
+        "name": "Alcohol"
+    },
+    {
+        "id": 261,
+        "menu_section_id": "019fdb27-5f94-7061-a32d-77836fe40959",
+        "locale": "ja",
+        "name": "ブン"
+    },
+    {
+        "id": 262,
+        "menu_section_id": "019fdb27-5f94-7061-a32d-77836fe40959",
+        "locale": "en",
+        "name": "Bun Noodles"
+    },
+    {
+        "id": 263,
+        "menu_section_id": "019fdb27-5f8e-7198-ad00-e437795d9379",
+        "locale": "ja",
+        "name": "小皿料理"
+    },
+    {
+        "id": 264,
+        "menu_section_id": "019fdb27-5f8e-7198-ad00-e437795d9379",
+        "locale": "en",
+        "name": "Small Plates"
+    },
+    {
+        "id": 265,
+        "menu_section_id": "019fdb27-5f93-7385-a98f-e67bc91bf91a",
+        "locale": "ja",
+        "name": "フォー"
+    },
+    {
+        "id": 266,
+        "menu_section_id": "019fdb27-5f93-7385-a98f-e67bc91bf91a",
+        "locale": "en",
+        "name": "Pho"
+    },
+    {
+        "id": 267,
+        "menu_section_id": "019fdb27-5f92-7392-ac5f-37037a370706",
+        "locale": "ja",
+        "name": "バインミー"
+    },
+    {
+        "id": 268,
+        "menu_section_id": "019fdb27-5f92-7392-ac5f-37037a370706",
+        "locale": "en",
+        "name": "Banh Mi"
+    },
+    {
+        "id": 269,
+        "menu_section_id": "019fdb27-5f95-7361-b69f-82ec523374c8",
+        "locale": "ja",
+        "name": "無料サービス"
+    },
+    {
+        "id": 270,
+        "menu_section_id": "019fdb27-5f95-7361-b69f-82ec523374c8",
+        "locale": "en",
+        "name": "Complimentary Items"
+    },
+    {
+        "id": 271,
+        "menu_section_id": "019fdb2c-497b-7194-a9c6-c5249a29cae9",
+        "locale": "ja",
+        "name": "ちょい飲み"
+    },
+    {
+        "id": 272,
+        "menu_section_id": "019fdb2c-497e-7194-929c-54d22239754a",
+        "locale": "ja",
+        "name": "チャーハン"
+    },
+    {
+        "id": 273,
+        "menu_section_id": "019fdb2c-497b-7194-a9c6-c5249a29cae9",
+        "locale": "en",
+        "name": "ちょい飲み"
+    },
+    {
+        "id": 274,
+        "menu_section_id": "019fdb2c-497b-7194-a9c6-c5249a29cae9",
+        "locale": "vi",
+        "name": "ちょい飲み"
+    },
+    {
+        "id": 275,
+        "menu_section_id": "019fdb2c-497e-7194-929c-54d22239754a",
+        "locale": "en",
+        "name": "チャーハン"
+    },
+    {
+        "id": 276,
+        "menu_section_id": "019fdb2c-497e-7194-929c-54d22239754a",
+        "locale": "vi",
+        "name": "チャーハン"
+    },
+    {
+        "id": 277,
+        "menu_section_id": "019fee91-63ad-70f0-b6cc-39d5ee417ddb",
+        "locale": "vi",
+        "name": "Có thời hạn"
+    },
+    {
+        "id": 278,
+        "menu_section_id": "019fee91-63af-701a-a1a3-bb71b48f1d04",
+        "locale": "vi",
+        "name": "Đề xuất"
+    },
+    {
+        "id": 279,
+        "menu_section_id": "019fee91-63b1-73a8-8505-779162507a2f",
+        "locale": "vi",
+        "name": "Salad & rau"
+    },
+    {
+        "id": 280,
+        "menu_section_id": "019fee91-63b2-70b6-8a10-c6f1cd1b7180",
+        "locale": "vi",
+        "name": "Nem cuốn"
+    },
+    {
+        "id": 281,
+        "menu_section_id": "019fee91-63b5-717c-88e9-3ec6e8c06482",
+        "locale": "vi",
+        "name": "Món ăn nhỏ"
+    },
+    {
+        "id": 282,
+        "menu_section_id": "019fee91-63b7-71f2-b605-9e25b46e77c5",
+        "locale": "vi",
+        "name": "Tráng miệng & đồ uống"
+    },
+    {
+        "id": 283,
+        "menu_section_id": "019fee91-63b8-73cc-9e40-53b94b33f6c8",
+        "locale": "vi",
+        "name": "Đồ uống có cồn"
+    },
+    {
+        "id": 284,
+        "menu_section_id": "019fee91-63b9-7035-950e-e7d0de01a3a9",
+        "locale": "vi",
+        "name": "Bánh mì"
+    },
+    {
+        "id": 285,
+        "menu_section_id": "019fee91-63bb-7274-8184-ae3b8d093731",
+        "locale": "vi",
+        "name": "Phở"
+    },
+    {
+        "id": 286,
+        "menu_section_id": "019fee91-63bc-7306-ba8b-15da15da403e",
+        "locale": "vi",
+        "name": "Bún"
+    },
+    {
+        "id": 287,
+        "menu_section_id": "019fee91-63bd-71b7-a74b-8c7f923ae4f3",
+        "locale": "vi",
+        "name": "Phục vụ miễn phí"
+    },
+    {
+        "id": 288,
+        "menu_section_id": "019fee91-63b1-73a8-8505-779162507a2f",
+        "locale": "ja",
+        "name": "サラダ・野菜"
+    },
+    {
+        "id": 289,
+        "menu_section_id": "019fee91-63b7-71f2-b605-9e25b46e77c5",
+        "locale": "ja",
+        "name": "デザート・飲み物"
+    },
+    {
+        "id": 290,
+        "menu_section_id": "019fee91-63b7-71f2-b605-9e25b46e77c5",
+        "locale": "en",
+        "name": "Desserts & Drinks"
+    },
+    {
+        "id": 291,
+        "menu_section_id": "019fee91-63b1-73a8-8505-779162507a2f",
+        "locale": "en",
+        "name": "Salads & Vegetables"
+    },
+    {
+        "id": 292,
+        "menu_section_id": "019fee91-63b2-70b6-8a10-c6f1cd1b7180",
+        "locale": "ja",
+        "name": "春巻き"
+    },
+    {
+        "id": 293,
+        "menu_section_id": "019fee91-63b2-70b6-8a10-c6f1cd1b7180",
+        "locale": "en",
+        "name": "Spring Rolls"
+    },
+    {
+        "id": 294,
+        "menu_section_id": "019fee91-63af-701a-a1a3-bb71b48f1d04",
+        "locale": "ja",
+        "name": "おすすめ"
+    },
+    {
+        "id": 295,
+        "menu_section_id": "019fee91-63af-701a-a1a3-bb71b48f1d04",
+        "locale": "en",
+        "name": "Recommended"
+    },
+    {
+        "id": 296,
+        "menu_section_id": "019fee91-63ad-70f0-b6cc-39d5ee417ddb",
+        "locale": "ja",
+        "name": "期間限定"
+    },
+    {
+        "id": 297,
+        "menu_section_id": "019fee91-63ad-70f0-b6cc-39d5ee417ddb",
+        "locale": "en",
+        "name": "Limited Time"
+    },
+    {
+        "id": 298,
+        "menu_section_id": "019fee91-63b5-717c-88e9-3ec6e8c06482",
+        "locale": "ja",
+        "name": "小皿料理"
+    },
+    {
+        "id": 299,
+        "menu_section_id": "019fee91-63b5-717c-88e9-3ec6e8c06482",
+        "locale": "en",
+        "name": "Small Plates"
+    },
+    {
+        "id": 300,
+        "menu_section_id": "019fee91-63b8-73cc-9e40-53b94b33f6c8",
+        "locale": "ja",
+        "name": "アルコール"
+    },
+    {
+        "id": 301,
+        "menu_section_id": "019fee91-63b8-73cc-9e40-53b94b33f6c8",
+        "locale": "en",
+        "name": "Alcohol"
+    },
+    {
+        "id": 302,
+        "menu_section_id": "019fee91-63bd-71b7-a74b-8c7f923ae4f3",
+        "locale": "ja",
+        "name": "無料サービス"
+    },
+    {
+        "id": 303,
+        "menu_section_id": "019fee91-63bd-71b7-a74b-8c7f923ae4f3",
+        "locale": "en",
+        "name": "Complimentary Items"
+    },
+    {
+        "id": 304,
+        "menu_section_id": "019fee91-63bb-7274-8184-ae3b8d093731",
+        "locale": "ja",
+        "name": "フォー"
+    },
+    {
+        "id": 305,
+        "menu_section_id": "019fee91-63bb-7274-8184-ae3b8d093731",
+        "locale": "en",
+        "name": "Pho"
+    },
+    {
+        "id": 306,
+        "menu_section_id": "019fee91-63bc-7306-ba8b-15da15da403e",
+        "locale": "ja",
+        "name": "ブン"
+    },
+    {
+        "id": 307,
+        "menu_section_id": "019fee91-63bc-7306-ba8b-15da15da403e",
+        "locale": "en",
+        "name": "Bun Noodles"
+    },
+    {
+        "id": 308,
+        "menu_section_id": "019fee91-63b9-7035-950e-e7d0de01a3a9",
+        "locale": "ja",
+        "name": "バインミー"
+    },
+    {
+        "id": 309,
+        "menu_section_id": "019fee91-63b9-7035-950e-e7d0de01a3a9",
+        "locale": "en",
+        "name": "Banh Mi"
+    },
+    {
+        "id": 310,
+        "menu_section_id": "019fee91-e217-715d-bde1-d529fe4797f8",
+        "locale": "vi",
+        "name": "Có thời hạn"
+    },
+    {
+        "id": 311,
+        "menu_section_id": "019fee91-e21a-7175-92c7-d739adc753fb",
+        "locale": "vi",
+        "name": "Đề xuất"
+    },
+    {
+        "id": 312,
+        "menu_section_id": "019fee91-e21b-70a3-958b-25871a12a2a0",
+        "locale": "vi",
+        "name": "Salad & rau"
+    },
+    {
+        "id": 313,
+        "menu_section_id": "019fee91-e21c-726c-b896-055e34c3069d",
+        "locale": "vi",
+        "name": "Nem cuốn"
+    },
+    {
+        "id": 314,
+        "menu_section_id": "019fee91-e21d-714a-b613-76ee756b2f8b",
+        "locale": "vi",
+        "name": "Món ăn nhỏ"
+    },
+    {
+        "id": 315,
+        "menu_section_id": "019fee91-e21e-72d7-9af0-3a5117138bca",
+        "locale": "vi",
+        "name": "Tráng miệng & đồ uống"
+    },
+    {
+        "id": 316,
+        "menu_section_id": "019fee91-e220-73d5-b29e-a75a83ecc478",
+        "locale": "vi",
+        "name": "Đồ uống có cồn"
+    },
+    {
+        "id": 317,
+        "menu_section_id": "019fee91-e221-724c-9ffb-342d97053c7f",
+        "locale": "vi",
+        "name": "Bánh mì"
+    },
+    {
+        "id": 318,
+        "menu_section_id": "019fee91-e222-7178-b02e-6e8144395d45",
+        "locale": "vi",
+        "name": "Phở"
+    },
+    {
+        "id": 319,
+        "menu_section_id": "019fee91-e223-73d8-b79b-34d50e303f76",
+        "locale": "vi",
+        "name": "Bún"
+    },
+    {
+        "id": 320,
+        "menu_section_id": "019fee91-e225-724c-abbd-64acada81649",
+        "locale": "vi",
+        "name": "Phục vụ miễn phí"
+    },
+    {
+        "id": 321,
+        "menu_section_id": "019fee91-e217-715d-bde1-d529fe4797f8",
+        "locale": "ja",
+        "name": "期間限定"
+    },
+    {
+        "id": 322,
+        "menu_section_id": "019fee91-e217-715d-bde1-d529fe4797f8",
+        "locale": "en",
+        "name": "Limited Time"
+    },
+    {
+        "id": 323,
+        "menu_section_id": "019fee91-e21e-72d7-9af0-3a5117138bca",
+        "locale": "ja",
+        "name": "デザート・飲み物"
+    },
+    {
+        "id": 324,
+        "menu_section_id": "019fee91-e21e-72d7-9af0-3a5117138bca",
+        "locale": "en",
+        "name": "Desserts & Drinks"
+    },
+    {
+        "id": 325,
+        "menu_section_id": "019fee91-e21b-70a3-958b-25871a12a2a0",
+        "locale": "ja",
+        "name": "サラダ・野菜"
+    },
+    {
+        "id": 326,
+        "menu_section_id": "019fee91-e21b-70a3-958b-25871a12a2a0",
+        "locale": "en",
+        "name": "Salads & Vegetables"
+    },
+    {
+        "id": 327,
+        "menu_section_id": "019fee91-e221-724c-9ffb-342d97053c7f",
+        "locale": "ja",
+        "name": "バインミー"
+    },
+    {
+        "id": 328,
+        "menu_section_id": "019fee91-e221-724c-9ffb-342d97053c7f",
+        "locale": "en",
+        "name": "Banh Mi"
+    },
+    {
+        "id": 329,
+        "menu_section_id": "019fee91-e21c-726c-b896-055e34c3069d",
+        "locale": "ja",
+        "name": "春巻き"
+    },
+    {
+        "id": 330,
+        "menu_section_id": "019fee91-e21c-726c-b896-055e34c3069d",
+        "locale": "en",
+        "name": "Spring Rolls"
+    },
+    {
+        "id": 331,
+        "menu_section_id": "019fee91-e21d-714a-b613-76ee756b2f8b",
+        "locale": "ja",
+        "name": "小皿料理"
+    },
+    {
+        "id": 332,
+        "menu_section_id": "019fee91-e223-73d8-b79b-34d50e303f76",
+        "locale": "ja",
+        "name": "ブン"
+    },
+    {
+        "id": 333,
+        "menu_section_id": "019fee91-e223-73d8-b79b-34d50e303f76",
+        "locale": "en",
+        "name": "Bun Noodles"
+    },
+    {
+        "id": 334,
+        "menu_section_id": "019fee91-e21d-714a-b613-76ee756b2f8b",
+        "locale": "en",
+        "name": "Small Plates"
+    },
+    {
+        "id": 335,
+        "menu_section_id": "019fee91-e21a-7175-92c7-d739adc753fb",
+        "locale": "ja",
+        "name": "おすすめ"
+    },
+    {
+        "id": 336,
+        "menu_section_id": "019fee91-e21a-7175-92c7-d739adc753fb",
+        "locale": "en",
+        "name": "Recommended"
+    },
+    {
+        "id": 337,
+        "menu_section_id": "019fee91-e225-724c-abbd-64acada81649",
+        "locale": "ja",
+        "name": "無料サービス"
+    },
+    {
+        "id": 338,
+        "menu_section_id": "019fee91-e225-724c-abbd-64acada81649",
+        "locale": "en",
+        "name": "Complimentary Items"
+    },
+    {
+        "id": 339,
+        "menu_section_id": "019fee91-e220-73d5-b29e-a75a83ecc478",
+        "locale": "ja",
+        "name": "アルコール"
+    },
+    {
+        "id": 340,
+        "menu_section_id": "019fee91-e220-73d5-b29e-a75a83ecc478",
+        "locale": "en",
+        "name": "Alcohol"
+    },
+    {
+        "id": 341,
+        "menu_section_id": "019fee91-e222-7178-b02e-6e8144395d45",
+        "locale": "ja",
+        "name": "フォー"
+    },
+    {
+        "id": 342,
+        "menu_section_id": "019fee91-e222-7178-b02e-6e8144395d45",
+        "locale": "en",
+        "name": "Pho"
+    },
+    {
+        "id": 343,
+        "menu_section_id": "019fee95-15bb-706c-a278-c8602befea94",
+        "locale": "vi",
+        "name": "Có thời hạn"
+    },
+    {
+        "id": 344,
+        "menu_section_id": "019fee95-15be-712f-ae23-5b0a7c079c92",
+        "locale": "vi",
+        "name": "Đề xuất"
+    },
+    {
+        "id": 345,
+        "menu_section_id": "019fee95-15bf-72b8-8ae4-a457ed607017",
+        "locale": "vi",
+        "name": "Salad & rau"
+    },
+    {
+        "id": 346,
+        "menu_section_id": "019fee95-15c0-725a-8572-42935a731769",
+        "locale": "vi",
+        "name": "Nem cuốn"
+    },
+    {
+        "id": 347,
+        "menu_section_id": "019fee95-15c2-7339-b0f8-678566cd7903",
+        "locale": "vi",
+        "name": "Món ăn nhỏ"
+    },
+    {
+        "id": 348,
+        "menu_section_id": "019fee95-15c3-73b2-82ec-70612db988c0",
+        "locale": "vi",
+        "name": "Bánh mì"
+    },
+    {
+        "id": 349,
+        "menu_section_id": "019fee95-15c4-72e3-af12-43c441d8e595",
+        "locale": "vi",
+        "name": "Phở"
+    },
+    {
+        "id": 350,
+        "menu_section_id": "019fee95-15c5-72f9-9ffe-ad908d1a3500",
+        "locale": "vi",
+        "name": "Bún"
+    },
+    {
+        "id": 351,
+        "menu_section_id": "019fee95-15c6-7230-9f0f-2720018f9f18",
+        "locale": "vi",
+        "name": "Tráng miệng & đồ uống"
+    },
+    {
+        "id": 352,
+        "menu_section_id": "019fee95-15c7-7235-a5fd-9f4feef3ec2b",
+        "locale": "vi",
+        "name": "Đồ uống có cồn"
+    },
+    {
+        "id": 353,
+        "menu_section_id": "019fee95-15c9-7129-97e6-bb6c12fef64e",
+        "locale": "vi",
+        "name": "Phục vụ miễn phí"
+    },
+    {
+        "id": 354,
+        "menu_section_id": "019fee95-15c2-7339-b0f8-678566cd7903",
+        "locale": "ja",
+        "name": "小皿料理"
+    },
+    {
+        "id": 355,
+        "menu_section_id": "019fee95-15c2-7339-b0f8-678566cd7903",
+        "locale": "en",
+        "name": "Small Plates"
+    },
+    {
+        "id": 356,
+        "menu_section_id": "019fee95-15bf-72b8-8ae4-a457ed607017",
+        "locale": "ja",
+        "name": "サラダ・野菜"
+    },
+    {
+        "id": 357,
+        "menu_section_id": "019fee95-15c0-725a-8572-42935a731769",
+        "locale": "ja",
+        "name": "春巻き"
+    },
+    {
+        "id": 358,
+        "menu_section_id": "019fee95-15bf-72b8-8ae4-a457ed607017",
+        "locale": "en",
+        "name": "Salads & Vegetables"
+    },
+    {
+        "id": 359,
+        "menu_section_id": "019fee95-15c0-725a-8572-42935a731769",
+        "locale": "en",
+        "name": "Spring Rolls"
+    },
+    {
+        "id": 360,
+        "menu_section_id": "019fee95-15be-712f-ae23-5b0a7c079c92",
+        "locale": "ja",
+        "name": "おすすめ"
+    },
+    {
+        "id": 361,
+        "menu_section_id": "019fee95-15be-712f-ae23-5b0a7c079c92",
+        "locale": "en",
+        "name": "Recommended"
+    },
+    {
+        "id": 362,
+        "menu_section_id": "019fee95-15c4-72e3-af12-43c441d8e595",
+        "locale": "ja",
+        "name": "フォー"
+    },
+    {
+        "id": 363,
+        "menu_section_id": "019fee95-15c4-72e3-af12-43c441d8e595",
+        "locale": "en",
+        "name": "Pho"
+    },
+    {
+        "id": 364,
+        "menu_section_id": "019fee95-15c3-73b2-82ec-70612db988c0",
+        "locale": "ja",
+        "name": "バインミー"
+    },
+    {
+        "id": 365,
+        "menu_section_id": "019fee95-15c7-7235-a5fd-9f4feef3ec2b",
+        "locale": "ja",
+        "name": "アルコール"
+    },
+    {
+        "id": 366,
+        "menu_section_id": "019fee95-15c3-73b2-82ec-70612db988c0",
+        "locale": "en",
+        "name": "Banh Mi"
+    },
+    {
+        "id": 367,
+        "menu_section_id": "019fee95-15c7-7235-a5fd-9f4feef3ec2b",
+        "locale": "en",
+        "name": "Alcohol"
+    },
+    {
+        "id": 368,
+        "menu_section_id": "019fee95-15c5-72f9-9ffe-ad908d1a3500",
+        "locale": "ja",
+        "name": "ブン"
+    },
+    {
+        "id": 369,
+        "menu_section_id": "019fee95-15c6-7230-9f0f-2720018f9f18",
+        "locale": "ja",
+        "name": "デザート・飲み物"
+    },
+    {
+        "id": 370,
+        "menu_section_id": "019fee95-15c6-7230-9f0f-2720018f9f18",
+        "locale": "en",
+        "name": "Desserts & Drinks"
+    },
+    {
+        "id": 371,
+        "menu_section_id": "019fee95-15c5-72f9-9ffe-ad908d1a3500",
+        "locale": "en",
+        "name": "Bun Noodles"
+    },
+    {
+        "id": 372,
+        "menu_section_id": "019fee95-15c9-7129-97e6-bb6c12fef64e",
+        "locale": "ja",
+        "name": "無料サービス"
+    },
+    {
+        "id": 373,
+        "menu_section_id": "019fee95-15c9-7129-97e6-bb6c12fef64e",
+        "locale": "en",
+        "name": "Complimentary Items"
+    },
+    {
+        "id": 374,
+        "menu_section_id": "019fee95-15bb-706c-a278-c8602befea94",
+        "locale": "ja",
+        "name": "期間限定"
+    },
+    {
+        "id": 375,
+        "menu_section_id": "019fee95-15bb-706c-a278-c8602befea94",
+        "locale": "en",
+        "name": "Limited Time"
+    }
+]

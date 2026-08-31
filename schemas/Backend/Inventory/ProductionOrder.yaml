@@ -1,0 +1,260 @@
+# ProductionOrder schema
+# Production order header for finished product manufacturing (製造指示).
+# Each order represents a production run that consumes components (NVL)
+# and produces a finished variant (thành phẩm — product sold on menu).
+#
+# Business Rules:
+#   - BR-01: Only variants with has_recipe = true can create orders
+#   - BR-02: Auto-calculate NVL = component.qty × recipe_multiplier × planned_quantity
+#   - BR-03: All component stock must be sufficient before approval
+#   - BR-06: Output goes into stock_levels via product_sku_id (output variant)
+#   - BR-07: actual_quantity may differ from planned_quantity (waste, spoilage)
+#   - BR-08: Each order creates 2 stock_transactions (out NVL + in TP), reference_type = production_order
+#   - BR-09: Component unit must match base unit in stock_levels
+#
+# Workflow:
+#   draft → pending → approved → in_progress → completed
+#                  ↘ cancelled
+#          ↗ cancelled
+#                    ↗ cancelled
+#
+# Stock Impact:
+#   - approved → in_progress: Creates stock_out transaction (deduct components)
+#   - in_progress → completed: Creates stock_in transaction (add output variant)
+#
+# Key Design:
+#   - order_code auto-generated: PO-YYYYMMDD-XXX
+#   - planned_quantity: number of finished products to produce
+#   - recipe_multiplier: from variant.recipe_data.multiplier (conversion factor)
+#   - NVL quantity = component.qty × recipe_multiplier × planned_quantity
+#   - stock_out/in_transaction_id: Links to auto-created stock transactions
+#   - created_by_id / approved_by_id: SSO user IDs (no hard FK)
+#   - Soft delete enabled for audit trail
+
+displayName:
+  en: Production Order
+  ja: 製造指示
+  vi: Lệnh sản xuất
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    - columns: [order_code]
+      unique: true
+    - columns: [organization_id, status]
+    - columns: [warehouse_id, output_variant_id]
+
+properties:
+  order_code:
+    type: String
+    length: 50
+    displayName:
+      en: Order Code
+      ja: 製造指示コード
+      vi: Mã lệnh SX
+    description:
+      en: "Auto-generated code: PO-YYYYMMDD-XXX (sequential per day)"
+      ja: "自動生成コード：PO-YYYYMMDD-XXX（日ごとの連番）"
+      vi: "Mã tự động: PO-YYYYMMDD-XXX (tăng dần theo ngày)"
+
+  warehouse:
+    type: Association
+    relation: ManyToOne
+    target: Warehouse
+    onDelete: RESTRICT
+    displayName:
+      en: Warehouse
+      ja: 倉庫
+      vi: Kho hàng
+    description:
+      en: Production warehouse where components are consumed and output is stored
+      ja: 原材料を消費し、成果物を保管する生産倉庫
+      vi: Kho sản xuất — nơi tiêu thụ NVL và lưu trữ thành phẩm
+
+  outputVariant:
+    type: Association
+    relation: ManyToOne
+    target: ProductSku
+    onDelete: RESTRICT
+    displayName:
+      en: Output Variant
+      ja: 出力バリエーション
+      vi: Sản phẩm đầu ra
+    description:
+      en: "FK to product_skus — the finished product being produced. Must have has_recipe = true (BR-01)"
+      ja: "product_skusへのFK — 生産される完成品。has_recipe = trueであること（BR-01）"
+      vi: "FK đến product_skus — thành phẩm đầu ra. Phải có has_recipe = true (BR-01)"
+
+  planned_quantity:
+    type: Decimal
+    precision: 15
+    scale: 4
+    displayName:
+      en: Planned Quantity
+      ja: 計画生産量
+      vi: Số lượng kế hoạch
+    description:
+      en: "Number of finished products to produce"
+      ja: "生産する完成品の数量"
+      vi: "Số lượng thành phẩm cần sản xuất"
+
+  actual_quantity:
+    type: Decimal
+    precision: 15
+    scale: 4
+    nullable: true
+    displayName:
+      en: Actual Quantity
+      ja: 実際生産量
+      vi: Số lượng thực tế
+    description:
+      en: "Actual output recorded on completion. May differ from planned (BR-07: waste, spoilage)"
+      ja: "完了時に記録された実際の出力。計画と異なる場合あり（BR-07：廃棄、損失）"
+      vi: "Số lượng thực tế ghi nhận khi hoàn thành. Có thể khác kế hoạch (BR-07: hao hụt, hỏng)"
+
+  output_unit:
+    type: String
+    length: 50
+    displayName:
+      en: Output Unit
+      ja: 出力単位
+      vi: Đơn vị đầu ra
+    description:
+      en: "Output unit from variant's base_unit (e.g., piece, portion, bowl)"
+      ja: "バリエーションのbase_unitからの出力単位（例：piece、portion、bowl）"
+      vi: "Đơn vị đầu ra từ base_unit của variant (VD: piece, portion, bowl)"
+
+  recipe_multiplier:
+    type: Decimal
+    precision: 10
+    scale: 4
+    default: 1
+    displayName:
+      en: Recipe Multiplier
+      ja: レシピ倍率
+      vi: Hệ số công thức
+    description:
+      en: "From variant.recipe_data.multiplier. NVL = component.qty × recipe_multiplier × planned_quantity (BR-02)"
+      ja: "variant.recipe_data.multiplierから。NVL = component.qty × recipe_multiplier × planned_quantity（BR-02）"
+      vi: "Từ variant.recipe_data.multiplier. NVL = component.qty × hệ số × SL sản xuất (BR-02)"
+
+  status:
+    type: EnumRef
+    enum: ProductionOrderStatus
+    default: draft
+    displayName:
+      en: Status
+      ja: ステータス
+      vi: Trạng thái
+    description:
+      en: "Workflow: draft → pending → approved → in_progress → completed / cancelled"
+      ja: "ワークフロー：下書き → 承認待ち → 承認済み → 進行中 → 完了 / キャンセル"
+      vi: "Workflow: nháp → chờ duyệt → đã duyệt → đang sản xuất → hoàn thành / đã hủy"
+
+  stock_out_transaction_id:
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Stock Out Transaction
+      ja: 出庫取引
+      vi: Phiếu xuất kho
+    description:
+      en: "FK to stock_transactions — auto-created when order starts (deduct components). No hard FK."
+      ja: "stock_transactionsへのFK — 製造開始時に自動作成（原材料差引）。ハードFKなし。"
+      vi: "FK đến stock_transactions — tự tạo khi bắt đầu SX (trừ NVL). Không dùng FK cứng."
+
+  stock_in_transaction_id:
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Stock In Transaction
+      ja: 入庫取引
+      vi: Phiếu nhập kho
+    description:
+      en: "FK to stock_transactions — auto-created when order completes (add output). No hard FK."
+      ja: "stock_transactionsへのFK — 製造完了時に自動作成（出力追加）。ハードFKなし。"
+      vi: "FK đến stock_transactions — tự tạo khi hoàn thành SX (nhập TP). Không dùng FK cứng."
+
+  note:
+    type: Text
+    nullable: true
+    displayName:
+      en: Note
+      ja: 備考
+      vi: Ghi chú
+
+  created_by_id:
+    type: Uuid
+    displayName:
+      en: Created By
+      ja: 作成者
+      vi: Người tạo
+    description:
+      en: "SSO user who created this order (user_caches.id). No hard FK."
+      ja: "この製造指示を作成したSSOユーザー（user_caches.id）。ハードFKなし。"
+      vi: "User SSO tạo lệnh SX (user_caches.id). Không dùng FK cứng."
+
+  approved_by_id:
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Approved By
+      ja: 承認者
+      vi: Người duyệt
+    description:
+      en: "SSO user who approved this order. Null if not yet approved."
+      ja: "この製造指示を承認したSSOユーザー。未承認の場合はNull。"
+      vi: "User SSO duyệt lệnh SX. Null nếu chưa duyệt."
+
+  approved_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Approved At
+      ja: 承認日時
+      vi: Ngày duyệt
+
+  started_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Started At
+      ja: 開始日時
+      vi: Ngày bắt đầu sản xuất
+    description:
+      en: "When production started (approved → in_progress transition)"
+      ja: "製造が開始された日時（承認済み → 進行中の遷移）"
+      vi: "Thời điểm bắt đầu sản xuất (chuyển approved → in_progress)"
+
+  completed_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Completed At
+      ja: 完了日時
+      vi: Ngày hoàn thành
+
+  # Relationships
+  items:
+    type: Association
+    relation: OneToMany
+    target: ProductionOrderItem
+    mappedBy: productionOrder
+    displayName:
+      en: Order Items
+      ja: 製造指示明細
+      vi: Chi tiết lệnh SX
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức

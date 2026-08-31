@@ -1,0 +1,69 @@
+# RecallAffectedOrder schema
+# ============================================================================
+# Plan-017 Tier 1.A — pivot rows between Recall and CustomerOrder. One row
+# per (recall, customer_order) determined at initiate() time by walking
+# genealogy_links sales edges from the recall's root lot subtree.
+#
+# notified_at + notification_channel are populated by RecallService::notify
+# when ops dispatches the customer notification (in-app / email).
+# Multi-channel notifications insert multiple rows (one per channel).
+# ============================================================================
+
+displayName:
+  en: Recall Affected Order
+  ja: リコール影響注文
+  vi: Đơn ảnh hưởng thu hồi
+
+kind: object
+
+options:
+  timestamps: true
+  id: Uuid
+  indexes:
+    - columns: [recall_id, customer_order_id, notification_channel]
+      unique: true
+    - columns: [customer_order_id]
+    - columns: [notified_at]
+
+properties:
+  recall:
+    type: Association
+    relation: ManyToOne
+    target: Recall
+    onDelete: CASCADE
+
+  customer_order_id:
+    type: Uuid
+    # Soft FK to customer_orders.id — recall history must persist even if
+    # an order is hard-deleted.
+    displayName:
+      en: Customer Order ID
+      ja: 顧客注文ID
+      vi: ID đơn khách
+
+  notification_channel:
+    type: String
+    length: 20
+    nullable: true
+    # in_app | email | sms (sms deferred). NULL = not yet notified.
+    displayName:
+      en: Notification Channel
+      ja: 通知チャネル
+      vi: Kênh thông báo
+
+  notified_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Notified At
+      ja: 通知日時
+      vi: Thời điểm thông báo
+
+  notification_id:
+    type: Uuid
+    nullable: true
+    # Soft FK to notifications.id when dispatch lands on plan-008 platform.
+    displayName:
+      en: Notification ID
+      ja: 通知ID
+      vi: ID thông báo

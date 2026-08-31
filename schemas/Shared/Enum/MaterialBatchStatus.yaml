@@ -1,0 +1,88 @@
+# ==============================================================================
+# Material Batch Status Enum (製造バッチステータス / Trạng thái batch NVL)
+# ==============================================================================
+#
+# Workflow status for material batch processing.
+# Controls what actions can be performed and stock impact.
+#
+# Values:
+#   - draft: Nháp (下書き)
+#     Allowed: Edit, delete, submit
+#     Stock impact: NONE
+#     Transition: → pending (submit) or → cancelled (cancel)
+#
+#   - pending: Chờ duyệt (承認待ち)
+#     Allowed: View only
+#     Stock impact: NONE
+#     Transition: → approved (approve) or → cancelled (reject)
+#
+#   - approved: Đã duyệt (承認済み)
+#     Allowed: View only, start processing
+#     Stock impact: NONE (stock deducted on start)
+#     Transition: → in_progress (start) or → cancelled (cancel)
+#
+#   - in_progress: Đang chế biến (進行中)
+#     Allowed: View, complete
+#     Stock impact: Component stock DEDUCTED (on start)
+#     Transition: → completed (complete with actual yield)
+#
+#   - completed: Hoàn thành (完了)
+#     Allowed: View only
+#     Stock impact: Output stock ADDED (on complete)
+#     Transition: Final state
+#
+#   - cancelled: Đã hủy (キャンセル)
+#     Allowed: View only
+#     Stock impact: Reversed if was in_progress
+#     Transition: Final state
+#
+# Workflow:
+#   draft → pending → approved → in_progress → completed
+#                  ↘ cancelled
+#          ↗ cancelled
+#                    ↗ cancelled
+#
+# Used in:
+#   - MaterialBatch.status: Batch processing workflow
+#   - Authorization: Determines allowed actions
+#
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: 製造バッチステータス
+  en: Material Batch Status
+  vi: Trạng thái batch NVL
+
+values:
+  - value: draft
+    label:
+      ja: 下書き
+      en: Draft
+      vi: Nháp
+  - value: pending
+    label:
+      ja: 承認待ち
+      en: Pending
+      vi: Chờ duyệt
+  - value: approved
+    label:
+      ja: 承認済み
+      en: Approved
+      vi: Đã duyệt
+  - value: in_progress
+    label:
+      ja: 進行中
+      en: In Progress
+      vi: Đang chế biến
+  - value: completed
+    label:
+      ja: 完了
+      en: Completed
+      vi: Hoàn thành
+  - value: cancelled
+    label:
+      ja: キャンセル
+      en: Cancelled
+      vi: Đã hủy

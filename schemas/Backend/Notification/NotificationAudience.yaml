@@ -1,0 +1,215 @@
+# =============================================================================
+# NotificationAudience (通知オーディエンス / Đối tượng thông báo)
+# =============================================================================
+#
+# Saved rule-based recipient set for notification dispatch. Replaces the
+# Phase A cap-50 "every user with a role in the org" fallback. Instead of
+# a hard-coded union, each Audience row stores a JSON rule that
+# `AudienceResolverService::resolveWithTrace` expands into a concrete
+# Collection<Notifiable> at dispatch time.
+#
+# Written by:
+#   - `POST /hq/{brand}/notifications/audiences`  — admin UI creates rules
+#   - `PATCH /hq/{brand}/notifications/audiences/{id}` — admin UI edits
+#   - `SystemNotificationAudienceSeeder` — pre-seeds `is_system=true` rows
+#     (e.g. "All warehouse managers", "All shop managers") per brand
+#
+# Read by:
+#   - `AudienceResolverService::resolveWithTrace(Audience $a, Brand $b)` —
+#     expands `rule` into recipients at dispatch time
+#   - `NotificationService::dispatch(...recipients: Audience)` — fluent
+#     helper in `Services/Notification/Audience.php` accepts Audience
+#     instances and resolves internally
+#   - `POST /hq/{brand}/notifications/audiences/preview` — admin UI live
+#     preview endpoint (returns {count, sample[≤10]})
+#
+# Rule JSON shape (persisted in `rule` column, also returned by
+# `Audience::toRule()` on the fluent helper):
+#
+#   {
+#     "version": 1,
+#     "combinator": "or" | "and",           // default "or"
+#     "rules": [
+#       { "type": "role", "role": "warehouse_manager",
+#         "scope": { "warehouse_id": "<uuid>" }, "include_members": true },
+#       { "type": "user", "user_ids": ["<uuid>", "<uuid>"] },
+#       { "type": "shop", "shop_ids": ["<uuid>"], "include_members": true },
+#       { "type": "brand", "brand_id": "<uuid>", "include_all_members": true },
+#       { "type": "device", "device_types": ["workstation"],
+#         "branch_id": "<uuid>" }
+#     ],
+#     "exclude": [                          // optional, applied last
+#       { "type": "user", "user_ids": ["<uuid>"] }
+#     ]
+#   }
+#
+# `combinator: 'or'` unions resolved sets; `'and'` intersects them.
+# Sub-rule `type` MUST map 1:1 to a `*Resolver` class registered in
+# `AudienceResolverService::resolvers` — enforced by an arch test.
+# Sub-rules may emit User or Device morph entries; de-dup is keyed on
+# `{morphClass, key}`. Resolved set > 10 000 throws
+# `NotificationException('audience_too_large', 422)`.
+#
+# Tenancy & scope semantics:
+#   - `organization_id` is the tenancy boundary (every query filters by it).
+#   - `brand_id` set    → audience is brand-scoped; editable under that
+#                         brand's HQ scope. Appears in the compose picker
+#                         only for that brand.
+#   - `brand_id` null   → audience is organization-scoped. Any brand in
+#                         the same organization may reference it (e.g. an
+#                         org-wide "All brand admins" audience). Admin UI
+#                         hides the brand-edit affordance for null-brand rows
+#                         and only HQ organization admins may edit them.
+#     (This is the resolution of the plan-012 open question in
+#     DESIGN.md §Open questions — confirmed null = organization-scoped.)
+#
+# `is_system` protection:
+#   - `is_system=true` rows are seeded by `SystemNotificationAudienceSeeder`
+#     and MUST NOT be edited or deleted via the admin API — the controller
+#     returns 403 on PATCH/DELETE when true. `is_system=false` rows are
+#     user-created and fully editable.
+#
+# `created_by_user_id` uses `SET NULL` on user deletion so audiences
+# outlive their creator (audit trail is preserved via `created_at` + the
+# audit log plan-007 IAM entries).
+# =============================================================================
+
+displayName:
+  en: Notification Audience
+  ja: 通知オーディエンス
+  vi: Đối tượng thông báo
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: false
+  id: Uuid
+  indexes:
+    # Primary listing query — "audiences in this org, ordered by name"
+    - columns: [organization_id, name]
+    # Brand-picker filter on compose screen
+    - columns: [brand_id]
+    # System-row filter (seeder idempotency + admin UI "hide system rows" toggle)
+    - columns: [is_system]
+
+properties:
+  # Tenancy boundary — every query filters by this.
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+    description:
+      en: Organization that owns this audience. Every query filters by this column.
+      ja: このオーディエンスを所有する組織。全てのクエリはこの列でフィルタ。
+      vi: Tổ chức sở hữu audience này. Mọi query đều filter theo cột này.
+
+  # Brand scope — null means organization-scoped (usable across all brands in the org).
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    nullable: true
+    onDelete: CASCADE
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu
+    description:
+      en: "Brand scope. Set → audience editable under that brand's HQ; compose picker shows it only for that brand. Null → organization-scoped: any brand in the same organization may reference it; only HQ organization admins may edit."
+      ja: "ブランドスコープ。セット → そのブランドの HQ で編集可、コンポーザーではそのブランドでのみ表示。Null → 組織スコープ：同じ組織の任意のブランドから参照可、HQ 組織管理者のみが編集可。"
+      vi: "Phạm vi brand. Set → audience sửa được dưới HQ của brand đó; composer chỉ show cho brand đó. Null → phạm vi tổ chức: mọi brand cùng tổ chức có thể tham chiếu; chỉ HQ organization admin được sửa."
+
+  # Shop scope (plan-023 M6 T6.1) — null = HQ-managed; set = shop_admin owned.
+  # In this codebase "shop" is the user-facing concept for `Branch`; the FK
+  # column lands as `branch_id` to match Warehouse / CustomerOrder
+  # convention. ResolveShopFromSlug middleware turns /shops/{slug}/* into
+  # the Branch row exposed as `attributes->shop`.
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    nullable: true
+    onDelete: CASCADE
+    displayName:
+      en: Shop
+      ja: 店舗
+      vi: Cửa hàng
+    description:
+      en: "Shop scope. Set → audience editable under that shop's admin UI only; compose picker on the shop surface shows it. Null → HQ-managed (existing semantics; brand_id may still narrow the scope). When the dispatch is shop-scoped, the resolver intersects resolved recipients with that shop's memberships so a brand-wide audience picked by a shop admin can't fan out cross-shop."
+      ja: "店舗スコープ。セット → その店舗の管理 UI でのみ編集可能；店舗側のコンポーザーピッカーに表示される。Null → HQ 管理（既存の意味論；brand_id が更にスコープを絞り込む場合あり）。ディスパッチが店舗スコープの場合、リゾルバはその店舗のメンバーシップと交差を取り、店舗管理者が選んだブランド全体のオーディエンスが他店舗にファンアウトしないようにする。"
+      vi: "Phạm vi shop. Set → audience chỉ sửa được trong admin UI của shop đó; composer ở mặt shop hiển thị. Null → HQ-managed (semantics cũ; brand_id có thể vẫn narrow scope). Khi dispatch shop-scoped, resolver intersect recipients với membership của shop nên audience brand-wide do shop admin chọn không fan-out cross-shop."
+
+  # Human-readable name — unique within (organization_id, name) via index.
+  name:
+    type: String
+    length: 160
+    filterable: true
+    displayName:
+      en: Name
+      ja: 名前
+      vi: Tên
+    description:
+      en: "Human-readable label shown in the compose audience picker and the admin list. Examples: 'All warehouse managers', 'Brand A shop staff', 'On-call engineers'. Unique per organization."
+      ja: "コンポーザーのオーディエンスピッカーや管理リストに表示される人間可読なラベル。例：「全倉庫マネージャー」、「ブランドAの店舗スタッフ」、「オンコールエンジニア」。組織内で一意。"
+      vi: "Nhãn human-readable hiển thị ở composer picker và list admin. VD: 'Tất cả quản lý kho', 'Nhân viên shop brand A', 'On-call engineers'. Unique trong phạm vi tổ chức."
+
+  # Optional long-form description — purpose/audit notes.
+  description:
+    type: Text
+    nullable: true
+    displayName:
+      en: Description
+      ja: 説明
+      vi: Mô tả
+    description:
+      en: Free-form notes on what the audience targets and why. Rendered as a secondary line under `name` in the picker.
+      ja: オーディエンスの対象と目的についての自由記述メモ。ピッカーでは `name` の下の補助行として描画される。
+      vi: Ghi chú tự do về audience nhắm tới ai và vì sao. Render thành dòng phụ dưới `name` trong picker.
+
+  # Rule JSON — see header comment for exact shape.
+  rule:
+    type: Json
+    displayName:
+      en: Rule
+      ja: ルール
+      vi: Quy tắc
+    description:
+      en: "Rule JSON consumed by `AudienceResolverService`. Shape: `{version, combinator: 'or'|'and', rules: [...], exclude?: [...]}`. Each sub-rule `type` maps to a `*Resolver` class. See header comment for full schema and examples."
+      ja: "`AudienceResolverService` が消費するルール JSON。形状：`{version, combinator: 'or'|'and', rules: [...], exclude?: [...]}`。各サブルールの `type` は `*Resolver` クラスにマップされる。完全なスキーマと例についてはヘッダーコメントを参照。"
+      vi: "Rule JSON mà `AudienceResolverService` consume. Shape: `{version, combinator: 'or'|'and', rules: [...], exclude?: [...]}`. Mỗi sub-rule `type` map tới một class `*Resolver`. Xem header comment để biết schema đầy đủ và ví dụ."
+
+  # System-seeded flag — blocks admin edit/delete when true.
+  is_system:
+    type: Boolean
+    default: false
+    filterable: true
+    displayName:
+      en: Is System
+      ja: システム
+      vi: Hệ thống
+    description:
+      en: "`true` when seeded by `SystemNotificationAudienceSeeder` (e.g. 'All warehouse managers'). PATCH + DELETE on these rows return 403 — they're part of the platform baseline. `false` for user-created rows; fully editable."
+      ja: "`SystemNotificationAudienceSeeder` によりシードされた行の場合 `true`（例：「全倉庫マネージャー」）。これらの行への PATCH + DELETE は 403 を返す — プラットフォームのベースラインの一部。ユーザー作成行の場合 `false`；完全に編集可能。"
+      vi: "`true` khi được seed bởi `SystemNotificationAudienceSeeder` (VD: 'Tất cả quản lý kho'). PATCH + DELETE vào row này trả về 403 — chúng là một phần baseline của platform. `false` cho row do user tạo; sửa được hoàn toàn."
+
+  # Creator trace — SET NULL so audiences outlive the user who created them.
+  createdBy:
+    type: Association
+    relation: ManyToOne
+    target: User
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Created By
+      ja: 作成者
+      vi: Người tạo
+    description:
+      en: User who created this audience. SET NULL on user deletion so the audience and its audit trail survive the creator's account removal. Null for seeder-created rows (`is_system=true`).
+      ja: このオーディエンスを作成したユーザー。ユーザー削除時は SET NULL — オーディエンスと監査証跡が作成者アカウントの削除後も残るため。シーダー作成行（`is_system=true`）では null。
+      vi: User đã tạo audience này. SET NULL khi user bị xoá — audience và audit trail vẫn tồn tại sau khi tài khoản creator bị xoá. Null cho row do seeder tạo (`is_system=true`).

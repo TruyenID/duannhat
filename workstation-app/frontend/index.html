@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/wails.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      Content Security Policy for the workstation Wails frontend.
+      The bundle is embedded into the Go binary + served from
+      http://localhost:8080 — no CDN, no remote origins, so we can
+      be tighter than the browser-facing apps. script-src and
+      style-src stay 'self' only. connect-src includes ws://
+      because the dashboard subscribes to /ws for realtime order
+      events from the workstation Hub.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'self' http://localhost:8080 ws://localhost:8080 ws: wss: https://*.sentry.io https://*.ingest.sentry.io; img-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+    />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <!--
+      Wails workstation frontend is operator-facing — no need for any
+      device sensor. Deny everything so a compromised dep cannot
+      activate camera/mic/geo/usb/bluetooth from inside the webview.
+    -->
+    <meta
+      http-equiv="Permissions-Policy"
+      content="camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=(), accelerometer=(), gyroscope=()"
+    />
+    <title>WS App - Workstation</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

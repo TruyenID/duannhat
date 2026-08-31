@@ -1,0 +1,12 @@
+-- 060 — plan-051 T3.2: order_items.void_reason_id
+--
+-- #1149 VoidReason master: staff pick a brand-scoped reason row instead of
+-- (only) typing free text. The picked id is stored alongside the existing
+-- `void_reason` TEXT (the text stays — it snapshots the label at void time so
+-- history is self-sufficient even if the master row is later deactivated, and
+-- it remains the only field an old Cloud understands).
+--
+-- Nullable on purpose: pending-status voids don't require a reason at all,
+-- and a workstation running offline before the void_reasons mirror arrives
+-- keeps voiding with free text only.
+ALTER TABLE order_items ADD COLUMN void_reason_id TEXT;

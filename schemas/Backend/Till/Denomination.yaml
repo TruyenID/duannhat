@@ -1,0 +1,122 @@
+# ==============================================================================
+# Denomination — Currency-unit master (banknote / coin)
+# ==============================================================================
+#
+# Plan 030 — Cashier Shift.
+# ARTS ODM 7.3: maps to `Denomination`.
+#
+# Master danh sách mệnh giá để cashier đếm khi mở/kết ca. Một row =
+# một mệnh giá của một currency (ví dụ: JPY 10000 note, JPY 500 coin,
+# USD 0.25 coin). Seeded global (organization_id null) cho 4 currency mặc
+# định (JPY/VND/USD/EUR). Org-level override hỗ trợ tương lai nếu shop
+# muốn thêm mệnh giá (vd: JPY 2000 note hiếm — đã seed).
+#
+# Written by: DenominationSeeder qua DenominationService (idempotent
+#             findBy+update / create — KHÔNG dùng raw Model::create theo
+#             convention #3 của plan).
+# Read by: GET /pos/till/denominations (form mở/kết ca).
+#
+# Business Rules:
+#   - BR-D01: (organization_id, currency_code, value, kind) unique. organization_id
+#             null = global seed.
+#   - BR-D02: value > 0 (validation form request).
+#   - BR-D03: sort_order desc (mệnh giá lớn lên trước).
+#   - BR-D04: is_active=false → ẩn khỏi form đếm nhưng giữ trong audit.
+# ==============================================================================
+
+displayName:
+  en: Denomination
+  ja: 額面
+  vi: Mệnh giá
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    - columns: [organization_id, currency_code, value, kind]
+      unique: true
+      name: denominations_org_currency_value_kind_unique
+    - columns: [currency_code, is_active]
+  service: {}
+
+properties:
+  currency_code:
+    # ISO 4217 (JPY/VND/USD/EUR/…).
+    type: String
+    length: 3
+    filterable: true
+    displayName:
+      en: Currency
+      ja: 通貨
+      vi: Tiền tệ
+
+  value:
+    # Giá trị mệnh giá (vd: 10000, 500, 0.25). Decimal để hỗ trợ coin USD/EUR.
+    type: Decimal
+    precision: 15
+    scale: 2
+    defaultSort: desc
+    displayName:
+      en: Value
+      ja: 額面
+      vi: Giá trị
+
+  kind:
+    # note (tiền giấy) hoặc coin (tiền xu). Xem DenominationKind enum.
+    # UI: notes group lên trước, coins group sau (sort_order resolves tiebreak).
+    type: EnumRef
+    enum: DenominationKind
+    filterable: true
+    displayName:
+      en: Kind
+      ja: 種別
+      vi: Loại
+
+  label:
+    # Optional override label hiển thị (vd: "1万円" cho JPY 10000). Null →
+    # UI tự format value + currency_code.
+    type: String
+    length: 50
+    nullable: true
+    displayName:
+      en: Label
+      ja: ラベル
+      vi: Nhãn
+
+  sort_order:
+    # Tiebreak khi nhiều mệnh giá cùng kind (UI sort by value desc, sort_order
+    # asc làm tiebreak; ít dùng trong thực tế).
+    type: Int
+    default: 0
+    displayName:
+      en: Sort Order
+      ja: 表示順
+      vi: Thứ tự
+
+  is_active:
+    # false = ẩn khỏi form mới; existing TillCashDenominationCount snapshot
+    # vẫn còn (denomination_value snapshot trên count row).
+    type: Boolean
+    default: true
+    filterable: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+
+  # Relationships
+  organization:
+    # null = seed global (JPY/VND/USD/EUR mặc định). Có giá trị = mệnh giá
+    # custom của org (chưa dùng v1 nhưng schema hỗ trợ).
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    nullable: true
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức

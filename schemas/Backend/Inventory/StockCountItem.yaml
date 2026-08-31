@@ -1,0 +1,134 @@
+# StockCountItem schema
+# Line items within a stock count session (chi tiết kiểm kê).
+# Each item represents one product variant or material being counted.
+#
+# Key Design:
+#   - system_quantity: Snapshot of stock level at count creation time (BR-02: never updated)
+#   - counted_quantity: Actual count entered by staff (nullable until counted)
+#   - difference: counted_quantity - system_quantity (computed by app, nullable until counted)
+#   - CASCADE delete: items are deleted when parent stock count is deleted
+#   - One of (product_sku_id, material_id) must be NOT NULL (app-level CHECK)
+#
+# Business Rules:
+#   - BR-02: system_quantity is snapshot, does NOT change when new transactions occur
+#   - difference > 0 → surplus (adjustment_in)
+#   - difference < 0 → shortage (adjustment_out)
+#   - difference = 0 → no adjustment needed
+
+displayName:
+  en: Stock Count Item
+  ja: 棚卸明細
+  vi: Chi tiết kiểm kê
+
+kind: object
+
+options:
+  timestamps: true
+  id: Uuid
+
+properties:
+  stockCount:
+    type: Association
+    relation: ManyToOne
+    target: StockCount
+    onDelete: CASCADE
+    displayName:
+      en: Stock Count
+      ja: 棚卸
+      vi: Kiểm kê
+    description:
+      en: Parent stock count session. Items are cascade-deleted with the session.
+      ja: 親棚卸セッション。セッションと一緒にカスケード削除される。
+      vi: Phiên kiểm kê cha. Items bị xóa cascade khi xóa phiên.
+
+  productSku:
+    type: Association
+    relation: ManyToOne
+    target: ProductSku
+    onDelete: RESTRICT
+    nullable: true
+    displayName:
+      en: Product Variant
+      ja: 商品バリエーション
+      vi: Biến thể sản phẩm
+    description:
+      en: "Product variant. Mutually exclusive with material_id"
+      ja: "商品バリエーション。material_idと排他的"
+      vi: "Biến thể sản phẩm. Loại trừ với material_id"
+
+  material:
+    type: Association
+    relation: ManyToOne
+    target: Material
+    onDelete: RESTRICT
+    nullable: true
+    displayName:
+      en: Material
+      ja: 材料
+      vi: Nguyên liệu
+    description:
+      en: "Raw material. Mutually exclusive with product_sku_id"
+      ja: "原材料。product_sku_idと排他的"
+      vi: "Nguyên liệu. Loại trừ với product_sku_id"
+
+  system_quantity:
+    type: Decimal
+    precision: 15
+    scale: 4
+    displayName:
+      en: System Quantity
+      ja: システム数量
+      vi: Số lượng hệ thống
+    description:
+      en: "Snapshot of stock level at count creation time (BR-02: never updated after snapshot)"
+      ja: "棚卸作成時の在庫レベルのスナップショット（BR-02：スナップショット後は更新されない）"
+      vi: "Snapshot tồn kho tại thời điểm tạo phiên (BR-02: KHÔNG cập nhật sau snapshot)"
+
+  counted_quantity:
+    type: Decimal
+    precision: 15
+    scale: 4
+    nullable: true
+    displayName:
+      en: Counted Quantity
+      ja: 実数
+      vi: Số lượng thực tế
+    description:
+      en: "Actual quantity counted by staff. Null until counted."
+      ja: "スタッフが実際にカウントした数量。カウントされるまでNull。"
+      vi: "Số lượng thực tế đếm được. Null cho đến khi đếm."
+
+  difference:
+    type: Decimal
+    precision: 15
+    scale: 4
+    nullable: true
+    displayName:
+      en: Difference
+      ja: 差異
+      vi: Chênh lệch
+    description:
+      en: "counted_quantity - system_quantity. Positive = surplus, negative = shortage. Null until counted."
+      ja: "counted_quantity - system_quantity。正 = 過剰、負 = 不足。カウントされるまでNull。"
+      vi: "counted_quantity - system_quantity. Dương = thừa, âm = thiếu. Null cho đến khi đếm."
+
+  unit:
+    type: String
+    length: 50
+    nullable: true
+    displayName:
+      en: Unit
+      ja: 単位
+      vi: Đơn vị
+    description:
+      en: "Unit of measurement for this item (e.g., kg, pcs, L)"
+      ja: "この品目の単位（例：kg、個、L）"
+      vi: "Đơn vị đo lường (VD: kg, cái, L)"
+
+  note:
+    type: Text
+    nullable: true
+    displayName:
+      en: Note
+      ja: 備考
+      vi: Ghi chú

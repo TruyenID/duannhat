@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "omnify": {
+      "command": "npx",
+      "args": [
+        "omnify",
+        "mcp"
+      ]
+    },
+    "omnify-ui": {
+      "command": "npx",
+      "args": [
+        "@omnifyjp/ui-mcp"
+      ]
+    },
+    "godx-ui": {
+      "command": "npx",
+      "args": [
+        "@godxjp/ui-mcp"
+      ]
+    }
+  }
+}

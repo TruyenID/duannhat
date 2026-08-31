@@ -1,0 +1,4 @@
+POST /materials/019f1163-d040-729e-9cb3-e1dec8537abb/units
+HTTP=201 (exp 201)
+--- body(head) ---
+{"data":{"id":"019f1220-b004-72ca-a33f-8f6469097484","material_id":"019f1163-d040-729e-9cb3-e1dec8537abb","unit":"sack_tc025","ratio":"40000.0000","is_base":false,"created_at":"2026-06-29T06:45:59.000000Z","updated_at":"2026-06-29T06:45:59.000000Z"}}

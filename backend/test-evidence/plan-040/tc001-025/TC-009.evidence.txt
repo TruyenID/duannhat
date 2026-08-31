@@ -1,0 +1,4 @@
+POST /materials (frank,valid)
+HTTP=201 (exp 403)
+--- body(head) ---
+{"data":{"id":"019f1221-86eb-7241-844f-4b31e6ea8aaa","sku":"TC9-1782715614","name":"TC009","description":null,"yield_quantity":"1000.0000","yield_unit":"g","shelf_life_days":null,"calculated_cost":"0.0000","is_active":true,"requires_temperature_check":false,"temperature_min":null,"temperature_max":null,"expiry_alert_thresholds":null,"output_sku_id":null,"outputSku":null,"allergens":[],"recipes":[],"organization_id":"019f1163-cbef-70fe-bc7f-f13a2e9f4eda","brand_id":"019f1163-cbf3-73cb-b980-d30b1b640c4b","translations":{"en":{"name":"TC009","description":null}},"created_at":"2026-06-29T06:46:54.000000Z","updated_at":"2026-06-29T06:46:54.000000Z","deleted_at":null,"active_lots_count":null,"expiring_soon_lots_count":null,"kind":"produced"}}

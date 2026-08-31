@@ -1,0 +1,45 @@
+# ==============================================================================
+# Warehouse Member Role Enum (倉庫メンバー役割 / Vai trò thành viên kho)
+# ==============================================================================
+#
+# Vai trò của nhân viên được gán vào kho.
+# Quyết định quyền hạn thao tác tại kho cụ thể.
+#
+# Giá trị (Values):
+#   - manager: Quản lý kho (倉庫マネージャー)
+#     Quyền: Xem + tạo phiếu + duyệt phiếu tại kho
+#     Ghi chú: Auto-approve áp dụng khi Manager tạo phiếu (BR-06)
+#
+#   - staff: Nhân viên kho (倉庫スタッフ)
+#     Quyền: Xem + tạo phiếu tại kho
+#     Ghi chú: Phiếu Staff tạo luôn cần duyệt, bất kể auto-approve (BR-06)
+#
+# Lưu ý:
+#   - Org Admin (từ SSO) tự động có full quyền TẤT CẢ kho,
+#     không cần record trong warehouse_members (BR-05)
+#   - 1 user có thể có role khác nhau tại các kho khác nhau (BR-04)
+#
+# Sử dụng trong:
+#   - WarehouseMember.role: Vai trò tại kho cụ thể
+#   - Authorization: Xác định quyền thao tác tại kho
+#
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: 倉庫メンバー役割
+  en: Warehouse Member Role
+  vi: Vai trò thành viên kho
+
+values:
+  - value: manager
+    label:
+      ja: 倉庫マネージャー
+      en: Warehouse Manager
+      vi: Quản lý kho
+  - value: staff
+    label:
+      ja: 倉庫スタッフ
+      en: Warehouse Staff
+      vi: Nhân viên kho

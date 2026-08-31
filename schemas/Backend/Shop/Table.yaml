@@ -1,0 +1,235 @@
+# Table schema
+# Một bàn ăn vật lý trong shop. Mỗi bàn thuộc một Zone (xem Zone.yaml).
+# Trạng thái runtime đổi qua TableStatusService::changeStatus, có lock row
+# tránh race và log vào TableStatusChange.
+#
+# Scope: Branch (Shop). Code unique theo branch.
+# qr_token là chuỗi opaque random — frontend tự render QR client-side.
+# Không có pos_x/pos_y trong v1 — bàn list dạng grid theo zone, không có
+# floor-plan canvas.
+#
+# Business Rules:
+#   - BR-T01: code unique trong scope của một branch
+#   - BR-T02: qr_token unique globally (32-char URL-safe base62)
+#   - BR-T03: Không thể change runtime status nếu is_active = false
+#   - BR-T04: zone_id RESTRICT — không xoá zone trực tiếp khi còn table
+#             (cascade soft-delete xử lý ở service layer trong DB::transaction)
+#   - BR-T05: seat_count >= 1
+#   - BR-T06: current_order_id tracks which order is served at this table
+#             null = table free, set = table occupied by that order
+#             Multiple tables with same current_order_id = merged tables (gộp bàn)
+#   - BR-T07: When order closed → current_order_id = null, status = cleaning
+#   - BR-T08: When order voided → current_order_id = null, status = free
+#   - BR-T09: table_template_id != null ⇒ bàn được copy từ HQ template
+#             (issue #890). Shop KHÔNG được xoá bàn này — chỉ HQ quản lý
+#             vòng đời template; shop chỉ toggle-active/đổi tên/sửa chỗ ngồi.
+#             Guard 409 TABLE_DELETE_BLOCKED_HQ_TEMPLATE ở TableService::delete.
+
+displayName:
+  en: Table
+  ja: テーブル
+  vi: Bàn
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    - columns: [branch_id, code]
+      unique: true
+    - columns: [qr_token]
+      unique: true
+    - columns: [zone_id]
+    - columns: [branch_id, status]
+    - columns: [branch_id, is_active]
+    - columns: [current_order_id]
+
+properties:
+  code:
+    type: String
+    length: 50
+    searchable: true
+    filterable: true
+    defaultSort: asc
+    lookupable: true
+    displayName:
+      en: Table Code
+      ja: テーブルコード
+      vi: Mã bàn
+    description:
+      en: "Unique code per branch (BR-T01). Example: T-01."
+      ja: "店舗内で一意のコード（BR-T01）。例：T-01。"
+      vi: "Mã unique trong shop (BR-T01). Ví dụ: T-01."
+
+  name:
+    type: String
+    length: 255
+    nullable: true
+    searchable: true
+    lookupable: true
+    displayName:
+      en: Table Name
+      ja: テーブル名
+      vi: Tên bàn
+    description:
+      en: "Optional friendly name. UI falls back to code when null."
+      ja: "任意の表示名。空のときはコードにフォールバック。"
+      vi: "Tên hiển thị tuỳ chọn. Nếu trống, UI dùng code."
+
+  seat_count:
+    type: Int
+    default: 2
+    lookupable: true
+    displayName:
+      en: Seat Count
+      ja: 座席数
+      vi: Số chỗ ngồi
+    description:
+      en: "Number of seats. Must be >= 1 (BR-T05)."
+      ja: "座席数。1以上必須（BR-T05）。"
+      vi: "Số chỗ ngồi. Tối thiểu 1 (BR-T05)."
+
+  status:
+    type: EnumRef
+    enum: TableStatus
+    default: free
+    filterable: true
+    displayName:
+      en: Status
+      ja: 状態
+      vi: Trạng thái
+    description:
+      en: "Runtime status. Changes via TableStatusService and logged in table_status_changes."
+      ja: "ランタイム状態。TableStatusService経由で変更し、table_status_changesに記録。"
+      vi: "Trạng thái runtime. Đổi qua TableStatusService, log vào table_status_changes."
+
+  paid_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Last Paid At
+      ja: 最終会計日時
+      vi: Thanh toán lúc
+    description:
+      en: "Timestamp of the last payment for this table. Used by TMS to show 'recently paid' state."
+      ja: "このテーブルの最終会計日時。TMSで「会計済」表示に使用。"
+      vi: "Thời điểm thanh toán cuối cùng. TMS dùng để hiển thị trạng thái 'vừa thanh toán'."
+
+  call_requested_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Staff Call Requested At
+      ja: スタッフ呼出日時
+      vi: Yêu cầu gọi NV lúc
+    description:
+      en: "Timestamp when a customer requested staff. Null means no active call. TMS shows red + bell icon."
+      ja: "顧客がスタッフを呼び出した日時。nullは呼出なし。TMSで赤色＋ベルアイコン表示。"
+      vi: "Thời điểm khách gọi nhân viên. Null = không có yêu cầu. TMS hiển thị đỏ + icon chuông."
+
+  qr_token:
+    type: String
+    length: 64
+    displayName:
+      en: QR Token
+      ja: QRトークン
+      vi: Token QR
+    description:
+      en: "Opaque random URL-safe base62 (32 chars). Unique globally (BR-T02). Frontend renders QR client-side from this string."
+      ja: "ランダムなURL-safe base62文字列（32文字）。グローバルに一意（BR-T02）。フロントエンドがこの値からQRを生成。"
+      vi: "Chuỗi opaque random URL-safe base62 (32 ký tự). Unique toàn cục (BR-T02). Frontend render QR từ chuỗi này."
+
+  is_active:
+    type: Boolean
+    default: true
+    filterable: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+    description:
+      en: "Inactive tables cannot have their runtime status changed (BR-T03)."
+      ja: "無効なテーブルはランタイム状態を変更できません（BR-T03）。"
+      vi: "Bàn vô hiệu không cho đổi runtime status (BR-T03)."
+
+  # === Order tracking ===
+
+  currentOrder:
+    # Order đang được serve tại bàn này. null = bàn trống (BR-T06).
+    # Nhiều tables cùng current_order_id = gộp bàn.
+    # Set khi order open, clear khi closed/voided (BR-T07, BR-T08).
+    type: Association
+    relation: ManyToOne
+    target: CustomerOrder
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Current Order
+      ja: 現在の注文
+      vi: Order hiện tại
+
+  # Relationships
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    onDelete: CASCADE
+    displayName:
+      en: Branch
+      ja: 店舗
+      vi: Chi nhánh
+    description:
+      en: "Denormalized from zone.branch for fast shop-scoped queries."
+      ja: "ショップスコープクエリ高速化のためzone.branchから非正規化。"
+      vi: "Denormalize từ zone.branch để query theo shop nhanh."
+
+  zone:
+    type: Association
+    relation: ManyToOne
+    target: Zone
+    onDelete: RESTRICT
+    displayName:
+      en: Zone
+      ja: エリア
+      vi: Khu vực
+    description:
+      en: "RESTRICT at the DB level (BR-T04). Cascade soft-delete is handled in ZoneService::delete inside a DB::transaction."
+      ja: "DBレベルでRESTRICT（BR-T04）。カスケードソフト削除はZoneService::deleteのトランザクション内で処理。"
+      vi: "RESTRICT ở DB (BR-T04). Cascade soft-delete xử lý ở ZoneService::delete trong DB::transaction."
+
+  # Origin marker (issue #890 / BR-T09): set when the table was copied from an
+  # HQ table template via tables/defaults/apply. Null = shop-created. SET NULL
+  # only fires on a HARD delete of the template (templates are soft-deleted in
+  # practice, so the marker persists and the shop still cannot delete the table).
+  tableTemplate:
+    type: Association
+    relation: ManyToOne
+    target: TableTemplate
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: HQ Table Template
+      ja: HQテーブルテンプレート
+      vi: Mẫu bàn HQ
+
+  status_changes:
+    type: Association
+    relation: OneToMany
+    target: TableStatusChange
+    mappedBy: table
+    displayName:
+      en: Status Changes
+      ja: 状態変更履歴
+      vi: Lịch sử trạng thái

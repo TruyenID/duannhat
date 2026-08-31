@@ -1,0 +1,155 @@
+# ==============================================================================
+# Till — Cash drawer (ngăn kéo tiền) per branch
+# ==============================================================================
+#
+# Plan 030 — Cashier Shift.
+# ARTS ODM 7.3: maps to ARTS `Till` / `TenderRepository`.
+#
+# Một Till là cái két tiền vật lý ở quầy thu ngân. v1: 1 Till / branch, code
+# mặc định 'MAIN', chưa gắn device cụ thể (multi-terminal là future
+# extension). Mỗi Till chỉ có TỐI ĐA một TillSession đang ở trạng thái
+# 'open' tại một thời điểm — invariant này được enforce qua `current_session_id`
+# (Till.current_session_id NULL ⇔ "không có ca đang mở"). Race-condition:
+# `lockForUpdate()` trên Till row khi TillSessionService::open() chạy.
+#
+# Written by: TillSessionService (open/close/abandon set/clear current_session_id),
+#             TillSeeder (tạo default 'MAIN' per branch).
+# Read by: ResolveOpenTillSession middleware (gate cho /pos/orders +
+#          /pos/payments), TillController@current.
+#
+# Business Rules:
+#   - BR-T01: (branch_id, till_code) unique. v1 chỉ có 'MAIN' nhưng schema
+#             cho phép multi-till tương lai.
+#   - BR-T02: current_session_id chỉ trỏ tới TillSession có status='open'
+#             hoặc 'closing'. Service phải clear nó khi close/abandon.
+#   - BR-T03: device_id nullable (reserved v2). v1 luôn null.
+#   - BR-T04: Soft delete on — Till "đã ngừng dùng" vẫn giữ lịch sử ca.
+# ==============================================================================
+
+displayName:
+  en: Till
+  ja: レジ
+  vi: Két tiền
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    - columns: [branch_id, till_code]
+      unique: true
+      name: tills_branch_code_unique
+    - columns: [organization_id, is_active]
+    - columns: [current_session_id]
+
+properties:
+  till_code:
+    # Mã định danh till trong branch. v1: 'MAIN' duy nhất; v2 multi-terminal
+    # có thể 'MAIN' / 'BACKUP' / 'KIOSK1' ...
+    type: String
+    length: 50
+    searchable: true
+    lookupable: true
+    displayName:
+      en: Till Code
+      ja: レジコード
+      vi: Mã két
+
+  default_currency_code:
+    # ISO 4217 (JPY/VND/USD/EUR). Currency mặc định khi mở ca; cashier có thể
+    # đổi tại form mở ca (Decision 6 — one currency per shift v1).
+    type: String
+    length: 3
+    default: JPY
+    displayName:
+      en: Default Currency
+      ja: 既定通貨
+      vi: Tiền tệ mặc định
+
+  variance_tolerance_amount:
+    # Ngưỡng sai số được phép cho cash/per-tender variance trước khi yêu cầu
+    # reason. Default 0 → bất kỳ chênh lệch nào ≠ 0 đều bắt buộc nhập reason.
+    # Open question từ DESIGN (Open question #1) — đặt column thay vì hard-code
+    # để org-admin có thể nới sau này.
+    type: Decimal
+    precision: 15
+    scale: 2
+    default: 0
+    displayName:
+      en: Variance Tolerance
+      ja: 許容差額
+      vi: Sai số cho phép
+
+  is_active:
+    # false = till không hiển thị trên POS, không cho mở ca mới. Ca đang mở
+    # vẫn cho close (audit).
+    type: Boolean
+    default: true
+    filterable: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+
+  # Relationships
+  device:
+    # Reserved cho v2 multi-terminal. v1 LUÔN null. Khi có giá trị: Till
+    # gắn cứng với 1 paired device (kiosk/tablet) → mỗi device 1 ca riêng.
+    # onDelete: SET NULL — xoá device không xoá till.
+    type: Association
+    relation: ManyToOne
+    target: Device
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Device
+      ja: 端末
+      vi: Thiết bị
+
+  currentSession:
+    # Trỏ tới TillSession đang mở (status='open' hoặc 'closing'). NULL ⇒
+    # "không có ca đang mở" → ResolveOpenTillSession trả 409 NO_OPEN_SHIFT.
+    # Service set khi open(), clear khi close()/abandon().
+    # onDelete: SET NULL — phòng race chứ session về lý thuyết không bị
+    # hard-delete (TillSession không có softDelete).
+    type: Association
+    relation: ManyToOne
+    target: TillSession
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Current Session
+      ja: 現在のセッション
+      vi: Ca hiện tại
+
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    onDelete: CASCADE
+    displayName:
+      en: Branch
+      ja: 店舗
+      vi: Chi nhánh
+
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: CASCADE
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức

@@ -1,0 +1,106 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache: true
+      - name: go vet
+        run: go vet ./...
+      - name: gofmt
+        run: |
+          # Exclude codegen output — those files are regenerated from YAML.
+          unformatted=$(find . -name '*.go' \
+            -not -path './internal/domain/generated/*' \
+            -not -path './internal/generated/*' \
+            -not -path './vendor/*' | xargs gofmt -l)
+          if [ -n "$unformatted" ]; then
+            echo "Files need gofmt:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache: true
+      # 40m, not 5m: ~1000 tests across handler+service, each opening a real
+      # SQLite database. Without -race the two packages take ~27s/~39s; -race
+      # multiplies that ~30x — handler alone measured 842s on a 10-core dev
+      # machine, and the CI runner has 4. At 5m the job died mid-suite on a
+      # test that had only been running 2s: the package total was over budget,
+      # nothing was hung — so every run since has been red. 40m leaves room
+      # for the slower runner rather than sitting on the measured number.
+      - name: go test -race
+        run: go test -race -timeout=40m ./...
+
+  build:
+    name: Build
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+          - goos: linux
+            goarch: arm64
+          - goos: darwin
+            goarch: amd64
+          - goos: darwin
+            goarch: arm64
+          - goos: windows
+            goarch: amd64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache: true
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+      - name: Build binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: "0"
+        run: |
+          mkdir -p build/bin
+          ext=""
+          if [ "${{ matrix.goos }}" = "windows" ]; then ext=".exe"; fi
+          go build -ldflags "-s -w -X 'github.com/dxs-platform/workstation-app/internal/config.Version=ci-${{ github.sha }}'" \
+            -o build/bin/ws-app-${{ matrix.goos }}-${{ matrix.goarch }}${ext} ./cmd/workstation
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ws-app-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: build/bin/
+          retention-days: 7

@@ -1,0 +1,3706 @@
+[
+    {
+        "menu_id": "019f408b-2b80-70f6-9fdc-acb1215f4256",
+        "menu_section_id": "019f408b-2b81-729f-bcb5-f91300228aa1",
+        "display_order": 1,
+        "tax_type_id": null,
+        "created_at": "2026-07-08 07:04:50",
+        "updated_at": "2026-07-08 07:04:50"
+    },
+    {
+        "menu_id": "019f408b-2b80-70f6-9fdc-acb1215f4256",
+        "menu_section_id": "019f408b-2b85-7289-86ec-0ceb772ec4cb",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-07-08 07:04:50",
+        "updated_at": "2026-07-08 07:04:50"
+    },
+    {
+        "menu_id": "019f408b-2b80-70f6-9fdc-acb1215f4256",
+        "menu_section_id": "019f408b-2b88-70d2-81b0-516f4abcf6ef",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-07-08 07:04:50",
+        "updated_at": "2026-07-08 07:04:50"
+    },
+    {
+        "menu_id": "019f408b-2b80-70f6-9fdc-acb1215f4256",
+        "menu_section_id": "019f408b-2b8b-725f-a6aa-a114c6bb8a2f",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-07-08 07:04:50",
+        "updated_at": "2026-07-08 07:04:50"
+    },
+    {
+        "menu_id": "019f408b-2b80-70f6-9fdc-acb1215f4256",
+        "menu_section_id": "019f408b-2b8e-7281-af44-33574c269c30",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-07-08 07:04:50",
+        "updated_at": "2026-07-08 07:04:50"
+    },
+    {
+        "menu_id": "019f408b-2c19-709d-b73f-d64bd751c427",
+        "menu_section_id": "019f408b-2b81-729f-bcb5-f91300228aa1",
+        "display_order": 1,
+        "tax_type_id": null,
+        "created_at": "2026-07-08 07:04:50",
+        "updated_at": "2026-07-08 07:04:50"
+    },
+    {
+        "menu_id": "019f408b-2c19-709d-b73f-d64bd751c427",
+        "menu_section_id": "019f408b-2b85-7289-86ec-0ceb772ec4cb",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-07-08 07:04:50",
+        "updated_at": "2026-07-08 07:04:50"
+    },
+    {
+        "menu_id": "019f408b-2c19-709d-b73f-d64bd751c427",
+        "menu_section_id": "019f408b-2b88-70d2-81b0-516f4abcf6ef",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-07-08 07:04:50",
+        "updated_at": "2026-07-08 07:04:50"
+    },
+    {
+        "menu_id": "019f408b-2c19-709d-b73f-d64bd751c427",
+        "menu_section_id": "019f408b-2b8b-725f-a6aa-a114c6bb8a2f",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-07-08 07:04:50",
+        "updated_at": "2026-07-08 07:04:50"
+    },
+    {
+        "menu_id": "019f408b-2c19-709d-b73f-d64bd751c427",
+        "menu_section_id": "019f408b-2b8e-7281-af44-33574c269c30",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-07-08 07:04:50",
+        "updated_at": "2026-07-08 07:04:50"
+    },
+    {
+        "menu_id": "019f6efa-2f7e-70fb-8c40-6f6fa121779d",
+        "menu_section_id": "019f6efa-2fb7-73c7-92f3-d24ac20603dd",
+        "display_order": 0,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f7e-70fb-8c40-6f6fa121779d",
+        "menu_section_id": "019f6efa-30b5-723e-a72b-fc65dc1b5b60",
+        "display_order": 1,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f7e-70fb-8c40-6f6fa121779d",
+        "menu_section_id": "019f6efa-30e9-72c9-812b-f34242d2b57b",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f7e-70fb-8c40-6f6fa121779d",
+        "menu_section_id": "019f6efa-312a-7051-be78-08235d8b2f7f",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f7e-70fb-8c40-6f6fa121779d",
+        "menu_section_id": "019f6efa-313e-715c-9a75-533b8626a374",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f7e-70fb-8c40-6f6fa121779d",
+        "menu_section_id": "019f6efa-3179-7363-a5b6-50b4f1cccd8f",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f7e-70fb-8c40-6f6fa121779d",
+        "menu_section_id": "019f6efa-3266-72b6-91f6-9b6fb938d5fe",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f7e-70fb-8c40-6f6fa121779d",
+        "menu_section_id": "019f6efa-3465-7116-aa29-441043d485ec",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f7e-70fb-8c40-6f6fa121779d",
+        "menu_section_id": "019f6efa-349a-7332-8766-75bef623e8b4",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f7e-70fb-8c40-6f6fa121779d",
+        "menu_section_id": "019f6efa-34b4-714f-8fd6-4e1521e1e12c",
+        "display_order": 9,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f7e-70fb-8c40-6f6fa121779d",
+        "menu_section_id": "019f6efa-3520-730e-976a-342bc067a633",
+        "display_order": 10,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f7e-70fb-8c40-6f6fa121779d",
+        "menu_section_id": "019f6efa-3625-7214-a060-d25e8049f435",
+        "display_order": 11,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f7e-70fb-8c40-6f6fa121779d",
+        "menu_section_id": "019f6efa-3660-71a1-a716-288370885866",
+        "display_order": 13,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f7e-70fb-8c40-6f6fa121779d",
+        "menu_section_id": "019f6efa-3736-702b-b6f6-09d5815fa0b1",
+        "display_order": 14,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f7e-70fb-8c40-6f6fa121779d",
+        "menu_section_id": "019f6efa-38a8-7107-8147-c90a3dd95c2d",
+        "display_order": 15,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f7e-70fb-8c40-6f6fa121779d",
+        "menu_section_id": "019f6efa-38db-737e-80d6-fb2e1ecfaa58",
+        "display_order": 16,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f7e-70fb-8c40-6f6fa121779d",
+        "menu_section_id": "019f6efa-3980-73d7-a72e-ebd7c1ab2987",
+        "display_order": 17,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f7e-70fb-8c40-6f6fa121779d",
+        "menu_section_id": "019f6efa-39c7-73b8-be63-674de5316eea",
+        "display_order": 18,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f7e-70fb-8c40-6f6fa121779d",
+        "menu_section_id": "019f6efa-3de9-735b-9486-18da770d12e4",
+        "display_order": 19,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f7e-70fb-8c40-6f6fa121779d",
+        "menu_section_id": "019f6efa-3fca-72be-8e44-3e32aaadd2cc",
+        "display_order": 21,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f7e-70fb-8c40-6f6fa121779d",
+        "menu_section_id": "019f6efa-3fdf-72ea-87cc-30e5184b7301",
+        "display_order": 22,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f7e-70fb-8c40-6f6fa121779d",
+        "menu_section_id": "019f6efa-4088-7348-96e2-84bd370925ef",
+        "display_order": 23,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f7e-70fb-8c40-6f6fa121779d",
+        "menu_section_id": "019f6efa-40b0-739e-b0ef-0a23347c7324",
+        "display_order": 24,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f7e-70fb-8c40-6f6fa121779d",
+        "menu_section_id": "019f6efa-4101-7028-8634-3c0ccb3e005c",
+        "display_order": 27,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f7e-70fb-8c40-6f6fa121779d",
+        "menu_section_id": "019f6efa-4123-72f1-8471-dcae1857f210",
+        "display_order": 28,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f7e-70fb-8c40-6f6fa121779d",
+        "menu_section_id": "019f6efa-416f-7060-b4d1-ff5023b564eb",
+        "display_order": 29,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f7e-70fb-8c40-6f6fa121779d",
+        "menu_section_id": "019f6f3d-2557-7397-bbc7-c60755d4ebef",
+        "display_order": 25,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 08:41:46",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f7e-70fb-8c40-6f6fa121779d",
+        "menu_section_id": "019f6f3d-2561-73fc-b29a-f0da8418feda",
+        "display_order": 26,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 08:41:46",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f83-71a8-b061-2c8f9435718a",
+        "menu_section_id": "019f6efa-2fb7-73c7-92f3-d24ac20603dd",
+        "display_order": 0,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f83-71a8-b061-2c8f9435718a",
+        "menu_section_id": "019f6efa-30b5-723e-a72b-fc65dc1b5b60",
+        "display_order": 1,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f83-71a8-b061-2c8f9435718a",
+        "menu_section_id": "019f6efa-30e9-72c9-812b-f34242d2b57b",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f83-71a8-b061-2c8f9435718a",
+        "menu_section_id": "019f6efa-312a-7051-be78-08235d8b2f7f",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f83-71a8-b061-2c8f9435718a",
+        "menu_section_id": "019f6efa-313e-715c-9a75-533b8626a374",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f83-71a8-b061-2c8f9435718a",
+        "menu_section_id": "019f6efa-3179-7363-a5b6-50b4f1cccd8f",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f83-71a8-b061-2c8f9435718a",
+        "menu_section_id": "019f6efa-3266-72b6-91f6-9b6fb938d5fe",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f83-71a8-b061-2c8f9435718a",
+        "menu_section_id": "019f6efa-3465-7116-aa29-441043d485ec",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f83-71a8-b061-2c8f9435718a",
+        "menu_section_id": "019f6efa-349a-7332-8766-75bef623e8b4",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f83-71a8-b061-2c8f9435718a",
+        "menu_section_id": "019f6efa-34b4-714f-8fd6-4e1521e1e12c",
+        "display_order": 9,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f83-71a8-b061-2c8f9435718a",
+        "menu_section_id": "019f6efa-3520-730e-976a-342bc067a633",
+        "display_order": 10,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f83-71a8-b061-2c8f9435718a",
+        "menu_section_id": "019f6efa-3625-7214-a060-d25e8049f435",
+        "display_order": 11,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f83-71a8-b061-2c8f9435718a",
+        "menu_section_id": "019f6efa-3660-71a1-a716-288370885866",
+        "display_order": 13,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f83-71a8-b061-2c8f9435718a",
+        "menu_section_id": "019f6efa-3736-702b-b6f6-09d5815fa0b1",
+        "display_order": 14,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f83-71a8-b061-2c8f9435718a",
+        "menu_section_id": "019f6efa-38a8-7107-8147-c90a3dd95c2d",
+        "display_order": 15,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f83-71a8-b061-2c8f9435718a",
+        "menu_section_id": "019f6efa-38db-737e-80d6-fb2e1ecfaa58",
+        "display_order": 16,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f83-71a8-b061-2c8f9435718a",
+        "menu_section_id": "019f6efa-3980-73d7-a72e-ebd7c1ab2987",
+        "display_order": 17,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f83-71a8-b061-2c8f9435718a",
+        "menu_section_id": "019f6efa-39c7-73b8-be63-674de5316eea",
+        "display_order": 18,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f83-71a8-b061-2c8f9435718a",
+        "menu_section_id": "019f6efa-3de9-735b-9486-18da770d12e4",
+        "display_order": 19,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f83-71a8-b061-2c8f9435718a",
+        "menu_section_id": "019f6efa-3fca-72be-8e44-3e32aaadd2cc",
+        "display_order": 21,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f83-71a8-b061-2c8f9435718a",
+        "menu_section_id": "019f6efa-3fdf-72ea-87cc-30e5184b7301",
+        "display_order": 22,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f83-71a8-b061-2c8f9435718a",
+        "menu_section_id": "019f6efa-40b0-739e-b0ef-0a23347c7324",
+        "display_order": 24,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f83-71a8-b061-2c8f9435718a",
+        "menu_section_id": "019f6efa-4101-7028-8634-3c0ccb3e005c",
+        "display_order": 27,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f83-71a8-b061-2c8f9435718a",
+        "menu_section_id": "019f6efa-4123-72f1-8471-dcae1857f210",
+        "display_order": 28,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f83-71a8-b061-2c8f9435718a",
+        "menu_section_id": "019f6efa-416f-7060-b4d1-ff5023b564eb",
+        "display_order": 29,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f83-71a8-b061-2c8f9435718a",
+        "menu_section_id": "019f6f3d-2557-7397-bbc7-c60755d4ebef",
+        "display_order": 25,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 08:41:46",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f83-71a8-b061-2c8f9435718a",
+        "menu_section_id": "019f6f3d-2561-73fc-b29a-f0da8418feda",
+        "display_order": 26,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 08:41:46",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f87-7219-8ec6-1a0b63ad5978",
+        "menu_section_id": "019f6efa-2fb7-73c7-92f3-d24ac20603dd",
+        "display_order": 0,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f87-7219-8ec6-1a0b63ad5978",
+        "menu_section_id": "019f6efa-30b5-723e-a72b-fc65dc1b5b60",
+        "display_order": 1,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f87-7219-8ec6-1a0b63ad5978",
+        "menu_section_id": "019f6efa-30e9-72c9-812b-f34242d2b57b",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f87-7219-8ec6-1a0b63ad5978",
+        "menu_section_id": "019f6efa-312a-7051-be78-08235d8b2f7f",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f87-7219-8ec6-1a0b63ad5978",
+        "menu_section_id": "019f6efa-313e-715c-9a75-533b8626a374",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f87-7219-8ec6-1a0b63ad5978",
+        "menu_section_id": "019f6efa-3179-7363-a5b6-50b4f1cccd8f",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f87-7219-8ec6-1a0b63ad5978",
+        "menu_section_id": "019f6efa-3266-72b6-91f6-9b6fb938d5fe",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f87-7219-8ec6-1a0b63ad5978",
+        "menu_section_id": "019f6efa-3465-7116-aa29-441043d485ec",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f87-7219-8ec6-1a0b63ad5978",
+        "menu_section_id": "019f6efa-349a-7332-8766-75bef623e8b4",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f87-7219-8ec6-1a0b63ad5978",
+        "menu_section_id": "019f6efa-34b4-714f-8fd6-4e1521e1e12c",
+        "display_order": 9,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f87-7219-8ec6-1a0b63ad5978",
+        "menu_section_id": "019f6efa-3520-730e-976a-342bc067a633",
+        "display_order": 10,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f87-7219-8ec6-1a0b63ad5978",
+        "menu_section_id": "019f6efa-3625-7214-a060-d25e8049f435",
+        "display_order": 11,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f87-7219-8ec6-1a0b63ad5978",
+        "menu_section_id": "019f6efa-3660-71a1-a716-288370885866",
+        "display_order": 13,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f87-7219-8ec6-1a0b63ad5978",
+        "menu_section_id": "019f6efa-3736-702b-b6f6-09d5815fa0b1",
+        "display_order": 14,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f87-7219-8ec6-1a0b63ad5978",
+        "menu_section_id": "019f6efa-38a8-7107-8147-c90a3dd95c2d",
+        "display_order": 15,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f87-7219-8ec6-1a0b63ad5978",
+        "menu_section_id": "019f6efa-38db-737e-80d6-fb2e1ecfaa58",
+        "display_order": 16,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f87-7219-8ec6-1a0b63ad5978",
+        "menu_section_id": "019f6efa-3980-73d7-a72e-ebd7c1ab2987",
+        "display_order": 17,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f87-7219-8ec6-1a0b63ad5978",
+        "menu_section_id": "019f6efa-39c7-73b8-be63-674de5316eea",
+        "display_order": 18,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f87-7219-8ec6-1a0b63ad5978",
+        "menu_section_id": "019f6efa-3de9-735b-9486-18da770d12e4",
+        "display_order": 19,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f87-7219-8ec6-1a0b63ad5978",
+        "menu_section_id": "019f6efa-3fca-72be-8e44-3e32aaadd2cc",
+        "display_order": 21,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f87-7219-8ec6-1a0b63ad5978",
+        "menu_section_id": "019f6efa-3fdf-72ea-87cc-30e5184b7301",
+        "display_order": 22,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f87-7219-8ec6-1a0b63ad5978",
+        "menu_section_id": "019f6efa-40b0-739e-b0ef-0a23347c7324",
+        "display_order": 24,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f87-7219-8ec6-1a0b63ad5978",
+        "menu_section_id": "019f6efa-4101-7028-8634-3c0ccb3e005c",
+        "display_order": 27,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f87-7219-8ec6-1a0b63ad5978",
+        "menu_section_id": "019f6efa-4123-72f1-8471-dcae1857f210",
+        "display_order": 28,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f87-7219-8ec6-1a0b63ad5978",
+        "menu_section_id": "019f6efa-416f-7060-b4d1-ff5023b564eb",
+        "display_order": 29,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f87-7219-8ec6-1a0b63ad5978",
+        "menu_section_id": "019f6f3d-2557-7397-bbc7-c60755d4ebef",
+        "display_order": 25,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 08:41:46",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f87-7219-8ec6-1a0b63ad5978",
+        "menu_section_id": "019f6f3d-2561-73fc-b29a-f0da8418feda",
+        "display_order": 26,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 08:41:46",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f88-7114-8cd7-fbe0410ccf30",
+        "menu_section_id": "019f6efa-2fb7-73c7-92f3-d24ac20603dd",
+        "display_order": 0,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f88-7114-8cd7-fbe0410ccf30",
+        "menu_section_id": "019f6efa-30b5-723e-a72b-fc65dc1b5b60",
+        "display_order": 1,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f88-7114-8cd7-fbe0410ccf30",
+        "menu_section_id": "019f6efa-30e9-72c9-812b-f34242d2b57b",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f88-7114-8cd7-fbe0410ccf30",
+        "menu_section_id": "019f6efa-312a-7051-be78-08235d8b2f7f",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f88-7114-8cd7-fbe0410ccf30",
+        "menu_section_id": "019f6efa-313e-715c-9a75-533b8626a374",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f88-7114-8cd7-fbe0410ccf30",
+        "menu_section_id": "019f6efa-3179-7363-a5b6-50b4f1cccd8f",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f88-7114-8cd7-fbe0410ccf30",
+        "menu_section_id": "019f6efa-3266-72b6-91f6-9b6fb938d5fe",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f88-7114-8cd7-fbe0410ccf30",
+        "menu_section_id": "019f6efa-3465-7116-aa29-441043d485ec",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f88-7114-8cd7-fbe0410ccf30",
+        "menu_section_id": "019f6efa-349a-7332-8766-75bef623e8b4",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f88-7114-8cd7-fbe0410ccf30",
+        "menu_section_id": "019f6efa-34b4-714f-8fd6-4e1521e1e12c",
+        "display_order": 9,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f88-7114-8cd7-fbe0410ccf30",
+        "menu_section_id": "019f6efa-3520-730e-976a-342bc067a633",
+        "display_order": 10,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f88-7114-8cd7-fbe0410ccf30",
+        "menu_section_id": "019f6efa-3625-7214-a060-d25e8049f435",
+        "display_order": 11,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f88-7114-8cd7-fbe0410ccf30",
+        "menu_section_id": "019f6efa-3660-71a1-a716-288370885866",
+        "display_order": 13,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f88-7114-8cd7-fbe0410ccf30",
+        "menu_section_id": "019f6efa-3736-702b-b6f6-09d5815fa0b1",
+        "display_order": 14,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f88-7114-8cd7-fbe0410ccf30",
+        "menu_section_id": "019f6efa-38a8-7107-8147-c90a3dd95c2d",
+        "display_order": 15,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f88-7114-8cd7-fbe0410ccf30",
+        "menu_section_id": "019f6efa-38db-737e-80d6-fb2e1ecfaa58",
+        "display_order": 16,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f88-7114-8cd7-fbe0410ccf30",
+        "menu_section_id": "019f6efa-3980-73d7-a72e-ebd7c1ab2987",
+        "display_order": 17,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f88-7114-8cd7-fbe0410ccf30",
+        "menu_section_id": "019f6efa-39c7-73b8-be63-674de5316eea",
+        "display_order": 18,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f88-7114-8cd7-fbe0410ccf30",
+        "menu_section_id": "019f6efa-3de9-735b-9486-18da770d12e4",
+        "display_order": 19,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f88-7114-8cd7-fbe0410ccf30",
+        "menu_section_id": "019f6efa-3fca-72be-8e44-3e32aaadd2cc",
+        "display_order": 21,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f88-7114-8cd7-fbe0410ccf30",
+        "menu_section_id": "019f6efa-3fdf-72ea-87cc-30e5184b7301",
+        "display_order": 22,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f88-7114-8cd7-fbe0410ccf30",
+        "menu_section_id": "019f6efa-40b0-739e-b0ef-0a23347c7324",
+        "display_order": 24,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f88-7114-8cd7-fbe0410ccf30",
+        "menu_section_id": "019f6efa-4101-7028-8634-3c0ccb3e005c",
+        "display_order": 27,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f88-7114-8cd7-fbe0410ccf30",
+        "menu_section_id": "019f6efa-4123-72f1-8471-dcae1857f210",
+        "display_order": 28,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f88-7114-8cd7-fbe0410ccf30",
+        "menu_section_id": "019f6efa-416f-7060-b4d1-ff5023b564eb",
+        "display_order": 29,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f88-7114-8cd7-fbe0410ccf30",
+        "menu_section_id": "019f6f3d-2557-7397-bbc7-c60755d4ebef",
+        "display_order": 25,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 08:41:46",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f88-7114-8cd7-fbe0410ccf30",
+        "menu_section_id": "019f6f3d-2561-73fc-b29a-f0da8418feda",
+        "display_order": 26,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 08:41:46",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8c-707e-b9d7-5128c8345f25",
+        "menu_section_id": "019f6efa-2fb7-73c7-92f3-d24ac20603dd",
+        "display_order": 0,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8c-707e-b9d7-5128c8345f25",
+        "menu_section_id": "019f6efa-30b5-723e-a72b-fc65dc1b5b60",
+        "display_order": 1,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8c-707e-b9d7-5128c8345f25",
+        "menu_section_id": "019f6efa-30e9-72c9-812b-f34242d2b57b",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8c-707e-b9d7-5128c8345f25",
+        "menu_section_id": "019f6efa-312a-7051-be78-08235d8b2f7f",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8c-707e-b9d7-5128c8345f25",
+        "menu_section_id": "019f6efa-313e-715c-9a75-533b8626a374",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8c-707e-b9d7-5128c8345f25",
+        "menu_section_id": "019f6efa-3179-7363-a5b6-50b4f1cccd8f",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8c-707e-b9d7-5128c8345f25",
+        "menu_section_id": "019f6efa-3266-72b6-91f6-9b6fb938d5fe",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8c-707e-b9d7-5128c8345f25",
+        "menu_section_id": "019f6efa-3465-7116-aa29-441043d485ec",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8c-707e-b9d7-5128c8345f25",
+        "menu_section_id": "019f6efa-349a-7332-8766-75bef623e8b4",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8c-707e-b9d7-5128c8345f25",
+        "menu_section_id": "019f6efa-34b4-714f-8fd6-4e1521e1e12c",
+        "display_order": 9,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8c-707e-b9d7-5128c8345f25",
+        "menu_section_id": "019f6efa-3520-730e-976a-342bc067a633",
+        "display_order": 10,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8c-707e-b9d7-5128c8345f25",
+        "menu_section_id": "019f6efa-3625-7214-a060-d25e8049f435",
+        "display_order": 11,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8c-707e-b9d7-5128c8345f25",
+        "menu_section_id": "019f6efa-362b-71e9-add9-fc41417d91c4",
+        "display_order": 12,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8c-707e-b9d7-5128c8345f25",
+        "menu_section_id": "019f6efa-3660-71a1-a716-288370885866",
+        "display_order": 13,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8c-707e-b9d7-5128c8345f25",
+        "menu_section_id": "019f6efa-3736-702b-b6f6-09d5815fa0b1",
+        "display_order": 14,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8c-707e-b9d7-5128c8345f25",
+        "menu_section_id": "019f6efa-38a8-7107-8147-c90a3dd95c2d",
+        "display_order": 15,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8c-707e-b9d7-5128c8345f25",
+        "menu_section_id": "019f6efa-38db-737e-80d6-fb2e1ecfaa58",
+        "display_order": 16,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8c-707e-b9d7-5128c8345f25",
+        "menu_section_id": "019f6efa-3980-73d7-a72e-ebd7c1ab2987",
+        "display_order": 17,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8c-707e-b9d7-5128c8345f25",
+        "menu_section_id": "019f6efa-39c7-73b8-be63-674de5316eea",
+        "display_order": 18,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8c-707e-b9d7-5128c8345f25",
+        "menu_section_id": "019f6efa-3de9-735b-9486-18da770d12e4",
+        "display_order": 19,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8c-707e-b9d7-5128c8345f25",
+        "menu_section_id": "019f6efa-3fca-72be-8e44-3e32aaadd2cc",
+        "display_order": 21,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8c-707e-b9d7-5128c8345f25",
+        "menu_section_id": "019f6efa-3fdf-72ea-87cc-30e5184b7301",
+        "display_order": 22,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8c-707e-b9d7-5128c8345f25",
+        "menu_section_id": "019f6efa-40b0-739e-b0ef-0a23347c7324",
+        "display_order": 24,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8c-707e-b9d7-5128c8345f25",
+        "menu_section_id": "019f6efa-4101-7028-8634-3c0ccb3e005c",
+        "display_order": 27,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8c-707e-b9d7-5128c8345f25",
+        "menu_section_id": "019f6efa-4123-72f1-8471-dcae1857f210",
+        "display_order": 28,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8c-707e-b9d7-5128c8345f25",
+        "menu_section_id": "019f6efa-416f-7060-b4d1-ff5023b564eb",
+        "display_order": 29,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8c-707e-b9d7-5128c8345f25",
+        "menu_section_id": "019f6f3d-2557-7397-bbc7-c60755d4ebef",
+        "display_order": 25,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 08:41:46",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8c-707e-b9d7-5128c8345f25",
+        "menu_section_id": "019f6f3d-2561-73fc-b29a-f0da8418feda",
+        "display_order": 26,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 08:41:46",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8f-7279-8e05-1da70a2a725c",
+        "menu_section_id": "019f6efa-2fb7-73c7-92f3-d24ac20603dd",
+        "display_order": 0,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8f-7279-8e05-1da70a2a725c",
+        "menu_section_id": "019f6efa-30b5-723e-a72b-fc65dc1b5b60",
+        "display_order": 1,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8f-7279-8e05-1da70a2a725c",
+        "menu_section_id": "019f6efa-30e9-72c9-812b-f34242d2b57b",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8f-7279-8e05-1da70a2a725c",
+        "menu_section_id": "019f6efa-312a-7051-be78-08235d8b2f7f",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8f-7279-8e05-1da70a2a725c",
+        "menu_section_id": "019f6efa-313e-715c-9a75-533b8626a374",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8f-7279-8e05-1da70a2a725c",
+        "menu_section_id": "019f6efa-3179-7363-a5b6-50b4f1cccd8f",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8f-7279-8e05-1da70a2a725c",
+        "menu_section_id": "019f6efa-3266-72b6-91f6-9b6fb938d5fe",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8f-7279-8e05-1da70a2a725c",
+        "menu_section_id": "019f6efa-3465-7116-aa29-441043d485ec",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8f-7279-8e05-1da70a2a725c",
+        "menu_section_id": "019f6efa-349a-7332-8766-75bef623e8b4",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8f-7279-8e05-1da70a2a725c",
+        "menu_section_id": "019f6efa-34b4-714f-8fd6-4e1521e1e12c",
+        "display_order": 9,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8f-7279-8e05-1da70a2a725c",
+        "menu_section_id": "019f6efa-3520-730e-976a-342bc067a633",
+        "display_order": 10,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8f-7279-8e05-1da70a2a725c",
+        "menu_section_id": "019f6efa-3625-7214-a060-d25e8049f435",
+        "display_order": 11,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8f-7279-8e05-1da70a2a725c",
+        "menu_section_id": "019f6efa-3660-71a1-a716-288370885866",
+        "display_order": 13,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8f-7279-8e05-1da70a2a725c",
+        "menu_section_id": "019f6efa-3736-702b-b6f6-09d5815fa0b1",
+        "display_order": 14,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8f-7279-8e05-1da70a2a725c",
+        "menu_section_id": "019f6efa-38a8-7107-8147-c90a3dd95c2d",
+        "display_order": 15,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8f-7279-8e05-1da70a2a725c",
+        "menu_section_id": "019f6efa-38db-737e-80d6-fb2e1ecfaa58",
+        "display_order": 16,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8f-7279-8e05-1da70a2a725c",
+        "menu_section_id": "019f6efa-3980-73d7-a72e-ebd7c1ab2987",
+        "display_order": 17,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8f-7279-8e05-1da70a2a725c",
+        "menu_section_id": "019f6efa-39c7-73b8-be63-674de5316eea",
+        "display_order": 18,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8f-7279-8e05-1da70a2a725c",
+        "menu_section_id": "019f6efa-3de9-735b-9486-18da770d12e4",
+        "display_order": 19,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8f-7279-8e05-1da70a2a725c",
+        "menu_section_id": "019f6efa-3fca-72be-8e44-3e32aaadd2cc",
+        "display_order": 21,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8f-7279-8e05-1da70a2a725c",
+        "menu_section_id": "019f6efa-3fdf-72ea-87cc-30e5184b7301",
+        "display_order": 22,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8f-7279-8e05-1da70a2a725c",
+        "menu_section_id": "019f6efa-40b0-739e-b0ef-0a23347c7324",
+        "display_order": 24,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8f-7279-8e05-1da70a2a725c",
+        "menu_section_id": "019f6efa-4101-7028-8634-3c0ccb3e005c",
+        "display_order": 27,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8f-7279-8e05-1da70a2a725c",
+        "menu_section_id": "019f6efa-4123-72f1-8471-dcae1857f210",
+        "display_order": 28,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8f-7279-8e05-1da70a2a725c",
+        "menu_section_id": "019f6efa-416f-7060-b4d1-ff5023b564eb",
+        "display_order": 29,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8f-7279-8e05-1da70a2a725c",
+        "menu_section_id": "019f6f3d-2557-7397-bbc7-c60755d4ebef",
+        "display_order": 25,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 08:41:46",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f8f-7279-8e05-1da70a2a725c",
+        "menu_section_id": "019f6f3d-2561-73fc-b29a-f0da8418feda",
+        "display_order": 26,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 08:41:46",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f94-71b3-8210-d3eeb5a54df1",
+        "menu_section_id": "019f6efa-2fb7-73c7-92f3-d24ac20603dd",
+        "display_order": 0,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f94-71b3-8210-d3eeb5a54df1",
+        "menu_section_id": "019f6efa-30b5-723e-a72b-fc65dc1b5b60",
+        "display_order": 1,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f94-71b3-8210-d3eeb5a54df1",
+        "menu_section_id": "019f6efa-30e9-72c9-812b-f34242d2b57b",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f94-71b3-8210-d3eeb5a54df1",
+        "menu_section_id": "019f6efa-312a-7051-be78-08235d8b2f7f",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f94-71b3-8210-d3eeb5a54df1",
+        "menu_section_id": "019f6efa-313e-715c-9a75-533b8626a374",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f94-71b3-8210-d3eeb5a54df1",
+        "menu_section_id": "019f6efa-3179-7363-a5b6-50b4f1cccd8f",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f94-71b3-8210-d3eeb5a54df1",
+        "menu_section_id": "019f6efa-3266-72b6-91f6-9b6fb938d5fe",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f94-71b3-8210-d3eeb5a54df1",
+        "menu_section_id": "019f6efa-3465-7116-aa29-441043d485ec",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f94-71b3-8210-d3eeb5a54df1",
+        "menu_section_id": "019f6efa-349a-7332-8766-75bef623e8b4",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f94-71b3-8210-d3eeb5a54df1",
+        "menu_section_id": "019f6efa-34b4-714f-8fd6-4e1521e1e12c",
+        "display_order": 9,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f94-71b3-8210-d3eeb5a54df1",
+        "menu_section_id": "019f6efa-3520-730e-976a-342bc067a633",
+        "display_order": 10,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f94-71b3-8210-d3eeb5a54df1",
+        "menu_section_id": "019f6efa-3625-7214-a060-d25e8049f435",
+        "display_order": 11,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f94-71b3-8210-d3eeb5a54df1",
+        "menu_section_id": "019f6efa-362b-71e9-add9-fc41417d91c4",
+        "display_order": 12,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f94-71b3-8210-d3eeb5a54df1",
+        "menu_section_id": "019f6efa-3660-71a1-a716-288370885866",
+        "display_order": 13,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f94-71b3-8210-d3eeb5a54df1",
+        "menu_section_id": "019f6efa-3736-702b-b6f6-09d5815fa0b1",
+        "display_order": 14,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f94-71b3-8210-d3eeb5a54df1",
+        "menu_section_id": "019f6efa-38a8-7107-8147-c90a3dd95c2d",
+        "display_order": 15,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f94-71b3-8210-d3eeb5a54df1",
+        "menu_section_id": "019f6efa-38db-737e-80d6-fb2e1ecfaa58",
+        "display_order": 16,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f94-71b3-8210-d3eeb5a54df1",
+        "menu_section_id": "019f6efa-3980-73d7-a72e-ebd7c1ab2987",
+        "display_order": 17,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f94-71b3-8210-d3eeb5a54df1",
+        "menu_section_id": "019f6efa-39c7-73b8-be63-674de5316eea",
+        "display_order": 18,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f94-71b3-8210-d3eeb5a54df1",
+        "menu_section_id": "019f6efa-3de9-735b-9486-18da770d12e4",
+        "display_order": 19,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f94-71b3-8210-d3eeb5a54df1",
+        "menu_section_id": "019f6efa-3fca-72be-8e44-3e32aaadd2cc",
+        "display_order": 21,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f94-71b3-8210-d3eeb5a54df1",
+        "menu_section_id": "019f6efa-3fdf-72ea-87cc-30e5184b7301",
+        "display_order": 22,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f94-71b3-8210-d3eeb5a54df1",
+        "menu_section_id": "019f6efa-40b0-739e-b0ef-0a23347c7324",
+        "display_order": 24,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f94-71b3-8210-d3eeb5a54df1",
+        "menu_section_id": "019f6efa-4101-7028-8634-3c0ccb3e005c",
+        "display_order": 27,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f94-71b3-8210-d3eeb5a54df1",
+        "menu_section_id": "019f6efa-4123-72f1-8471-dcae1857f210",
+        "display_order": 28,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f94-71b3-8210-d3eeb5a54df1",
+        "menu_section_id": "019f6efa-416f-7060-b4d1-ff5023b564eb",
+        "display_order": 29,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f94-71b3-8210-d3eeb5a54df1",
+        "menu_section_id": "019f6f3d-2557-7397-bbc7-c60755d4ebef",
+        "display_order": 25,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 08:41:46",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f94-71b3-8210-d3eeb5a54df1",
+        "menu_section_id": "019f6f3d-2561-73fc-b29a-f0da8418feda",
+        "display_order": 26,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 08:41:46",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f98-70ec-b05a-cfff0e8e5536",
+        "menu_section_id": "019f6efa-2fb7-73c7-92f3-d24ac20603dd",
+        "display_order": 0,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f98-70ec-b05a-cfff0e8e5536",
+        "menu_section_id": "019f6efa-30b5-723e-a72b-fc65dc1b5b60",
+        "display_order": 1,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f98-70ec-b05a-cfff0e8e5536",
+        "menu_section_id": "019f6efa-30e9-72c9-812b-f34242d2b57b",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f98-70ec-b05a-cfff0e8e5536",
+        "menu_section_id": "019f6efa-312a-7051-be78-08235d8b2f7f",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f98-70ec-b05a-cfff0e8e5536",
+        "menu_section_id": "019f6efa-313e-715c-9a75-533b8626a374",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f98-70ec-b05a-cfff0e8e5536",
+        "menu_section_id": "019f6efa-3179-7363-a5b6-50b4f1cccd8f",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f98-70ec-b05a-cfff0e8e5536",
+        "menu_section_id": "019f6efa-3266-72b6-91f6-9b6fb938d5fe",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f98-70ec-b05a-cfff0e8e5536",
+        "menu_section_id": "019f6efa-3465-7116-aa29-441043d485ec",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f98-70ec-b05a-cfff0e8e5536",
+        "menu_section_id": "019f6efa-349a-7332-8766-75bef623e8b4",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f98-70ec-b05a-cfff0e8e5536",
+        "menu_section_id": "019f6efa-34b4-714f-8fd6-4e1521e1e12c",
+        "display_order": 9,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f98-70ec-b05a-cfff0e8e5536",
+        "menu_section_id": "019f6efa-3520-730e-976a-342bc067a633",
+        "display_order": 10,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f98-70ec-b05a-cfff0e8e5536",
+        "menu_section_id": "019f6efa-3625-7214-a060-d25e8049f435",
+        "display_order": 11,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f98-70ec-b05a-cfff0e8e5536",
+        "menu_section_id": "019f6efa-3660-71a1-a716-288370885866",
+        "display_order": 13,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f98-70ec-b05a-cfff0e8e5536",
+        "menu_section_id": "019f6efa-3736-702b-b6f6-09d5815fa0b1",
+        "display_order": 14,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f98-70ec-b05a-cfff0e8e5536",
+        "menu_section_id": "019f6efa-38a8-7107-8147-c90a3dd95c2d",
+        "display_order": 15,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f98-70ec-b05a-cfff0e8e5536",
+        "menu_section_id": "019f6efa-38db-737e-80d6-fb2e1ecfaa58",
+        "display_order": 16,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f98-70ec-b05a-cfff0e8e5536",
+        "menu_section_id": "019f6efa-3980-73d7-a72e-ebd7c1ab2987",
+        "display_order": 17,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f98-70ec-b05a-cfff0e8e5536",
+        "menu_section_id": "019f6efa-39c7-73b8-be63-674de5316eea",
+        "display_order": 18,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f98-70ec-b05a-cfff0e8e5536",
+        "menu_section_id": "019f6efa-3de9-735b-9486-18da770d12e4",
+        "display_order": 19,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f98-70ec-b05a-cfff0e8e5536",
+        "menu_section_id": "019f6efa-3fb3-70c6-80fe-247f9d30ebaf",
+        "display_order": 20,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f98-70ec-b05a-cfff0e8e5536",
+        "menu_section_id": "019f6efa-3fca-72be-8e44-3e32aaadd2cc",
+        "display_order": 21,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f98-70ec-b05a-cfff0e8e5536",
+        "menu_section_id": "019f6efa-3fdf-72ea-87cc-30e5184b7301",
+        "display_order": 22,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f98-70ec-b05a-cfff0e8e5536",
+        "menu_section_id": "019f6efa-40b0-739e-b0ef-0a23347c7324",
+        "display_order": 24,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f98-70ec-b05a-cfff0e8e5536",
+        "menu_section_id": "019f6efa-4101-7028-8634-3c0ccb3e005c",
+        "display_order": 27,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f98-70ec-b05a-cfff0e8e5536",
+        "menu_section_id": "019f6efa-4123-72f1-8471-dcae1857f210",
+        "display_order": 28,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f98-70ec-b05a-cfff0e8e5536",
+        "menu_section_id": "019f6efa-416f-7060-b4d1-ff5023b564eb",
+        "display_order": 29,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f98-70ec-b05a-cfff0e8e5536",
+        "menu_section_id": "019f6f3d-2557-7397-bbc7-c60755d4ebef",
+        "display_order": 25,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 08:41:46",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2f98-70ec-b05a-cfff0e8e5536",
+        "menu_section_id": "019f6f3d-2561-73fc-b29a-f0da8418feda",
+        "display_order": 26,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 08:41:46",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2fa0-725a-946e-ddc7e0c891b9",
+        "menu_section_id": "019f6efa-2fb7-73c7-92f3-d24ac20603dd",
+        "display_order": 0,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2fa0-725a-946e-ddc7e0c891b9",
+        "menu_section_id": "019f6efa-30b5-723e-a72b-fc65dc1b5b60",
+        "display_order": 1,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2fa0-725a-946e-ddc7e0c891b9",
+        "menu_section_id": "019f6efa-30e9-72c9-812b-f34242d2b57b",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2fa0-725a-946e-ddc7e0c891b9",
+        "menu_section_id": "019f6efa-312a-7051-be78-08235d8b2f7f",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2fa0-725a-946e-ddc7e0c891b9",
+        "menu_section_id": "019f6efa-313e-715c-9a75-533b8626a374",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2fa0-725a-946e-ddc7e0c891b9",
+        "menu_section_id": "019f6efa-3179-7363-a5b6-50b4f1cccd8f",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2fa0-725a-946e-ddc7e0c891b9",
+        "menu_section_id": "019f6efa-3266-72b6-91f6-9b6fb938d5fe",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2fa0-725a-946e-ddc7e0c891b9",
+        "menu_section_id": "019f6efa-3465-7116-aa29-441043d485ec",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2fa0-725a-946e-ddc7e0c891b9",
+        "menu_section_id": "019f6efa-349a-7332-8766-75bef623e8b4",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2fa0-725a-946e-ddc7e0c891b9",
+        "menu_section_id": "019f6efa-34b4-714f-8fd6-4e1521e1e12c",
+        "display_order": 9,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2fa0-725a-946e-ddc7e0c891b9",
+        "menu_section_id": "019f6efa-3520-730e-976a-342bc067a633",
+        "display_order": 10,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2fa0-725a-946e-ddc7e0c891b9",
+        "menu_section_id": "019f6efa-3625-7214-a060-d25e8049f435",
+        "display_order": 11,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2fa0-725a-946e-ddc7e0c891b9",
+        "menu_section_id": "019f6efa-3660-71a1-a716-288370885866",
+        "display_order": 13,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2fa0-725a-946e-ddc7e0c891b9",
+        "menu_section_id": "019f6efa-3736-702b-b6f6-09d5815fa0b1",
+        "display_order": 14,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2fa0-725a-946e-ddc7e0c891b9",
+        "menu_section_id": "019f6efa-38a8-7107-8147-c90a3dd95c2d",
+        "display_order": 15,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2fa0-725a-946e-ddc7e0c891b9",
+        "menu_section_id": "019f6efa-38db-737e-80d6-fb2e1ecfaa58",
+        "display_order": 16,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2fa0-725a-946e-ddc7e0c891b9",
+        "menu_section_id": "019f6efa-3980-73d7-a72e-ebd7c1ab2987",
+        "display_order": 17,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2fa0-725a-946e-ddc7e0c891b9",
+        "menu_section_id": "019f6efa-39c7-73b8-be63-674de5316eea",
+        "display_order": 18,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2fa0-725a-946e-ddc7e0c891b9",
+        "menu_section_id": "019f6efa-3de9-735b-9486-18da770d12e4",
+        "display_order": 19,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2fa0-725a-946e-ddc7e0c891b9",
+        "menu_section_id": "019f6efa-3fca-72be-8e44-3e32aaadd2cc",
+        "display_order": 21,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2fa0-725a-946e-ddc7e0c891b9",
+        "menu_section_id": "019f6efa-3fdf-72ea-87cc-30e5184b7301",
+        "display_order": 22,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2fa0-725a-946e-ddc7e0c891b9",
+        "menu_section_id": "019f6efa-40b0-739e-b0ef-0a23347c7324",
+        "display_order": 24,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2fa0-725a-946e-ddc7e0c891b9",
+        "menu_section_id": "019f6efa-4101-7028-8634-3c0ccb3e005c",
+        "display_order": 27,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2fa0-725a-946e-ddc7e0c891b9",
+        "menu_section_id": "019f6efa-4123-72f1-8471-dcae1857f210",
+        "display_order": 28,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2fa0-725a-946e-ddc7e0c891b9",
+        "menu_section_id": "019f6efa-416f-7060-b4d1-ff5023b564eb",
+        "display_order": 29,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 07:28:42",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2fa0-725a-946e-ddc7e0c891b9",
+        "menu_section_id": "019f6f3d-2557-7397-bbc7-c60755d4ebef",
+        "display_order": 25,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 08:41:46",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6efa-2fa0-725a-946e-ddc7e0c891b9",
+        "menu_section_id": "019f6f3d-2561-73fc-b29a-f0da8418feda",
+        "display_order": 26,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 08:41:46",
+        "updated_at": "2026-07-17 08:41:46"
+    },
+    {
+        "menu_id": "019f6f72-821d-7198-ab83-269f29b80180",
+        "menu_section_id": "019f6fb7-cdb3-7138-a268-cf074a435b2e",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 10:55:44",
+        "updated_at": "2026-07-22 07:00:51"
+    },
+    {
+        "menu_id": "019f6f72-821d-7198-ab83-269f29b80180",
+        "menu_section_id": "019f6fb7-cdbb-7283-b369-fd30d244b8ea",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 10:55:44",
+        "updated_at": "2026-07-22 07:00:51"
+    },
+    {
+        "menu_id": "019f6f72-821d-7198-ab83-269f29b80180",
+        "menu_section_id": "019f6fb7-cdbc-727b-8fbd-737c18e72696",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 10:55:44",
+        "updated_at": "2026-07-22 07:00:51"
+    },
+    {
+        "menu_id": "019f6f72-821d-7198-ab83-269f29b80180",
+        "menu_section_id": "019f6fb7-cdbc-727b-8fbd-737c192d1e02",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 10:55:44",
+        "updated_at": "2026-07-22 07:00:51"
+    },
+    {
+        "menu_id": "019f6f72-821d-7198-ab83-269f29b80180",
+        "menu_section_id": "019f7412-132d-715a-9f1d-a740ea2bfbf8",
+        "display_order": 1,
+        "tax_type_id": null,
+        "created_at": "2026-07-18 07:12:49",
+        "updated_at": "2026-07-22 07:00:51"
+    },
+    {
+        "menu_id": "019f6f72-821d-7198-ab83-269f29b80180",
+        "menu_section_id": "019f7412-1331-70ff-8005-fc1143edf35c",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-07-18 07:12:49",
+        "updated_at": "2026-07-22 07:00:51"
+    },
+    {
+        "menu_id": "019f6f72-821d-7198-ab83-269f29b80180",
+        "menu_section_id": "019f7412-1331-70ff-8005-fc1144a6dd80",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-07-18 07:12:49",
+        "updated_at": "2026-07-22 07:00:51"
+    },
+    {
+        "menu_id": "019f6f72-821d-7198-ab83-269f29b80180",
+        "menu_section_id": "019f7412-1332-715b-98b3-72de34d2df01",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-07-18 07:12:49",
+        "updated_at": "2026-07-22 07:00:51"
+    },
+    {
+        "menu_id": "019f6f72-821d-7198-ab83-269f29b80180",
+        "menu_section_id": "019f7412-1332-715b-98b3-72de35cce2b6",
+        "display_order": 9,
+        "tax_type_id": null,
+        "created_at": "2026-07-18 07:12:49",
+        "updated_at": "2026-07-22 07:00:51"
+    },
+    {
+        "menu_id": "019f6f9d-1728-7376-bff7-c59e7d8b2f2e",
+        "menu_section_id": "019f6f9c-74cd-711a-9ffa-55fa6128e1d4",
+        "display_order": 1,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 10:26:33",
+        "updated_at": "2026-07-17 10:26:33"
+    },
+    {
+        "menu_id": "019f6f9d-1728-7376-bff7-c59e7d8b2f2e",
+        "menu_section_id": "019f6fb7-cdb3-7138-a268-cf074a435b2e",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 10:56:12",
+        "updated_at": "2026-07-28 07:13:35"
+    },
+    {
+        "menu_id": "019f6f9d-1728-7376-bff7-c59e7d8b2f2e",
+        "menu_section_id": "019f6fb7-cdbb-7283-b369-fd30d244b8ea",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 10:56:12",
+        "updated_at": "2026-07-28 07:13:35"
+    },
+    {
+        "menu_id": "019f6f9d-1728-7376-bff7-c59e7d8b2f2e",
+        "menu_section_id": "019f6fb7-cdbc-727b-8fbd-737c18e72696",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 10:56:12",
+        "updated_at": "2026-07-28 07:13:35"
+    },
+    {
+        "menu_id": "019f6f9d-1728-7376-bff7-c59e7d8b2f2e",
+        "menu_section_id": "019f6fb7-cdbc-727b-8fbd-737c192d1e02",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-07-17 10:56:12",
+        "updated_at": "2026-07-28 07:13:35"
+    },
+    {
+        "menu_id": "019f6f9d-1728-7376-bff7-c59e7d8b2f2e",
+        "menu_section_id": "019f7412-132d-715a-9f1d-a740ea2bfbf8",
+        "display_order": 1,
+        "tax_type_id": null,
+        "created_at": "2026-07-18 07:13:15",
+        "updated_at": "2026-07-28 07:13:35"
+    },
+    {
+        "menu_id": "019f6f9d-1728-7376-bff7-c59e7d8b2f2e",
+        "menu_section_id": "019f7412-1331-70ff-8005-fc1143edf35c",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-07-18 07:13:15",
+        "updated_at": "2026-07-28 07:13:35"
+    },
+    {
+        "menu_id": "019f6f9d-1728-7376-bff7-c59e7d8b2f2e",
+        "menu_section_id": "019f7412-1331-70ff-8005-fc1144a6dd80",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-07-18 07:13:15",
+        "updated_at": "2026-07-28 07:13:35"
+    },
+    {
+        "menu_id": "019f6f9d-1728-7376-bff7-c59e7d8b2f2e",
+        "menu_section_id": "019f7412-1332-715b-98b3-72de34d2df01",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-07-18 07:13:15",
+        "updated_at": "2026-07-28 07:13:35"
+    },
+    {
+        "menu_id": "019f6f9d-1728-7376-bff7-c59e7d8b2f2e",
+        "menu_section_id": "019f7412-1332-715b-98b3-72de35cce2b6",
+        "display_order": 9,
+        "tax_type_id": null,
+        "created_at": "2026-07-18 07:13:15",
+        "updated_at": "2026-07-28 07:13:35"
+    },
+    {
+        "menu_id": "019f7e89-320b-73f2-82a3-63c5d30d1905",
+        "menu_section_id": "019fee95-15bb-706c-a278-c8602befea94",
+        "display_order": 1,
+        "tax_type_id": null,
+        "created_at": "2026-08-11 02:09:35",
+        "updated_at": "2026-08-11 02:09:36"
+    },
+    {
+        "menu_id": "019f7e89-320b-73f2-82a3-63c5d30d1905",
+        "menu_section_id": "019fee95-15be-712f-ae23-5b0a7c079c92",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-08-11 02:09:35",
+        "updated_at": "2026-08-11 02:09:36"
+    },
+    {
+        "menu_id": "019f7e89-320b-73f2-82a3-63c5d30d1905",
+        "menu_section_id": "019fee95-15bf-72b8-8ae4-a457ed607017",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-08-11 02:09:35",
+        "updated_at": "2026-08-11 02:09:36"
+    },
+    {
+        "menu_id": "019f7e89-320b-73f2-82a3-63c5d30d1905",
+        "menu_section_id": "019fee95-15c0-725a-8572-42935a731769",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-08-11 02:09:35",
+        "updated_at": "2026-08-11 02:09:36"
+    },
+    {
+        "menu_id": "019f7e89-320b-73f2-82a3-63c5d30d1905",
+        "menu_section_id": "019fee95-15c2-7339-b0f8-678566cd7903",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-08-11 02:09:35",
+        "updated_at": "2026-08-11 02:09:36"
+    },
+    {
+        "menu_id": "019f7e89-320b-73f2-82a3-63c5d30d1905",
+        "menu_section_id": "019fee95-15c3-73b2-82ec-70612db988c0",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-08-11 02:09:35",
+        "updated_at": "2026-08-11 02:09:36"
+    },
+    {
+        "menu_id": "019f7e89-320b-73f2-82a3-63c5d30d1905",
+        "menu_section_id": "019fee95-15c4-72e3-af12-43c441d8e595",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-08-11 02:09:35",
+        "updated_at": "2026-08-11 02:09:36"
+    },
+    {
+        "menu_id": "019f7e89-320b-73f2-82a3-63c5d30d1905",
+        "menu_section_id": "019fee95-15c5-72f9-9ffe-ad908d1a3500",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-08-11 02:09:35",
+        "updated_at": "2026-08-11 02:09:36"
+    },
+    {
+        "menu_id": "019f7e89-320b-73f2-82a3-63c5d30d1905",
+        "menu_section_id": "019fee95-15c6-7230-9f0f-2720018f9f18",
+        "display_order": 9,
+        "tax_type_id": null,
+        "created_at": "2026-08-11 02:09:35",
+        "updated_at": "2026-08-11 02:09:36"
+    },
+    {
+        "menu_id": "019f7e89-320b-73f2-82a3-63c5d30d1905",
+        "menu_section_id": "019fee95-15c7-7235-a5fd-9f4feef3ec2b",
+        "display_order": 10,
+        "tax_type_id": null,
+        "created_at": "2026-08-11 02:09:35",
+        "updated_at": "2026-08-11 02:09:36"
+    },
+    {
+        "menu_id": "019f7e89-320b-73f2-82a3-63c5d30d1905",
+        "menu_section_id": "019fee95-15c9-7129-97e6-bb6c12fef64e",
+        "display_order": 11,
+        "tax_type_id": null,
+        "created_at": "2026-08-11 02:09:35",
+        "updated_at": "2026-08-11 02:09:36"
+    },
+    {
+        "menu_id": "019f7ea5-30e5-723e-8159-32faecf27c15",
+        "menu_section_id": "019f7e8e-0bb7-736f-8e62-fe70c1b184fc",
+        "display_order": 1,
+        "tax_type_id": null,
+        "created_at": "2026-07-20 08:29:43",
+        "updated_at": "2026-07-28 07:13:41"
+    },
+    {
+        "menu_id": "019f7ea5-30e5-723e-8159-32faecf27c15",
+        "menu_section_id": "019f7e8e-0bc5-73e4-aab3-f57177c190c2",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-07-20 08:29:43",
+        "updated_at": "2026-07-28 07:13:41"
+    },
+    {
+        "menu_id": "019f7ea5-30e5-723e-8159-32faecf27c15",
+        "menu_section_id": "019f7e8e-0bc5-73e4-aab3-f571780226b8",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-07-20 08:29:43",
+        "updated_at": "2026-07-28 07:13:41"
+    },
+    {
+        "menu_id": "019f7ea5-30e5-723e-8159-32faecf27c15",
+        "menu_section_id": "019f7e8e-0bc5-73e4-aab3-f57178f740af",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-07-20 08:29:43",
+        "updated_at": "2026-07-28 07:13:41"
+    },
+    {
+        "menu_id": "019f7ea5-30e5-723e-8159-32faecf27c15",
+        "menu_section_id": "019f7e8e-0bc6-70e9-9339-47244baa5402",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-07-20 08:29:43",
+        "updated_at": "2026-07-28 07:13:41"
+    },
+    {
+        "menu_id": "019f7ea5-30e5-723e-8159-32faecf27c15",
+        "menu_section_id": "019f7e8e-0bc6-70e9-9339-47244c66f2f3",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-07-20 08:29:43",
+        "updated_at": "2026-07-28 07:13:41"
+    },
+    {
+        "menu_id": "019f7ea5-30e5-723e-8159-32faecf27c15",
+        "menu_section_id": "019f7e8e-0bc6-70e9-9339-47244d5773ec",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-07-20 08:29:43",
+        "updated_at": "2026-07-28 07:13:41"
+    },
+    {
+        "menu_id": "019f7ea5-30e5-723e-8159-32faecf27c15",
+        "menu_section_id": "019f7e8e-0bc6-70e9-9339-47244e0fddb5",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-07-20 08:29:43",
+        "updated_at": "2026-07-28 07:13:41"
+    },
+    {
+        "menu_id": "019f7ea5-30e5-723e-8159-32faecf27c15",
+        "menu_section_id": "019f7e8e-0bc7-7202-864a-5a53eef212c4",
+        "display_order": 9,
+        "tax_type_id": null,
+        "created_at": "2026-07-20 08:29:43",
+        "updated_at": "2026-07-28 07:13:41"
+    },
+    {
+        "menu_id": "019f7ea5-30e5-723e-8159-32faecf27c15",
+        "menu_section_id": "019f7e8e-0bc7-7202-864a-5a53efc35018",
+        "display_order": 10,
+        "tax_type_id": null,
+        "created_at": "2026-07-20 08:29:43",
+        "updated_at": "2026-07-28 07:13:41"
+    },
+    {
+        "menu_id": "019f7ea5-30e5-723e-8159-32faecf27c15",
+        "menu_section_id": "019f7e8e-0bc7-7202-864a-5a53f097d58c",
+        "display_order": 11,
+        "tax_type_id": null,
+        "created_at": "2026-07-20 08:29:43",
+        "updated_at": "2026-07-28 07:13:41"
+    },
+    {
+        "menu_id": "019f7ed5-c80b-73fa-b82f-147f71879eb8",
+        "menu_section_id": "019f7ee3-ade2-72e3-b2c1-8a94e0bd2f16",
+        "display_order": 1,
+        "tax_type_id": "6d489c68-f830-5c60-b0cc-2f159a9b3ae4",
+        "created_at": "2026-07-20 09:37:58",
+        "updated_at": "2026-07-22 08:08:09"
+    },
+    {
+        "menu_id": "019f7ed5-c80b-73fa-b82f-147f71879eb8",
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f19aeb7c",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-07-20 09:37:58",
+        "updated_at": "2026-07-22 08:08:09"
+    },
+    {
+        "menu_id": "019f7ed5-c80b-73fa-b82f-147f71879eb8",
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f220edb4",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-07-20 09:37:58",
+        "updated_at": "2026-07-22 08:08:09"
+    },
+    {
+        "menu_id": "019f7ed5-c80b-73fa-b82f-147f71879eb8",
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f2c111dc",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-07-20 09:37:58",
+        "updated_at": "2026-07-22 08:08:09"
+    },
+    {
+        "menu_id": "019f7ed5-c80b-73fa-b82f-147f71879eb8",
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f387c78d",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-07-20 09:37:58",
+        "updated_at": "2026-07-22 08:08:09"
+    },
+    {
+        "menu_id": "019f7ed5-c80b-73fa-b82f-147f71879eb8",
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdea34c28f",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-07-20 09:37:58",
+        "updated_at": "2026-07-22 08:08:09"
+    },
+    {
+        "menu_id": "019f7ed5-c80b-73fa-b82f-147f71879eb8",
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdeb188d28",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-07-20 09:37:58",
+        "updated_at": "2026-07-22 08:08:09"
+    },
+    {
+        "menu_id": "019f7ed5-c80b-73fa-b82f-147f71879eb8",
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdebf91efc",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-07-20 09:37:58",
+        "updated_at": "2026-07-22 08:08:09"
+    },
+    {
+        "menu_id": "019f7ee4-57ae-7289-b434-80576e5f2e69",
+        "menu_section_id": "019f7ee3-ade2-72e3-b2c1-8a94e0bd2f16",
+        "display_order": 1,
+        "tax_type_id": "6d489c68-f830-5c60-b0cc-2f159a9b3ae4",
+        "created_at": "2026-07-20 09:38:41",
+        "updated_at": "2026-07-28 07:13:50"
+    },
+    {
+        "menu_id": "019f7ee4-57ae-7289-b434-80576e5f2e69",
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f19aeb7c",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-07-20 09:38:41",
+        "updated_at": "2026-07-28 07:13:50"
+    },
+    {
+        "menu_id": "019f7ee4-57ae-7289-b434-80576e5f2e69",
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f220edb4",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-07-20 09:38:41",
+        "updated_at": "2026-07-28 07:13:50"
+    },
+    {
+        "menu_id": "019f7ee4-57ae-7289-b434-80576e5f2e69",
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f2c111dc",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-07-20 09:38:41",
+        "updated_at": "2026-07-28 07:13:50"
+    },
+    {
+        "menu_id": "019f7ee4-57ae-7289-b434-80576e5f2e69",
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f387c78d",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-07-20 09:38:41",
+        "updated_at": "2026-07-28 07:13:50"
+    },
+    {
+        "menu_id": "019f7ee4-57ae-7289-b434-80576e5f2e69",
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdea34c28f",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-07-20 09:38:41",
+        "updated_at": "2026-07-28 07:13:50"
+    },
+    {
+        "menu_id": "019f7ee4-57ae-7289-b434-80576e5f2e69",
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdeb188d28",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-07-20 09:38:41",
+        "updated_at": "2026-07-28 07:13:50"
+    },
+    {
+        "menu_id": "019f7ee4-57ae-7289-b434-80576e5f2e69",
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdebf91efc",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-07-20 09:38:41",
+        "updated_at": "2026-07-28 07:13:50"
+    },
+    {
+        "menu_id": "019f8286-4cf4-73b0-8264-64c6170fd2b6",
+        "menu_section_id": "019f82a6-0758-7101-ba11-73f5335dad69",
+        "display_order": 1,
+        "tax_type_id": null,
+        "created_at": "2026-07-21 03:09:06",
+        "updated_at": "2026-07-21 03:09:07"
+    },
+    {
+        "menu_id": "019f88d1-be69-7074-9aed-b85e74067de2",
+        "menu_section_id": "019f7e8e-0bb7-736f-8e62-fe70c1b184fc",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 07:54:34",
+        "updated_at": "2026-07-22 07:59:31"
+    },
+    {
+        "menu_id": "019f88d1-be69-7074-9aed-b85e74067de2",
+        "menu_section_id": "019f7e8e-0bc5-73e4-aab3-f57177c190c2",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 07:54:34",
+        "updated_at": "2026-07-22 07:59:31"
+    },
+    {
+        "menu_id": "019f88d1-be69-7074-9aed-b85e74067de2",
+        "menu_section_id": "019f7e8e-0bc5-73e4-aab3-f571780226b8",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 07:54:34",
+        "updated_at": "2026-07-22 07:59:31"
+    },
+    {
+        "menu_id": "019f88d1-be69-7074-9aed-b85e74067de2",
+        "menu_section_id": "019f7e8e-0bc5-73e4-aab3-f57178f740af",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 07:54:34",
+        "updated_at": "2026-07-22 07:59:31"
+    },
+    {
+        "menu_id": "019f88d1-be69-7074-9aed-b85e74067de2",
+        "menu_section_id": "019f7e8e-0bc6-70e9-9339-47244baa5402",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 07:54:34",
+        "updated_at": "2026-07-22 07:59:31"
+    },
+    {
+        "menu_id": "019f88d1-be69-7074-9aed-b85e74067de2",
+        "menu_section_id": "019f7e8e-0bc6-70e9-9339-47244c66f2f3",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 07:54:34",
+        "updated_at": "2026-07-22 07:59:31"
+    },
+    {
+        "menu_id": "019f88d1-be69-7074-9aed-b85e74067de2",
+        "menu_section_id": "019f7e8e-0bc6-70e9-9339-47244d5773ec",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 07:54:34",
+        "updated_at": "2026-07-22 07:59:31"
+    },
+    {
+        "menu_id": "019f88d1-be69-7074-9aed-b85e74067de2",
+        "menu_section_id": "019f7e8e-0bc6-70e9-9339-47244e0fddb5",
+        "display_order": 9,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 07:54:34",
+        "updated_at": "2026-07-22 07:59:31"
+    },
+    {
+        "menu_id": "019f88d1-be69-7074-9aed-b85e74067de2",
+        "menu_section_id": "019f7e8e-0bc7-7202-864a-5a53eef212c4",
+        "display_order": 10,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 07:54:34",
+        "updated_at": "2026-07-22 07:59:31"
+    },
+    {
+        "menu_id": "019f88d1-be69-7074-9aed-b85e74067de2",
+        "menu_section_id": "019f7e8e-0bc7-7202-864a-5a53efc35018",
+        "display_order": 11,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 07:54:34",
+        "updated_at": "2026-07-22 07:59:31"
+    },
+    {
+        "menu_id": "019f88d1-be69-7074-9aed-b85e74067de2",
+        "menu_section_id": "019f7e8e-0bc7-7202-864a-5a53f097d58c",
+        "display_order": 12,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 07:54:34",
+        "updated_at": "2026-07-22 07:59:31"
+    },
+    {
+        "menu_id": "019f88d1-be69-7074-9aed-b85e74067de2",
+        "menu_section_id": "019f88d4-df8e-7217-865d-50931d071807",
+        "display_order": 1,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 07:58:00",
+        "updated_at": "2026-07-22 07:59:31"
+    },
+    {
+        "menu_id": "019f88d1-be69-7074-9aed-b85e74067de2",
+        "menu_section_id": "019fda95-aa59-71c2-843d-c08e0b5becdd",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-08-07 04:57:49",
+        "updated_at": "2026-08-07 04:57:50"
+    },
+    {
+        "menu_id": "019f88d1-be69-7074-9aed-b85e74067de2",
+        "menu_section_id": "019fda95-aa5c-73de-acda-75471d2a0cb5",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-08-07 04:57:49",
+        "updated_at": "2026-08-07 04:57:50"
+    },
+    {
+        "menu_id": "019f88d1-be69-7074-9aed-b85e74067de2",
+        "menu_section_id": "019fda95-aa5d-71ba-af0f-78c70f4647d1",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-08-07 04:57:49",
+        "updated_at": "2026-08-07 04:57:50"
+    },
+    {
+        "menu_id": "019f88d1-be69-7074-9aed-b85e74067de2",
+        "menu_section_id": "019fda95-aa5e-7337-ac2e-05b3bd4b7b72",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-08-07 04:57:49",
+        "updated_at": "2026-08-07 04:57:50"
+    },
+    {
+        "menu_id": "019f88d1-be69-7074-9aed-b85e74067de2",
+        "menu_section_id": "019fda95-aa5f-7330-94e5-98c28c39c0ff",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-08-07 04:57:49",
+        "updated_at": "2026-08-07 04:57:50"
+    },
+    {
+        "menu_id": "019f88d1-be69-7074-9aed-b85e74067de2",
+        "menu_section_id": "019fda95-aa63-7290-a51a-f32779fd9318",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-08-07 04:57:49",
+        "updated_at": "2026-08-07 04:57:50"
+    },
+    {
+        "menu_id": "019f88d1-be69-7074-9aed-b85e74067de2",
+        "menu_section_id": "019fda95-aa64-726b-a1bf-3eb9f7896858",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-08-07 04:57:49",
+        "updated_at": "2026-08-07 04:57:50"
+    },
+    {
+        "menu_id": "019f88d1-be69-7074-9aed-b85e74067de2",
+        "menu_section_id": "019fda95-aa65-7350-a409-7f187e70238e",
+        "display_order": 9,
+        "tax_type_id": null,
+        "created_at": "2026-08-07 04:57:49",
+        "updated_at": "2026-08-07 04:57:50"
+    },
+    {
+        "menu_id": "019f88d1-be69-7074-9aed-b85e74067de2",
+        "menu_section_id": "019fda95-aa66-71da-9b8e-71f7061a5aca",
+        "display_order": 10,
+        "tax_type_id": null,
+        "created_at": "2026-08-07 04:57:49",
+        "updated_at": "2026-08-07 04:57:50"
+    },
+    {
+        "menu_id": "019f88d1-be69-7074-9aed-b85e74067de2",
+        "menu_section_id": "019fda95-aa68-72ea-959e-e43992baf3cd",
+        "display_order": 11,
+        "tax_type_id": null,
+        "created_at": "2026-08-07 04:57:49",
+        "updated_at": "2026-08-07 04:57:50"
+    },
+    {
+        "menu_id": "019f88d1-be69-7074-9aed-b85e74067de2",
+        "menu_section_id": "019fda95-aa69-718d-808d-6be0f6ce3f25",
+        "display_order": 12,
+        "tax_type_id": null,
+        "created_at": "2026-08-07 04:57:49",
+        "updated_at": "2026-08-07 04:57:50"
+    },
+    {
+        "menu_id": "019f88d8-c5db-7152-a630-0bbd36b0b0c6",
+        "menu_section_id": "019f6fb7-cdb3-7138-a268-cf074a435b2e",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:02:15",
+        "updated_at": "2026-07-22 08:04:02"
+    },
+    {
+        "menu_id": "019f88d8-c5db-7152-a630-0bbd36b0b0c6",
+        "menu_section_id": "019f6fb7-cdbb-7283-b369-fd30d244b8ea",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:02:15",
+        "updated_at": "2026-07-22 08:04:02"
+    },
+    {
+        "menu_id": "019f88d8-c5db-7152-a630-0bbd36b0b0c6",
+        "menu_section_id": "019f6fb7-cdbc-727b-8fbd-737c18e72696",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:02:15",
+        "updated_at": "2026-07-22 08:04:02"
+    },
+    {
+        "menu_id": "019f88d8-c5db-7152-a630-0bbd36b0b0c6",
+        "menu_section_id": "019f6fb7-cdbc-727b-8fbd-737c192d1e02",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:02:15",
+        "updated_at": "2026-07-22 08:04:02"
+    },
+    {
+        "menu_id": "019f88d8-c5db-7152-a630-0bbd36b0b0c6",
+        "menu_section_id": "019f7412-132d-715a-9f1d-a740ea2bfbf8",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:02:15",
+        "updated_at": "2026-07-22 08:04:02"
+    },
+    {
+        "menu_id": "019f88d8-c5db-7152-a630-0bbd36b0b0c6",
+        "menu_section_id": "019f7412-1331-70ff-8005-fc1143edf35c",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:02:15",
+        "updated_at": "2026-07-22 08:04:02"
+    },
+    {
+        "menu_id": "019f88d8-c5db-7152-a630-0bbd36b0b0c6",
+        "menu_section_id": "019f7412-1331-70ff-8005-fc1144a6dd80",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:02:15",
+        "updated_at": "2026-07-22 08:04:02"
+    },
+    {
+        "menu_id": "019f88d8-c5db-7152-a630-0bbd36b0b0c6",
+        "menu_section_id": "019f7412-1332-715b-98b3-72de34d2df01",
+        "display_order": 9,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:02:15",
+        "updated_at": "2026-07-22 08:04:02"
+    },
+    {
+        "menu_id": "019f88d8-c5db-7152-a630-0bbd36b0b0c6",
+        "menu_section_id": "019f7412-1332-715b-98b3-72de35cce2b6",
+        "display_order": 10,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:02:15",
+        "updated_at": "2026-07-22 08:04:02"
+    },
+    {
+        "menu_id": "019f88d8-c5db-7152-a630-0bbd36b0b0c6",
+        "menu_section_id": "019f88da-6666-72f6-9fe2-99f6c8ecc7d3",
+        "display_order": 1,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:04:02",
+        "updated_at": "2026-07-22 08:04:02"
+    },
+    {
+        "menu_id": "019f88db-b4fb-723a-aa25-8baedebd5e8f",
+        "menu_section_id": "019f6fb7-cdb3-7138-a268-cf074a435b2e",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:05:27",
+        "updated_at": "2026-07-28 07:13:59"
+    },
+    {
+        "menu_id": "019f88db-b4fb-723a-aa25-8baedebd5e8f",
+        "menu_section_id": "019f6fb7-cdbb-7283-b369-fd30d244b8ea",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:05:27",
+        "updated_at": "2026-07-28 07:13:59"
+    },
+    {
+        "menu_id": "019f88db-b4fb-723a-aa25-8baedebd5e8f",
+        "menu_section_id": "019f6fb7-cdbc-727b-8fbd-737c18e72696",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:05:27",
+        "updated_at": "2026-07-28 07:13:59"
+    },
+    {
+        "menu_id": "019f88db-b4fb-723a-aa25-8baedebd5e8f",
+        "menu_section_id": "019f6fb7-cdbc-727b-8fbd-737c192d1e02",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:05:27",
+        "updated_at": "2026-07-28 07:13:59"
+    },
+    {
+        "menu_id": "019f88db-b4fb-723a-aa25-8baedebd5e8f",
+        "menu_section_id": "019f7412-132d-715a-9f1d-a740ea2bfbf8",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:05:27",
+        "updated_at": "2026-07-28 07:13:59"
+    },
+    {
+        "menu_id": "019f88db-b4fb-723a-aa25-8baedebd5e8f",
+        "menu_section_id": "019f7412-1331-70ff-8005-fc1143edf35c",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:05:27",
+        "updated_at": "2026-07-28 07:13:59"
+    },
+    {
+        "menu_id": "019f88db-b4fb-723a-aa25-8baedebd5e8f",
+        "menu_section_id": "019f7412-1331-70ff-8005-fc1144a6dd80",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:05:27",
+        "updated_at": "2026-07-28 07:13:59"
+    },
+    {
+        "menu_id": "019f88db-b4fb-723a-aa25-8baedebd5e8f",
+        "menu_section_id": "019f7412-1332-715b-98b3-72de34d2df01",
+        "display_order": 9,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:05:27",
+        "updated_at": "2026-07-28 07:13:59"
+    },
+    {
+        "menu_id": "019f88db-b4fb-723a-aa25-8baedebd5e8f",
+        "menu_section_id": "019f7412-1332-715b-98b3-72de35cce2b6",
+        "display_order": 10,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:05:27",
+        "updated_at": "2026-07-28 07:13:59"
+    },
+    {
+        "menu_id": "019f88db-b4fb-723a-aa25-8baedebd5e8f",
+        "menu_section_id": "019f88da-6666-72f6-9fe2-99f6c8ecc7d3",
+        "display_order": 1,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:05:27",
+        "updated_at": "2026-07-28 07:13:59"
+    },
+    {
+        "menu_id": "019f88db-d1ae-72e5-b9a9-492a5b87e233",
+        "menu_section_id": "019f7e8e-0bb7-736f-8e62-fe70c1b184fc",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:05:35",
+        "updated_at": "2026-07-28 07:14:06"
+    },
+    {
+        "menu_id": "019f88db-d1ae-72e5-b9a9-492a5b87e233",
+        "menu_section_id": "019f7e8e-0bc5-73e4-aab3-f57177c190c2",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:05:35",
+        "updated_at": "2026-07-28 07:14:06"
+    },
+    {
+        "menu_id": "019f88db-d1ae-72e5-b9a9-492a5b87e233",
+        "menu_section_id": "019f7e8e-0bc5-73e4-aab3-f571780226b8",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:05:35",
+        "updated_at": "2026-07-28 07:14:06"
+    },
+    {
+        "menu_id": "019f88db-d1ae-72e5-b9a9-492a5b87e233",
+        "menu_section_id": "019f7e8e-0bc5-73e4-aab3-f57178f740af",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:05:35",
+        "updated_at": "2026-07-28 07:14:06"
+    },
+    {
+        "menu_id": "019f88db-d1ae-72e5-b9a9-492a5b87e233",
+        "menu_section_id": "019f7e8e-0bc6-70e9-9339-47244baa5402",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:05:35",
+        "updated_at": "2026-07-28 07:14:06"
+    },
+    {
+        "menu_id": "019f88db-d1ae-72e5-b9a9-492a5b87e233",
+        "menu_section_id": "019f7e8e-0bc6-70e9-9339-47244c66f2f3",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:05:35",
+        "updated_at": "2026-07-28 07:14:06"
+    },
+    {
+        "menu_id": "019f88db-d1ae-72e5-b9a9-492a5b87e233",
+        "menu_section_id": "019f7e8e-0bc6-70e9-9339-47244d5773ec",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:05:35",
+        "updated_at": "2026-07-28 07:14:06"
+    },
+    {
+        "menu_id": "019f88db-d1ae-72e5-b9a9-492a5b87e233",
+        "menu_section_id": "019f7e8e-0bc6-70e9-9339-47244e0fddb5",
+        "display_order": 9,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:05:35",
+        "updated_at": "2026-07-28 07:14:06"
+    },
+    {
+        "menu_id": "019f88db-d1ae-72e5-b9a9-492a5b87e233",
+        "menu_section_id": "019f7e8e-0bc7-7202-864a-5a53eef212c4",
+        "display_order": 10,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:05:35",
+        "updated_at": "2026-07-28 07:14:06"
+    },
+    {
+        "menu_id": "019f88db-d1ae-72e5-b9a9-492a5b87e233",
+        "menu_section_id": "019f7e8e-0bc7-7202-864a-5a53efc35018",
+        "display_order": 11,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:05:35",
+        "updated_at": "2026-07-28 07:14:06"
+    },
+    {
+        "menu_id": "019f88db-d1ae-72e5-b9a9-492a5b87e233",
+        "menu_section_id": "019f7e8e-0bc7-7202-864a-5a53f097d58c",
+        "display_order": 12,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:05:35",
+        "updated_at": "2026-07-28 07:14:06"
+    },
+    {
+        "menu_id": "019f88db-d1ae-72e5-b9a9-492a5b87e233",
+        "menu_section_id": "019f88d4-df8e-7217-865d-50931d071807",
+        "display_order": 1,
+        "tax_type_id": null,
+        "created_at": "2026-07-22 08:05:35",
+        "updated_at": "2026-07-28 07:14:06"
+    },
+    {
+        "menu_id": "019f936c-978f-73ed-9b39-e8034bfe8915",
+        "menu_section_id": "019f7ee3-ade2-72e3-b2c1-8a94e0bd2f16",
+        "display_order": 1,
+        "tax_type_id": "6d489c68-f830-5c60-b0cc-2f159a9b3ae4",
+        "created_at": "2026-07-24 09:19:55",
+        "updated_at": "2026-08-11 01:15:11"
+    },
+    {
+        "menu_id": "019f936c-978f-73ed-9b39-e8034bfe8915",
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f19aeb7c",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:19:55",
+        "updated_at": "2026-08-11 01:15:11"
+    },
+    {
+        "menu_id": "019f936c-978f-73ed-9b39-e8034bfe8915",
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f220edb4",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:19:55",
+        "updated_at": "2026-08-11 01:15:11"
+    },
+    {
+        "menu_id": "019f936c-978f-73ed-9b39-e8034bfe8915",
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f2c111dc",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:19:55",
+        "updated_at": "2026-08-11 01:15:11"
+    },
+    {
+        "menu_id": "019f936c-978f-73ed-9b39-e8034bfe8915",
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f387c78d",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:19:55",
+        "updated_at": "2026-08-11 01:15:11"
+    },
+    {
+        "menu_id": "019f936c-978f-73ed-9b39-e8034bfe8915",
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdea34c28f",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:19:55",
+        "updated_at": "2026-08-11 01:15:11"
+    },
+    {
+        "menu_id": "019f936c-978f-73ed-9b39-e8034bfe8915",
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdeb188d28",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:19:55",
+        "updated_at": "2026-08-11 01:15:11"
+    },
+    {
+        "menu_id": "019f936c-978f-73ed-9b39-e8034bfe8915",
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdebf91efc",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:19:55",
+        "updated_at": "2026-08-11 01:15:11"
+    },
+    {
+        "menu_id": "019f9373-47da-73d9-9302-c146bb914ec4",
+        "menu_section_id": "019f7ee3-ade2-72e3-b2c1-8a94e0bd2f16",
+        "display_order": 1,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:13",
+        "updated_at": "2026-07-24 09:28:23"
+    },
+    {
+        "menu_id": "019f9373-47da-73d9-9302-c146bb914ec4",
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f19aeb7c",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:13",
+        "updated_at": "2026-07-24 09:28:23"
+    },
+    {
+        "menu_id": "019f9373-47da-73d9-9302-c146bb914ec4",
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f220edb4",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:13",
+        "updated_at": "2026-07-24 09:28:23"
+    },
+    {
+        "menu_id": "019f9373-47da-73d9-9302-c146bb914ec4",
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f2c111dc",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:13",
+        "updated_at": "2026-07-24 09:28:23"
+    },
+    {
+        "menu_id": "019f9373-47da-73d9-9302-c146bb914ec4",
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f387c78d",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:13",
+        "updated_at": "2026-07-24 09:28:23"
+    },
+    {
+        "menu_id": "019f9373-47da-73d9-9302-c146bb914ec4",
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdea34c28f",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:13",
+        "updated_at": "2026-07-24 09:28:23"
+    },
+    {
+        "menu_id": "019f9373-47da-73d9-9302-c146bb914ec4",
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdeb188d28",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:13",
+        "updated_at": "2026-07-24 09:28:23"
+    },
+    {
+        "menu_id": "019f9373-47da-73d9-9302-c146bb914ec4",
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdebf91efc",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:13",
+        "updated_at": "2026-07-24 09:28:23"
+    },
+    {
+        "menu_id": "019f9373-6834-70f0-9b2c-364db3ef5277",
+        "menu_section_id": "019f7ee3-ade2-72e3-b2c1-8a94e0bd2f16",
+        "display_order": 1,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:21",
+        "updated_at": "2026-07-24 09:27:21"
+    },
+    {
+        "menu_id": "019f9373-6834-70f0-9b2c-364db3ef5277",
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f19aeb7c",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:21",
+        "updated_at": "2026-07-24 09:27:21"
+    },
+    {
+        "menu_id": "019f9373-6834-70f0-9b2c-364db3ef5277",
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f220edb4",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:21",
+        "updated_at": "2026-07-24 09:27:21"
+    },
+    {
+        "menu_id": "019f9373-6834-70f0-9b2c-364db3ef5277",
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f2c111dc",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:21",
+        "updated_at": "2026-07-24 09:27:21"
+    },
+    {
+        "menu_id": "019f9373-6834-70f0-9b2c-364db3ef5277",
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f387c78d",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:21",
+        "updated_at": "2026-07-24 09:27:21"
+    },
+    {
+        "menu_id": "019f9373-6834-70f0-9b2c-364db3ef5277",
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdea34c28f",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:21",
+        "updated_at": "2026-07-24 09:27:21"
+    },
+    {
+        "menu_id": "019f9373-6834-70f0-9b2c-364db3ef5277",
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdeb188d28",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:21",
+        "updated_at": "2026-07-24 09:27:21"
+    },
+    {
+        "menu_id": "019f9373-6834-70f0-9b2c-364db3ef5277",
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdebf91efc",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:21",
+        "updated_at": "2026-07-24 09:27:21"
+    },
+    {
+        "menu_id": "019f9373-86e2-7072-95f8-e0ccbab148e3",
+        "menu_section_id": "019f7ee3-ade2-72e3-b2c1-8a94e0bd2f16",
+        "display_order": 1,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:29",
+        "updated_at": "2026-07-24 09:27:29"
+    },
+    {
+        "menu_id": "019f9373-86e2-7072-95f8-e0ccbab148e3",
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f19aeb7c",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:29",
+        "updated_at": "2026-07-24 09:27:29"
+    },
+    {
+        "menu_id": "019f9373-86e2-7072-95f8-e0ccbab148e3",
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f220edb4",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:29",
+        "updated_at": "2026-07-24 09:27:29"
+    },
+    {
+        "menu_id": "019f9373-86e2-7072-95f8-e0ccbab148e3",
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f2c111dc",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:29",
+        "updated_at": "2026-07-24 09:27:29"
+    },
+    {
+        "menu_id": "019f9373-86e2-7072-95f8-e0ccbab148e3",
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f387c78d",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:29",
+        "updated_at": "2026-07-24 09:27:29"
+    },
+    {
+        "menu_id": "019f9373-86e2-7072-95f8-e0ccbab148e3",
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdea34c28f",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:29",
+        "updated_at": "2026-07-24 09:27:29"
+    },
+    {
+        "menu_id": "019f9373-86e2-7072-95f8-e0ccbab148e3",
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdeb188d28",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:29",
+        "updated_at": "2026-07-24 09:27:29"
+    },
+    {
+        "menu_id": "019f9373-86e2-7072-95f8-e0ccbab148e3",
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdebf91efc",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:29",
+        "updated_at": "2026-07-24 09:27:29"
+    },
+    {
+        "menu_id": "019f9373-b111-718d-bcfb-e51ab4ee0772",
+        "menu_section_id": "019f7ee3-ade2-72e3-b2c1-8a94e0bd2f16",
+        "display_order": 1,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:40",
+        "updated_at": "2026-07-24 09:28:33"
+    },
+    {
+        "menu_id": "019f9373-b111-718d-bcfb-e51ab4ee0772",
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f19aeb7c",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:40",
+        "updated_at": "2026-07-24 09:28:33"
+    },
+    {
+        "menu_id": "019f9373-b111-718d-bcfb-e51ab4ee0772",
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f220edb4",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:40",
+        "updated_at": "2026-07-24 09:28:33"
+    },
+    {
+        "menu_id": "019f9373-b111-718d-bcfb-e51ab4ee0772",
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f2c111dc",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:40",
+        "updated_at": "2026-07-24 09:28:33"
+    },
+    {
+        "menu_id": "019f9373-b111-718d-bcfb-e51ab4ee0772",
+        "menu_section_id": "019f7ee3-ade4-72b2-a12c-5892f387c78d",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:40",
+        "updated_at": "2026-07-24 09:28:33"
+    },
+    {
+        "menu_id": "019f9373-b111-718d-bcfb-e51ab4ee0772",
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdea34c28f",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:40",
+        "updated_at": "2026-07-24 09:28:33"
+    },
+    {
+        "menu_id": "019f9373-b111-718d-bcfb-e51ab4ee0772",
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdeb188d28",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:40",
+        "updated_at": "2026-07-24 09:28:33"
+    },
+    {
+        "menu_id": "019f9373-b111-718d-bcfb-e51ab4ee0772",
+        "menu_section_id": "019f7ee3-ade5-7318-a149-26bdebf91efc",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-07-24 09:27:40",
+        "updated_at": "2026-07-24 09:28:33"
+    },
+    {
+        "menu_id": "019fd5da-2a1a-73e4-84d0-29595dc1b9e7",
+        "menu_section_id": "019f6fb7-cdb3-7138-a268-cf074a435b2e",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:32",
+        "updated_at": "2026-08-11 01:18:22"
+    },
+    {
+        "menu_id": "019fd5da-2a1a-73e4-84d0-29595dc1b9e7",
+        "menu_section_id": "019f6fb7-cdbb-7283-b369-fd30d244b8ea",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:32",
+        "updated_at": "2026-08-11 01:18:22"
+    },
+    {
+        "menu_id": "019fd5da-2a1a-73e4-84d0-29595dc1b9e7",
+        "menu_section_id": "019f6fb7-cdbc-727b-8fbd-737c18e72696",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:32",
+        "updated_at": "2026-08-11 01:18:22"
+    },
+    {
+        "menu_id": "019fd5da-2a1a-73e4-84d0-29595dc1b9e7",
+        "menu_section_id": "019f6fb7-cdbc-727b-8fbd-737c192d1e02",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:32",
+        "updated_at": "2026-08-11 01:18:22"
+    },
+    {
+        "menu_id": "019fd5da-2a1a-73e4-84d0-29595dc1b9e7",
+        "menu_section_id": "019f7412-132d-715a-9f1d-a740ea2bfbf8",
+        "display_order": 1,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:32",
+        "updated_at": "2026-08-11 01:18:22"
+    },
+    {
+        "menu_id": "019fd5da-2a1a-73e4-84d0-29595dc1b9e7",
+        "menu_section_id": "019f7412-1331-70ff-8005-fc1143edf35c",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:32",
+        "updated_at": "2026-08-11 01:18:22"
+    },
+    {
+        "menu_id": "019fd5da-2a1a-73e4-84d0-29595dc1b9e7",
+        "menu_section_id": "019f7412-1331-70ff-8005-fc1144a6dd80",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:32",
+        "updated_at": "2026-08-11 01:18:22"
+    },
+    {
+        "menu_id": "019fd5da-2a1a-73e4-84d0-29595dc1b9e7",
+        "menu_section_id": "019f7412-1332-715b-98b3-72de34d2df01",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:32",
+        "updated_at": "2026-08-11 01:18:22"
+    },
+    {
+        "menu_id": "019fd5da-2a1a-73e4-84d0-29595dc1b9e7",
+        "menu_section_id": "019f7412-1332-715b-98b3-72de35cce2b6",
+        "display_order": 9,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:32",
+        "updated_at": "2026-08-11 01:18:22"
+    },
+    {
+        "menu_id": "019fd5da-400e-7096-9309-5c2bddacf293",
+        "menu_section_id": "019f6fb7-cdb3-7138-a268-cf074a435b2e",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:38",
+        "updated_at": "2026-08-11 01:15:06"
+    },
+    {
+        "menu_id": "019fd5da-400e-7096-9309-5c2bddacf293",
+        "menu_section_id": "019f6fb7-cdbb-7283-b369-fd30d244b8ea",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:38",
+        "updated_at": "2026-08-11 01:15:06"
+    },
+    {
+        "menu_id": "019fd5da-400e-7096-9309-5c2bddacf293",
+        "menu_section_id": "019f6fb7-cdbc-727b-8fbd-737c18e72696",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:38",
+        "updated_at": "2026-08-11 01:15:06"
+    },
+    {
+        "menu_id": "019fd5da-400e-7096-9309-5c2bddacf293",
+        "menu_section_id": "019f6fb7-cdbc-727b-8fbd-737c192d1e02",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:38",
+        "updated_at": "2026-08-11 01:15:06"
+    },
+    {
+        "menu_id": "019fd5da-400e-7096-9309-5c2bddacf293",
+        "menu_section_id": "019f7412-132d-715a-9f1d-a740ea2bfbf8",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:38",
+        "updated_at": "2026-08-11 01:15:06"
+    },
+    {
+        "menu_id": "019fd5da-400e-7096-9309-5c2bddacf293",
+        "menu_section_id": "019f7412-1331-70ff-8005-fc1143edf35c",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:38",
+        "updated_at": "2026-08-11 01:15:06"
+    },
+    {
+        "menu_id": "019fd5da-400e-7096-9309-5c2bddacf293",
+        "menu_section_id": "019f7412-1331-70ff-8005-fc1144a6dd80",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:38",
+        "updated_at": "2026-08-11 01:15:06"
+    },
+    {
+        "menu_id": "019fd5da-400e-7096-9309-5c2bddacf293",
+        "menu_section_id": "019f7412-1332-715b-98b3-72de34d2df01",
+        "display_order": 9,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:38",
+        "updated_at": "2026-08-11 01:15:06"
+    },
+    {
+        "menu_id": "019fd5da-400e-7096-9309-5c2bddacf293",
+        "menu_section_id": "019f7412-1332-715b-98b3-72de35cce2b6",
+        "display_order": 10,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:38",
+        "updated_at": "2026-08-11 01:15:06"
+    },
+    {
+        "menu_id": "019fd5da-400e-7096-9309-5c2bddacf293",
+        "menu_section_id": "019f88da-6666-72f6-9fe2-99f6c8ecc7d3",
+        "display_order": 1,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:38",
+        "updated_at": "2026-08-11 01:15:06"
+    },
+    {
+        "menu_id": "019fd5da-5b6b-738d-9533-c66198fb6b68",
+        "menu_section_id": "019f7e8e-0bb7-736f-8e62-fe70c1b184fc",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:45",
+        "updated_at": "2026-08-11 01:15:09"
+    },
+    {
+        "menu_id": "019fd5da-5b6b-738d-9533-c66198fb6b68",
+        "menu_section_id": "019f7e8e-0bc5-73e4-aab3-f57177c190c2",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:45",
+        "updated_at": "2026-08-11 01:15:09"
+    },
+    {
+        "menu_id": "019fd5da-5b6b-738d-9533-c66198fb6b68",
+        "menu_section_id": "019f7e8e-0bc5-73e4-aab3-f571780226b8",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:45",
+        "updated_at": "2026-08-11 01:15:09"
+    },
+    {
+        "menu_id": "019fd5da-5b6b-738d-9533-c66198fb6b68",
+        "menu_section_id": "019f7e8e-0bc5-73e4-aab3-f57178f740af",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:45",
+        "updated_at": "2026-08-11 01:15:09"
+    },
+    {
+        "menu_id": "019fd5da-5b6b-738d-9533-c66198fb6b68",
+        "menu_section_id": "019f7e8e-0bc6-70e9-9339-47244baa5402",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:45",
+        "updated_at": "2026-08-11 01:15:09"
+    },
+    {
+        "menu_id": "019fd5da-5b6b-738d-9533-c66198fb6b68",
+        "menu_section_id": "019f7e8e-0bc6-70e9-9339-47244c66f2f3",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:45",
+        "updated_at": "2026-08-11 01:15:09"
+    },
+    {
+        "menu_id": "019fd5da-5b6b-738d-9533-c66198fb6b68",
+        "menu_section_id": "019f7e8e-0bc6-70e9-9339-47244d5773ec",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:45",
+        "updated_at": "2026-08-11 01:15:09"
+    },
+    {
+        "menu_id": "019fd5da-5b6b-738d-9533-c66198fb6b68",
+        "menu_section_id": "019f7e8e-0bc6-70e9-9339-47244e0fddb5",
+        "display_order": 9,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:45",
+        "updated_at": "2026-08-11 01:15:09"
+    },
+    {
+        "menu_id": "019fd5da-5b6b-738d-9533-c66198fb6b68",
+        "menu_section_id": "019f7e8e-0bc7-7202-864a-5a53eef212c4",
+        "display_order": 10,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:45",
+        "updated_at": "2026-08-11 01:15:09"
+    },
+    {
+        "menu_id": "019fd5da-5b6b-738d-9533-c66198fb6b68",
+        "menu_section_id": "019f7e8e-0bc7-7202-864a-5a53efc35018",
+        "display_order": 11,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:45",
+        "updated_at": "2026-08-11 01:15:09"
+    },
+    {
+        "menu_id": "019fd5da-5b6b-738d-9533-c66198fb6b68",
+        "menu_section_id": "019f7e8e-0bc7-7202-864a-5a53f097d58c",
+        "display_order": 12,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:45",
+        "updated_at": "2026-08-11 01:15:09"
+    },
+    {
+        "menu_id": "019fd5da-5b6b-738d-9533-c66198fb6b68",
+        "menu_section_id": "019f88d4-df8e-7217-865d-50931d071807",
+        "display_order": 1,
+        "tax_type_id": null,
+        "created_at": "2026-08-06 06:54:45",
+        "updated_at": "2026-08-11 01:15:09"
+    },
+    {
+        "menu_id": "019fd5da-5b6b-738d-9533-c66198fb6b68",
+        "menu_section_id": "019fda95-aa59-71c2-843d-c08e0b5becdd",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-08-07 08:29:08",
+        "updated_at": "2026-08-11 01:15:09"
+    },
+    {
+        "menu_id": "019fd5da-5b6b-738d-9533-c66198fb6b68",
+        "menu_section_id": "019fda95-aa5c-73de-acda-75471d2a0cb5",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-08-07 08:29:08",
+        "updated_at": "2026-08-11 01:15:09"
+    },
+    {
+        "menu_id": "019fd5da-5b6b-738d-9533-c66198fb6b68",
+        "menu_section_id": "019fda95-aa5d-71ba-af0f-78c70f4647d1",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-08-07 08:29:08",
+        "updated_at": "2026-08-11 01:15:09"
+    },
+    {
+        "menu_id": "019fd5da-5b6b-738d-9533-c66198fb6b68",
+        "menu_section_id": "019fda95-aa5e-7337-ac2e-05b3bd4b7b72",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-08-07 08:29:08",
+        "updated_at": "2026-08-11 01:15:09"
+    },
+    {
+        "menu_id": "019fd5da-5b6b-738d-9533-c66198fb6b68",
+        "menu_section_id": "019fda95-aa5f-7330-94e5-98c28c39c0ff",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-08-07 08:29:08",
+        "updated_at": "2026-08-11 01:15:09"
+    },
+    {
+        "menu_id": "019fd5da-5b6b-738d-9533-c66198fb6b68",
+        "menu_section_id": "019fda95-aa63-7290-a51a-f32779fd9318",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-08-07 08:29:08",
+        "updated_at": "2026-08-11 01:15:09"
+    },
+    {
+        "menu_id": "019fd5da-5b6b-738d-9533-c66198fb6b68",
+        "menu_section_id": "019fda95-aa64-726b-a1bf-3eb9f7896858",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-08-07 08:29:08",
+        "updated_at": "2026-08-11 01:15:09"
+    },
+    {
+        "menu_id": "019fd5da-5b6b-738d-9533-c66198fb6b68",
+        "menu_section_id": "019fda95-aa65-7350-a409-7f187e70238e",
+        "display_order": 9,
+        "tax_type_id": null,
+        "created_at": "2026-08-07 08:29:08",
+        "updated_at": "2026-08-11 01:15:09"
+    },
+    {
+        "menu_id": "019fd5da-5b6b-738d-9533-c66198fb6b68",
+        "menu_section_id": "019fda95-aa66-71da-9b8e-71f7061a5aca",
+        "display_order": 10,
+        "tax_type_id": null,
+        "created_at": "2026-08-07 08:29:08",
+        "updated_at": "2026-08-11 01:15:09"
+    },
+    {
+        "menu_id": "019fd5da-5b6b-738d-9533-c66198fb6b68",
+        "menu_section_id": "019fda95-aa68-72ea-959e-e43992baf3cd",
+        "display_order": 11,
+        "tax_type_id": null,
+        "created_at": "2026-08-07 08:29:08",
+        "updated_at": "2026-08-11 01:15:09"
+    },
+    {
+        "menu_id": "019fd5da-5b6b-738d-9533-c66198fb6b68",
+        "menu_section_id": "019fda95-aa69-718d-808d-6be0f6ce3f25",
+        "display_order": 12,
+        "tax_type_id": null,
+        "created_at": "2026-08-07 08:29:08",
+        "updated_at": "2026-08-11 01:15:09"
+    },
+    {
+        "menu_id": "019fd5da-7963-7145-bcc4-1271a876e0e2",
+        "menu_section_id": "019fee95-15bb-706c-a278-c8602befea94",
+        "display_order": 1,
+        "tax_type_id": null,
+        "created_at": "2026-08-11 02:15:56",
+        "updated_at": "2026-08-11 02:15:56"
+    },
+    {
+        "menu_id": "019fd5da-7963-7145-bcc4-1271a876e0e2",
+        "menu_section_id": "019fee95-15be-712f-ae23-5b0a7c079c92",
+        "display_order": 2,
+        "tax_type_id": null,
+        "created_at": "2026-08-11 02:15:56",
+        "updated_at": "2026-08-11 02:15:56"
+    },
+    {
+        "menu_id": "019fd5da-7963-7145-bcc4-1271a876e0e2",
+        "menu_section_id": "019fee95-15bf-72b8-8ae4-a457ed607017",
+        "display_order": 3,
+        "tax_type_id": null,
+        "created_at": "2026-08-11 02:15:56",
+        "updated_at": "2026-08-11 02:15:56"
+    },
+    {
+        "menu_id": "019fd5da-7963-7145-bcc4-1271a876e0e2",
+        "menu_section_id": "019fee95-15c0-725a-8572-42935a731769",
+        "display_order": 4,
+        "tax_type_id": null,
+        "created_at": "2026-08-11 02:15:56",
+        "updated_at": "2026-08-11 02:15:56"
+    },
+    {
+        "menu_id": "019fd5da-7963-7145-bcc4-1271a876e0e2",
+        "menu_section_id": "019fee95-15c2-7339-b0f8-678566cd7903",
+        "display_order": 5,
+        "tax_type_id": null,
+        "created_at": "2026-08-11 02:15:56",
+        "updated_at": "2026-08-11 02:15:56"
+    },
+    {
+        "menu_id": "019fd5da-7963-7145-bcc4-1271a876e0e2",
+        "menu_section_id": "019fee95-15c3-73b2-82ec-70612db988c0",
+        "display_order": 6,
+        "tax_type_id": null,
+        "created_at": "2026-08-11 02:15:56",
+        "updated_at": "2026-08-11 02:15:56"
+    },
+    {
+        "menu_id": "019fd5da-7963-7145-bcc4-1271a876e0e2",
+        "menu_section_id": "019fee95-15c4-72e3-af12-43c441d8e595",
+        "display_order": 7,
+        "tax_type_id": null,
+        "created_at": "2026-08-11 02:15:56",
+        "updated_at": "2026-08-11 02:15:56"
+    },
+    {
+        "menu_id": "019fd5da-7963-7145-bcc4-1271a876e0e2",
+        "menu_section_id": "019fee95-15c5-72f9-9ffe-ad908d1a3500",
+        "display_order": 8,
+        "tax_type_id": null,
+        "created_at": "2026-08-11 02:15:56",
+        "updated_at": "2026-08-11 02:15:56"
+    },
+    {
+        "menu_id": "019fd5da-7963-7145-bcc4-1271a876e0e2",
+        "menu_section_id": "019fee95-15c6-7230-9f0f-2720018f9f18",
+        "display_order": 9,
+        "tax_type_id": null,
+        "created_at": "2026-08-11 02:15:56",
+        "updated_at": "2026-08-11 02:15:56"
+    },
+    {
+        "menu_id": "019fd5da-7963-7145-bcc4-1271a876e0e2",
+        "menu_section_id": "019fee95-15c7-7235-a5fd-9f4feef3ec2b",
+        "display_order": 10,
+        "tax_type_id": null,
+        "created_at": "2026-08-11 02:15:56",
+        "updated_at": "2026-08-11 02:15:56"
+    },
+    {
+        "menu_id": "019fd5da-7963-7145-bcc4-1271a876e0e2",
+        "menu_section_id": "019fee95-15c9-7129-97e6-bb6c12fef64e",
+        "display_order": 11,
+        "tax_type_id": null,
+        "created_at": "2026-08-11 02:15:56",
+        "updated_at": "2026-08-11 02:15:56"
+    }
+]

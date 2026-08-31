@@ -1,0 +1,90 @@
+# ==============================================================================
+# MenuScheduleDate (特定日 / Ngày cụ thể của lịch menu)
+# ==============================================================================
+#
+# One concrete calendar date on which a schedule row applies, for
+# `menu_schedules.recurrence_kind = SpecificDates` (#1979). Non-recurring: these
+# are the only days that row is on, and once they pass the row is simply spent.
+#
+# WHY A TABLE AND NOT A JSON COLUMN. The obvious shape is
+# `menu_schedules.specific_dates JSON`, and it was rejected on purpose: matching
+# it needs `JSON_CONTAINS` on MySQL, which has no dependable equivalent on the
+# SQLite the test suite runs. That is precisely the engine split that cost us at
+# #1970 — the `date` cast writes `'2026-02-10 00:00:00'` on SQLite while MySQL's
+# DATE column truncates, so a plain string comparison disagreed between the two
+# ON THE BOUNDARY DAY ITSELF, live on one engine and hidden on the other. A row
+# per date is matched with `=` and cannot drift that way.
+#
+# Written by: HQ admin via MenuScheduleService (full replace on update — the
+#             list is a set, and diffing a set of dates buys nothing).
+# Read by:    the four reading surfaces (getCurrentMenu,
+#             listActiveBranchMenusForShopByDay, CustomerMenuService,
+#             MenuScheduleReplicaController) through the shared date predicate.
+#
+# Business Rules:
+#   - BR-MSD01: UNIQUE(menu_schedule_id, date) — the same date twice on one row
+#     is meaningless, and a duplicate would silently double-count in any future
+#     aggregate.
+#   - BR-MSD02: ON DELETE CASCADE from the schedule. These rows have no meaning
+#     without their parent and must never outlive it as orphans.
+#   - BR-MSD03: a row whose kind is NOT SpecificDates ignores these entirely.
+#     Rows left behind by a kind change are inert, not corrupt — keeping them
+#     means switching kind back and forth does not destroy the user's list.
+#
+# ==============================================================================
+
+displayName:
+  en: Menu Schedule Date
+  ja: メニュースケジュール特定日
+  vi: Ngày cụ thể của lịch menu
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: false
+  id: Uuid
+  indexes:
+    - columns: [menu_schedule_id, date]
+      unique: true
+    # The date alone is the hot lookup: "is any schedule on today?" scans this.
+    - columns: [date]
+
+properties:
+  # The calendar date, in the BRANCH's business time (#1091). Stored as a plain
+  # date with no timezone: "5 August" means the shop's 5 August, which is a
+  # different UTC instant in Hanoi than in Tokyo.
+  date:
+    type: Date
+    filterable: true
+    defaultSort: asc
+    displayName:
+      en: Date
+      ja: 日付
+      vi: Ngày
+
+  # ==========================================================================
+  # Associations
+  # ==========================================================================
+
+  menuSchedule:
+    type: Association
+    relation: ManyToOne
+    target: MenuSchedule
+    nullable: false
+    onDelete: CASCADE
+    displayName:
+      en: Menu Schedule
+      ja: メニュースケジュール
+      vi: Lịch trình menu
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    nullable: false
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức

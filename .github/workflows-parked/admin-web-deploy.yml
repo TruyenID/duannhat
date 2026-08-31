@@ -1,0 +1,57 @@
+# Deploy lên AWS Amplify (mô hình kintai/tempo cũ): GitHub Actions trigger
+# start-job RELEASE rồi chờ kết quả — build chạy trên Amplify.
+# Amplify app: godx-tempo-admin (d3cqu96a6b470f, account famgia, Tokyo). autoBuild OFF —
+# Actions là đường deploy DUY NHẤT. IAM: gha-godx-tempo-amplify (chỉ StartJob/GetJob).
+name: Deploy to Amplify
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-amplify
+  cancel-in-progress: false
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AMPLIFY_AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AMPLIFY_AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: ap-northeast-1
+  APP_ID: d3cqu96a6b470f
+
+jobs:
+  deploy:
+    name: Amplify release
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - name: Validate production customer-web URL
+        env:
+          EXPECTED_CUSTOMER_WEB_URL: https://menu.vietorigin.jp
+        run: |
+          ACTUAL_CUSTOMER_WEB_URL=$(aws amplify get-app \
+            --app-id "$APP_ID" \
+            --query 'app.environmentVariables.NEXT_PUBLIC_CUSTOMER_WEB_URL' \
+            --output text)
+
+          if [ "$ACTUAL_CUSTOMER_WEB_URL" != "$EXPECTED_CUSTOMER_WEB_URL" ]; then
+            echo "::error::NEXT_PUBLIC_CUSTOMER_WEB_URL must be the canonical production customer domain"
+            exit 1
+          fi
+
+      - name: Start Amplify build and wait
+        run: |
+          JOB_ID=$(aws amplify start-job --app-id "$APP_ID" --branch-name main --job-type RELEASE --query 'jobSummary.jobId' --output text)
+          echo "==> job $JOB_ID started"
+          while true; do
+            STATUS=$(aws amplify get-job --app-id "$APP_ID" --branch-name main --job-id "$JOB_ID" --query 'job.summary.status' --output text)
+            case "$STATUS" in
+              SUCCEED) echo "==> deployed: https://main.$APP_ID.amplifyapp.com"; exit 0 ;;
+              FAILED|CANCELLED) echo "::error::Amplify job $STATUS"; exit 1 ;;
+              *) echo "  $STATUS…"; sleep 30 ;;
+            esac
+          done
+      - name: Smoke test
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "https://main.$APP_ID.amplifyapp.com/" || echo 000)
+          echo "smoke: HTTP $code"
+          case "$code" in 200|30*) echo OK;; *) echo "::error::smoke $code"; exit 1;; esac

@@ -1,0 +1,5 @@
+# Binary tree for workstation releases lives under ./workstation/.
+# Keep directory listing off; the HTML catalog is the Laravel /downloads route
+# (see public/.htaccess RewriteRule ^downloads/?$).
+Options -Indexes
+DirectorySlash Off

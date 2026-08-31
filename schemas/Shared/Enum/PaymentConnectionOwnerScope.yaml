@@ -1,0 +1,14 @@
+# Legal merchant connection owner scope. This is resolved from Identity's authoritative
+# hq_managed/franchise_owned projection and never inferred from UI flags or user roles.
+kind: enum
+
+displayName:
+  en: Payment Connection Owner Scope
+  ja: 決済接続の所有範囲
+  vi: Phạm vi sở hữu kết nối thanh toán
+
+values:
+  - value: hq
+    label: { en: Headquarters, ja: 本部, vi: Trụ sở chính }
+  - value: franchise
+    label: { en: Franchise Operator, ja: フランチャイズ運営者, vi: Đơn vị nhượng quyền }

@@ -1,0 +1,181 @@
+{
+  "description": "#2083 — hợp đồng CHUNG cho phép tính tiền giảm của coupon giữa Cloud (CouponService::computeDiscount) và máy trạm (coupon_service.go). Lệch ở đây nghĩa là TIỀN IN TRÊN PHIẾU khác TIỀN VÀO SỔ, và nó xuất hiện đúng lúc offline — lúc không ai đối chiếu được. Đổi công thức? Đổi file này TRƯỚC, copy sang cả hai repo, rồi mới sửa code hai phía.\n\nGIỚI HẠN đã biết: mô hình phía Go là SỐ NGUYÊN đơn vị tiền tệ, nên mọi ca ở đây dùng tiền tệ không có phần lẻ (JPY/VND — hai thị trường đang chạy). Tiền tệ có xu cần đổi mô hình, không phải đổi fixture.\n\n#2118/#2186 — khoá `value_x100` (nullable): giá trị giảm CHÍNH XÁC nhân 100 như Cloud phát trên dây (12,5% → 1250). Có mặt và khác null ⇒ phía Go dùng value_x100/100 làm phần trăm, phía PHP dùng value_x100/100 làm discount_value; vắng mặt hoặc null ⇒ cả hai dùng `value` (số đã làm tròn của feed cũ). Chỉ áp cho `percent` — `fixed` lẻ xu vẫn nằm ngoài mô hình số nguyên, xem giới hạn ở trên.",
+  "cases": [
+    {
+      "id": "percent biên .5 — CA ĐÃ LỆCH",
+      "type": "percent",
+      "value": 15,
+      "subtotal": 1005,
+      "cap": null,
+      "expected": 151,
+      "why": "#2083 — chia số nguyên cho 150 (CẮT CỤT); Cloud round(150.75)=151"
+    },
+    {
+      "id": "percent biên .5 thứ hai",
+      "type": "percent",
+      "value": 15,
+      "subtotal": 1015,
+      "cap": null,
+      "expected": 152,
+      "why": "152.25 → 152"
+    },
+    {
+      "id": "percent chia chẵn",
+      "type": "percent",
+      "value": 10,
+      "subtotal": 1000,
+      "cap": null,
+      "expected": 100,
+      "why": "không có phần lẻ, hai bản cũ/mới đều đúng"
+    },
+    {
+      "id": "percent làm tròn LÊN",
+      "type": "percent",
+      "value": 15,
+      "subtotal": 1010,
+      "cap": null,
+      "expected": 152,
+      "why": "151.5 → half-away-from-zero → 152"
+    },
+    {
+      "id": "percent làm tròn XUỐNG",
+      "type": "percent",
+      "value": 15,
+      "subtotal": 1003,
+      "cap": null,
+      "expected": 150,
+      "why": "150.45 → 150"
+    },
+    {
+      "id": "trần áp TRƯỚC khi làm tròn",
+      "type": "percent",
+      "value": 15,
+      "subtotal": 1005,
+      "cap": 150,
+      "expected": 150,
+      "why": "min(150.75, 150) = 150 → round → 150"
+    },
+    {
+      "id": "trần cao hơn raw ⇒ không cắn",
+      "type": "percent",
+      "value": 15,
+      "subtotal": 1005,
+      "cap": 200,
+      "expected": 151,
+      "why": "min(150.75, 200) = 150.75 → round → 151; trần không được nuốt phần làm tròn"
+    },
+    {
+      "id": "trần bằng đúng raw đã tròn",
+      "type": "percent",
+      "value": 15,
+      "subtotal": 1005,
+      "cap": 151,
+      "expected": 151,
+      "why": "min(150.75,151)=150.75 → 151"
+    },
+    {
+      "id": "fixed dưới subtotal",
+      "type": "fixed",
+      "value": 500,
+      "subtotal": 1000,
+      "cap": null,
+      "expected": 500,
+      "why": ""
+    },
+    {
+      "id": "fixed VƯỢT subtotal ⇒ kẹp",
+      "type": "fixed",
+      "value": 5000,
+      "subtotal": 1000,
+      "cap": null,
+      "expected": 1000,
+      "why": "Cloud min(value, subtotal); Go đã làm đúng từ đầu"
+    },
+    {
+      "id": "fixed bằng đúng subtotal",
+      "type": "fixed",
+      "value": 1000,
+      "subtotal": 1000,
+      "cap": null,
+      "expected": 1000,
+      "why": ""
+    },
+    {
+      "id": "subtotal 0",
+      "type": "percent",
+      "value": 15,
+      "subtotal": 0,
+      "cap": null,
+      "expected": 0,
+      "why": "giỏ rỗng"
+    },
+    {
+      "id": "percent 100%",
+      "type": "percent",
+      "value": 100,
+      "subtotal": 1234,
+      "cap": null,
+      "expected": 1234,
+      "why": "miễn phí trọn đơn"
+    },
+    {
+      "id": "percent 0%",
+      "type": "percent",
+      "value": 0,
+      "subtotal": 1000,
+      "cap": null,
+      "expected": 0,
+      "why": ""
+    },
+    {
+      "id": "percent lẻ 12,5% — value_x100 THẮNG value đã tròn",
+      "type": "percent",
+      "value": 13,
+      "value_x100": 1250,
+      "subtotal": 10000,
+      "cap": null,
+      "expected": 1250,
+      "why": "#2118/#2186 — Cloud round(12.5)=13 ở trường cũ ⇒ đọc value cho 1300; giá trị thật 12.5% × 10000 = 1250"
+    },
+    {
+      "id": "percent lẻ 12,5% có làm tròn",
+      "type": "percent",
+      "value": 13,
+      "value_x100": 1250,
+      "subtotal": 999,
+      "cap": null,
+      "expected": 125,
+      "why": "124.875 → round → 125; đọc NHẦM 1250 như phần trăm cho 12488 — gấp 100 lần, không có kẹp nào chặn"
+    },
+    {
+      "id": "percent 0,5% — tròn cũ thổi phồng GẤP ĐÔI",
+      "type": "percent",
+      "value": 1,
+      "value_x100": 50,
+      "subtotal": 10000,
+      "cap": null,
+      "expected": 50,
+      "why": "round(0.5)=1 ở trường cũ ⇒ 100; giá trị thật 0.5% ⇒ 50"
+    },
+    {
+      "id": "percent 7,25%",
+      "type": "percent",
+      "value": 7,
+      "value_x100": 725,
+      "subtotal": 4000,
+      "cap": null,
+      "expected": 290,
+      "why": "7.25% × 4000 = 290 chẵn; trường cũ 7% cho 280"
+    },
+    {
+      "id": "feed cũ: value_x100 null ⇒ RƠI VỀ value",
+      "type": "percent",
+      "value": 15,
+      "value_x100": null,
+      "subtotal": 1005,
+      "cap": null,
+      "expected": 151,
+      "why": "#2186 — NULL = Cloud chưa deploy tầng 1; phải dùng value như hôm nay, rơi về 0 là mất coupon im lặng"
+    }
+  ]
+}

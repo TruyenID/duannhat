@@ -1,0 +1,150 @@
+# RecallDrill schema
+# A mock recall drill record that measures traceability speed.
+# Created by org-admin/org-manager via POST /hq/{brand}/recalls/drill.
+# Does NOT quarantine real lots or send notifications — pure measurement.
+#
+# Business Rules:
+#   - BD-01: Drill selects a lot (auto-pick random if not specified)
+#   - BD-02: Walks genealogy + order tree to count affected lots/orders
+#   - BD-03: Measures elapsed seconds at checkpoints
+#   - BD-04: completeness_percent = % of affected orders with contact info
+
+displayName:
+  en: Recall Drill
+  ja: リコール訓練
+  vi: Diễn tập thu hồi
+
+kind: object
+
+options:
+  timestamps: true
+  id: Uuid
+  indexes:
+    - columns: [brand_id]
+    - columns: [organization_id]
+
+properties:
+  # Who triggered the drill
+  triggeredBy:
+    type: Association
+    relation: ManyToOne
+    target: User
+    onDelete: RESTRICT
+    displayName:
+      en: Triggered By
+      ja: 実行者
+      vi: Người thực hiện
+
+  # Which lot was selected as the drill target
+  selectedLot:
+    type: Association
+    relation: ManyToOne
+    target: MaterialLot
+    onDelete: RESTRICT
+    displayName:
+      en: Selected Lot
+      ja: 対象ロット
+      vi: Lô được chọn
+
+  # Checkpoint timestamps
+  started_at:
+    type: Timestamp
+    displayName:
+      en: Started At
+      ja: 開始日時
+      vi: Thời gian bắt đầu
+
+  affected_lots_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Affected Lots At
+      ja: 影響ロット特定日時
+      vi: Thời gian xác định lô ảnh hưởng
+    description:
+      en: "Checkpoint 1: genealogy tree walk completed"
+
+  affected_orders_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Affected Orders At
+      ja: 影響注文特定日時
+      vi: Thời gian xác định đơn ảnh hưởng
+    description:
+      en: "Checkpoint 2: order snapshot completed"
+
+  completed_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Completed At
+      ja: 完了日時
+      vi: Thời gian hoàn thành
+
+  # Metrics
+  elapsed_seconds:
+    type: Int
+    nullable: true
+    displayName:
+      en: Elapsed Seconds
+      ja: 経過秒数
+      vi: Số giây đã trôi qua
+
+  affected_lots_count:
+    type: Int
+    default: 0
+    displayName:
+      en: Affected Lots Count
+      ja: 影響ロット数
+      vi: Số lô ảnh hưởng
+
+  affected_orders_count:
+    type: Int
+    default: 0
+    displayName:
+      en: Affected Orders Count
+      ja: 影響注文数
+      vi: Số đơn ảnh hưởng
+
+  # % of affected orders with valid contact info (email/phone snapshot)
+  completeness_percent:
+    type: Decimal
+    precision: 5
+    scale: 2
+    default: 0
+    displayName:
+      en: Completeness Percent
+      ja: 完全率
+      vi: Tỷ lệ hoàn thành
+    description:
+      en: "Percentage of affected orders that have valid customer contact (email/phone)."
+
+  notes:
+    type: Text
+    nullable: true
+    displayName:
+      en: Notes
+      ja: メモ
+      vi: Ghi chú
+
+  # Org context
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: CASCADE
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu

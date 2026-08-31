@@ -1,0 +1,144 @@
+# ==============================================================================
+# IdentityInboxEntry (アイデンティティ受信箱 / Sổ nhận danh tính)
+# ==============================================================================
+#
+# The receiving end of the identity feed from Platform (ADR 0002 —
+# docs/decisions/0002-platform-tempo-identity-sync.md, issue #3199).
+#
+# Platform records every directory change into an outbox and a relay publishes
+# it (dxs-platform/platform#798, #814). This table is what Tempo does with the
+# result, and it exists for exactly two reasons — both of them about surviving a
+# transport that guarantees very little:
+#
+#   1. `event_id` is UNIQUE. SQS delivers at-least-once, so a duplicate is
+#      routine rather than exceptional; the index turns re-delivery into a cheap
+#      constraint violation instead of a second apply.
+#
+#   2. `sequence` is the producer's monotonic counter. SNS/SQS do NOT preserve
+#      order, so an event arriving behind one already applied must be dropped.
+#      Without this column a late old event would quietly roll the mirror back
+#      to a past state and nothing would report it.
+#
+# Written as schema YAML rather than a hand-written migration because
+# .githooks/pre-commit blocks the latter — every table in this repo goes through
+# Omnify codegen so the schema stays the single source of truth for the
+# TS/Go/model artifacts derived from it.
+#
+# Placed under Sso/ next to Organization/Branch/Brand: those are the rows this
+# feed keeps in step, so the schema that carries the events belongs beside the
+# schemas that receive them.
+# ==============================================================================
+
+kind: object
+
+displayName:
+  ja: アイデンティティ受信箱
+  en: Identity Inbox Entry
+  vi: Sổ nhận danh tính
+
+options:
+  # No generated service layer: the only writer is
+  # App\Services\Platform\IdentityEventConsumer, and that boundary is enforced
+  # by a test (config/domain-mutation-guard.php → aggregates.identity_feed).
+  # Tên bảng đặt tay: mặc định của generator là identity_inbox_entries, nhưng
+  # phía producer đặt identity_outbox — giữ cặp inbox/outbox đối xứng để ai đọc
+  # một đầu là đoán đúng đầu kia.
+  tableName: identity_inbox
+
+  service: false
+  timestamps: true
+  # Append-only ledger. A received event is a statement about something that
+  # happened; soft-deleting one would rewrite history rather than correct it.
+  softDelete: false
+  id: Uuid
+  indexes:
+    # The staleness check runs per resource on every single event.
+    - columns: [resource_type, resource_id, sequence]
+    # Relay/ops question: what has arrived but not been acted on?
+    - columns: [applied_at]
+
+properties:
+  event_id:
+    # THE idempotency key — the CloudEvents 1.0 `id` minted by Platform.
+    type: Uuid
+    unique: true
+    displayName:
+      ja: イベントID
+      en: Event ID
+      vi: ID sự kiện
+
+  resource_type:
+    type: String
+    length: 64
+    displayName:
+      ja: リソース種別
+      en: Resource Type
+      vi: Loại tài nguyên
+
+  resource_id:
+    type: String
+    length: 64
+    displayName:
+      ja: リソースID
+      en: Resource ID
+      vi: ID tài nguyên
+
+  event_type:
+    # Reverse-DNS CloudEvents type, e.g. jp.godx.identity.branch.updated
+    type: String
+    length: 128
+    displayName:
+      ja: イベント種別
+      en: Event Type
+      vi: Loại sự kiện
+
+  sequence:
+    # Producer-side monotonic counter; see the header note on ordering.
+    type: BigInt
+    displayName:
+      ja: シーケンス
+      en: Sequence
+      vi: Số thứ tự
+
+  payload:
+    # The mirrored fields only — Platform whitelists what crosses the boundary,
+    # so this is not a copy of the upstream row.
+    type: Json
+    displayName:
+      ja: ペイロード
+      en: Payload
+      vi: Nội dung
+
+  occurred_at:
+    # When the change happened upstream, not when we heard about it.
+    type: Timestamp
+    nullable: true
+    displayName:
+      ja: 発生日時
+      en: Occurred At
+      vi: Thời điểm phát sinh
+
+  received_at:
+    type: Timestamp
+    displayName:
+      ja: 受信日時
+      en: Received At
+      vi: Thời điểm nhận
+
+  applied_at:
+    # NULL = received but not acted on. Kept separate from `received_at` so
+    # "we have it" and "we acted on it" can never collapse into one fact.
+    type: Timestamp
+    nullable: true
+    displayName:
+      ja: 適用日時
+      en: Applied At
+      vi: Thời điểm áp dụng
+
+  apply_error:
+    type: Text
+    nullable: true
+    displayName:
+      ja: 適用エラー
+      en: Apply Error
+      vi: Lỗi khi áp dụng

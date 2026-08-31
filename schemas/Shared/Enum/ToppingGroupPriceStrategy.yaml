@@ -1,0 +1,57 @@
+kind: enum
+
+# How the per-order topping price gets computed.
+#
+# After 30 years running restaurants, these are the only two strategies
+# that actually pull weight commercially:
+#
+#   flat (default) — every selected topping charges its own extra_price.
+#     The simplest model. Use it for sauces, premium add-ons, anything
+#     where each pick is its own line item value-wise.
+#
+#   free_up_to_n  — the `free_quantity` MOST EXPENSIVE selected toppings
+#     are free; everything else charges. Drives combo deals: "Build-your-own
+#     sub: 5 toppings free, $0.75 each after", "Build-your-own pizza:
+#     first 3 toppings on the house". Customers naturally cluster picks
+#     up to N (the threshold drives upsell — they almost always max out
+#     the free tier, often add one more paid).
+#
+#     MOST expensive, not cheapest, and not "the first N picked". This line
+#     said "the cheapest" until 2026-08-13 while `ToppingGroup.yaml` said the
+#     opposite and both implementations sorted DESC — so the two schema files
+#     documented contradictory rules for the same field, and a reader had to
+#     go read `ToppingPricingService::priceFreeUpToN` and
+#     `topping_pricing.go::priceFreeUpToN` to find out which one lied. It is
+#     the customer-favourable rule (Toast / Square do the same): waiving the
+#     dearest picks is what makes "3 toppings free" feel like 3 toppings free.
+#     The unit is a UNIT, not a selection — "Mayo ×3" contributes three units
+#     to the sort, so a free tier of 2 waives two of those three.
+#
+# Tiered pricing (small/medium/large modifier sizes) is intentionally
+# NOT here — that's already covered by ToppingGroupItemSku.extra_price,
+# which lets each SKU carry its own price. Adding a `tiered` strategy
+# would be a second way to express the same thing.
+#
+# Subtraction price strategy (rebate for removing default ingredients) is
+# also intentionally NOT here — modifier_type=remove already nails that
+# requirement: extra_price is always 0 for removes, and pricing is
+# unaffected by what the customer drops.
+
+displayName:
+  ja: 価格戦略
+  en: Price Strategy
+  vi: Chiến lược giá
+
+# The `free_up_to_n` label says WHICH picks are waived, because the previous
+# wording ("First N free" / "N món đầu miễn phí") reads as "the first N you
+# picked" — an order-of-selection rule the code has never implemented. A brand
+# manager choosing the strategy from that label would price a combo deal on a
+# rule that does not exist.
+values:
+  - value: flat
+    label: { ja: 個別課金, en: Flat (per item), vi: Tính riêng từng món }
+  - value: free_up_to_n
+    label:
+      ja: 高い順にN個無料
+      en: N most expensive free
+      vi: N món đắt nhất miễn phí

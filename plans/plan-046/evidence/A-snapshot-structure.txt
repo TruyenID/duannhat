@@ -1,0 +1,4 @@
+["cash","orders","revenue","tenders","opening_float","tax_breakdown"]
+cash keys: ["sales","counted","paid_in","expected","paid_out","variance"]
+tax_breakdown: []
+revenue: {"net":0,"tax":0,"gross":0,"discount":0}

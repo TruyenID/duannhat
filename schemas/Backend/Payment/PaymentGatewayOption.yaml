@@ -1,0 +1,250 @@
+# =============================================================================
+# PaymentGatewayOption — versioned provider capability/rail/channel catalog
+# =============================================================================
+#
+# Describes what one provider integration product can potentially support. Actual
+# merchant approval lives on PaymentGatewayConnectionOption; shop/device policy can
+# only narrow it. JSON fields are non-secret, validated capability documents.
+#
+# Written by: versioned seed/release process with evidence in CAPABILITIES.md.
+# Read by: connection validation, policy resolver, admin capability explanation.
+# Uniqueness: provider + stable option code.
+# Security: no credentials, webhook secrets, tokens, PAN/CVV, or raw provider payloads.
+# =============================================================================
+
+displayName:
+  en: Payment Gateway Option
+  ja: 決済ゲートウェイオプション
+  vi: Tuỳ chọn cổng thanh toán
+
+kind: object
+
+options:
+  id: Uuid
+  timestamps: true
+  softDelete: false
+  indexes:
+    # Stable provider-local capability identity, e.g. stripe.pi.card.web.v1.
+    - columns: [provider_id, code]
+      unique: true
+      name: payment_gateway_options_provider_code_unique
+    # Resolver/admin scans by rail and release state.
+    - columns: [provider_id, rail, is_active]
+    # Time/version eligibility scan; upper bound is nullable/open-ended.
+    - columns: [effective_from, effective_to]
+
+properties:
+  provider:
+    # Provider catalog owner. RESTRICT prevents deleting referenced history.
+    type: Association
+    relation: ManyToOne
+    target: PaymentGatewayProvider
+    onDelete: RESTRICT
+    displayName:
+      en: Provider
+      ja: プロバイダー
+      vi: Nhà cung cấp
+
+  code:
+    # Immutable provider-local option identity; never a user-editable label.
+    type: String
+    length: 120
+    searchable: true
+    lookupable: true
+    rules:
+      lowercase: true
+    displayName:
+      en: Option Code
+      ja: オプションコード
+      vi: Mã tuỳ chọn
+
+  name:
+    # Localized UI name; routing always uses id/code and typed capability fields.
+    type: String
+    length: 160
+    translatable: true
+    searchable: true
+    displayName:
+      en: Name
+      ja: 名称
+      vi: Tên
+
+  integration_product:
+    # Provider API/product family, e.g. payment_intents or opa_preauth_capture.
+    type: String
+    length: 100
+    rules:
+      alphaDash: true
+      lowercase: true
+    displayName:
+      en: Integration Product
+      ja: 連携プロダクト
+      vi: Sản phẩm tích hợp
+
+  api_version:
+    # Exact provider/Tempo contract version used to interpret operations and limits.
+    type: String
+    length: 50
+    displayName:
+      en: API or Contract Version
+      ja: API・契約バージョン
+      vi: Phiên bản API hoặc hợp đồng
+
+  rail:
+    # Provider-neutral rail; method subtype and brand evidence remain separate.
+    type: EnumRef
+    enum: PaymentOptionRail
+    filterable: true
+    displayName:
+      en: Rail
+      ja: 決済レール
+      vi: Kênh giá trị
+
+  method_type:
+    # Provider-specific safe subtype such as card_present or paypay; null when immaterial.
+    type: String
+    length: 80
+    nullable: true
+    displayName:
+      en: Method Type
+      ja: 決済方式タイプ
+      vi: Loại phương thức
+
+  brands:
+    # Array of explicit safe brand codes or `account_configured`; never card data.
+    type: Json
+    displayName:
+      en: Supported Brands
+      ja: 対応ブランド
+      vi: Thương hiệu hỗ trợ
+
+  channels:
+    # Array of PaymentChannel values. Resolver requires the exact initiating channel.
+    type: Json
+    rules:
+      arrayMin: 1
+    displayName:
+      en: Channels
+      ja: チャネル
+      vi: Kênh
+
+  device_classes:
+    # Safe device capability codes such as browser, reader, tap_to_pay, or server.
+    type: Json
+    rules:
+      arrayMin: 1
+    displayName:
+      en: Device Classes
+      ja: デバイスクラス
+      vi: Lớp thiết bị
+
+  currencies:
+    # Array of {code, minor_unit}; currency support is explicit and never inferred.
+    type: Json
+    rules:
+      arrayMin: 1
+    displayName:
+      en: Currencies
+      ja: 通貨
+      vi: Tiền tệ
+
+  workflows:
+    # Array containing sale and/or authorize_capture.
+    type: Json
+    rules:
+      arrayMin: 1
+    displayName:
+      en: Workflows
+      ja: ワークフロー
+      vi: Quy trình
+
+  operations:
+    # Machine-readable operation support: supported/unsupported/conditional + predicate.
+    type: Json
+    displayName:
+      en: Operations
+      ja: オペレーション
+      vi: Thao tác
+
+  limits:
+    # Non-secret amount/window/partial/multiple limits; null means no verified data.
+    type: Json
+    nullable: true
+    displayName:
+      en: Limits
+      ja: 制限
+      vi: Giới hạn
+
+  recovery:
+    # Non-secret webhook/poll/retrieve coverage used by reconciliation planning.
+    type: Json
+    nullable: true
+    displayName:
+      en: Recovery Capabilities
+      ja: リカバリー機能
+      vi: Khả năng phục hồi
+
+  merchant_identity_requirements:
+    # Required identity kinds only (account/store/terminal); contains no identity value.
+    type: Json
+    nullable: true
+    displayName:
+      en: Merchant Identity Requirements
+      ja: 加盟店識別要件
+      vi: Yêu cầu định danh đơn vị bán hàng
+
+  revision:
+    # Monotonic catalog revision snapshotted by new attempts.
+    type: BigInt
+    unsigned: true
+    default: 1
+    rules:
+      min: 1
+    displayName:
+      en: Revision
+      ja: リビジョン
+      vi: Phiên bản sửa đổi
+
+  effective_from:
+    # Inclusive eligibility bound evaluated against operation_started_at.
+    type: Timestamp
+    displayName:
+      en: Effective From
+      ja: 有効開始
+      vi: Hiệu lực từ
+
+  effective_to:
+    # Exclusive eligibility bound; null means open-ended.
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Effective To
+      ja: 有効終了
+      vi: Hiệu lực đến
+
+  is_active:
+    # Release switch only. Merchant approval and runtime health are separate intersections.
+    type: Boolean
+    default: false
+    filterable: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+
+  sort_order:
+    # Presentation ordering only; never resolver fallback priority.
+    type: Int
+    unsigned: true
+    default: 0
+    defaultSort: asc
+    displayName:
+      en: Sort Order
+      ja: 表示順
+      vi: Thứ tự
+
+policies:
+  - forbid: [create, edit, delete]
+    desc: Capability catalog is release-managed; tenants cannot mutate provider option rows
+  - permit: [view, list]
+    desc: Catalog read for admin/effective-policy explanation surfaces

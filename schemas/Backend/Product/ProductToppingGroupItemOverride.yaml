@@ -1,0 +1,128 @@
+# =============================================================================
+# ProductToppingGroupItemOverride (商品トッピング項目上書き / Ghi đè Topping theo Sản phẩm)
+# =============================================================================
+#
+# Per-product override cho price + visibility của từng topping item trong nhóm.
+#
+# Use case:
+#   - Product A và Product B cùng dùng ToppingGroup "Sauce" nhưng cần giá
+#     "Tương ớt" khác nhau (A: 10k, B: 20k) → override_price per product.
+#   - Phở thấy hành+lá+hẹ, Bún chỉ thấy hành+lá → is_hidden=true per product.
+#
+# Mỗi row cover 1 combination (product, group, item, sku):
+#   is_hidden = true       → ẩn item này với product trong question
+#   override_price non-null → ghi đè ToppingGroupItemSku.extra_price
+#   override_price = null  → dùng giá group default (ToppingGroupItemSku.extra_price)
+#
+# Constraint (application layer):
+#   is_hidden = true → override_price PHẢI NULL (không thể vừa ẩn vừa set giá).
+#
+# Resolution logic Phase 2 POS/workstation:
+#   visible = NOT EXISTS override WHERE product_id=? AND group_id=?
+#               AND item_id=? AND is_hidden=true
+#   price   = COALESCE(override.override_price, item_sku.extra_price, sku.selling_price)
+#
+# Orphan rows khi detach group:
+#   Khi ProductToppingGroupService::syncForProduct() detach group khỏi product,
+#   override rows GIỮ NGUYÊN — nếu admin attach lại cùng group, config tự restore.
+#   Xóa hẳn chỉ khi product hoặc topping_group bị xóa (CASCADE FK).
+#
+# Composite FK rationale:
+#   Dùng (product_id, topping_group_id) thay UUID reference đến pivot vì
+#   omnify-go có bug với pivot→object ALTER migration (documented trong
+#   ProductToppingGroup.yaml). Composite FK hoạt động đúng — application layer
+#   validate attachment exists trước khi insert override row.
+#
+# Written by: HQ admin via ProductToppingGroupService::syncOverrides().
+# Read by: POS/workstation (Phase 2 — compute visible items + effective price).
+# =============================================================================
+
+displayName:
+  en: Product Topping Group Item Override
+  ja: 商品トッピング項目上書き
+  vi: Ghi đè Topping theo Sản phẩm
+
+kind: object
+
+options:
+  # No softDelete: sync pattern replaces rows entirely, no soft-delete needed
+  softDelete: false
+  timestamps: true
+  id: Uuid
+  indexes:
+    # Composite unique: 1 (product, group, item, sku) chỉ có 1 override row.
+    # product_sku_id nullable — MySQL UNIQUE allows multiple NULL; validated at app layer.
+    - columns: [product_id, topping_group_id, topping_group_item_id, product_sku_id]
+      unique: true
+      name: uq_ptgio_product_group_item_sku
+
+properties:
+  # Product cần override. CASCADE — khi product bị xoá, config override đi theo.
+  product:
+    type: Association
+    relation: ManyToOne
+    target: Product
+    onDelete: CASCADE
+    displayName:
+      en: Product
+      ja: 商品
+      vi: Sản phẩm
+
+  # ToppingGroup chứa item. CASCADE — khi group bị xoá, config override đi theo.
+  toppingGroup:
+    type: Association
+    relation: ManyToOne
+    target: ToppingGroup
+    onDelete: CASCADE
+    displayName:
+      en: Topping Group
+      ja: トッピンググループ
+      vi: Nhóm Topping
+
+  # Item cụ thể cần override. CASCADE — khi item bị xoá, override đi theo.
+  toppingGroupItem:
+    type: Association
+    relation: ManyToOne
+    target: ToppingGroupItem
+    onDelete: CASCADE
+    displayName:
+      en: Topping Group Item
+      ja: トッピンググループ項目
+      vi: Mục Topping
+
+  # SKU cụ thể cần override. nullable — NULL = override cho topping không có variant.
+  # CASCADE — khi SKU bị xoá, override đi theo.
+  productSku:
+    type: Association
+    relation: ManyToOne
+    target: ProductSku
+    nullable: true
+    onDelete: CASCADE
+    displayName:
+      en: Product SKU
+      ja: 商品SKU
+      vi: SKU sản phẩm
+
+  # Ẩn item này với product trong question.
+  # true → item không xuất hiện trong topping picker khi order product này.
+  # Constraint: is_hidden=true → override_price phải NULL (application layer).
+  is_hidden:
+    type: Boolean
+    default: false
+    displayName:
+      en: Is Hidden
+      ja: 非表示
+      vi: Ẩn
+
+  # Ghi đè giá cho item này với product này.
+  # NULL = không override — dùng ToppingGroupItemSku.extra_price (group default).
+  # Non-null = ghi đè giá; phải NULL nếu is_hidden=true.
+  override_price:
+    type: Decimal
+    precision: 15
+    scale: 2
+    nullable: true
+    displayName:
+      en: Override Price
+      ja: 上書き価格
+      vi: Giá ghi đè

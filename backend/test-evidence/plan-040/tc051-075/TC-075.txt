@@ -1,0 +1,2 @@
+POST unitcreate -> HTTP 201
+{"data":{"id":"019f1253-49d2-70ba-8ccb-a9dd62e83640","material_id":"019f1163-d040-729e-9cb3-e1dec8537abb","unit":"crate_t75","ratio":"24.0000","is_base":false,"created_at":"2026-06-29T07:41:16.000000Z","updated_at":"2026-06-29T07:41:16.000000Z"}}

@@ -1,0 +1,613 @@
+# Deploy tempo backend lên XServer Business (origin tempo-prod.godx.jp) —
+# port nguyên mẫu từ godx-kintai deploy-xserver.yml (mô hình chuẩn platform:
+# origin <slug>-prod.godx.jp, Cloudflare proxy phía trước, apigw edge-auth).
+#
+# SSH host famgia@famgia.xbiz.jp:10022 (máy XServer chung với kintai/chat).
+# Secret X_SERVER_SSH_KEY (private key) — public key đã đăng ký ở panel XServer.
+#
+# Chuẩn bị 1 lần trên server (đã làm 2026-07-05):
+#   ~/apps/tempo/.env          (từ prod coreserver + DB famgia_tempo + GODX_GATEWAY_KEY)
+#   Docroot symlink tempo-prod → ~/apps/tempo/public (workflow tự đảm bảo)
+#   DB famgia_tempo (panel XServer) — PHẢI có trước lần deploy đầu.
+
+# ⚠ WORKFLOW NÀY GHI VÀO DATABASE THẬT (#2463)
+#
+# Mỗi push vào `main` là một lần ghi vào DB production, không người trông, vào
+# bất cứ giờ nào ai đó merge — kể cả giữa giờ phục vụ. Grep `db:seed` không
+# liệt kê hết (tinker / INSERT migrations / migrate):
+#
+#   provisioner SSO: Service/ServiceInstance/ServiceUserAccess (Platform, tinker)
+#   deploy:reconcile-omnify-migrations → INSERT bảng `migrations`  (tempo)
+#   migrate --force                                    (tempo)
+#   db:seed BetoyaSeeder                               (tempo)
+#   db:seed SystemNotificationTemplateSeeder           (tempo, firstOrCreate theo key)
+#   db:seed SystemNotificationAudienceSeeder           (tempo, #2777)
+#   db:seed SystemNotificationRuleSeeder               (tempo, #2777 — SAU audience)
+#   db:seed DenominationSeeder                         (tempo, #2777)
+#   db:seed TillTenderCategorySeeder                    (tempo, #2777)
+#   service:sync-authz-manifest                        (Platform)
+#   ServiceUserAccess: CHỈ tạo dòng cho user chưa có, mặc định member
+#     (Platform, tinker — set-once; không bao giờ ghi đè role đã có)
+#
+# Đừng ghim SỐ DÒNG ở đây — bản trước ghim, rồi lệch ngay lượt sửa kế tiếp và
+# bảng trở thành thứ đọc lên thì sai.
+#
+# #2463 — NĂM khối `tinker --execute` phía TEMPO đã thành artisan command thật
+# (`deploy:reconcile-omnify-migrations`, `deploy:verify-uploads-disk`,
+# `deploy:verify-production-seed`, `deploy:export-authz-manifest`), nên chúng
+# lint được, review được như mã thường, và có test. **Đừng thêm PHP inline mới
+# vào file này** — viết một lệnh và gọi nó.
+#
+# BA khối tinker còn lại chạy trong app PLATFORM (`~/apps/id`), là repo KHÁC.
+# Lệnh cho chúng phải sinh ra ở repo đó; không gỡ được từ đây, và đó là lý do
+# chúng còn nguyên chứ không phải vì bị bỏ sót.
+#
+# Các bước `verify-*` chỉ ĐỌC. Đó là rào dữ liệu, đừng gỡ.
+#
+# LUẬT: deploy được seed DANH MỤC HỆ THỐNG (payment methods, gateway catalog,
+# authz manifest — quán không sửa được, thiếu thì POS chết). KHÔNG được quyết hộ
+# quán: menu nào bật, shop_order_settings, bàn/khu nào tồn tại. Từ lúc quán chạm
+# vào được, deploy tái áp một giá trị là cướp mất lựa chọn của họ.
+#
+# 2026-08-11 việc này tốn hai lần dịch vụ thật: HongoShopConfigSeeder (qua
+# BetoyaSeeder) tắt bốn menu khung giờ của 本郷店 lúc 06:08:01 rồi lại 07:35:06.
+# Cú suýt tệ hơn: CatalogSnapshotSeeder upsert `tables` với status='free',
+# current_order_id=null — deploy đó rơi vào lúc mọi bàn đang trống nên không ai
+# thấy; giữa giờ phục vụ nó trả bàn có khách về trống.
+#
+# Trước khi thêm bất cứ gì vào đây: bảng đó có màn hình cho quán sửa không? Nếu
+# có thì KHÔNG thuộc về file này — chạy tay. Chi tiết + rào:
+# CLAUDE.md § "Deploy production GHI VÀO DB" và
+# backend/tests/Feature/Architecture/BetoyaSeederLeavesShopOwnedStateAloneTest.php
+
+name: Deploy Backend to XServer (tempo-prod)
+
+on:
+  # Auto-deploy sau khi backend-tests full suite trên main xanh (push/merge).
+  # Tag v* vẫn giữ cho release thủ công; workflow_dispatch cho hotfix.
+  workflow_run:
+    workflows: [backend-tests]
+    types: [completed]
+    branches: [main]
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch/tag/SHA to deploy (defaults to the triggering ref)"
+        required: false
+        default: ""
+
+concurrency:
+  group: deploy-xserver-tempo
+  cancel-in-progress: false
+
+env:
+  SSH_HOST: famgia.xbiz.jp
+  SSH_PORT: "10022"
+  SSH_USER: famgia
+  APP_DIR: apps/tempo
+  DOCROOT_LINK: /home/famgia/godx.jp/public_html/tempo-prod
+  PHP_BIN: /opt/php-8.4/bin/php
+
+jobs:
+  deploy:
+    name: Build & deploy
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      startsWith(github.ref, 'refs/tags/v') ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      # Rào GIỜ PHỤC VỤ — deploy TỰ ĐỘNG chỉ chạy 23:00–09:00 JST.
+      #
+      # Vì sao rào ở đây chứ không ở branch protection: repo private ở gói free
+      # không có branch protection lẫn ruleset (API trả 403 "Upgrade to Pro"),
+      # và kể cả có thì nó cũng KHÔNG có luật theo giờ — nó chặn "merge khi CI
+      # đỏ", không chặn "merge lúc 12h trưa". Thứ gây hại không phải commit trên
+      # `main` mà là bước này: `migrate --force` cộng một loạt `db:seed` ghi
+      # thẳng vào DB của quán đang bán hàng.
+      #
+      # Án lệ, cả hai đều là dịch vụ thật:
+      #   - 2026-08-11: `HongoShopConfigSeeder` tắt bốn menu khung giờ của
+      #     本郷店 lúc 06:08 rồi lại 07:35; quán phục vụ ~50 phút với menu sai.
+      #   - 2026-08-16 11:39 JST: một promote `dev → main` chạy giữa CA TRƯA,
+      #     đúng hôm chủ dự án vừa quyết định giữ lại tới sau giờ đóng cửa. Lần
+      #     đó deploy xanh, nhưng "may" không phải là một cơ chế.
+      #
+      # Chỉ chặn đường TỰ ĐỘNG (`workflow_run` sau khi backend-tests xanh trên
+      # main). `workflow_dispatch` và tag `v*` đi qua, vì cả hai đều là hành
+      # động CÓ CHỦ Ý của một con người đang nhìn màn hình — rào này để chặn
+      # deploy không ai trông, không phải để chặn người vận hành.
+      #
+      # Đánh đổi phải nói thẳng: khi rào bật, `main` đã tiến còn production thì
+      # chưa. Đó là lý do bước này FAIL to (dấu X đỏ trên main) thay vì lặng lẽ
+      # bỏ qua — một deploy bị chặn trong im lặng sẽ bị đọc thành "đã ship".
+      - name: Rào giờ phục vụ (deploy tự động chỉ 23:00–09:00 JST)
+        if: github.event_name == 'workflow_run'
+        run: |
+          hour=$(TZ=Asia/Tokyo date +%-H)
+          now=$(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M JST')
+          if [ "$hour" -ge 9 ] && [ "$hour" -lt 23 ]; then
+            echo "::error title=Deploy bị chặn: đang trong giờ phục vụ::${now} — deploy TỰ ĐỘNG chỉ chạy 23:00–09:00 JST."
+            {
+              echo "## Deploy bị chặn — đang trong giờ phục vụ"
+              echo
+              echo "Hiện tại: **${now}**. Cửa sổ cho deploy tự động: **23:00–09:00 JST**."
+              echo
+              echo "\`main\` đã tiến nhưng **production CHƯA cập nhật**. Không có gì hỏng, và cũng chưa có gì được ship."
+              echo
+              echo "### Cách deploy khi đã đóng cửa"
+              echo
+              echo "Chạy tay workflow **Deploy Backend to XServer (tempo-prod)** (nút *Run workflow*), để trống \`ref\` là lấy \`main\`."
+              echo
+              echo "### Nếu đây là sự cố phải vá NGAY"
+              echo
+              echo "Vẫn dùng đúng nút đó — \`workflow_dispatch\` cố ý KHÔNG bị rào, vì lúc đó có người đang nhìn màn hình."
+              echo "Nhớ rằng bước deploy chạy \`migrate --force\` và nhiều \`db:seed\` ghi vào DB của quán đang bán."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          echo "OK — ${now}, ngoài giờ phục vụ."
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.event.inputs.ref || github.ref }}
+
+      - name: Assert PHP toolchain
+        run: |
+          # The JP self-hosted runner ships PHP 8.4 + Composer natively.
+          # Installing them with setup-php requires privileges unavailable on
+          # this runner and fails before deployment starts.
+          php -v | head -1
+          php -r 'exit(version_compare(PHP_VERSION, "8.4.0", ">=") ? 0 : 1);' \
+            || { echo "::error::runner needs PHP >= 8.4"; exit 1; }
+          composer --version
+
+      - name: Composer install (production, no scripts)
+        working-directory: backend
+        run: |
+          # --no-scripts: package:discover boots app và cần .env server,
+          # nên regenerate package manifest trên máy chủ sau rsync.
+          composer install --no-dev --no-interaction --prefer-dist \
+            --optimize-autoloader --no-scripts
+
+      - name: Setup SSH
+        run: |
+          install -m 700 -d "$RUNNER_TEMP/ssh"
+          printf '%s\n' "${{ secrets.X_SERVER_SSH_KEY }}" > "$RUNNER_TEMP/ssh/id_deploy"
+          chmod 600 "$RUNNER_TEMP/ssh/id_deploy"
+          ssh-keyscan -p "$SSH_PORT" "$SSH_HOST" > "$RUNNER_TEMP/ssh/known_hosts" 2>/dev/null
+
+      - name: Rsync release to XServer
+        run: |
+          rsync -az --delete \
+            -e "ssh -p $SSH_PORT -i $RUNNER_TEMP/ssh/id_deploy -o UserKnownHostsFile=$RUNNER_TEMP/ssh/known_hosts -o IdentitiesOnly=yes" \
+            --exclude='.env' \
+            --exclude='.env.*' \
+            --exclude='/storage/' \
+            --exclude='/.git/' \
+            --exclude='/node_modules/' \
+            --exclude='/bootstrap/cache/' \
+            --exclude='/tests/' \
+            --exclude='/public/downloads/' \
+            backend/ "$SSH_USER@$SSH_HOST:$APP_DIR/"
+
+      - name: Provision production Platform SSO
+        run: |
+          ssh -p "$SSH_PORT" -i "$RUNNER_TEMP/ssh/id_deploy" \
+            -o UserKnownHostsFile="$RUNNER_TEMP/ssh/known_hosts" -o IdentitiesOnly=yes \
+            "$SSH_USER@$SSH_HOST" bash -s <<'REMOTE'
+          set -euo pipefail
+
+          APP_DIR="/home/famgia/apps/tempo"
+          PLATFORM_DIR="/home/famgia/apps/id"
+          PHP="/opt/php-8.4/bin/php"
+          SSO_PAYLOAD="$(mktemp /tmp/tempo-sso.XXXXXX)"
+          PROVISIONER="$(mktemp /tmp/tempo-provision.XXXXXX.php)"
+
+          cleanup() {
+            rm -f "$SSO_PAYLOAD" "$PROVISIONER"
+          }
+          trap cleanup EXIT
+
+          [[ -f "$APP_DIR/.env" ]] || { echo '::error::Tempo production .env is missing.'; exit 1; }
+          [[ -f "$PLATFORM_DIR/artisan" ]] || { echo '::error::Platform application is missing.'; exit 1; }
+
+          # BetoyaProductionSeeder KHÔNG còn được gọi ở đây.
+          # Nó bootstrap thư mục Betoya đúng một lần, và việc đó xong từ lâu.
+          # Nhưng nhánh isTempo trong seeder ép role=admin + granted_at=now()
+          # cho mọi user nó biết, nên mỗi lần deploy lại xoá sạch phân quyền do
+          # Console đặt — đo được 97 dòng bị ghi đè mỗi lần deploy.
+          # Platform đã archive nên không sửa seeder trong repo nguồn được; bỏ
+          # lời gọi là cách duy nhất nằm trong tầm tay Tempo.
+          # Hệ quả có chủ đích: nhân viên mới thêm vào danh sách cứng của seeder
+          # sẽ KHÔNG tự được tạo trong Platform nữa — tạo qua Console.
+
+          cat > "$PROVISIONER" <<'PHP'
+          <?php
+
+          use App\Console\Models\Service;
+          use App\Console\Models\ServiceInstance;
+          use App\Console\Models\ServiceProvisioning;
+          use App\Console\Models\ServiceUserAccess;
+          use App\Core\Models\Organization;
+          use Illuminate\Support\Facades\DB;
+
+          $payloadPath = getenv('TEMPO_SSO_PAYLOAD');
+          if (! is_string($payloadPath) || $payloadPath === '') {
+              throw new RuntimeException('TEMPO_SSO_PAYLOAD is required.');
+          }
+
+          DB::transaction(function () use ($payloadPath): void {
+              $organization = Organization::query()->where('slug', 'betoya')->firstOrFail();
+              $service = Service::query()->where('slug', 'tempo')->firstOrFail();
+              $publicUrl = 'https://tempo.godx.jp';
+              $callbackUrl = $publicUrl.'/auth/callback';
+              $loginUrl = $publicUrl.'/login';
+
+              $service->update([
+                  'default_base_url' => $publicUrl,
+                  'default_redirect_uris' => [$callbackUrl],
+                  'is_active' => true,
+              ]);
+
+              $instance = ServiceInstance::query()->firstOrNew([
+                  'slug' => 'betoya-tempo-production',
+              ]);
+              $settings = array_replace_recursive($instance->settings ?? [], [
+                  'oauth' => [
+                      'require_state' => true,
+                      'require_nonce' => true,
+                      'require_pkce' => true,
+                      'strict_client_auth' => true,
+                      'allowed_scopes' => ['openid', 'profile', 'email', 'offline_access'],
+                  ],
+              ]);
+              $instance->fill([
+                  'organization_id' => $organization->getKey(),
+                  'service_id' => $service->getKey(),
+                  'name' => 'Betoya Tempo Production',
+                  'environment' => 'production',
+                  'deployment_type' => 'cloud',
+                  'base_url' => $publicUrl,
+                  'allowed_redirect_uris' => [$callbackUrl],
+                  'post_logout_redirect_uris' => [$loginUrl],
+                  'client_id' => ServiceInstance::generateClientId(),
+                  'settings' => $settings,
+                  'provision_status' => ServiceProvisioning::STATUS_READY,
+                  'provision_error' => null,
+                  'provisioned_at' => now(),
+                  'is_active' => true,
+                  'credentials_rotation_required' => false,
+                  'service_api_enabled' => true,
+              ]);
+              $clientSecret = $instance->assignFreshClientSecret();
+              $instance->save();
+
+              $userIds = ServiceUserAccess::query()
+                  ->where('organization_id', $organization->getKey())
+                  ->where('service_id', $service->getKey())
+                  ->pluck('user_id');
+
+              $lines = [
+                  'SSO_ISSUER=https://id.godx.jp',
+                  'SSO_PUBLIC_URL=https://tempo.godx.jp',
+                  'SSO_SERVICE_SLUG='.$instance->slug,
+                  'SSO_CLIENT_ID='.$instance->client_id,
+                  'SSO_CLIENT_SECRET='.$clientSecret,
+                  'SSO_ORGANIZATION_CONTEXT_ID='.$organization->console_organization_id,
+                  'SSO_ORGANIZATION_ID='.$organization->getKey(),
+                  'SSO_REDIRECT_URI='.$callbackUrl,
+                  'SSO_SCOPES="openid profile email offline_access"',
+                  'SSO_ALLOW_ORGANIZATION_SWITCHING=false',
+                  'SSO_AFTER_LOGIN=/select-context',
+                  'SSO_AFTER_LOGOUT='.$loginUrl,
+                  'SSO_FAILURE_REDIRECT=/login',
+                  'SSO_FAILURE_QUERY_PARAMETER=error',
+                  'SSO_TOKEN_COOKIE=token',
+                  'SSO_REFRESH_ENABLED=true',
+                  'SSO_PERMISSIONS_STRICT=false',
+                  'SSO_SERVICE_ID=tempo',
+                  'SSO_SYNC_AUTHZ_AUTO=false',
+                  'SSO_DEV_BYPASS=false',
+              ];
+              file_put_contents($payloadPath, implode(PHP_EOL, $lines).PHP_EOL, LOCK_EX);
+              chmod($payloadPath, 0600);
+
+              echo sprintf(
+                  "Platform SSO ready: instance=%s users=%d\n",
+                  $instance->slug,
+                  $userIds->count(),
+              );
+          });
+          PHP
+
+          (
+            cd "$PLATFORM_DIR"
+            TEMPO_SSO_PAYLOAD="$SSO_PAYLOAD" "$PHP" artisan tinker --no-interaction \
+              --execute="require '$PROVISIONER';"
+          )
+
+          working="$(mktemp "$APP_DIR/.env.sso.XXXXXX")"
+          cp "$APP_DIR/.env" "$working"
+          while IFS='=' read -r key _; do
+            [[ "$key" =~ ^SSO_[A-Z0-9_]+$ ]] || { echo '::error::Invalid SSO environment key.'; exit 1; }
+            filtered="$(mktemp "$APP_DIR/.env.sso.XXXXXX")"
+            grep -v "^${key}=" "$working" > "$filtered" || true
+            mv "$filtered" "$working"
+          done < "$SSO_PAYLOAD"
+          cat "$SSO_PAYLOAD" >> "$working"
+          chmod 600 "$working"
+          mv "$working" "$APP_DIR/.env"
+          REMOTE
+
+      # Trang tải nay là trang Next ở admin-web; `GET /downloads` của Laravel chỉ
+      # còn 301 tới đó. Controller CỐ Ý trả 503 khi biến này rỗng thay vì đoán
+      # một host — 301 sai bị mọi trình duyệt cache lại và nhìn từ ngoài không ai
+      # biết. Nhưng "cố ý 503" chỉ đúng nếu có ai đặt biến; nếu không thì URL mà
+      # workflow phát hành đang in cho quán sẽ chết. Đặt ở đây, idempotent.
+      - name: Ensure workstation downloads page URL
+        run: |
+          # Ba tham số này KHÔNG phải trang trí. `Setup SSH` ghi khoá và
+          # known_hosts vào `$RUNNER_TEMP/ssh`, chứ không vào `~/.ssh` — runner
+          # tự quản dùng chung cho nhiều repo nên nó cố ý không đụng HOME. Một
+          # lời gọi `ssh` trần vì thế KHÔNG thấy host key và chết với
+          # `Host key verification failed` (exit 255). Mọi bước SSH khác trong
+          # file này đều truyền đủ ba cờ; bước này ra đời thiếu chúng.
+          ssh -p "$SSH_PORT" -i "$RUNNER_TEMP/ssh/id_deploy" \
+            -o UserKnownHostsFile="$RUNNER_TEMP/ssh/known_hosts" -o IdentitiesOnly=yes \
+            "$SSH_USER@$SSH_HOST" bash -se <<'REMOTE'
+          set -euo pipefail
+          APP_DIR="$HOME/apps/tempo"
+          KEY=WORKSTATION_DOWNLOADS_PAGE_URL
+          VAL=https://tempo.godx.jp/downloads
+          [[ -f "$APP_DIR/.env" ]] || { echo '::error::Tempo production .env is missing.'; exit 1; }
+          working="$(mktemp "$APP_DIR/.env.dl.XXXXXX")"
+          grep -v "^${KEY}=" "$APP_DIR/.env" > "$working" || true
+          printf '%s=%s\n' "$KEY" "$VAL" >> "$working"
+          chmod 600 "$working"
+          mv "$working" "$APP_DIR/.env"
+          echo "OK — ${KEY} set"
+          REMOTE
+
+      # #3173 dựng rào "feed expected-build phải nói được điều gì đó có ích",
+      # nhưng CON SỐ thì vẫn nằm đặt tay trong `.env` của server — nên nó trôi
+      # ngay lượt phát hành kế tiếp và không rào nào thấy. Đo 2026-08-18: trang
+      # tải ở v0.8.31, `.env` vẫn v0.8.30, ba máy đứng ở v0.6.0.
+      #
+      # Con số về repo, deploy chỉ CHÉP xuống. Quyền mà #2635/#3173 giao cho HQ
+      # không mất đi, nó ĐỔI CHỖ: hãm một bản lỗi = không bump
+      # `WORKSTATION_EXPECTED_VERSION`, và bump là một PR đọc được, có history —
+      # thay vì một lần `sed` trên server không ai review.
+      #
+      # KHÔNG đọc `latest` từ manifest. Thế là deploy TỰ CHỌN, đúng thứ #3173 từ
+      # chối; và với `WORKSTATION_EXPECTED_AUTO_APPLY=true` (bật 2026-08-18) nó
+      # thành "mọi merge vào main tự khởi động lại máy quán lúc 2h sáng".
+      #
+      # Đặt TRƯỚC bước `config:cache` là load-bearing: production đọc
+      # `bootstrap/cache/config.php`, nên ghi `.env` sau lượt cache là ghi vào
+      # một file không ai đọc cho tới lần deploy sau.
+      - name: Ensure workstation expected build version
+        run: |
+          EXPECTED="$(grep -v '^[[:space:]]*#' WORKSTATION_EXPECTED_VERSION | tr -d '[:space:]')"
+          # Rác ở đây đi thẳng vào `.env` production. Feed fail-safe về
+          # `version:null` khi biến rỗng, tức một lỗi gõ KHÔNG đỏ ở đâu cả — nó
+          # chỉ lặng lẽ tắt đường cập nhật của cả fleet.
+          if [[ ! "$EXPECTED" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::WORKSTATION_EXPECTED_VERSION không hợp lệ: [$EXPECTED]"
+            exit 1
+          fi
+          # Ba cờ danh tính: xem `deploy-ssh-steps-carry-credentials.test.mjs`.
+          # Giá trị đi qua tham số vị trí vì heredoc được nháy ('REMOTE') —
+          # runner không nội suy, và env của runner không vượt qua ssh.
+          ssh -p "$SSH_PORT" -i "$RUNNER_TEMP/ssh/id_deploy" \
+            -o UserKnownHostsFile="$RUNNER_TEMP/ssh/known_hosts" -o IdentitiesOnly=yes \
+            "$SSH_USER@$SSH_HOST" bash -se -- "$EXPECTED" <<'REMOTE'
+          set -euo pipefail
+          APP_DIR="$HOME/apps/tempo"
+          KEY=WORKSTATION_EXPECTED_VERSION
+          VAL="$1"
+          [[ -f "$APP_DIR/.env" ]] || { echo '::error::Tempo production .env is missing.'; exit 1; }
+          working="$(mktemp "$APP_DIR/.env.wsver.XXXXXX")"
+          grep -v "^${KEY}=" "$APP_DIR/.env" > "$working" || true
+          printf '%s=%s\n' "$KEY" "$VAL" >> "$working"
+          chmod 600 "$working"
+          mv "$working" "$APP_DIR/.env"
+          echo "OK — ${KEY}=${VAL}"
+          REMOTE
+
+      - name: Reconcile, migrate & cache on server
+        run: |
+          # Thứ tự ở đây là load-bearing — mỗi bước sửa một dạng lệch KHÁC nhau
+          # mà `migrate` một mình không xử lý được:
+          #
+          #   1. realign-history (#1217) — migration bị ĐỔI TÊN. Laravel khớp
+          #      bảng `migrations` theo TÊN FILE, nên 160 file bị đổi tên trông
+          #      như mới toanh và `migrate` chạy lại `Schema::create` trên bảng
+          #      đã tồn tại rồi chết. PHẢI chạy trước cả bước reconcile: nếu
+          #      reconcile chèn tên file MỚI trước, hàng ghi tên CŨ còn lại sẽ
+          #      không ghép 1:1 được nữa.
+          #   2. reconcile — bảng đã tồn tại nhưng create_* chưa được ghi nhận
+          #      (nguyên mẫu từ deploy coreserver/kintai).
+          #   3. migrate.
+          #   4. heal-create-drift (#1769) — cột mà `omnify reset` gộp từ ALTER
+          #      vào create_*. Migration CREATE ấy đã chạy từ lâu và KHÔNG BAO
+          #      GIỜ chạy lại, nên `migrate` không thể vá; `migrate:status` vẫn
+          #      báo sạch. Chạy SAU migrate để đối chiếu với hình dạng cuối.
+          #
+          # Cả hai lệnh mới đều idempotent: không lệch thì báo no-op và thoát 0.
+          ssh -p "$SSH_PORT" -i "$RUNNER_TEMP/ssh/id_deploy" \
+            -o UserKnownHostsFile="$RUNNER_TEMP/ssh/known_hosts" -o IdentitiesOnly=yes \
+            "$SSH_USER@$SSH_HOST" bash -s <<REMOTE
+          set -euo pipefail
+          cd "$APP_DIR"
+          PHP="$PHP_BIN"
+
+          echo "==> clear stale bootstrap caches"
+          rm -f bootstrap/cache/packages.php bootstrap/cache/services.php bootstrap/cache/config.php
+
+          echo "==> package:discover"
+          \$PHP artisan package:discover --ansi
+
+          echo "==> reconcile omnify migrations"
+          \$PHP artisan deploy:reconcile-omnify-migrations --no-interaction
+
+          echo "==> migrate"
+          \$PHP artisan migrate --force
+
+
+          echo "==> restore the idempotent Betoya production snapshot"
+          \$PHP artisan db:seed --class=BetoyaSeeder --force --no-interaction
+
+          echo "==> restore system notification templates (firstOrCreate on key; never overwrites shop-edited copy)"
+          \$PHP artisan db:seed --class=SystemNotificationTemplateSeeder --force --no-interaction
+
+          # #2777 — bốn danh mục hệ thống nữa nằm trong danh sách `isProduction()`
+          # của `DatabaseSeeder`, mà đường deploy KHÔNG BAO GIỜ gọi `DatabaseSeeder`.
+          # Chúng chưa từng chạy ở production. Đo được: `notification_rules = 0`, và
+          # dòng `SystemNotificationRuleSeeder` mà #2451 thêm vào để vá đúng chuyện
+          # đó đã nằm im trong một danh sách không ai đọc.
+          #
+          # THỨ TỰ BẮT BUỘC: audience TRƯỚC rule — rule trỏ audience bằng
+          # `audience_name`, đảo lại thì rule dựng hụt mà không kêu.
+          #
+          # Cả bốn là danh mục hệ thống thuần: quán không sửa được, và không cái
+          # nào chạm state quán sở hữu (menu · bàn · shop_order_settings) — đo
+          # bằng `SystemCatalogSeedersReachDeployTest`.
+          echo "==> restore system notification audiences (#2777)"
+          \$PHP artisan db:seed --class=SystemNotificationAudienceSeeder --force --no-interaction
+
+          echo "==> restore system notification rules — MUST run after audiences (#2451, #2777)"
+          \$PHP artisan db:seed --class=SystemNotificationRuleSeeder --force --no-interaction
+
+          echo "==> restore cash denominations (#2777)"
+          \$PHP artisan db:seed --class=DenominationSeeder --force --no-interaction
+
+          # TillTenderTypeSeeder CỐ Ý không có ở đây — xem DELIBERATELY_OFF_DEPLOY.
+          # `till_tender_types` là từ vựng TỔ CHỨC SỬA ĐƯỢC, còn seeder ghi
+          # `is_active => true` đè lên hàng có sẵn.
+          echo "==> restore till tender CATEGORIES (system rows, is_system=true) (#2777)"
+          \$PHP artisan db:seed --class=TillTenderCategorySeeder --force --no-interaction
+
+          echo "==> caches"
+          \$PHP artisan config:cache
+          \$PHP artisan route:cache 2>/dev/null || true
+          \$PHP artisan event:cache
+          \$PHP artisan storage:link 2>/dev/null || true
+          \$PHP artisan l5-swagger:generate --all 2>/dev/null || true
+
+          echo "==> verify uploads disk config (#2184)"
+          \$PHP artisan deploy:verify-uploads-disk --no-interaction
+          # #2969 — bản sửa #2893 có một TIỀN ĐỀ ÂM THẦM. Quy thuộc webhook
+          # Stripe dựa vào STRIPE_ACCOUNT_ID; thiếu nó thì webhook rơi về lưới
+          # cuối và ghi settlement vào connection tổng hợp — tiền KHÔNG hiện ra
+          # với chủ sở hữu, webhook vẫn 200, bảng HQ vẫn hiện 0 hàng. Người vận
+          # hành không phân biệt được "đã sửa và không có tiền" với "chưa cấu
+          # hình nên không thấy tiền".
+          #
+          # Chỉ chặn khi connection tổng hợp CÒN tồn tại — tức tiền đang đi sai
+          # ngay lúc này. Sau khi ops chạy `payments:migrate-stripe-attribution
+          # --apply`, rào tự câm vĩnh viễn, không cần ai nhớ gỡ.
+          \$PHP artisan deploy:verify-stripe-attribution --no-interaction
+
+          echo "==> verify production seed invariants"
+          \$PHP artisan deploy:verify-production-seed --no-interaction
+
+          # #3173 — feed expected-build phải nói được điều gì đó có ích cho máy
+          # quán. Biến này CHƯA BAO GIỜ được đặt, nên feed trả version:null và
+          # ba máy đứng ở v0.6.0 trong khi v0.8.26 đã phát hành — dù mã tự cập
+          # nhật đã ship từ 2026-08-10. Không gì đỏ, vì không có gì sai; chỉ là
+          # không có gì được lên đạn. Rào KHÔNG tự chọn phiên bản: "quán nên ở
+          # bản nào" là quyết định #2635 giao cho HQ, và một deploy tự đẩy lên
+          # bản mới nhất sẽ lấy mất quyền hãm một bản lỗi.
+          echo "==> verify workstation expected-build feed"
+          \$PHP artisan deploy:verify-workstation-expected-version --no-interaction
+
+          echo "==> export Tempo authorization manifest"
+          \$PHP artisan deploy:export-authz-manifest /tmp/tempo-authz.php --no-interaction
+
+          echo "==> sync Tempo authorization catalog into Platform"
+          PLATFORM_DIR="/home/$SSH_USER/apps/id"
+          [[ -f "\$PLATFORM_DIR/artisan" ]] || { echo '::error::Platform application is missing.'; exit 1; }
+          (
+            cd "\$PLATFORM_DIR"
+            \$PHP artisan service:sync-authz-manifest \
+              tempo \
+              /tmp/tempo-authz.php \
+              --no-interaction
+          )
+          rm -f /tmp/tempo-authz.php
+
+          # CẤP MỘT LẦN, rồi thôi. Phân quyền là chuyện của Console — operator
+          # cấp hay thu quyền qua UI thì quyết định đó là nguồn sự thật.
+          # Bản cũ dùng updateOrCreate với role=admin cứng, nên MỖI lần deploy
+          # lại kéo toàn bộ user Betoya về admin và đạp granted_at (đo được 101
+          # dòng bị ghi đè mỗi deploy, tất cả cùng một mốc thời gian). Hạ quyền
+          # ai đó trong Console không bao giờ sống quá lần deploy kế tiếp, mà
+          # cũng không báo lỗi gì — im lặng hoàn tác.
+          # Giờ chỉ tạo dòng cho user CHƯA có, mặc định là member; đã có dòng
+          # thì không đụng tới, bất kể role là gì.
+          echo "==> bootstrap Tempo access for Betoya users that have none (set-once)"
+          (
+            cd "\$PLATFORM_DIR"
+            \$PHP artisan tinker --no-interaction --execute \
+              '\$org = App\Core\Models\Organization::query()->where("slug", "betoya")->firstOrFail(); \$service = App\Console\Models\Service::query()->where("slug", "tempo")->firstOrFail(); \$created = 0; foreach (\$org->users as \$user) { \$access = App\Console\Models\ServiceUserAccess::query()->firstOrNew(["organization_id" => \$org->getKey(), "service_id" => \$service->getKey(), "user_id" => \$user->getKey()]); if (\$access->exists) { continue; } \$access->role = "member"; \$access->granted_at = now(); \$access->save(); \$created++; } echo "Betoya Tempo access rows created: {\$created}\\n";'
+          )
+
+          # Cái kiểm "catalog rỗng" từng đứng ở đây đã dời vào
+          # 'deploy:export-authz-manifest' (#2463) — và dời lên TRƯỚC bước sync,
+          # (#2516 — comment này nằm TRONG heredoc không quote delimiter, nên
+          # backtick trong comment là command substitution CHẠY THẬT trên
+          # runner lúc expand; dấu # không cứu được. Đừng dùng backtick ở đây.)
+          # đúng chỗ của nó. Đứng ở đây nó chỉ báo động SAU khi manifest rỗng đã
+          # được đẩy vào Platform, tức sau khi mọi user đã bị tước quyền ở lần
+          # đăng nhập kế. Giờ manifest rỗng không bao giờ rời khỏi Tempo.
+          # Bất biến ở đây là "không ai bị khoá ngoài Tempo", KHÔNG phải "ai
+          # cũng là admin". Bản cũ đếm role=admin và throw nếu thiếu một người,
+          # tức bước hạ quyền hợp lệ trong Console sẽ làm gãy deploy. Nó chưa
+          # bao giờ gãy chỉ vì bước backfill ngay phía trên vừa ép mọi người về
+          # admin 0.3 giây trước — hai bước cộng lại thành một vòng khép kín tự
+          # thoả mãn. Giờ chỉ đếm SỐ DÒNG access: role nào cũng hợp lệ, nhưng
+          # user không có dòng nào thì vẫn bắt được.
+          echo "==> verify Betoya Tempo access"
+          (
+            cd "\$PLATFORM_DIR"
+            \$PHP artisan tinker --no-interaction --execute \
+              '\$org = App\Core\Models\Organization::query()->where("slug", "betoya")->firstOrFail(); \$service = App\Console\Models\Service::query()->where("slug", "tempo")->firstOrFail(); \$total = \$org->users()->count(); \$rows = App\Console\Models\ServiceUserAccess::query()->where("organization_id", \$org->getKey())->where("service_id", \$service->getKey())->whereIn("user_id", \$org->users()->select("id"))->count(); if (!(\$total > 0 && \$rows === \$total)) { \$missing = \$org->users()->whereNotIn("id", App\Console\Models\ServiceUserAccess::query()->where("organization_id", \$org->getKey())->where("service_id", \$service->getKey())->select("user_id"))->pluck("email")->implode(", "); throw new RuntimeException("Every Betoya user must have a Tempo access row — {\$rows}/{\$total}, missing: [{\$missing}]"); } echo "Betoya Tempo access rows: {\$rows}/{\$total}\\n";'
+          )
+
+          echo "==> ensure docroot symlink"
+          if [ ! -L "$DOCROOT_LINK" ]; then rm -rf "$DOCROOT_LINK"; fi
+          ln -sfn "/home/$SSH_USER/$APP_DIR/public" "$DOCROOT_LINK"
+
+          echo "==> deploy complete: https://tempo-prod.godx.jp"
+          REMOTE
+
+      - name: Smoke test (tempo-prod.godx.jp)
+        run: |
+          # /api/v1/me/context cần auth → 401/403 nghĩa là app boot + auth stack sống.
+          # 5xx hoặc trang default XServer = fail.
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 \
+            -H 'Accept: application/json' \
+            https://tempo-prod.godx.jp/api/v1/me/context || echo 000)
+          echo "smoke: HTTP $code"
+          case "$code" in
+            401|403) echo "OK — app is serving and auth is enforced";;
+            *) echo "::error::Unexpected smoke status $code"; exit 1;;
+          esac
+
+          location=$(curl -sS -o /dev/null -w '%{redirect_url}' --max-time 20 \
+            https://tempo-prod.godx.jp/auth/redirect)
+          case "$location" in
+            https://id.godx.jp/*) echo "OK — production SSO redirect is active";;
+            *) echo "::error::Unexpected SSO redirect destination"; exit 1;;
+          esac
+
+      - name: Cleanup
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/ssh"

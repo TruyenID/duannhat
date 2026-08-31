@@ -1,0 +1,776 @@
+[
+    {
+        "id": 43,
+        "topping_group_id": "019f408b-840e-7116-bc3b-7dc619240270",
+        "locale": "ja",
+        "name": "辛さレベル"
+    },
+    {
+        "id": 44,
+        "topping_group_id": "019f408b-840e-7116-bc3b-7dc619240270",
+        "locale": "en",
+        "name": "Spice level"
+    },
+    {
+        "id": 45,
+        "topping_group_id": "019f408b-840e-7116-bc3b-7dc619240270",
+        "locale": "vi",
+        "name": "Mức độ cay"
+    },
+    {
+        "id": 46,
+        "topping_group_id": "019f408b-842b-7317-9c70-89a1fc0359d3",
+        "locale": "ja",
+        "name": "甘さ"
+    },
+    {
+        "id": 47,
+        "topping_group_id": "019f408b-842b-7317-9c70-89a1fc0359d3",
+        "locale": "en",
+        "name": "Sweetness"
+    },
+    {
+        "id": 48,
+        "topping_group_id": "019f408b-842b-7317-9c70-89a1fc0359d3",
+        "locale": "vi",
+        "name": "Độ ngọt"
+    },
+    {
+        "id": 49,
+        "topping_group_id": "019f408b-844a-70e7-b44d-62725b5cf8cb",
+        "locale": "ja",
+        "name": "氷レベル"
+    },
+    {
+        "id": 50,
+        "topping_group_id": "019f408b-844a-70e7-b44d-62725b5cf8cb",
+        "locale": "en",
+        "name": "Ice level"
+    },
+    {
+        "id": 51,
+        "topping_group_id": "019f408b-844a-70e7-b44d-62725b5cf8cb",
+        "locale": "vi",
+        "name": "Lượng đá"
+    },
+    {
+        "id": 52,
+        "topping_group_id": "019f408b-8465-7074-ba79-2547ee616ae8",
+        "locale": "ja",
+        "name": "トッピング追加"
+    },
+    {
+        "id": 53,
+        "topping_group_id": "019f408b-8465-7074-ba79-2547ee616ae8",
+        "locale": "en",
+        "name": "Add-ons"
+    },
+    {
+        "id": 54,
+        "topping_group_id": "019f408b-8465-7074-ba79-2547ee616ae8",
+        "locale": "vi",
+        "name": "Thêm nguyên liệu"
+    },
+    {
+        "id": 55,
+        "topping_group_id": "019f408b-848a-705e-b51c-58dfb1cb5c84",
+        "locale": "ja",
+        "name": "ドリンクトッピング（1つ無料）"
+    },
+    {
+        "id": 56,
+        "topping_group_id": "019f408b-848a-705e-b51c-58dfb1cb5c84",
+        "locale": "en",
+        "name": "Drink toppings (1st free)"
+    },
+    {
+        "id": 57,
+        "topping_group_id": "019f408b-848a-705e-b51c-58dfb1cb5c84",
+        "locale": "vi",
+        "name": "Topping đồ uống (1 miễn phí)"
+    },
+    {
+        "id": 58,
+        "topping_group_id": "019f408b-84a9-7353-a7c6-40ba03730b8f",
+        "locale": "ja",
+        "name": "ソース"
+    },
+    {
+        "id": 59,
+        "topping_group_id": "019f408b-84a9-7353-a7c6-40ba03730b8f",
+        "locale": "en",
+        "name": "Sauce"
+    },
+    {
+        "id": 60,
+        "topping_group_id": "019f408b-84a9-7353-a7c6-40ba03730b8f",
+        "locale": "vi",
+        "name": "Nước sốt"
+    },
+    {
+        "id": 61,
+        "topping_group_id": "019f408b-84c6-715d-93a0-2123ecca5f32",
+        "locale": "ja",
+        "name": "材料を省く"
+    },
+    {
+        "id": 62,
+        "topping_group_id": "019f408b-84c6-715d-93a0-2123ecca5f32",
+        "locale": "en",
+        "name": "Remove ingredients"
+    },
+    {
+        "id": 63,
+        "topping_group_id": "019f408b-84c6-715d-93a0-2123ecca5f32",
+        "locale": "vi",
+        "name": "Bỏ bớt nguyên liệu"
+    },
+    {
+        "id": 66,
+        "topping_group_id": "019f6efc-c881-7224-a7ec-a59a4538ac3e",
+        "locale": "en",
+        "name": "Juice"
+    },
+    {
+        "id": 67,
+        "topping_group_id": "019f6efc-c8aa-73cd-af12-577a8ec6c3e7",
+        "locale": "en",
+        "name": "Quick Drink Beer"
+    },
+    {
+        "id": 68,
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "locale": "en",
+        "name": "Noodle Portion"
+    },
+    {
+        "id": 69,
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "locale": "en",
+        "name": "Pho Toppings"
+    },
+    {
+        "id": 70,
+        "topping_group_id": "019f6efc-c931-738f-999a-1c41658655e3",
+        "locale": "en",
+        "name": "Bun Toppings"
+    },
+    {
+        "id": 71,
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "locale": "en",
+        "name": "Banh Mi Toppings"
+    },
+    {
+        "id": 72,
+        "topping_group_id": "019f6efc-c952-707c-abb3-f4c345f59802",
+        "locale": "en",
+        "name": "Takeaway Pho Toppings"
+    },
+    {
+        "id": 73,
+        "topping_group_id": "019f6efc-c970-730b-9b24-c7def946a9bf",
+        "locale": "en",
+        "name": "Pho Noodle Portion"
+    },
+    {
+        "id": 74,
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "locale": "en",
+        "name": "Spice Level"
+    },
+    {
+        "id": 75,
+        "topping_group_id": "019f6efc-c9a0-7109-89a4-620271a0b4d1",
+        "locale": "en",
+        "name": "Bun Bo Hue Spice Level"
+    },
+    {
+        "id": 76,
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "locale": "en",
+        "name": "Coriander"
+    },
+    {
+        "id": 77,
+        "topping_group_id": "019f6efc-c9a6-7139-babf-8486c57889b8",
+        "locale": "en",
+        "name": "Whiskey Options"
+    },
+    {
+        "id": 78,
+        "topping_group_id": "019f6efc-c9ad-72c2-9470-1f4cfd1e2ddb",
+        "locale": "en",
+        "name": "Gin Options"
+    },
+    {
+        "id": 79,
+        "topping_group_id": "019f6efc-c9b2-710c-8f1f-d9f434a2798d",
+        "locale": "en",
+        "name": "Lua Moi"
+    },
+    {
+        "id": 80,
+        "topping_group_id": "019f6efc-c9b7-731a-862a-998ff0e2f11b",
+        "locale": "en",
+        "name": "Nep Moi / Nep Cam"
+    },
+    {
+        "id": 81,
+        "topping_group_id": "019f6efc-c9bc-7231-9c42-03b9ea0da6f4",
+        "locale": "en",
+        "name": "Jasmine"
+    },
+    {
+        "id": 82,
+        "topping_group_id": "019f6efc-c9bf-72aa-a3f6-9e6a7c70f8bd",
+        "locale": "en",
+        "name": "Coffee Hot/Iced"
+    },
+    {
+        "id": 83,
+        "topping_group_id": "019f6efc-c9c2-71c0-8418-32bc20f6bf5c",
+        "locale": "en",
+        "name": "Coffee Type"
+    },
+    {
+        "id": 84,
+        "topping_group_id": "019f6efc-c9c6-72fa-82aa-c351c5ce26fe",
+        "locale": "en",
+        "name": "Daytime Coffee"
+    },
+    {
+        "id": 85,
+        "topping_group_id": "019f6efc-c9c9-7362-bb06-cd35901b8168",
+        "locale": "en",
+        "name": "Lunch Add-on Deal"
+    },
+    {
+        "id": 86,
+        "topping_group_id": "019f6efc-c9d0-715c-a8c6-a49ba8bf152c",
+        "locale": "en",
+        "name": "Rice"
+    },
+    {
+        "id": 87,
+        "topping_group_id": "019f6efc-c9d6-73ab-8dc2-55bc03588b3b",
+        "locale": "en",
+        "name": "Lunch Set Noodles"
+    },
+    {
+        "id": 88,
+        "topping_group_id": "019f6efc-c9df-7210-a702-1314f52bda00",
+        "locale": "en",
+        "name": "Lunch Set Bun"
+    },
+    {
+        "id": 89,
+        "topping_group_id": "019f6efc-c9e7-738f-b305-cdf26cf067bf",
+        "locale": "en",
+        "name": "Banh Mi Type"
+    },
+    {
+        "id": 90,
+        "topping_group_id": "019f6efc-c9f1-739c-b428-a2ff22d7b61c",
+        "locale": "en",
+        "name": "Mini Pho Noodle Type"
+    },
+    {
+        "id": 91,
+        "topping_group_id": "019f6efc-c9f6-7353-bffe-7c4478da6ef5",
+        "locale": "en",
+        "name": "Che Type"
+    },
+    {
+        "id": 92,
+        "topping_group_id": "019f6efc-c9fa-73db-a3cc-4be65bc88b47",
+        "locale": "en",
+        "name": "Salad Type"
+    },
+    {
+        "id": 93,
+        "topping_group_id": "019f6efc-c9fd-703a-9314-ccda45ccb762",
+        "locale": "en",
+        "name": "Fried Chicken Size"
+    },
+    {
+        "id": 94,
+        "topping_group_id": "019f6efc-ca01-73b8-b7f1-196023afa95f",
+        "locale": "en",
+        "name": "Kids Pho Set"
+    },
+    {
+        "id": 95,
+        "topping_group_id": "019f6efc-ca04-7215-960f-a5694f19e6dd",
+        "locale": "en",
+        "name": "Mini Pho Add-on"
+    },
+    {
+        "id": 96,
+        "topping_group_id": "019f6efc-ca08-70a7-bddb-10552f751c89",
+        "locale": "en",
+        "name": "Chilled Noodles"
+    },
+    {
+        "id": 97,
+        "topping_group_id": "019f6efc-ca0d-7108-bd6e-85df840129c3",
+        "locale": "en",
+        "name": "TOPPE"
+    },
+    {
+        "id": 98,
+        "topping_group_id": "019f6efc-ca11-7351-92c5-10c11c039b4c",
+        "locale": "en",
+        "name": "Spring Roll Set"
+    },
+    {
+        "id": 99,
+        "topping_group_id": "019f6efc-c881-7224-a7ec-a59a4538ac3e",
+        "locale": "ja",
+        "name": "ジュース"
+    },
+    {
+        "id": 100,
+        "topping_group_id": "019f6efc-c881-7224-a7ec-a59a4538ac3e",
+        "locale": "vi",
+        "name": "Nước ép"
+    },
+    {
+        "id": 101,
+        "topping_group_id": "019f6efc-c8aa-73cd-af12-577a8ec6c3e7",
+        "locale": "ja",
+        "name": "ちょい飲みビール"
+    },
+    {
+        "id": 102,
+        "topping_group_id": "019f6efc-c8aa-73cd-af12-577a8ec6c3e7",
+        "locale": "vi",
+        "name": "Bia uống nhanh"
+    },
+    {
+        "id": 103,
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "locale": "ja",
+        "name": "麺の量"
+    },
+    {
+        "id": 104,
+        "topping_group_id": "019f6efc-c8c0-731b-a4c4-e39baabadb6b",
+        "locale": "vi",
+        "name": "Lượng mì"
+    },
+    {
+        "id": 105,
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "locale": "ja",
+        "name": "フォーのトッピング"
+    },
+    {
+        "id": 106,
+        "topping_group_id": "019f6efc-c917-7344-905d-3c96f991bbb3",
+        "locale": "vi",
+        "name": "Topping phở"
+    },
+    {
+        "id": 107,
+        "topping_group_id": "019f6efc-c931-738f-999a-1c41658655e3",
+        "locale": "ja",
+        "name": "ブンのトッピング"
+    },
+    {
+        "id": 108,
+        "topping_group_id": "019f6efc-c931-738f-999a-1c41658655e3",
+        "locale": "vi",
+        "name": "Topping bún"
+    },
+    {
+        "id": 109,
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "locale": "ja",
+        "name": "バインミーのトッピング"
+    },
+    {
+        "id": 110,
+        "topping_group_id": "019f6efc-c940-73f4-8b52-f29f91ad864a",
+        "locale": "vi",
+        "name": "Topping bánh mì"
+    },
+    {
+        "id": 111,
+        "topping_group_id": "019f6efc-c952-707c-abb3-f4c345f59802",
+        "locale": "ja",
+        "name": "フォー持ち帰りトッピング"
+    },
+    {
+        "id": 112,
+        "topping_group_id": "019f6efc-c952-707c-abb3-f4c345f59802",
+        "locale": "vi",
+        "name": "Topping phở mang về"
+    },
+    {
+        "id": 113,
+        "topping_group_id": "019f6efc-c970-730b-9b24-c7def946a9bf",
+        "locale": "ja",
+        "name": "フォー麺の量"
+    },
+    {
+        "id": 114,
+        "topping_group_id": "019f6efc-c970-730b-9b24-c7def946a9bf",
+        "locale": "vi",
+        "name": "Lượng bánh phở"
+    },
+    {
+        "id": 115,
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "locale": "ja",
+        "name": "辛さ"
+    },
+    {
+        "id": 116,
+        "topping_group_id": "019f6efc-c985-7202-84d5-209bb6148eac",
+        "locale": "vi",
+        "name": "Độ cay"
+    },
+    {
+        "id": 117,
+        "topping_group_id": "019f6efc-c9a0-7109-89a4-620271a0b4d1",
+        "locale": "ja",
+        "name": "BBH辛さ"
+    },
+    {
+        "id": 118,
+        "topping_group_id": "019f6efc-c9a0-7109-89a4-620271a0b4d1",
+        "locale": "vi",
+        "name": "Độ cay bún bò Huế"
+    },
+    {
+        "id": 119,
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "locale": "ja",
+        "name": "パクチー"
+    },
+    {
+        "id": 120,
+        "topping_group_id": "019f6efc-c9a4-737b-aecc-6f038b6d1f01",
+        "locale": "vi",
+        "name": "Rau mùi"
+    },
+    {
+        "id": 121,
+        "topping_group_id": "019f6efc-c9a6-7139-babf-8486c57889b8",
+        "locale": "ja",
+        "name": "Whiskeyオプション"
+    },
+    {
+        "id": 122,
+        "topping_group_id": "019f6efc-c9a6-7139-babf-8486c57889b8",
+        "locale": "vi",
+        "name": "Tùy chọn whisky"
+    },
+    {
+        "id": 123,
+        "topping_group_id": "019f6efc-c9ad-72c2-9470-1f4cfd1e2ddb",
+        "locale": "ja",
+        "name": "Ginオプション"
+    },
+    {
+        "id": 124,
+        "topping_group_id": "019f6efc-c9ad-72c2-9470-1f4cfd1e2ddb",
+        "locale": "vi",
+        "name": "Tùy chọn gin"
+    },
+    {
+        "id": 125,
+        "topping_group_id": "019f6efc-c9b2-710c-8f1f-d9f434a2798d",
+        "locale": "ja",
+        "name": "ルアモイ"
+    },
+    {
+        "id": 126,
+        "topping_group_id": "019f6efc-c9b2-710c-8f1f-d9f434a2798d",
+        "locale": "vi",
+        "name": "Lúa Mới"
+    },
+    {
+        "id": 127,
+        "topping_group_id": "019f6efc-c9b7-731a-862a-998ff0e2f11b",
+        "locale": "ja",
+        "name": "ネップモイ・ネップカム"
+    },
+    {
+        "id": 128,
+        "topping_group_id": "019f6efc-c9b7-731a-862a-998ff0e2f11b",
+        "locale": "vi",
+        "name": "Nếp mới / nếp cẩm"
+    },
+    {
+        "id": 129,
+        "topping_group_id": "019f6efc-c9bc-7231-9c42-03b9ea0da6f4",
+        "locale": "ja",
+        "name": "茉莉花"
+    },
+    {
+        "id": 130,
+        "topping_group_id": "019f6efc-c9bc-7231-9c42-03b9ea0da6f4",
+        "locale": "vi",
+        "name": "Hoa nhài"
+    },
+    {
+        "id": 131,
+        "topping_group_id": "019f6efc-c9bf-72aa-a3f6-9e6a7c70f8bd",
+        "locale": "ja",
+        "name": "コーヒー Hot/Ice"
+    },
+    {
+        "id": 132,
+        "topping_group_id": "019f6efc-c9bf-72aa-a3f6-9e6a7c70f8bd",
+        "locale": "vi",
+        "name": "Cà phê nóng/đá"
+    },
+    {
+        "id": 133,
+        "topping_group_id": "019f6efc-c9c2-71c0-8418-32bc20f6bf5c",
+        "locale": "ja",
+        "name": "コーヒー種類"
+    },
+    {
+        "id": 134,
+        "topping_group_id": "019f6efc-c9c2-71c0-8418-32bc20f6bf5c",
+        "locale": "vi",
+        "name": "Loại cà phê"
+    },
+    {
+        "id": 135,
+        "topping_group_id": "019f6efc-c9c6-72fa-82aa-c351c5ce26fe",
+        "locale": "ja",
+        "name": "昼間コーヒー"
+    },
+    {
+        "id": 136,
+        "topping_group_id": "019f6efc-c9c6-72fa-82aa-c351c5ce26fe",
+        "locale": "vi",
+        "name": "Cà phê ban ngày"
+    },
+    {
+        "id": 137,
+        "topping_group_id": "019f6efc-c9c9-7362-bb06-cd35901b8168",
+        "locale": "ja",
+        "name": "ランチ一緒にお得"
+    },
+    {
+        "id": 138,
+        "topping_group_id": "019f6efc-c9c9-7362-bb06-cd35901b8168",
+        "locale": "vi",
+        "name": "Ưu đãi gọi kèm bữa trưa"
+    },
+    {
+        "id": 139,
+        "topping_group_id": "019f6efc-c9d0-715c-a8c6-a49ba8bf152c",
+        "locale": "ja",
+        "name": "ご飯"
+    },
+    {
+        "id": 140,
+        "topping_group_id": "019f6efc-c9d0-715c-a8c6-a49ba8bf152c",
+        "locale": "vi",
+        "name": "Cơm"
+    },
+    {
+        "id": 141,
+        "topping_group_id": "019f6efc-c9d6-73ab-8dc2-55bc03588b3b",
+        "locale": "ja",
+        "name": "フォー麺類"
+    },
+    {
+        "id": 142,
+        "topping_group_id": "019f6efc-c9d6-73ab-8dc2-55bc03588b3b",
+        "locale": "vi",
+        "name": "Mì trong combo trưa"
+    },
+    {
+        "id": 143,
+        "topping_group_id": "019f6efc-c9df-7210-a702-1314f52bda00",
+        "locale": "ja",
+        "name": "ブン麺類"
+    },
+    {
+        "id": 144,
+        "topping_group_id": "019f6efc-c9df-7210-a702-1314f52bda00",
+        "locale": "vi",
+        "name": "Bún trong combo trưa"
+    },
+    {
+        "id": 145,
+        "topping_group_id": "019f6efc-c9e7-738f-b305-cdf26cf067bf",
+        "locale": "ja",
+        "name": "バインミー種類"
+    },
+    {
+        "id": 146,
+        "topping_group_id": "019f6efc-c9e7-738f-b305-cdf26cf067bf",
+        "locale": "vi",
+        "name": "Loại bánh mì"
+    },
+    {
+        "id": 147,
+        "topping_group_id": "019f6efc-c9f1-739c-b428-a2ff22d7b61c",
+        "locale": "ja",
+        "name": "ミニフォー麺類"
+    },
+    {
+        "id": 148,
+        "topping_group_id": "019f6efc-c9f1-739c-b428-a2ff22d7b61c",
+        "locale": "vi",
+        "name": "Loại bánh phở mini"
+    },
+    {
+        "id": 149,
+        "topping_group_id": "019f6efc-c9f6-7353-bffe-7c4478da6ef5",
+        "locale": "ja",
+        "name": "チェー種類"
+    },
+    {
+        "id": 150,
+        "topping_group_id": "019f6efc-c9f6-7353-bffe-7c4478da6ef5",
+        "locale": "vi",
+        "name": "Loại chè"
+    },
+    {
+        "id": 151,
+        "topping_group_id": "019f6efc-c9fa-73db-a3cc-4be65bc88b47",
+        "locale": "ja",
+        "name": "サラダ種類"
+    },
+    {
+        "id": 152,
+        "topping_group_id": "019f6efc-c9fa-73db-a3cc-4be65bc88b47",
+        "locale": "vi",
+        "name": "Loại salad"
+    },
+    {
+        "id": 153,
+        "topping_group_id": "019f6efc-c9fd-703a-9314-ccda45ccb762",
+        "locale": "ja",
+        "name": "唐揚げサイズ"
+    },
+    {
+        "id": 154,
+        "topping_group_id": "019f6efc-c9fd-703a-9314-ccda45ccb762",
+        "locale": "vi",
+        "name": "Cỡ gà chiên"
+    },
+    {
+        "id": 155,
+        "topping_group_id": "019f6efc-ca01-73b8-b7f1-196023afa95f",
+        "locale": "ja",
+        "name": "子どもフォーセット"
+    },
+    {
+        "id": 156,
+        "topping_group_id": "019f6efc-ca01-73b8-b7f1-196023afa95f",
+        "locale": "vi",
+        "name": "Combo phở trẻ em"
+    },
+    {
+        "id": 157,
+        "topping_group_id": "019f6efc-ca04-7215-960f-a5694f19e6dd",
+        "locale": "ja",
+        "name": "ちょい飲みフォーミニ"
+    },
+    {
+        "id": 158,
+        "topping_group_id": "019f6efc-ca04-7215-960f-a5694f19e6dd",
+        "locale": "vi",
+        "name": "Phở mini gọi thêm"
+    },
+    {
+        "id": 159,
+        "topping_group_id": "019f6efc-ca08-70a7-bddb-10552f751c89",
+        "locale": "ja",
+        "name": "冷やし麺類"
+    },
+    {
+        "id": 160,
+        "topping_group_id": "019f6efc-ca08-70a7-bddb-10552f751c89",
+        "locale": "vi",
+        "name": "Mì lạnh"
+    },
+    {
+        "id": 161,
+        "topping_group_id": "019f6efc-ca0d-7108-bd6e-85df840129c3",
+        "locale": "ja",
+        "name": "TOPPE"
+    },
+    {
+        "id": 162,
+        "topping_group_id": "019f6efc-ca0d-7108-bd6e-85df840129c3",
+        "locale": "vi",
+        "name": "TOPPE"
+    },
+    {
+        "id": 163,
+        "topping_group_id": "019f6efc-ca11-7351-92c5-10c11c039b4c",
+        "locale": "ja",
+        "name": "春巻きセット"
+    },
+    {
+        "id": 164,
+        "topping_group_id": "019f6efc-ca11-7351-92c5-10c11c039b4c",
+        "locale": "vi",
+        "name": "Combo nem cuốn"
+    },
+    {
+        "id": 165,
+        "topping_group_id": "019f6f3a-86bc-7347-aa37-fe869048a70a",
+        "locale": "ja",
+        "name": "Lサイズ"
+    },
+    {
+        "id": 166,
+        "topping_group_id": "019f6f3a-86bc-7347-aa37-fe869048a70a",
+        "locale": "en",
+        "name": "Large Size"
+    },
+    {
+        "id": 167,
+        "topping_group_id": "019f6f3a-86bc-7347-aa37-fe869048a70a",
+        "locale": "vi",
+        "name": "Cỡ lớn"
+    },
+    {
+        "id": 168,
+        "topping_group_id": "019f88aa-6d0f-7051-86ed-3de6b68701b0",
+        "locale": "ja",
+        "name": "ジュース（お子様）"
+    },
+    {
+        "id": 169,
+        "topping_group_id": "019fd635-82d5-7152-ba44-c8191e4a8278",
+        "locale": "ja",
+        "name": "冷やしフォー肉類"
+    },
+    {
+        "id": 170,
+        "topping_group_id": "019fd635-82d5-7152-ba44-c8191e4a8278",
+        "locale": "vi",
+        "name": "Loại thịt"
+    },
+    {
+        "id": 171,
+        "topping_group_id": "019f88aa-6d0f-7051-86ed-3de6b68701b0",
+        "locale": "vi",
+        "name": "Nước ngọt (trẻ em)"
+    },
+    {
+        "id": 172,
+        "topping_group_id": "019fdb31-24c9-7132-ac74-af3f89174f09",
+        "locale": "vi",
+        "name": "Chạo tôm"
+    },
+    {
+        "id": 173,
+        "topping_group_id": "019fdb31-24c9-7132-ac74-af3f89174f09",
+        "locale": "ja",
+        "name": "エビのすり身揚げ"
+    }
+]

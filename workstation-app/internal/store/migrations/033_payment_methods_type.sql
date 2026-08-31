@@ -1,0 +1,13 @@
+-- Plan-038 T11.9 — workstation-local payment_methods.type column.
+--
+-- Mirrors cloud's plan-038 T10.1 migration so the workstation's local
+-- pos_payment_methods (and payment_methods if present locally) can carry
+-- the on_account enum value. Used by:
+--   - ComputeTillDebtSummary (T10.11)
+--   - The future Wails settings UI (T9.5) so the operator can see at a
+--     glance which method is the debt one.
+--
+-- The column is added defensively when the table exists locally. Some
+-- workstation builds only mirror a subset of POS replicas; we ignore
+-- ADD COLUMN failures on absent tables.
+ALTER TABLE payment_methods ADD COLUMN type TEXT NOT NULL DEFAULT 'cash';

@@ -1,0 +1,51 @@
+[
+    {
+        "id": 15,
+        "allergen_id": "019f408b-036f-735c-be78-0929fc8564bd",
+        "material_id": "019f408b-05c9-72f2-992f-0a08bbe3c60f",
+        "created_at": "2026-07-08 07:04:40",
+        "updated_at": "2026-07-08 07:04:40"
+    },
+    {
+        "id": 16,
+        "allergen_id": "019f408b-0373-72a8-b990-b8b2b2a0253b",
+        "material_id": "019f408b-05cc-707f-8343-a21af00fadd9",
+        "created_at": "2026-07-08 07:04:40",
+        "updated_at": "2026-07-08 07:04:40"
+    },
+    {
+        "id": 17,
+        "allergen_id": "019f408b-0375-72ac-9b54-d34e8e39c34c",
+        "material_id": "019f408b-05d0-7248-b4cf-cb4bf4670906",
+        "created_at": "2026-07-08 07:04:40",
+        "updated_at": "2026-07-08 07:04:40"
+    },
+    {
+        "id": 18,
+        "allergen_id": "019f408b-036f-735c-be78-0929fc8564bd",
+        "material_id": "019f408b-05d4-7055-a8ab-3c3dd6f7f121",
+        "created_at": "2026-07-08 07:04:40",
+        "updated_at": "2026-07-08 07:04:40"
+    },
+    {
+        "id": 19,
+        "allergen_id": "019f408b-038e-7376-b25f-a8cb25490d21",
+        "material_id": "019f408b-05d4-7055-a8ab-3c3dd6f7f121",
+        "created_at": "2026-07-08 07:04:40",
+        "updated_at": "2026-07-08 07:04:40"
+    },
+    {
+        "id": 20,
+        "allergen_id": "019f408b-0375-72ac-9b54-d34e8e39c34c",
+        "material_id": "019f408b-05d9-715e-b16b-29d2978ea83b",
+        "created_at": "2026-07-08 07:04:40",
+        "updated_at": "2026-07-08 07:04:40"
+    },
+    {
+        "id": 21,
+        "allergen_id": "019f408b-0369-72ef-8bb2-3c4e0d31e5d4",
+        "material_id": "019f408b-05dd-7102-ba2d-7ad82dfc4c44",
+        "created_at": "2026-07-08 07:04:40",
+        "updated_at": "2026-07-08 07:04:40"
+    }
+]

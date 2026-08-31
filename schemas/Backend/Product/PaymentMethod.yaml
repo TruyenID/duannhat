@@ -1,0 +1,163 @@
+# PaymentMethod schema
+# Hình thức thanh toán — bảng thay thế PaymentMethod enum cũ.
+# Shop có thể tự thêm/sửa payment method qua admin UI mà không cần deploy code.
+#
+# Written by: admin shop qua PaymentMethodService (hoặc seeder cho defaults)
+# Read by: POS khi tạo payment, báo cáo đối soát
+#
+# Business Rules:
+#   - BR-PM01: code unique theo organization + deterministic global/branch scope
+#   - BR-PM02: is_auto_confirm=true → payment tự confirm khi tạo (VD: cash)
+#   - BR-PM03: requires_tendered=true → bắt buộc nhập tendered_amount (VD: cash)
+#   - BR-PM04: is_active=false → POS không hiển thị method này
+#   - BR-PM05: branch_id null = dùng toàn hệ thống, có giá trị = riêng branch
+#
+# Seed mặc định:
+#   cash      → auto_confirm=true,  requires_tendered=true
+#   card      → auto_confirm=false, requires_tendered=false
+#   transfer  → auto_confirm=false, requires_tendered=false
+#   e_wallet  → auto_confirm=false, requires_tendered=false
+
+displayName:
+  en: Payment Method
+  ja: 支払方法
+  vi: Phương thức thanh toán
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    # Nullable branch_id cannot participate safely in uniqueness because SQL
+    # permits multiple NULL values. scope_key is deterministically `global` or
+    # the branch UUID, so every logical scope has a non-null identity.
+    - columns: [organization_id, scope_key, code]
+      unique: true
+      name: payment_methods_org_scope_code_unique
+    - columns: [organization_id, is_active]
+    # Behavioural tender type added by plan-038; now owned by Omnify schema.
+    - columns: [type, is_active]
+      name: idx_payment_methods_type_active
+    - columns: [branch_id]
+
+properties:
+  scope_key:
+    # Persistence-only normalized scope: `global` when branch_id is null,
+    # otherwise the branch UUID. The database derives it for existing and
+    # future rows; callers cannot assign or read it through generated APIs.
+    type: String
+    length: 36
+    # Để trống được: hàng mới được sinh giá trị này ở tầng persistence, không
+    # phải do caller gán.
+    nullable: true
+    hidden: true
+    fillable: false
+    displayName:
+      en: Scope Key
+      ja: スコープキー
+      vi: Khoá phạm vi
+
+  code:
+    # Mã định danh: cash, card, transfer, e_wallet (BR-PM01)
+    # Dùng trong code logic, không đổi sau khi tạo
+    type: String
+    length: 50
+    searchable: true
+    lookupable: true
+    displayName:
+      en: Code
+      ja: コード
+      vi: Mã
+
+  name:
+    # Tên hiển thị trên POS: "Tiền mặt", "Thẻ"...
+    type: String
+    length: 255
+    translatable: true
+    searchable: true
+    lookupable: true
+    displayName:
+      en: Name
+      ja: 名前
+      vi: Tên
+
+  type:
+    # Behavioural tender classification; stable even when mutable `code`/name differ.
+    # Matches the existing plan-038 string(20) migration and debt workflow contract.
+    type: Enum
+    enum: [cash, card, transfer, qr, voucher, on_account, other]
+    default: cash
+    filterable: true
+    displayName:
+      en: Payment Type
+      ja: 支払タイプ
+      vi: Loại thanh toán
+    description:
+      en: Stable behavior category. `on_account` records debt and is not external money movement.
+      ja: 安定した動作分類。`on_account` は売掛を記録し、外部資金移動ではありません。
+      vi: Phân loại hành vi ổn định. `on_account` ghi nhận công nợ, không chuyển tiền bên ngoài.
+
+  is_auto_confirm:
+    # true = payment tự confirm khi tạo, không cần 2 bước (BR-PM02)
+    # VD: cash thu tại chỗ → auto-confirm
+    type: Boolean
+    default: false
+    displayName:
+      en: Auto Confirm
+      ja: 自動確認
+      vi: Tự động xác nhận
+
+  requires_tendered:
+    # true = bắt buộc nhập tendered_amount để tính tiền thừa (BR-PM03)
+    # VD: cash cần biết khách đưa bao nhiêu
+    type: Boolean
+    default: false
+    displayName:
+      en: Requires Tendered Amount
+      ja: 受取金額必須
+      vi: Yêu cầu tiền đưa
+
+  is_active:
+    # false = POS không hiển thị method này (BR-PM04)
+    type: Boolean
+    default: true
+    filterable: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+
+  sort_order:
+    # Thứ tự hiển thị trên POS
+    type: Int
+    default: 0
+    defaultSort: asc
+    displayName:
+      en: Sort Order
+      ja: 表示順
+      vi: Thứ tự
+
+  # Relationships
+  branch:
+    # null = dùng toàn hệ thống, có giá trị = riêng branch đó (BR-PM05)
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    nullable: true
+    onDelete: CASCADE
+    displayName:
+      en: Branch
+      ja: 店舗
+      vi: Chi nhánh
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức

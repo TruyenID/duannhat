@@ -1,0 +1,245 @@
+# =============================================================================
+# PaymentAttempt — durable prepare/call/finalize operation identity
+# =============================================================================
+#
+# Immutable money/provider/policy identity is persisted before any provider call.
+# Raw provider payloads and secrets are forbidden; only allowlisted redacted summaries
+# and safe next-action data may be stored. Normalized transitions follow STATE-MACHINES.md.
+# =============================================================================
+
+displayName: { en: Payment Attempt, ja: 決済試行, vi: Lần thử thanh toán }
+kind: object
+
+options:
+  id: Uuid
+  timestamps: true
+  softDelete: false
+  indexes:
+    # Stable command identity. Fingerprint detects same-key/different-payload misuse.
+    - columns: [connection_id, operation, idempotency_key]
+      unique: true
+      name: payment_attempts_connection_operation_idempotency_unique
+    # Provider object cannot represent two local attempts in one connection/environment.
+    - columns: [connection_id, environment, provider_object_id]
+      unique: true
+      name: payment_attempts_provider_object_unique
+    # Order lifecycle/ledger reconciliation scan.
+    - columns: [customer_order_id, state, created_at]
+      name: payment_attempts_order_state
+    # Due recovery scan without changing immutable connection identity.
+    - columns: [state, next_reconciliation_at]
+      name: payment_attempts_reconciliation_due
+    - columns: [organization_id, branch_id, created_at]
+
+properties:
+  organization:
+    # Immutable Tempo tenant snapshot and query boundary.
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: RESTRICT
+    displayName: { en: Organization, ja: 組織, vi: Tổ chức }
+  brand:
+    # Immutable local brand snapshot for ownership/audit.
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: RESTRICT
+    displayName: { en: Brand, ja: ブランド, vi: Thương hiệu }
+  branch:
+    # Shop that initiated the operation.
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    onDelete: RESTRICT
+    displayName: { en: Shop, ja: 店舗, vi: Cửa hàng }
+  customer_order:
+    # Order whose remaining amount was locked/validated at prepare.
+    type: Association
+    relation: ManyToOne
+    target: CustomerOrder
+    onDelete: RESTRICT
+    displayName: { en: Order, ja: 注文, vi: Đơn hàng }
+  connection:
+    # Immutable merchant connection used for every retry/retrieve/event.
+    type: Association
+    relation: ManyToOne
+    target: PaymentGatewayConnection
+    onDelete: RESTRICT
+    displayName: { en: Connection, ja: 接続, vi: Kết nối }
+  connection_option:
+    # Verified account capability snapshotted at prepare.
+    type: Association
+    relation: ManyToOne
+    target: PaymentGatewayConnectionOption
+    onDelete: RESTRICT
+    displayName: { en: Connection Option, ja: 接続オプション, vi: Tuỳ chọn kết nối }
+  policy_revision:
+    # Exact effective policy publication accepted at prepare.
+    type: Association
+    relation: ManyToOne
+    target: PaymentPolicyRevision
+    onDelete: RESTRICT
+    displayName: { en: Policy Revision, ja: ポリシーリビジョン, vi: Phiên bản chính sách }
+  device:
+    # Initiating registered device; null for customer web/server operations.
+    type: Association
+    relation: ManyToOne
+    target: Device
+    nullable: true
+    onDelete: RESTRICT
+    displayName: { en: Device, ja: デバイス, vi: Thiết bị }
+
+  operation:
+    # Immutable requested operation; changing it requires a new idempotency identity.
+    type: EnumRef
+    enum: PaymentAttemptOperation
+    filterable: true
+    displayName: { en: Operation, ja: オペレーション, vi: Thao tác }
+  state:
+    # Provider-neutral lifecycle; raw provider status is stored separately.
+    type: EnumRef
+    enum: PaymentAttemptState
+    default: prepared
+    filterable: true
+    displayName: { en: State, ja: 状態, vi: Trạng thái }
+  provider:
+    # Immutable adapter code snapshot; must equal the selected connection provider.
+    type: EnumRef
+    enum: PaymentGatewayProviderCode
+    displayName: { en: Provider Snapshot, ja: プロバイダースナップショット, vi: Snapshot nhà cung cấp }
+  environment:
+    # Immutable environment snapshot; provider identities cannot cross it.
+    type: EnumRef
+    enum: PaymentGatewayEnvironment
+    displayName: { en: Environment Snapshot, ja: 環境スナップショット, vi: Snapshot môi trường }
+  owner_scope:
+    # Immutable legal merchant owner scope selected by the ownership contract.
+    type: EnumRef
+    enum: PaymentConnectionOwnerScope
+    displayName: { en: Owner Scope Snapshot, ja: 所有範囲スナップショット, vi: Snapshot phạm vi sở hữu }
+  operator_org_unit_id:
+    # Identity canonical legal operator snapshotted before provider call.
+    type: Uuid
+    displayName: { en: Operator Org Unit ID, ja: 運営組織ユニットID, vi: ID đơn vị vận hành }
+  ownership_revision:
+    # Opaque Identity ownership token accepted by policy resolution.
+    type: String
+    length: 32
+    rules: { numeric: true }
+    displayName: { en: Ownership Revision, ja: 所有権リビジョン, vi: Phiên bản quyền sở hữu }
+  channel:
+    # Immutable initiating channel used by capability resolution.
+    type: EnumRef
+    enum: PaymentChannel
+    displayName: { en: Channel, ja: チャネル, vi: Kênh }
+  currency:
+    # ISO 4217 transaction currency snapshot; never read from mutable order later.
+    type: String
+    length: 3
+    rules: { uppercase: true, alpha: true }
+    displayName: { en: Currency, ja: 通貨, vi: Tiền tệ }
+  amount_minor:
+    # Positive amount in captured currency minor units; no floating-point money.
+    type: BigInt
+    unsigned: true
+    rules: { min: 1 }
+    displayName: { en: Amount Minor, ja: 最小通貨単位金額, vi: Số tiền đơn vị nhỏ }
+  idempotency_key:
+    # Caller-stable command ID; reuse with another fingerprint is a typed conflict.
+    type: String
+    length: 191
+    displayName: { en: Idempotency Key, ja: 冪等キー, vi: Khoá idempotency }
+  request_fingerprint:
+    # SHA-256 hex of canonical immutable command payload.
+    type: String
+    length: 64
+    rules: { alphaNum: true, lowercase: true }
+    displayName: { en: Request Fingerprint, ja: リクエストフィンガープリント, vi: Dấu vân tay request }
+  provider_request_key:
+    # Stable provider idempotency/request identity reused for safe retry.
+    type: String
+    length: 191
+    unique: true
+    displayName: { en: Provider Request Key, ja: プロバイダーリクエストキー, vi: Khoá request nhà cung cấp }
+  provider_object_id:
+    # Safe provider object identity (e.g. PaymentIntent ID); null before acceptance.
+    type: String
+    length: 191
+    nullable: true
+    displayName: { en: Provider Object ID, ja: プロバイダーオブジェクトID, vi: ID đối tượng nhà cung cấp }
+  provider_status:
+    # Raw status code/name only; no raw response or error message.
+    type: String
+    length: 100
+    nullable: true
+    displayName: { en: Provider Status, ja: プロバイダー状態, vi: Trạng thái nhà cung cấp }
+  next_action:
+    # Allowlisted display-safe action descriptor; secrets/client_secret are forbidden.
+    type: Json
+    nullable: true
+    displayName: { en: Safe Next Action, ja: 安全な次の操作, vi: Thao tác tiếp theo an toàn }
+  redacted_summary:
+    # Allowlisted provider result summary after redaction; never stores raw payload.
+    type: Json
+    nullable: true
+    hidden: true
+    displayName: { en: Redacted Summary, ja: 編集済みサマリー, vi: Tóm tắt đã che }
+  error_code:
+    # Stable internal/public typed code; provider message stays out of this table.
+    type: String
+    length: 100
+    nullable: true
+    displayName: { en: Error Code, ja: エラーコード, vi: Mã lỗi }
+  retry_count:
+    # Number of recovery attempts using the same provider identity.
+    type: Int
+    unsigned: true
+    default: 0
+    displayName: { en: Retry Count, ja: 再試行回数, vi: Số lần thử lại }
+  next_reconciliation_at:
+    # Due time for retrieve/reconciliation; null when no recovery is scheduled.
+    type: Timestamp
+    nullable: true
+    displayName: { en: Next Reconciliation At, ja: 次回照合日時, vi: Đối soát tiếp theo }
+  version:
+    # Optimistic transition version incremented under row lock.
+    type: BigInt
+    unsigned: true
+    default: 1
+    rules: { min: 1 }
+    displayName: { en: Version, ja: バージョン, vi: Phiên bản }
+  prepared_at:
+    # Prepare transaction commit timestamp.
+    type: Timestamp
+    useCurrent: true
+    displayName: { en: Prepared At, ja: 準備日時, vi: Chuẩn bị lúc }
+  dispatched_at:
+    # First provider dispatch timestamp; null for provider-free/local completion.
+    type: Timestamp
+    nullable: true
+    displayName: { en: Dispatched At, ja: 送信日時, vi: Gửi lúc }
+  finalized_at:
+    # Terminal local finalize timestamp; null for active/reconciling attempts.
+    type: Timestamp
+    nullable: true
+    displayName: { en: Finalized At, ja: 確定日時, vi: Hoàn tất lúc }
+  last_swept_at:
+    # #2454 — when the background sweep last ASKED the provider about this
+    # attempt. NULL means never asked, and that is the highest priority a
+    # candidate can have: a QR nobody has enquired about yet is the customer
+    # who just scanned. Written on every enquiry, including ones that changed
+    # nothing, because the value being recorded is "we asked", not "it moved".
+    type: Timestamp
+    nullable: true
+    displayName: { en: Last Swept At, ja: 最終照会日時, vi: Hỏi lần cuối lúc }
+
+  # CHỈ LÀ ƯỚC TÍNH (plan-050 L1) — không bao giờ hạch toán; số thật nằm ở
+  # payment_settlements.
+  estimated_fee_minor:
+    type: BigInt
+    nullable: true
+    displayName:
+      ja: 想定手数料（最小単位）
+      en: Estimated Fee (minor units)
+      vi: Phí ước tính (đơn vị nhỏ)

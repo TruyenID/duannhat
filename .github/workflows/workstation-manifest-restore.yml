@@ -1,0 +1,124 @@
+name: workstation-manifest-restore
+
+# Khôi phục các thế hệ đã mất khỏi `manifest.json` của trang tải (#2819).
+#
+# #2814 vá chỗ RÒ — từ nay mỗi lượt phát hành giữ lịch sử. Nhưng những thế hệ đã
+# rơi ra trước đó không tự quay lại: binary vẫn nằm trên đĩa production, chỉ có
+# entry mô tả chúng là mất. Đo 2026-08-14: server còn v0.5.0, v0.6.0, v0.7.0,
+# v0.8.0 — manifest liệt kê đúng MỘT.
+#
+# Fleet là hai máy Windows cài TAY, không auto-update. Manifest là thứ duy nhất
+# trả lời "quán đang chạy bản nào" và "muốn lùi thì lùi về đâu".
+#
+# TÁCH KHỎI ĐƯỜNG PHÁT HÀNH, và chỉ chạy bằng tay. Đây là thao tác sửa dữ liệu
+# một lần, không phải một bước của mọi lượt release — nhét nó vào
+# `workstation-release` là biến một việc cần người nhìn thành việc chạy ngầm.
+#
+# KHÔNG đụng binary. KHÔNG đụng `latest`. Chỉ ghi lại đúng `manifest.json`.
+
+on:
+  workflow_dispatch:
+    inputs:
+      meta:
+        description: 'JSON {"v0.7.0":{"commit":"...","released_at":"..."}} — bản nào không có ở đây sẽ bị BỎ QUA'
+        required: true
+      dry_run:
+        description: 'Chỉ in manifest mới, KHÔNG ghi lên server'
+        type: boolean
+        default: true
+
+concurrency:
+  # Hai lượt cùng lúc sẽ đọc cùng một manifest rồi ghi đè lẫn nhau — đúng họ
+  # lỗi mà workflow này sinh ra để sửa.
+  group: workstation-manifest-restore
+  cancel-in-progress: false
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    env:
+      SSH_HOST: famgia.xbiz.jp
+      SSH_PORT: '10022'
+      SSH_USER: famgia
+      APP_DIR: apps/tempo
+      PROD_MANIFEST_URL: https://tempo-prod.godx.jp/downloads/workstation/manifest.json
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test bộ gộp trước khi đụng production
+        run: node --test scripts/workstation-manifest-restore.test.mjs
+
+      - name: Setup SSH
+        run: |
+          install -m 700 -d "$RUNNER_TEMP/ssh"
+          printf '%s\n' "${{ secrets.X_SERVER_SSH_KEY }}" > "$RUNNER_TEMP/ssh/id_deploy"
+          chmod 600 "$RUNNER_TEMP/ssh/id_deploy"
+          ssh-keyscan -p "$SSH_PORT" "$SSH_HOST" > "$RUNNER_TEMP/ssh/known_hosts" 2>/dev/null
+
+      - name: Kéo manifest đang phục vụ (fail-closed)
+        run: |
+          set -euo pipefail
+          # Cùng lý lẽ #2814: không lấy được thì DỪNG. Khởi tạo từ rỗng ở một
+          # script mang tên "khôi phục" sẽ xoá đúng thứ nó được gọi để cứu.
+          if ! curl -fsS --max-time 30 "$PROD_MANIFEST_URL" -o manifest.prod.json; then
+            echo "::error::không tải được manifest production. DỪNG (#2819)."
+            exit 1
+          fi
+          python3 -c 'import json,sys; json.load(open("manifest.prod.json"))'
+          python3 -c 'import json; d=json.load(open("manifest.prod.json")); print("latest:", d.get("latest"), "| thế hệ:", len(d.get("versions",[])))'
+
+      - name: Kiểm kê ĐĨA production (stat + sha256sum tại chỗ)
+        run: |
+          set -euo pipefail
+          # Đọc hiện trạng đĩa, không đoán: kích thước và hash tính trên chính
+          # máy đang phục vụ file. `SHA256SUMS` là thứ người cài đối chiếu trước
+          # khi chạy một nhị phân trên máy quán, nên một con số suy diễn ở đây
+          # tệ hơn là không có entry.
+          ssh -p "$SSH_PORT" -i "$RUNNER_TEMP/ssh/id_deploy" \
+            -o UserKnownHostsFile="$RUNNER_TEMP/ssh/known_hosts" -o IdentitiesOnly=yes \
+            "$SSH_USER@$SSH_HOST" '
+              set -eu
+              root="$HOME/apps/tempo/public/downloads/workstation"
+              cd "$root" || exit 0
+              for d in v*/; do
+                v="${d%/}"
+                [ -d "$v" ] || continue
+                for f in "$v"/*; do
+                  [ -f "$f" ] || continue
+                  printf "%s\t%s\t%s\t%s\n" "$v" "$(basename "$f")" \
+                    "$(stat -c%s "$f" 2>/dev/null || stat -f%z "$f")" \
+                    "$(sha256sum "$f" | cut -d" " -f1)"
+                done
+              done
+            ' > inventory.tsv
+          echo "kiểm kê: $(cut -f1 inventory.tsv | sort -u | tr '\n' ' ')"
+          test -s inventory.tsv || { echo "::error::kiểm kê RỖNG — không có gì để khôi phục, dừng."; exit 1; }
+
+      - name: Dựng manifest mới
+        run: |
+          set -euo pipefail
+          printf '%s' '${{ inputs.meta }}' > meta.json
+          python3 -c 'import json; json.load(open("meta.json"))' \
+            || { echo "::error::input meta không phải JSON hợp lệ."; exit 1; }
+          python3 .github/scripts/restore-workstation-manifest-history.py \
+            --manifest manifest.prod.json --inventory inventory.tsv \
+            --meta meta.json --out manifest.new.json
+
+      - name: Ghi lên production
+        if: ${{ inputs.dry_run == false }}
+        run: |
+          set -euo pipefail
+          # CHỈ manifest.json. Không rsync cả cây — binary không được đụng tới.
+          scp -P "$SSH_PORT" -i "$RUNNER_TEMP/ssh/id_deploy" \
+            -o UserKnownHostsFile="$RUNNER_TEMP/ssh/known_hosts" -o IdentitiesOnly=yes \
+            manifest.new.json \
+            "$SSH_USER@$SSH_HOST:$APP_DIR/public/downloads/workstation/manifest.json"
+
+      - name: Đối chiếu lại từ production
+        if: ${{ inputs.dry_run == false }}
+        run: |
+          set -euo pipefail
+          sleep 3
+          curl -fsS --max-time 30 "$PROD_MANIFEST_URL" -o manifest.after.json
+          python3 .github/scripts/verify-manifest-matches.py \
+            --expected manifest.new.json --actual manifest.after.json

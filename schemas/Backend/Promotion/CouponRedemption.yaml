@@ -1,0 +1,167 @@
+# =============================================================================
+# CouponRedemption (クーポン利用履歴 / Lịch sử dùng Coupon)
+# =============================================================================
+#
+# Immutable per-order ledger row recording a single coupon application.
+# Created bởi CouponService::apply() inside the locked transaction;
+# read-only afterwards EXCEPT cho `released_at` (set bởi
+# CouponService::release() khi rollback). Service KHÔNG sửa các field
+# khác sau insert — receipt + audit lookup phải reproducible.
+#
+# Why a separate ledger (Decision 4 + 5):
+#   - Decoupled from CustomerOrder lifecycle: closed orders giữ ledger
+#     row vĩnh viễn (audit), thậm chí nếu coupon row sau này bị soft-
+#     deleted hoặc rename. coupon_snapshot JSON freeze đầy đủ {type,
+#     value, cap, code, name} tại apply time.
+#   - Atomic counter: tăng times_used + insert redemption trong cùng
+#     DB::transaction; race-safe via lockForUpdate trên Coupon row.
+#   - Per-customer eligibility: query SELECT count() FROM
+#     coupon_redemptions WHERE coupon_id=? AND customer_id=? AND
+#     released_at IS NULL — index `(coupon_id, customer_id, released_at)`
+#     hỗ trợ.
+#   - Rollback: void TRƯỚC closed → set released_at + decrement
+#     times_used (BR-COUP07). Closed sau đó void → KHÔNG rollback (closed
+#     immutable).
+#
+# Written by:  CouponService::apply() / release() / releaseIfApplied()
+#              (autopatched từ CustomerOrderService::voidOrder + cancel
+#              hooks).
+# Read by:     receipt printing (snapshot for resilience), HQ redemption
+#              history tab, per-customer eligibility check.
+# Lifecycle:   immutable except released_at toggle. NOT softDeletable
+#              (ledger phải có dấu vết audit kể cả khi rollback).
+#
+# Indexes:
+#   - unique customer_order_id           : enforce 1 coupon per order at DB
+#   - (coupon_id, released_at)           : count active redemptions
+#   - (coupon_id, customer_id, released_at) : per-customer counter
+# =============================================================================
+
+displayName:
+  en: Coupon Redemption
+  ja: クーポン利用履歴
+  vi: Lịch sử dùng Coupon
+
+kind: object
+
+options:
+  timestamps: true
+  id: Uuid
+  audit:
+    createdBy: true
+  indexes:
+    # Decision 4 — DB-enforced 1 coupon per order
+    - columns: [customer_order_id]
+      unique: true
+      name: coupon_redemptions_order_unique
+    # Active redemption counter for usage_limit_total
+    - columns: [coupon_id, released_at]
+    # Per-customer eligibility (BR-COUP03 usage_limit_per_customer)
+    - columns: [coupon_id, customer_id, released_at]
+
+properties:
+  discount_applied_amount:
+    # Số tiền giảm thực tế đã áp (sau cap clamp). Snapshot tại apply
+    # time — không phụ thuộc coupon edit về sau. Receipt hiển thị
+    # field này.
+    type: Decimal
+    precision: 12
+    scale: 2
+    displayName:
+      en: Discount Applied
+      ja: 適用額
+      vi: Đã giảm
+
+  coupon_snapshot:
+    # Decision 5 — JSON frozen state of coupon at apply time. Schema:
+    #   { code, name (locale-keyed), discount_type, discount_value,
+    #     max_discount_cap, min_order_subtotal }
+    # Receipt printing đọc field này thay vì JOIN coupons để giữ giá
+    # trị cho dù coupon row bị edit/soft-delete sau closed.
+    type: Json
+    displayName:
+      en: Coupon Snapshot
+      ja: クーポンスナップショット
+      vi: Bản sao Coupon
+
+  redeemed_at:
+    # Timestamp lúc apply chạy (UTC). KHÔNG đổi sau insert.
+    type: Timestamp
+    displayName:
+      en: Redeemed At
+      ja: 利用日時
+      vi: Thời điểm dùng
+
+  released_at:
+    # Set khi rollback (void trước closed). Decrement times_used trong
+    # cùng transaction. Một redemption chỉ release 1 lần (idempotent
+    # guard ở service: WHERE released_at IS NULL).
+    type: Timestamp
+    nullable: true
+    displayName:
+      en: Released At
+      ja: 解放日時
+      vi: Thời điểm hoàn
+
+  redeemed_via:
+    # Provenance: pos | customer_web | kiosk. Dùng cho reporting + UI
+    # filter "redemption qua kênh nào". Free-form string length 20 thay
+    # vì enum để khỏi đẻ thêm Shared/Enum cho field ít biến (nếu sau
+    # này cần strict ⇒ migrate sang EnumRef).
+    type: String
+    length: 20
+    displayName:
+      en: Redeemed Via
+      ja: 利用チャネル
+      vi: Kênh dùng
+
+  redeemed_by_user_id:
+    # SSO user ID của staff bấm apply. Nullable vì customer-web flow
+    # tự apply không qua staff. KHÔNG dùng FK cứng (cross-package
+    # boundary với dxs-sso).
+    type: Uuid
+    nullable: true
+    displayName:
+      en: Redeemed By User
+      ja: 利用者
+      vi: Người dùng
+
+  # === Relationships ===
+
+  coupon:
+    # RESTRICT: coupon không xóa được khi còn redemption (delete chỉ
+    # cho phép times_used = 0, mà times_used = count active redemption,
+    # nên RESTRICT là defensive backup tại DB level).
+    type: Association
+    relation: ManyToOne
+    target: Coupon
+    onDelete: RESTRICT
+    displayName:
+      en: Coupon
+      ja: クーポン
+      vi: Coupon
+
+  customerOrder:
+    # CASCADE: nếu order bị hard-delete (extreme case), redemption
+    # đi theo. Bình thường order soft-delete giữ redemption.
+    type: Association
+    relation: ManyToOne
+    target: CustomerOrder
+    onDelete: CASCADE
+    displayName:
+      en: Customer Order
+      ja: 注文
+      vi: Đơn hàng
+
+  customer:
+    # Nullable cho walk-in (BR-COUP03 — usage_limit_per_customer = 0).
+    # SET NULL khi customer hard-delete (rare).
+    type: Association
+    relation: ManyToOne
+    target: Customer
+    nullable: true
+    onDelete: SET NULL
+    displayName:
+      en: Customer
+      ja: 顧客
+      vi: Khách hàng

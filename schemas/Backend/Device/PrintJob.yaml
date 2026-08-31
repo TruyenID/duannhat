@@ -1,0 +1,145 @@
+# Một lệnh in đã xếp hàng. `confidence` phân biệt "đã gửi" với "máy in xác nhận
+# đã in" — phiếu tiền cần cái sau. `printed_reported_at` là giờ in THẬT do máy
+# báo, không bao giờ là giờ đồng bộ.
+kind: object
+
+options:
+  id: Uuid
+  timestamps: true
+  softDelete: false
+  indexes:
+    - columns: [branch_id, status]
+    - columns: [printer_id, status]
+    - columns: [order_id]
+    - columns: [payment_id]
+
+properties:
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName: { ja: 組織, en: Organization, vi: Tổ chức }
+
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    onDelete: CASCADE
+    displayName: { ja: 支店, en: Branch, vi: Chi nhánh }
+
+  printer:
+    type: Association
+    relation: ManyToOne
+    target: Printer
+    nullable: true
+    onDelete: SET NULL
+    displayName: { ja: プリンタ, en: Printer, vi: Máy in }
+
+  transport:
+    type: String
+    length: 32
+    default: ws_lan
+    displayName: { ja: 経路, en: Transport, vi: Kênh truyền }
+
+  kind:
+    type: String
+    length: 32
+    displayName: { ja: 種別, en: Kind, vi: Loại phiếu }
+
+  # Không ràng khoá ngoại: lệnh in phải sống lâu hơn đơn để còn tra cứu.
+  order_id:
+    type: Uuid
+    nullable: true
+    displayName: { ja: 注文ID, en: Order ID, vi: ID đơn }
+
+  payment_id:
+    type: Uuid
+    nullable: true
+    displayName: { ja: 支払ID, en: Payment ID, vi: ID thanh toán }
+
+  payload:
+    type: Json
+    nullable: true
+    displayName: { ja: ペイロード, en: Payload, vi: Nội dung }
+
+  reprint_no:
+    type: Int
+    unsigned: true
+    default: 1
+    displayName: { ja: 印刷回数, en: Reprint No, vi: Bản in số }
+
+  requestedBy:
+    type: Association
+    relation: ManyToOne
+    target: User
+    nullable: true
+    onDelete: SET NULL
+    displayName: { ja: 依頼者, en: Requested By, vi: Người yêu cầu }
+
+  requested_via:
+    type: String
+    length: 32
+    nullable: true
+    displayName: { ja: 依頼元, en: Requested Via, vi: Yêu cầu từ }
+
+  # Bắt buộc khi in lại một phiếu tiền.
+  reprint_reason:
+    type: String
+    length: 255
+    nullable: true
+    displayName: { ja: 再印刷理由, en: Reprint Reason, vi: Lý do in lại }
+
+  # plan-053 TR-28 (#1171) — WHICH layout definition drew this sheet, as
+  # `<scope>:<version>` (`system:0` · `brand:7` · `shop:12`). Số phiên bản một
+  # mình KHÔNG định danh được một definition: brand v3 và shop v3 là hai tài liệu
+  # khác nhau, và `TemplateResolver::forVersion` địa chỉ theo cả hai.
+  #
+  # NULL là một trạng thái THẬT và phải phân biệt được: nó nghĩa là formatter CŨ
+  # của workstation vẽ tờ đó — mã nguồn Go, không phải definition đã publish, nên
+  # không mang số hiệu nào. Bịa `system:0` cho nó sẽ khiến một lần in lại đi tìm
+  # bản mặc định hệ thống trong khi tờ gốc do formatter vẽ.
+  template_version:
+    type: String
+    length: 32
+    nullable: true
+    displayName: { ja: 帳票バージョン, en: Template Version, vi: Phiên bản mẫu }
+
+  status:
+    type: String
+    length: 32
+    default: queued
+    displayName: { ja: 状態, en: Status, vi: Trạng thái }
+
+  confidence:
+    type: String
+    length: 16
+    default: sent_only
+    displayName: { ja: 確度, en: Confidence, vi: Độ chắc chắn }
+
+  attempts:
+    type: Int
+    unsigned: true
+    default: 0
+    displayName: { ja: 試行回数, en: Attempts, vi: Số lần thử }
+
+  last_error:
+    type: String
+    length: 255
+    nullable: true
+    displayName: { ja: 最終エラー, en: Last Error, vi: Lỗi gần nhất }
+
+  acked_at:
+    type: Timestamp
+    nullable: true
+    displayName: { ja: 受領日時, en: Acked At, vi: Nhận lúc }
+
+  printed_reported_at:
+    type: Timestamp
+    nullable: true
+    displayName: { ja: 実印刷日時, en: Printed Reported At, vi: In thật lúc }
+
+  expires_at:
+    type: Timestamp
+    nullable: true
+    displayName: { ja: 有効期限, en: Expires At, vi: Hết hạn }

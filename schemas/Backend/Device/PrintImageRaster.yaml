@@ -1,0 +1,82 @@
+# Bitmap 1-bit đã đóng gói, dẫn xuất từ một `PrintImageAsset` ở MỘT khổ cụ thể
+# (#1957 mảnh B). Đây là thứ DUY NHẤT đi xuống máy trạm.
+#
+# Vì sao raster ở Cloud chứ không ở máy trạm: hai bộ GIẢI MÃ ảnh khớp nhau từng
+# pixel là lời hứa lớn hơn nhiều so với hai bộ MÃ HOÁ khớp nhau ở một header tám
+# byte — và chỉ cái thứ hai ghim được bằng golden fixture. Để máy trạm tự giải
+# mã PNG là mở một mặt trận parity mới (scaling + ngưỡng của GD so với một thư
+# viện Go) cho một tính năng trang trí. Raster một lần ở đây thì hai phía giống
+# nhau từng byte THEO CẤU TẠO, không cần cổng nào canh.
+#
+# Vì sao một hàng cho mỗi `max_width_dots` chứ không phải một hàng cho mỗi ảnh:
+# khối `image` trong template khai bề rộng riêng, và thu nhỏ ở phía máy trạm sẽ
+# lôi đúng cái mặt trận parity vừa nói quay lại. Thu nhỏ xảy ra Ở ĐÂY, một lần.
+kind: object
+
+options:
+  id: Uuid
+  timestamps: true
+  indexes:
+    - columns: [asset_id, max_width_dots]
+      unique: true
+      name: print_image_rasters_asset_width_unique
+    # Máy trạm hỏi theo hash (địa chỉ theo nội dung), nên nó phải tra được nhanh.
+    - columns: [content_hash]
+      name: print_image_rasters_content_hash_idx
+
+properties:
+  asset:
+    type: Association
+    relation: ManyToOne
+    target: PrintImageAsset
+    onDelete: CASCADE
+    displayName: { ja: 元画像, en: Asset, vi: Ảnh gốc }
+
+  # Trần bề rộng mà bitmap này được raster cho — chính là `max_width_dots` của
+  # khối. Đã được kẹp theo khổ giấy in được từ trước (TR-22, `clampImages`).
+  max_width_dots:
+    type: Int
+    unsigned: true
+    displayName: { ja: 最大幅ドット, en: Max Width Dots, vi: Bề rộng trần (dots) }
+
+  # Kích thước THẬT của bitmap. Khác `max_width_dots` khi ảnh gốc hẹp hơn trần:
+  # ảnh nhỏ hơn đích thì để nguyên bề rộng của nó. Kéo giãn không thêm chi tiết,
+  # chỉ làm nhoè cạnh để rồi ngưỡng hoá thành răng cưa, và tốn giấy.
+  width_dots:
+    type: Int
+    unsigned: true
+    displayName: { ja: 幅ドット, en: Width Dots, vi: Bề rộng (dots) }
+
+  height_dots:
+    type: Int
+    unsigned: true
+    displayName: { ja: 高さドット, en: Height Dots, vi: Bề cao (dots) }
+
+  # Byte đã đóng gói MSB-first, mỗi hàng đệm cho tròn byte — đúng bố cục mà
+  # chính lệnh `GS v 0` dùng, nên không nơi nào phía sau phải đóng gói lại.
+  # Lưu base64 vì cột này đi thẳng vào JSON của feed đồng bộ.
+  #
+  # MediumText chứ KHÔNG phải Text: `TEXT` của MySQL trần 64 KB, mà một logo cao
+  # 900 hàng ở khổ 80mm đã là 576/8 × 900 ≈ 65 KB byte thô → ~87 KB sau base64.
+  # Kiểu hỏng ở đây tệ hơn mức nó nghe: MySQL ngoài chế độ strict CẮT CỤT rồi đi
+  # tiếp, nên hàng vẫn lưu, hash vẫn tính trên byte đầy đủ, và thứ máy trạm in ra
+  # là nửa cái logo — không lỗi ở đâu cả. Trần thật được ép ở tầng service
+  # (`PrintImageStore::MAX_RASTER_BYTES`); cột chỉ cần rộng hơn trần đó.
+  data:
+    type: MediumText
+    displayName: { ja: ビットマップ, en: Bitmap Data, vi: Dữ liệu bitmap }
+
+  # sha256 của byte đã đóng gói. Đây là ĐỊA CHỈ của bitmap: hash đi trong
+  # `sync-manifest` (#1175), nên một lần đổi logo được phát hiện qua đúng cơ chế
+  # đang chạy — không thêm vòng polling nào.
+  content_hash:
+    type: String
+    length: 64
+    displayName: { ja: ハッシュ, en: Content Hash, vi: Hash nội dung }
+
+  # Số byte của bitmap đã giải base64. Có sẵn để feed đồng bộ báo được kích cỡ
+  # mà không phải giải base64 chỉ để đếm.
+  byte_length:
+    type: Int
+    unsigned: true
+    displayName: { ja: バイト長, en: Byte Length, vi: Số byte }

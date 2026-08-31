@@ -1,0 +1,52 @@
+# ==============================================================================
+# Till Tender System Category Enum (テンダー分類 / Phân loại phương tiện thanh toán)
+# ==============================================================================
+#
+# Plan 030 — Cashier Shift.
+#
+# Phân loại các loại tender hiển thị trên màn hình kết ca. KHÔNG TRÙNG với
+# `PaymentMethod.code` (PaymentMethod là phía POS ghi nhận thu tiền — code:
+# cash/card/transfer/e_wallet/stripe). Category này nhóm các sub-brand Stera
+# theo bố cục của printout 日計, để reconcile ở mức "category" khi không có
+# mapping 1:1 với PaymentMethod (ví dụ: 9 sub-brand QR đều map tới
+# PaymentMethod e_wallet, expected sum cộng dồn ở category=qr).
+#
+# Values:
+#   - cash:   Tiền mặt. Anchor — TillTenderType cash gắn payment_method_code
+#             = cash, có expected_amount per-row.
+#   - card:   Thẻ tín dụng / debit. Anchor — TillTenderType credit gắn
+#             payment_method_code = card, có expected_amount per-row.
+#             Bao gồm các thương hiệu in trên slip (JCB/VISA/Master/AMEX/Diners),
+#             v1 nhập gộp 1 row "credit".
+#   - qr:     QR code payment (Stera tổng hợp 9 sub-brand:
+#             rakuten_pay / paypay / d_barai / au_pay / merpay / ginko_pay /
+#             wechat_pay / alipay / unionpay). Sub-brand KHÔNG anchor;
+#             expected nằm ở mức category (Σ POS e_wallet payments có sub-category
+#             qr — v1: tất cả e_wallet rơi vào qr expected vì POS không phân biệt).
+#   - emoney: Tiền điện tử (id/ic/edy/waon/nanaco/quicpay). Cũng KHÔNG anchor;
+#             expected nằm ở mức category. v1: POS không phân biệt qr vs emoney
+#             nên category_expected.emoney = 0 (Stera slip sẽ là một "Stera
+#             variance" rõ ràng — đây là behaviour mong đợi để kế toán thấy).
+#
+# Used in:
+#   - TillTenderType.category
+#   - TillSettlementTenderDetail.category (snapshot)
+#   - Reconciliation grouping cho UI close screen + category_expected payload.
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: テンダー分類
+  en: Till Tender Category
+  vi: Phân loại tender
+
+values:
+  - value: cash
+    label: { ja: 現金, en: Cash, vi: Tiền mặt }
+  - value: card
+    label: { ja: クレジット, en: Card, vi: Thẻ }
+  - value: qr
+    label: { ja: QR決済, en: QR Payment, vi: QR }
+  - value: emoney
+    label: { ja: 電子マネー, en: E-Money, vi: Tiền điện tử }

@@ -1,0 +1,182 @@
+# OrderCondition schema (plan-045)
+# ---------------------------------
+# Append-only audit ledger of every financial "condition" applied to an order or
+# a single order line: consumption tax, discounts (coupon/promotion), and refunds.
+# Each row is a VALUE-COPIED snapshot — rate + amount + label captured at write
+# time — so a later edit/delete of the source coupon / promotion / tax type never
+# rewrites history.
+#
+# Polymorphic: attaches to BOTH CustomerOrder and CustomerOrderItem via the
+# (conditionable_type, conditionable_id) pair. Omnify does NOT emit a morphs()
+# directive — these are plain String + Uuid columns. The morph aliases
+# 'CustomerOrder' / 'CustomerOrderItem' are ALREADY registered by omnify's
+# generated OmnifyServiceProvider::enforceMorphMap, so conditionable_type stores
+# those values (no manual AppServiceProvider registration needed — verified via
+# getMorphClass()). The Eloquent side uses morphMany(..., 'conditionable').
+#
+# Written by:
+#   - OrderPricingCalculator::writeConditions() — the `tax` + `discount` rows,
+#     REGENERATED on every recompute (delete + reinsert for the order).
+#   - RefundService::refundItem() — the `refund` rows, APPEND-ONLY immutable
+#     events, never touched by recompute.
+# Read by: accounting/reporting, CustomerOrderResource (conditions[]), the
+#   workstation LAN order shape, and reconciliation checks.
+#
+# Sign & reconciliation contract (amount is SIGNED):
+#   tax → +   |   discount → −   |   refund → −
+#   tax_amount      := Σ(type=tax).amount
+#   discount_amount := −Σ(type=discount).amount
+#   service_charge  := Σ(type=service_charge).amount
+#   Σ(type=refund).amount   == total refunded gross (negative)
+#
+# Business Rules:
+#   - BR-OC01: amount is signed; consumers building revenue aggregates MUST be
+#              sign-aware (refund rows are negative).
+#   - BR-OC02: meta stores source ids (coupon_id/promotion_id/tax_type_id,
+#              refund_of_item_id, rate-group key) for reference ONLY — the value
+#              is already copied into rate/amount/label, so a source edit never
+#              changes the ledger.
+#   - BR-OC03: `tax` + `discount` rows are derived (regenerated per recompute);
+#              `refund` rows are immutable events (never regenerated).
+
+displayName:
+  en: Order Condition
+  ja: 注文条件
+  vi: Điều kiện đơn hàng
+
+kind: object
+
+options:
+  timestamps: true
+  id: Uuid
+  indexes:
+    # Primary lookup — all conditions for one order or one line.
+    - columns: [conditionable_type, conditionable_id]
+    # Reporting filters by condition kind (tax / discount / refund).
+    - columns: [type]
+
+properties:
+  conditionable_type:
+    # Morph alias of the owner — 'order' (CustomerOrder) or 'order_item'
+    # (CustomerOrderItem). Resolved via the manual morphMap in AppServiceProvider.
+    type: String
+    length: 20
+    displayName:
+      en: Conditionable Type
+      ja: 対象タイプ
+      vi: Loại đối tượng
+
+  conditionable_id:
+    # Morph id of the owner (CustomerOrder.id or CustomerOrderItem.id).
+    type: Uuid
+    displayName:
+      en: Conditionable ID
+      ja: 対象ID
+      vi: ID đối tượng
+
+  type:
+    # Condition kind: tax | discount | service_charge | refund (BR-OC01/OC03).
+    # Drives the sign convention + whether the row is regenerated
+    # (tax/discount/service_charge) or immutable (refund).
+    #
+    # `tip` is deliberately NOT a value here (#2041). Tip already has its own
+    # table — `order_payments.tip_amount` — and belongs there for two reasons
+    # that outrank "one table for everything":
+    #   1. it attaches to a PAYMENT, not to the order (split bill ⇒ each payer
+    #      tips on their own card; moving it up loses that attribution);
+    #   2. BR-P03 keeps tip OUT of `total_amount` — it is money for staff, not
+    #      revenue — whereas this ledger's invariant is
+    #      `total_amount == subtotal + Σ(amount)`. Folding tip in would break
+    #      the very property that makes the table reconcilable.
+    # `customer_orders.total_tip` is therefore a legitimate cache of
+    # `SUM(order_payments.tip_amount)`, not a missing ledger row.
+    type: String
+    length: 20
+    displayName:
+      en: Type
+      ja: 種別
+      vi: Loại
+
+  source:
+    # Finer origin: tax_type | service_charge | coupon | promotion | manual.
+    # Null when not applicable.
+    type: String
+    length: 30
+    nullable: true
+    displayName:
+      en: Source
+      ja: 発生源
+      vi: Nguồn
+
+  label:
+    # Human-readable snapshot description at write time — e.g. "10%対象", a coupon
+    # code, or a promotion name. Frozen even if the source is later renamed.
+    type: String
+    length: 100
+    displayName:
+      en: Label
+      ja: ラベル
+      vi: Nhãn
+
+  rate:
+    # Percent when applicable (tax rate, percent discount). Null for fixed
+    # amounts / refunds without a rate.
+    type: Decimal
+    precision: 5
+    scale: 2
+    nullable: true
+    displayName:
+      en: Rate (%)
+      ja: 率 (%)
+      vi: Tỷ lệ (%)
+
+  amount:
+    # SIGNED money value (BR-OC01): tax +, discount −, refund −. Currency minor
+    # unit per currency_code. Summing by type reconstructs the order's money story.
+    type: Decimal
+    precision: 15
+    scale: 2
+    displayName:
+      en: Amount
+      ja: 金額
+      vi: Số tiền
+
+  # Nền chịu thuế của nhóm mức này, tại thời điểm ghi. CHỈ có nghĩa với
+  # `type: tax`; các loại khác để null.
+  #
+  # Vì sao là CỘT chứ không phải suy lại lúc in: đây là 税率ごとに区分した対価の額
+  # — một trường BẮT BUỘC của 適格請求書, và là con số khách cầm trên tay. Suy lại
+  # nó ở đường đọc đúng là cách sinh ra lỗi #2031: hoá đơn gom `SUM(items.subtotal)`
+  # (gộp) cạnh `SUM(items.tax_amount)` (đã trừ giảm giá), nên trên đơn có khuyến
+  # mãi hai cột không khớp nhau ở mức đã in.
+  #
+  # Trong chế độ giá đã gồm thuế, đây là `net − tax` của nhóm, không phải `net`.
+  taxable_base:
+    type: Decimal
+    precision: 15
+    scale: 2
+    nullable: true
+    displayName:
+      en: Taxable Base
+      ja: 課税対象額
+      vi: Nền chịu thuế
+
+  currency_code:
+    # ISO 4217 snapshot (copied from the order at write time).
+    type: String
+    length: 8
+    displayName:
+      en: Currency
+      ja: 通貨
+      vi: Tiền tệ
+
+  meta:
+    # Reference-only JSON (BR-OC02): source ids (coupon_id/promotion_id/
+    # tax_type_id), refund_of_item_id, rate-group key. The authoritative value is
+    # already in rate/amount/label — meta never feeds a computation.
+    type: Json
+    nullable: true
+    displayName:
+      en: Meta
+      ja: メタ情報
+      vi: Thông tin thêm

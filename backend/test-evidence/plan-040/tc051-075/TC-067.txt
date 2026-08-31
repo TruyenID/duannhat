@@ -1,0 +1,2 @@
+POST bulk -> HTTP 200
+{"message":"2 items deleted.","deleted":2,"errors":[]}

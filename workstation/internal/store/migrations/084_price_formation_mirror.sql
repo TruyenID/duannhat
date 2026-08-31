@@ -1,0 +1,21 @@
+-- #2620 (tầng 4 của #2273, ruling #2132 §B) — mirror dấu vết ĐỊNH HÌNH GIÁ mà
+-- Cloud đóng dấu ở tầng 1–3. Máy trạm không TỰ tính hai giá trị này; nó chỉ
+-- chép lại thứ Cloud đã quyết, để LAN đọc ngược được "giá dòng này ở đâu ra".
+--
+--   price_source     (#2618)  sku_base | menu | floating | menu_promotion
+--   waived_quantity  (#2619)  số đơn vị topping được `free_up_to_n` miễn
+--
+-- `price_source` để NULLABLE có chủ ý: NULL nghĩa là **payload không mang**
+-- (Cloud cũ, hoặc dòng sinh offline trước khi Cloud re-price), KHÔNG phải
+-- "nguồn không xác định". Đừng đọc NULL thành `sku_base` — đó là bịa ra một
+-- dấu vết mà chính ruling #2132 §B đòi phải có thật.
+--
+-- `waived_quantity` NOT NULL DEFAULT 0 vì 0 là câu trả lời ĐÚNG cho mọi dòng
+-- không thuộc nhóm free_up_to_n, không phải một giá trị thay thế cho "chưa
+-- biết". Bất biến ở Cloud: Σ(unit_price × quantity) − topping_subtotal
+-- == Σ(waived_quantity × unit_price).
+--
+-- Cả hai câu đều nullable-hoặc-có-DEFAULT nên binary bản N vẫn đọc được schema
+-- bản N+1 — bất biến mà `migration_forward_compat_test.go` (#2659) cưỡng chế.
+ALTER TABLE order_items ADD COLUMN price_source TEXT;
+ALTER TABLE order_item_toppings ADD COLUMN waived_quantity INTEGER NOT NULL DEFAULT 0;

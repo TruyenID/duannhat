@@ -1,0 +1,12 @@
+[
+  {
+    "source": "/api/<*>",
+    "target": "https://tempo-prod.godx.jp/api/<*>",
+    "status": "200"
+  },
+  {
+    "source": "/storage/<*>",
+    "target": "https://tempo-prod.godx.jp/storage/<*>",
+    "status": "200"
+  }
+]

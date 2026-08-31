@@ -1,0 +1,16 @@
+kind: enum
+
+displayName:
+  ja: 支払いステータス
+  en: Payment Status
+  vi: Trạng thái thanh toán
+
+values:
+  - value: pending
+    label: { ja: 確認待ち, en: Pending, vi: Chờ xác nhận }
+  - value: succeeded
+    label: { ja: 成功, en: Succeeded, vi: Thành công }
+  - value: failed
+    label: { ja: 失敗, en: Failed, vi: Thất bại }
+  - value: refunded
+    label: { ja: 返金済み, en: Refunded, vi: Đã hoàn tiền }

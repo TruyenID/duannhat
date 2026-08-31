@@ -1,0 +1,15 @@
+# #3233 — chống clickjacking cho POS trên Amplify.
+#
+# App Amplify của pos là app MONOREPO (buildspec dạng `applications: - appRoot:
+# web/pos`), nên customHttp cũng phải mang khung `applications:` — bản phẳng
+# `customHeaders:` được `update-app --custom-headers` NHẬN không lỗi, rồi phát
+# nổ ở CUỐI job build: "Monorepo spec provided without applications key" /
+# "Unable to save headers" (đo 2026-08-18, job 101 app d3nuz12zp9crpd — build
+# xanh, job FAILED ở bước lưu headers).
+applications:
+  - appRoot: web/pos
+    customHeaders:
+      - pattern: "**/*"
+        headers:
+          - key: "Content-Security-Policy"
+            value: "frame-ancestors 'none'"

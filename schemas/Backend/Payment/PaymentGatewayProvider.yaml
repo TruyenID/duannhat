@@ -1,0 +1,94 @@
+# =============================================================================
+# PaymentGatewayProvider — provider/adapter catalog (no merchant credentials)
+# =============================================================================
+#
+# Stable catalog row that maps a documented provider code to a server-side adapter.
+# This table is not a merchant connection and MUST NOT contain API keys, webhook
+# secrets, account tokens, PAN/CVV, or any opaque secret reference.
+#
+# Written by: versioned seed/release process after adapter contract approval.
+# Read by: connection onboarding, capability resolver, admin provider catalog.
+# Uniqueness: one row per PaymentGatewayProviderCode.
+# Deletion: catalog history is retained; downstream associations use RESTRICT.
+# =============================================================================
+
+displayName:
+  en: Payment Gateway Provider
+  ja: 決済ゲートウェイプロバイダー
+  vi: Nhà cung cấp cổng thanh toán
+
+kind: object
+
+options:
+  id: Uuid
+  timestamps: true
+  softDelete: false
+  indexes:
+    # Adapter registry key. A provider code cannot map to two catalog rows.
+    - columns: [code]
+      unique: true
+      name: payment_gateway_providers_code_unique
+    # Deterministic active provider list for onboarding/settings screens.
+    - columns: [is_active, sort_order]
+
+properties:
+  code:
+    # Server-side adapter key; display names must never be used for dispatch.
+    type: EnumRef
+    enum: PaymentGatewayProviderCode
+    displayName:
+      en: Provider Code
+      ja: プロバイダーコード
+      vi: Mã nhà cung cấp
+    description:
+      en: Stable adapter registry code. Changing it is a compatibility migration, not a display edit.
+      ja: 安定したアダプターレジストリコード。変更は表示編集ではなく互換性移行です。
+      vi: Mã registry adapter ổn định. Đổi mã là migration tương thích, không phải sửa nhãn.
+
+  name:
+    # Human-facing provider name; never participates in identity or routing.
+    type: String
+    length: 120
+    translatable: true
+    searchable: true
+    displayName:
+      en: Name
+      ja: 名称
+      vi: Tên
+
+  description:
+    # Safe catalog explanation only; provider responses and credentials are forbidden.
+    type: Text
+    nullable: true
+    translatable: true
+    displayName:
+      en: Description
+      ja: 説明
+      vi: Mô tả
+
+  is_active:
+    # Release-level availability. Connection and policy checks may narrow this further.
+    type: Boolean
+    default: false
+    filterable: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+
+  sort_order:
+    # Presentation ordering only; never affects resolver priority or fallback.
+    type: Int
+    unsigned: true
+    default: 0
+    defaultSort: asc
+    displayName:
+      en: Sort Order
+      ja: 表示順
+      vi: Thứ tự
+
+policies:
+  - forbid: [create, edit, delete]
+    desc: Provider catalog is release-managed; tenants cannot mutate adapter registry rows
+  - permit: [view, list]
+    desc: Catalog read for HQ/shop payment admin surfaces; credential fields are absent by schema

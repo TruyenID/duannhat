@@ -1,0 +1,12 @@
+kind: enum
+
+displayName:
+  ja: ピックアップタイプ
+  en: Pickup Type
+  vi: Loại nhận hàng
+
+values:
+  - value: immediate
+    label: { ja: すぐに, en: Immediate, vi: Lấy ngay }
+  - value: scheduled
+    label: { ja: 予約, en: Scheduled, vi: Hẹn giờ }

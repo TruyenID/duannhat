@@ -1,0 +1,213 @@
+# Warehouse schema
+# Warehouse is a logical inventory management unit within an organization.
+# Each warehouse belongs to a branch (SSO) and has its own approval settings.
+# This is the foundation for all inventory features (F3-F9).
+#
+# Important: Warehouse != Location
+#   - Warehouse: Logical unit for stock management (this schema)
+#   - Location: Physical place for geofencing/attendance (Organization/Location.yaml)
+#
+# Business Rules:
+#   - BR-01: Code must be unique per organization
+#   - BR-03: Inactive warehouse cannot create new stock transactions
+#   - BR-06: Auto-approve only applies when Manager/Admin creates transactions
+#   - BR-07: Only Org Admin can toggle auto-approve settings
+#   - BR-09: A branch can have multiple warehouses
+#   - BR-11: disposal_approval_threshold is a safety net for high-value disposals
+
+displayName:
+  en: Warehouse
+  ja: 倉庫
+  vi: Kho hàng
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    - columns: [organization_id, code]
+      unique: true
+    - columns: [organization_id, is_active]
+    - columns: [branch_id]
+
+properties:
+  code:
+    type: String
+    length: 50
+    displayName:
+      en: Warehouse Code
+      ja: 倉庫コード
+      vi: Mã kho
+    description:
+      en: "Unique code per organization. Alphanumeric and hyphens only (BR-01)"
+      ja: "組織内で一意のコード。英数字とハイフンのみ（BR-01）"
+      vi: "Mã unique trong tổ chức. Chỉ chữ, số, gạch ngang (BR-01)"
+
+  name:
+    type: String
+    length: 255
+    displayName:
+      en: Warehouse Name
+      ja: 倉庫名
+      vi: Tên kho
+
+  type:
+    type: EnumRef
+    enum: WarehouseType
+    displayName:
+      en: Warehouse Type
+      ja: 倉庫タイプ
+      vi: Loại kho
+
+  address:
+    type: Text
+    nullable: true
+    displayName:
+      en: Address
+      ja: 住所
+      vi: Địa chỉ
+
+  is_active:
+    type: Boolean
+    default: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+    description:
+      en: "Inactive warehouses cannot create new transactions (BR-03)"
+      ja: "無効な倉庫は新しい取引を作成できません（BR-03）"
+      vi: "Kho vô hiệu hóa không cho tạo phiếu mới (BR-03)"
+
+  # Auto-approve settings (BR-06, BR-07)
+  auto_approve_stock_in:
+    type: Boolean
+    default: false
+    displayName:
+      en: Auto Approve Stock In
+      ja: 入庫自動承認
+      vi: Tự duyệt phiếu nhập
+    description:
+      en: "Auto-approve only when Manager/Admin creates stock-in (BR-06)"
+      ja: "マネージャー/管理者が入庫を作成した場合のみ自動承認（BR-06）"
+      vi: "Chỉ tự duyệt khi Manager/Admin tạo phiếu nhập (BR-06)"
+
+  auto_approve_stock_out:
+    type: Boolean
+    default: false
+    displayName:
+      en: Auto Approve Stock Out
+      ja: 出庫自動承認
+      vi: Tự duyệt phiếu xuất
+
+  auto_approve_batch:
+    type: Boolean
+    default: false
+    displayName:
+      en: Auto Approve Batch
+      ja: バッチ自動承認
+      vi: Tự duyệt batch/SX
+
+  auto_approve_disposal:
+    type: Boolean
+    default: false
+    displayName:
+      en: Auto Approve Disposal
+      ja: 廃棄自動承認
+      vi: Tự duyệt phiếu hủy
+
+  disposal_approval_threshold:
+    type: Decimal
+    precision: 15
+    scale: 2
+    nullable: true
+    displayName:
+      en: Disposal Approval Threshold
+      ja: 廃棄承認しきい値
+      vi: Ngưỡng hủy cần duyệt
+    description:
+      en: "Safety net: disposals exceeding this value always require Org Admin approval, regardless of auto-approve (BR-11). Null = no limit."
+      ja: "セーフティネット：この値を超える廃棄は自動承認に関係なくOrg Admin承認が必要（BR-11）。Null = 制限なし。"
+      vi: "Safety net: phiếu hủy vượt ngưỡng luôn cần Org Admin duyệt, bất kể auto-approve (BR-11). Null = không giới hạn."
+
+  # Plan-024 — allow negative StockLevel.quantity on sales-flow shortages.
+  #
+  # When true, `StockTransactionService::completeTransaction()` does NOT throw
+  # `InsufficientStockException` for stock_out items whose transaction
+  # `sub_type` is in {sales, sales_material_consumption} AND whose available
+  # quantity is less than requested. Instead:
+  #   - StockLevel.quantity is written to the resulting negative value
+  #   - An `out_of_stock` StockAlert is force-created (no dedup against
+  #     existing `low_stock` alerts — the out condition supersedes)
+  #   - StockAlertNotificationObserver fires the standard notification
+  #
+  # The flag intentionally does NOT cover manual stock_out / disposal /
+  # adjustment_out / transfer_out — those represent staff-initiated writes
+  # where the user knows the real on-hand state. Only the automated
+  # order-close path benefits from the leniency. Written by org-admin via
+  # warehouse settings (BR-07). Default false preserves pre-plan-024 strict
+  # behaviour.
+  allow_negative_sales:
+    type: Boolean
+    default: false
+    nullable: false
+    displayName:
+      en: Allow Negative Sales Stock
+      ja: 売上時のマイナス在庫を許可
+      vi: Cho phép tồn kho âm khi bán hàng
+    description:
+      en: "When enabled, sales-flow stock-out can drive StockLevel.quantity below zero. Out-of-stock alert fires immediately. Manual transactions remain strict."
+      ja: "有効時、売上経由の出庫はStockLevelの数量をマイナスに下げることができます。在庫切れアラートが即座に発火。手動取引は厳格なまま。"
+      vi: "Khi bật, xuất kho qua flow bán hàng có thể đẩy số lượng StockLevel xuống âm. Cảnh báo hết hàng kích hoạt ngay. Giao dịch thủ công vẫn nghiêm ngặt."
+
+  # Allergen segregation policy (plan-018 B.3)
+  # JSON structure: { "forbidden": ["peanut", "gluten", ...], "required_separate": ["soy", ...] }
+  # Forbidden = these allergens must NOT be stored here.
+  # Required-separate = these allergens can be stored but must be in dedicated zones.
+  # Written by org-admin/org-manager via warehouse settings page.
+  # Read by MaterialLotReceiveRequest::after() to validate inbound lots.
+  allergen_policy:
+    type: Json
+    nullable: true
+    displayName:
+      en: Allergen Policy
+      ja: アレルゲンポリシー
+      vi: Chính sách dị ứng
+    description:
+      en: "Allergen segregation rules for this warehouse. JSON with 'forbidden' and 'required_separate' arrays."
+      ja: "この倉庫のアレルゲン隔離ルール。'forbidden'と'required_separate'配列を含むJSON。"
+      vi: "Quy tắc cách ly dị ứng cho kho này. JSON với mảng 'forbidden' và 'required_separate'."
+
+  # Relationships
+  members:
+    type: Association
+    relation: OneToMany
+    target: WarehouseMember
+    mappedBy: warehouse
+    displayName:
+      en: Members
+      ja: メンバー
+      vi: Thành viên
+
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    nullable: true
+    onDelete: CASCADE
+    displayName:
+      en: Branch
+      ja: 店舗
+      vi: Chi nhánh

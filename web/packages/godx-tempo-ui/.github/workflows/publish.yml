@@ -1,0 +1,42 @@
+name: publish
+
+# Publishes @godxjp/ui to npm on version tags (vX.Y.Z).
+# Trigger ritual: bump "version" in package.json, commit, then:
+#   git tag v0.1.1 && git push origin v0.1.1
+#
+# Requires repo secret NPM_TOKEN (npm automation/granular token with
+# read+write on @godxjp scope). Set at:
+#   https://github.com/godx-jp/godx-tempo-ui/settings/secrets/actions
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+          scope: '@godxjp'
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - run: npm publish --access public
+        env:
+          # Repo .npmrc references ${NPM_TOKEN}; setup-node sets NODE_AUTH_TOKEN
+          # by default. Export both so whichever file wins, auth resolves.
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

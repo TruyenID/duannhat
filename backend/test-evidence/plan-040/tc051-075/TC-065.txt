@@ -1,0 +1,2 @@
+GET usage -> HTTP 200
+{"data":[{"id":"019f1163-d65d-708e-b772-33b286eb317c","name":"Pancake Mix"},{"id":"019f1163-d698-71ab-b9e3-bde22a3aeecb","name":"Sauce Base"},{"id":"019f1163-d6b5-71f8-a11b-903f3f6a7f57","name":"Tempura Shrimp"},{"id":"019f1163-d6cb-7307-9aa3-d07bec7fc270","name":"Passion Fruit Sauce"}]}

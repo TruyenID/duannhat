@@ -1,0 +1,38 @@
+deptrac:
+  skip_violations:
+    App\Models\BranchReview:
+      - App\Models\File
+    App\Models\Brand:
+      - App\Models\Category
+      - App\Models\Product
+    App\Models\Customer:
+      - App\Models\NotificationRecipient
+    App\Models\CustomerOrder:
+      - App\Models\Table
+    App\Models\Device:
+      - App\Models\NotificationRecipient
+    App\Models\Product:
+      - App\Models\File
+    App\Models\ProductSku:
+      - App\Models\File
+    App\Models\Table:
+      - App\Models\TableStatusChange
+    App\Models\TableSession:
+      - App\Models\Table
+    App\Models\User:
+      - App\Models\NotificationRecipient
+      - App\Models\Role
+    App\Services\Customer\OrderPaymentService:
+      - App\Models\CustomerOrder
+    App\Services\Customer\StripePaymentService:
+      - App\Models\CustomerOrder
+    App\Services\Customer\TaxResolver:
+      - App\Models\Product
+    App\Services\Payment\Orchestration\OrderPaymentOrchestrationCompat:
+      - App\Models\CustomerOrder
+    App\Services\Payment\Terminal\StripeTerminalService:
+      - App\Models\PeripheralDevice
+    App\Services\Pos\TillSessionService:
+      - App\Models\CouponRedemption
+    App\Services\Shop\ShopOrderSettingsService:
+      - App\Models\TaxType

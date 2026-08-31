@@ -1,0 +1,24 @@
+# Durable verified provider-event inbox lifecycle. Unverified requests never get a row;
+# succeeded/operator_resolved are terminal and duplicate deliveries never repeat money effects.
+kind: enum
+
+displayName:
+  en: Payment Provider Event State
+  ja: 決済プロバイダーイベント状態
+  vi: Trạng thái sự kiện nhà cung cấp thanh toán
+
+values:
+  - value: received_verified
+    label: { en: Received and Verified, ja: 受信・検証済み, vi: Đã nhận và xác minh }
+  - value: queued
+    label: { en: Queued, ja: キュー待ち, vi: Đã xếp hàng }
+  - value: processing
+    label: { en: Processing, ja: 処理中, vi: Đang xử lý }
+  - value: retryable
+    label: { en: Retryable, ja: 再試行可能, vi: Có thể thử lại }
+  - value: succeeded
+    label: { en: Succeeded, ja: 成功, vi: Thành công }
+  - value: dead_letter
+    label: { en: Dead Letter, ja: デッドレター, vi: Dead letter }
+  - value: operator_resolved
+    label: { en: Operator Resolved, ja: 運用者解決済み, vi: Đã được vận hành xử lý }

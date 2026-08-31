@@ -1,0 +1,208 @@
+# Deploy admin-web lên AWS Amplify (monorepo web/admin).
+# Amplify autoBuild OFF — Actions gọi start-job RELEASE.
+name: Deploy admin-web to Amplify
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "web/admin/**"
+      - ".github/workflows/admin-web-deploy.yml"
+      - ".github/amplify/admin-buildspec.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-amplify-admin
+  cancel-in-progress: false
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AMPLIFY_AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AMPLIFY_AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: ap-northeast-1
+  APP_ID: d3cqu96a6b470f
+
+jobs:
+  deploy:
+    name: Amplify release (admin)
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - name: Validate production customer-web URL
+        env:
+          EXPECTED_CUSTOMER_WEB_URL: https://menu.vietorigin.jp
+        run: |
+          ACTUAL_CUSTOMER_WEB_URL=$(aws amplify get-app \
+            --app-id "$APP_ID" \
+            --query 'app.environmentVariables.NEXT_PUBLIC_CUSTOMER_WEB_URL' \
+            --output text)
+
+          if [ "$ACTUAL_CUSTOMER_WEB_URL" != "$EXPECTED_CUSTOMER_WEB_URL" ]; then
+            echo "::error::NEXT_PUBLIC_CUSTOMER_WEB_URL must be the canonical production customer domain"
+            exit 1
+          fi
+
+      # Trang tải (#3088) dựng link file từ `TEMPO_BACKEND_URL`. Thiếu nó thì
+      # `backendOrigin()` NÉM ở production — cố ý, vì mặc định là
+      # `https://dxs-product.test`, host chỉ có trên máy lập trình viên: rơi về
+      # nó cho ra một trang render đẹp mà MỌI nút tải đều chết, và nhìn từ ngoài
+      # không phân biệt được với trang chạy đúng.
+      #
+      # Env của Amplify sống ở AWS console, nên trước bước này không có gì
+      # trong repo bảo đảm nó được đặt. Đặt ở đây để cấu hình nằm trong cây,
+      # review được — thay vì trong một console ai đó phải nhớ.
+      #
+      # GỘP, không đè: `update-app --environment-variables` THAY nguyên map, nên
+      # ghi thẳng một khoá sẽ xoá sạch các biến khác của app. Đọc map hiện tại,
+      # gộp đúng một khoá, ghi lại. Không đổi gì thì KHÔNG gọi update — một lượt
+      # ghi thừa vào cấu hình production là rủi ro không đổi lấy gì.
+      - name: Ensure TEMPO_BACKEND_URL on Amplify
+        env:
+          EXPECTED_BACKEND_URL: https://tempo-prod.godx.jp
+        run: |
+          current=$(aws amplify get-app --app-id "$APP_ID" \
+            --query 'app.environmentVariables' --output json)
+
+          actual=$(printf '%s' "$current" | jq -r '.TEMPO_BACKEND_URL // ""')
+          if [ "$actual" = "$EXPECTED_BACKEND_URL" ]; then
+            echo "OK — TEMPO_BACKEND_URL already $actual"
+            exit 0
+          fi
+
+          echo "==> TEMPO_BACKEND_URL is '${actual:-<unset>}', setting to $EXPECTED_BACKEND_URL"
+          merged=$(printf '%s' "$current" \
+            | jq -c --arg v "$EXPECTED_BACKEND_URL" '. + {TEMPO_BACKEND_URL: $v}')
+
+          # Rào tự vệ: map gộp phải có ÍT NHẤT bằng số khoá cũ. `jq` hỏng hay
+          # `get-app` trả rỗng đều cho ra `{}`, và ghi `{}` lên production là
+          # xoá sạch env của app.
+          before=$(printf '%s' "$current" | jq 'length')
+          after=$(printf '%s' "$merged" | jq 'length')
+          if [ "$after" -lt "$before" ]; then
+            echo "::error::refusing to shrink Amplify env map ($before -> $after)"
+            exit 1
+          fi
+
+          # #3088 lượt đầu để lệnh này CHẶN cả job, và nó đã chặn THẬT: IAM user
+          # của CI (`gha-godx-tempo-amplify`) có `amplify:StartJob` nhưng KHÔNG có
+          # `amplify:UpdateApp`, nên bước này chết `AccessDeniedException` và kéo
+          # theo cả lượt release. Đo: lần deploy admin-web cuối cùng thành công là
+          # 2026-08-17 17:45 JST, bước này vào cây 19:43, và MỌI lượt từ 21:01 trở
+          # đi đều đỏ — bảy lượt liên tiếp, trong đó có lượt promote hôm nay.
+          #
+          # Tức một bước TIỆN NGHI đã chặn đường phát hành. Sai tỉ lệ: biến này chỉ
+          # quyết định trang /downloads trỏ đâu, còn thứ bị chặn là toàn bộ
+          # admin-web.
+          #
+          # Nay tách hai loại lỗi. THIẾU QUYỀN là trạng thái đã biết, cần một người
+          # có quyền AWS xử lý một lần — cảnh báo rồi đi tiếp. Mọi lỗi khác vẫn
+          # CHẶN, vì chúng nghĩa là điều kiện đã đổi và không ai biết đổi thế nào.
+          set +e
+          update_out=$(aws amplify update-app --app-id "$APP_ID" \
+            --environment-variables "$merged" 2>&1)
+          update_code=$?
+          set -e
+
+          if [ "$update_code" -eq 0 ]; then
+            echo "OK — TEMPO_BACKEND_URL set ($before -> $after keys)"
+          elif printf '%s' "$update_out" | grep -q 'AccessDeniedException'; then
+            echo "::warning title=Không đặt được TEMPO_BACKEND_URL::CI thiếu quyền amplify:UpdateApp — đặt TAY một lần trong Amplify console (TEMPO_BACKEND_URL=$EXPECTED_BACKEND_URL), hoặc cấp quyền cho gha-godx-tempo-amplify. Release vẫn tiếp tục."
+            printf '%s\n' "$update_out"
+          else
+            echo "::error::update-app thất bại vì lý do KHÁC thiếu quyền — dừng lại thay vì đoán"
+            printf '%s\n' "$update_out"
+            exit 1
+          fi
+
+      # #3088 — NẠP buildspec từ repo lên Amplify.
+      #
+      # `.github/amplify/admin-buildspec.yml` nằm trong `paths:` của workflow
+      # nên nó TRÔNG như nguồn chân lý, nhưng trước bước này KHÔNG có gì nạp nó:
+      # Amplify chỉ đọc `amplify.yml` ở gốc app, hoặc bản lưu trong console.
+      # Repo này không có `amplify.yml`, nên file kia là file CHẾT — sửa nó
+      # không đổi một byte nào của lượt build.
+      #
+      # Đo 2026-08-18: sửa buildspec để nướng TEMPO_BACKEND_URL vào
+      # `.env.production`, deploy xanh, trang vẫn 500 — vì lệnh mới chưa bao giờ
+      # chạy. Một file cấu hình không ai đọc còn tệ hơn không có file: nó trả
+      # lời "đã cấu hình" cho câu hỏi "chỗ này đã được cấu hình chưa".
+      - name: Push buildspec to Amplify
+        run: |
+          set +e
+          out=$(aws amplify update-app --app-id "$APP_ID" \
+            --build-spec "$(cat .github/amplify/admin-buildspec.yml)" 2>&1)
+          code=$?
+          set -e
+
+          if [ "$code" -eq 0 ]; then
+            echo "OK — buildspec đã nạp lên Amplify"
+          elif printf '%s' "$out" | grep -q 'AccessDeniedException'; then
+            echo "::warning title=Không nạp được buildspec::CI thiếu quyền amplify:UpdateApp — Amplify sẽ dùng bản trong console, và mọi sửa đổi trong repo KHÔNG có tác dụng."
+            printf '%s\n' "$out"
+          else
+            echo "::error::update-app --build-spec thất bại vì lý do KHÁC thiếu quyền"
+            printf '%s\n' "$out"
+            exit 1
+          fi
+
+      - name: Start Amplify build and wait
+        run: |
+          set +e
+          task_start_output=$(aws amplify start-job --app-id "$APP_ID" --branch-name main --job-type RELEASE --query 'jobSummary.jobId' --output text 2>&1)
+          task_start_code=$?
+          set -e
+
+          if [ "$task_start_code" -eq 0 ]; then
+            task_job_id="$task_start_output"
+            echo "==> job $task_job_id started"
+          elif echo "$task_start_output" | grep -q 'LimitExceededException'; then
+            task_job_id=$(aws amplify list-jobs --app-id "$APP_ID" --branch-name main --max-results 10 --query "jobSummaries[?status=='PENDING' || status=='RUNNING'] | [0].jobId" --output text)
+            if [ -z "$task_job_id" ] || [ "$task_job_id" = "None" ]; then
+              echo "::error::Amplify reported an active job, but no active job could be found"
+              exit 1
+            fi
+            echo "==> following existing job $task_job_id"
+          else
+            echo "::error::$task_start_output"
+            exit "$task_start_code"
+          fi
+
+          while true; do
+            STATUS=$(aws amplify get-job --app-id "$APP_ID" --branch-name main --job-id "$task_job_id" --query 'job.summary.status' --output text)
+            case "$STATUS" in
+              SUCCEED) echo "==> deployed: https://main.$APP_ID.amplifyapp.com"; exit 0 ;;
+              FAILED|CANCELLED) echo "::error::Amplify job $STATUS"; exit 1 ;;
+              *) echo "  $STATUS…"; sleep 30 ;;
+            esac
+          done
+
+      - name: Smoke test
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "https://main.$APP_ID.amplifyapp.com/" || echo 000)
+          echo "smoke: HTTP $code"
+          case "$code" in 200|30*) echo OK;; *) echo "::error::smoke $code"; exit 1;; esac
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "https://main.$APP_ID.amplifyapp.com/downloads" || echo 000)
+          echo "smoke /downloads: HTTP $code"
+          case "$code" in 200) echo OK;; *) echo "::error::/downloads trả $code — đường này PHẢI mở cho khách (#3222), 30x nghĩa là cổng đăng nhập đã nuốt nó lần nữa"; exit 1;; esac
+
+          # #3231 — mã HTTP nói "server còn thở"; dấu vân tay nói "bundle vừa
+          # build đang được phục vụ". HAI CÂU KHÁC NHAU, cả hai đều phải hỏi.
+          # Thay cái trên bằng cái dưới là đổi một lỗ mù lấy một lỗ mù khác.
+          info=$(curl -s --max-time 30 "https://main.$APP_ID.amplifyapp.com/build-info.json" || echo '')
+          served=$(printf '%s' "$info" | node -e "let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{try{process.stdout.write(JSON.parse(d).commit||'')}catch{process.stdout.write('')}})")
+          echo "bundle đang phục vụ dựng từ: ${served:-<không đọc được>}"
+
+          if [ -z "$served" ]; then
+            echo "::error::/build-info.json không đọc được. Hoặc bước nướng dấu vân tay trong buildspec chưa chạy (buildspec trong repo là FILE CHẾT nếu không ai nạp — #3229), hoặc lượt build này chưa tới người dùng."
+            exit 1
+          fi
+
+          # Chấp nhận commit MỚI HƠN: hai PR merge sát nhau thì Amplify dựng cái
+          # sau, và cái sau CHỨA cái này — deploy vẫn tới nơi. Đỏ chỉ khi bundle
+          # đang phục vụ KHÔNG chứa commit vừa merge. Không có vế này thì rào kêu
+          # oan mỗi lượt merge kép, và một rào kêu oan không bị tranh luận, nó bị TẮT.
+          git fetch --quiet origin "$served" 2>/dev/null || true
+          if git merge-base --is-ancestor "${GITHUB_SHA}" "$served" 2>/dev/null; then
+            echo "OK — bundle chứa ${GITHUB_SHA}"
+          else
+            echo "::error::Bundle đang phục vụ dựng từ $served, KHÔNG chứa ${GITHUB_SHA}. Lượt deploy này chưa tới người dùng — đừng đọc bảng checks xanh thành 'đã lên'."
+            exit 1
+          fi

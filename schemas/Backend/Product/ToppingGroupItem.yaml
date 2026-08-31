@@ -1,0 +1,105 @@
+# =============================================================================
+# ToppingGroupItem (トッピンググループ項目 / Mục Topping trong Nhóm)
+# =============================================================================
+#
+# Một topping cụ thể trong nhóm — trỏ vào Product có type.code = 'topping'.
+# Mỗi item có thể có nhiều ToppingGroupItemSku (price override per-SKU).
+#
+# Written by: HQ admin via ToppingGroupItemService::addItem().
+# Read by: HQ admin topping group edit page, POS/workstation (Phase 2).
+#
+# Constraints:
+#   - RESTRICT on product: không thể xoá Product khi còn ToppingGroupItem
+#     reference nó — bảo vệ order history (Phase 2 khi order_item_toppings
+#     tham chiếu group_item_id).
+#   - Composite unique (topping_group_id, product_id): 1 product chỉ xuất
+#     hiện 1 lần trong mỗi nhóm.
+#   - Soft delete: yes — khi item bị xoá, order cũ vẫn reference được
+#     group_item_id. Observer cascade hard-delete ToppingGroupItemSku khi
+#     item soft-deleted (xem ToppingGroupItemObserver).
+# =============================================================================
+
+displayName:
+  en: Topping Group Item
+  ja: トッピンググループ項目
+  vi: Mục Topping trong Nhóm
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  # Audit: track who added/modified topping items
+  audit:
+    createdBy: true
+    updatedBy: true
+  indexes:
+    # Group-scoped queries — list items của một nhóm
+    - columns: [topping_group_id]
+    # Product-scoped queries — tìm nhóm nào chứa product này
+    - columns: [product_id]
+    # Composite unique: 1 product chỉ xuất hiện 1 lần trong mỗi nhóm
+    - columns: [topping_group_id, product_id]
+      unique: true
+
+properties:
+  # Nhóm chứa item này. CASCADE — khi xoá nhóm thì item đi theo.
+  toppingGroup:
+    type: Association
+    relation: ManyToOne
+    target: ToppingGroup
+    onDelete: CASCADE
+    displayName:
+      en: Topping Group
+      ja: トッピンググループ
+      vi: Nhóm Topping
+
+  # Sản phẩm topping (phải có type.code = 'topping').
+  # RESTRICT — không xoá Product khi còn order history reference (Phase 2).
+  # Application layer validate product phải thuộc cùng brand với group.
+  product:
+    type: Association
+    relation: ManyToOne
+    target: Product
+    onDelete: RESTRICT
+    displayName:
+      en: Product
+      ja: 商品
+      vi: Sản phẩm
+
+  # Thứ tự hiển thị item trong nhóm (nhỏ hơn = trước).
+  sort_order:
+    type: Int
+    default: 0
+    sortable: true
+    displayName:
+      en: Sort Order
+      ja: 表示順序
+      vi: Thứ tự hiển thị
+
+  # "Đã chọn sẵn" pattern (matches Square `on_by_default`, Toast `default_modifier`).
+  # UX example: "Burger có sẵn cà chua, hành — khách có thể bỏ ra".
+  # Phase 2 customer-web: tick sẵn ở UI, customer untick để loại khỏi order.
+  # Phase 2 server-side: nếu customer không gửi explicit topping selection
+  # cho group, auto-add các is_default=true items vào OrderItemTopping.
+  is_default:
+    type: Boolean
+    default: false
+    displayName:
+      en: Default Included
+      ja: デフォルト選択
+      vi: Chọn sẵn
+
+  # Price override per-SKU cho item này.
+  # Auto-created 1 row (product_sku_id=null, extra_price=0) khi addItem cho
+  # simple topping (không có variant). Observer cascade hard-delete khi soft-delete.
+  skus:
+    type: Association
+    relation: OneToMany
+    target: ToppingGroupItemSku
+    mappedBy: toppingGroupItem
+    displayName:
+      en: SKU Prices
+      ja: SKU価格
+      vi: Giá theo SKU

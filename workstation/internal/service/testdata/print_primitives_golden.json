@@ -1,0 +1,2439 @@
+{
+  "column_header_text": {
+    "": [
+      "",
+      ""
+    ],
+    "\t\n ": [
+      "\t\n ",
+      ""
+    ],
+    " ": [
+      " ",
+      ""
+    ],
+    "  leading and trailing  ": [
+      "",
+      "leading and trailing  "
+    ],
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA": [
+      "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      ""
+    ],
+    "Bun bo Hue dac biet thap cam": [
+      "Bun bo Hue dac biet thap cam",
+      ""
+    ],
+    "Chi nhánh Hà Nội": [
+      "Chi nhánh Hà Nội",
+      ""
+    ],
+    "Item": [
+      "Item",
+      ""
+    ],
+    "Khong hanh, it cay": [
+      "Khong hanh, it cay",
+      ""
+    ],
+    "T1234567890123": [
+      "T1234567890123",
+      ""
+    ],
+    "line one\nline two\n\nline four": [
+      "line one\nline two\n\nline four",
+      ""
+    ],
+    "one two three four five six seven eight nine ten eleven": [
+      "one two three four five six seven eight nine ten eleven",
+      ""
+    ],
+    "phở đặc biệt": [
+      "phở đặc biệt",
+      ""
+    ],
+    "¥1,000": [
+      "¥1,000",
+      ""
+    ],
+    "—— Them rau mui": [
+      "—— Them rau mui",
+      ""
+    ],
+    "※": [
+      "※",
+      ""
+    ],
+    "※軽減税率対象": [
+      "※軽減税率対象",
+      ""
+    ],
+    "₫50.000": [
+      "₫50.000",
+      ""
+    ],
+    "€100 £50 ₩900 ฿20": [
+      "€100 £50 ₩900 ฿20",
+      ""
+    ],
+    "あああああああああああああああああああああああああああああああああ": [
+      "あああああああああああああああああああああああああああああああああ",
+      ""
+    ],
+    "ベト屋": [
+      "ベト屋",
+      ""
+    ],
+    "商品": [
+      "商品",
+      ""
+    ],
+    "商品                          金額": [
+      "商品",
+      "金額"
+    ],
+    "田中": [
+      "田中",
+      ""
+    ],
+    "精算（チェーン）": [
+      "精算（チェーン）",
+      ""
+    ],
+    "緑茶": [
+      "緑茶",
+      ""
+    ]
+  },
+  "dashed_line": {
+    "1": "-",
+    "16": "- - - - - - - - ",
+    "2": "- ",
+    "32": "- - - - - - - - - - - - - - - - ",
+    "42": "- - - - - - - - - - - - - - - - - - - - - ",
+    "48": "- - - - - - - - - - - - - - - - - - - - - - - - ",
+    "8": "- - - - "
+  },
+  "display_width": {
+    "": 0,
+    "\t\n ": 3,
+    " ": 1,
+    "  leading and trailing  ": 24,
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA": 56,
+    "Bun bo Hue dac biet thap cam": 28,
+    "Chi nhánh Hà Nội": 16,
+    "Item": 4,
+    "Khong hanh, it cay": 18,
+    "T1234567890123": 14,
+    "line one\nline two\n\nline four": 28,
+    "one two three four five six seven eight nine ten eleven": 55,
+    "phở đặc biệt": 12,
+    "¥1,000": 6,
+    "—— Them rau mui": 15,
+    "※": 2,
+    "※軽減税率対象": 14,
+    "₫50.000": 7,
+    "€100 £50 ₩900 ฿20": 17,
+    "あああああああああああああああああああああああああああああああああ": 66,
+    "ベト屋": 6,
+    "商品": 4,
+    "商品                          金額": 34,
+    "田中": 4,
+    "精算（チェーン）": 16,
+    "緑茶": 4
+  },
+  "finishing_hex": {
+    "esc_d|3|false": "1b6433",
+    "esc_d|3|true": "",
+    "gs_v_full|12|false": "0a0a0a0a0a0a0a0a0a0a0a0a1d5600",
+    "gs_v_full|4|false": "0a0a0a0a1d5600",
+    "gs_v_full|4|true": "",
+    "gs_v_partial|0|false": "1d5601",
+    "gs_v_partial|4|false": "0a0a0a0a1d5601",
+    "none|0|false": "0a0a",
+    "none|3|true": "0a0a0a",
+    "none|4|false": "0a0a0a0a"
+  },
+  "format_price": {
+    "-1": "-1",
+    "-1234": "-1,234",
+    "0": "0",
+    "1": "1",
+    "10": "10",
+    "100": "100",
+    "1000": "1,000",
+    "1000000": "1,000,000",
+    "1234": "1,234",
+    "9": "9",
+    "999": "999",
+    "999999": "999,999"
+  },
+  "pad_right": {
+    "\t\n |0": "\t\n ",
+    "\t\n |16": "\t\n              ",
+    "\t\n |32": "\t\n                              ",
+    "\t\n |8": "\t\n      ",
+    "  leading and trailing  |0": "  leading and trailing  ",
+    "  leading and trailing  |16": "  leading and trailing  ",
+    "  leading and trailing  |32": "  leading and trailing          ",
+    "  leading and trailing  |8": "  leading and trailing  ",
+    " |0": " ",
+    " |16": "                ",
+    " |32": "                                ",
+    " |8": "        ",
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA|0": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA|16": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA|32": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA|8": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "Bun bo Hue dac biet thap cam|0": "Bun bo Hue dac biet thap cam",
+    "Bun bo Hue dac biet thap cam|16": "Bun bo Hue dac biet thap cam",
+    "Bun bo Hue dac biet thap cam|32": "Bun bo Hue dac biet thap cam    ",
+    "Bun bo Hue dac biet thap cam|8": "Bun bo Hue dac biet thap cam",
+    "Chi nhánh Hà Nội|0": "Chi nhánh Hà Nội",
+    "Chi nhánh Hà Nội|16": "Chi nhánh Hà Nội",
+    "Chi nhánh Hà Nội|32": "Chi nhánh Hà Nội                ",
+    "Chi nhánh Hà Nội|8": "Chi nhánh Hà Nội",
+    "Item|0": "Item",
+    "Item|16": "Item            ",
+    "Item|32": "Item                            ",
+    "Item|8": "Item    ",
+    "Khong hanh, it cay|0": "Khong hanh, it cay",
+    "Khong hanh, it cay|16": "Khong hanh, it cay",
+    "Khong hanh, it cay|32": "Khong hanh, it cay              ",
+    "Khong hanh, it cay|8": "Khong hanh, it cay",
+    "T1234567890123|0": "T1234567890123",
+    "T1234567890123|16": "T1234567890123  ",
+    "T1234567890123|32": "T1234567890123                  ",
+    "T1234567890123|8": "T1234567890123",
+    "line one\nline two\n\nline four|0": "line one\nline two\n\nline four",
+    "line one\nline two\n\nline four|16": "line one\nline two\n\nline four",
+    "line one\nline two\n\nline four|32": "line one\nline two\n\nline four    ",
+    "line one\nline two\n\nline four|8": "line one\nline two\n\nline four",
+    "one two three four five six seven eight nine ten eleven|0": "one two three four five six seven eight nine ten eleven",
+    "one two three four five six seven eight nine ten eleven|16": "one two three four five six seven eight nine ten eleven",
+    "one two three four five six seven eight nine ten eleven|32": "one two three four five six seven eight nine ten eleven",
+    "one two three four five six seven eight nine ten eleven|8": "one two three four five six seven eight nine ten eleven",
+    "phở đặc biệt|0": "phở đặc biệt",
+    "phở đặc biệt|16": "phở đặc biệt    ",
+    "phở đặc biệt|32": "phở đặc biệt                    ",
+    "phở đặc biệt|8": "phở đặc biệt",
+    "|0": "",
+    "|16": "                ",
+    "|32": "                                ",
+    "|8": "        ",
+    "¥1,000|0": "¥1,000",
+    "¥1,000|16": "¥1,000          ",
+    "¥1,000|32": "¥1,000                          ",
+    "¥1,000|8": "¥1,000  ",
+    "—— Them rau mui|0": "—— Them rau mui",
+    "—— Them rau mui|16": "—— Them rau mui ",
+    "—— Them rau mui|32": "—— Them rau mui                 ",
+    "—— Them rau mui|8": "—— Them rau mui",
+    "※|0": "※",
+    "※|16": "※              ",
+    "※|32": "※                              ",
+    "※|8": "※      ",
+    "※軽減税率対象|0": "※軽減税率対象",
+    "※軽減税率対象|16": "※軽減税率対象  ",
+    "※軽減税率対象|32": "※軽減税率対象                  ",
+    "※軽減税率対象|8": "※軽減税率対象",
+    "₫50.000|0": "₫50.000",
+    "₫50.000|16": "₫50.000         ",
+    "₫50.000|32": "₫50.000                         ",
+    "₫50.000|8": "₫50.000 ",
+    "€100 £50 ₩900 ฿20|0": "€100 £50 ₩900 ฿20",
+    "€100 £50 ₩900 ฿20|16": "€100 £50 ₩900 ฿20",
+    "€100 £50 ₩900 ฿20|32": "€100 £50 ₩900 ฿20               ",
+    "€100 £50 ₩900 ฿20|8": "€100 £50 ₩900 ฿20",
+    "あああああああああああああああああああああああああああああああああ|0": "あああああああああああああああああああああああああああああああああ",
+    "あああああああああああああああああああああああああああああああああ|16": "あああああああああああああああああああああああああああああああああ",
+    "あああああああああああああああああああああああああああああああああ|32": "あああああああああああああああああああああああああああああああああ",
+    "あああああああああああああああああああああああああああああああああ|8": "あああああああああああああああああああああああああああああああああ",
+    "ベト屋|0": "ベト屋",
+    "ベト屋|16": "ベト屋          ",
+    "ベト屋|32": "ベト屋                          ",
+    "ベト屋|8": "ベト屋  ",
+    "商品                          金額|0": "商品                          金額",
+    "商品                          金額|16": "商品                          金額",
+    "商品                          金額|32": "商品                          金額",
+    "商品                          金額|8": "商品                          金額",
+    "商品|0": "商品",
+    "商品|16": "商品            ",
+    "商品|32": "商品                            ",
+    "商品|8": "商品    ",
+    "田中|0": "田中",
+    "田中|16": "田中            ",
+    "田中|32": "田中                            ",
+    "田中|8": "田中    ",
+    "精算（チェーン）|0": "精算（チェーン）",
+    "精算（チェーン）|16": "精算（チェーン）",
+    "精算（チェーン）|32": "精算（チェーン）                ",
+    "精算（チェーン）|8": "精算（チェーン）",
+    "緑茶|0": "緑茶",
+    "緑茶|16": "緑茶            ",
+    "緑茶|32": "緑茶                            ",
+    "緑茶|8": "緑茶    "
+  },
+  "raster_hex": {
+    "12x2_padded": "true:1b401d76300002000200fff00ff0",
+    "1x8_column": "true:1b401d763000010008008080808080808080",
+    "8x1_solid": "true:1b401d76300001000100ff",
+    "8x2_stripes": "true:1b401d76300001000200aa55",
+    "empty_data": "false:1b40",
+    "ragged_rows": "false:1b40",
+    "zero_width": "false:1b40"
+  },
+  "rune_len": {
+    "": 0,
+    "\t\n ": 3,
+    " ": 1,
+    "  leading and trailing  ": 24,
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA": 56,
+    "Bun bo Hue dac biet thap cam": 28,
+    "Chi nhánh Hà Nội": 16,
+    "Item": 4,
+    "Khong hanh, it cay": 18,
+    "T1234567890123": 14,
+    "line one\nline two\n\nline four": 28,
+    "one two three four five six seven eight nine ten eleven": 55,
+    "phở đặc biệt": 12,
+    "¥1,000": 6,
+    "—— Them rau mui": 15,
+    "※": 1,
+    "※軽減税率対象": 7,
+    "₫50.000": 7,
+    "€100 £50 ₩900 ฿20": 17,
+    "あああああああああああああああああああああああああああああああああ": 33,
+    "ベト屋": 3,
+    "商品": 2,
+    "商品                          金額": 30,
+    "田中": 2,
+    "精算（チェーン）": 8,
+    "緑茶": 2
+  },
+  "shift_jis_hex": {
+    "": "",
+    "\t\n ": "090a20",
+    " ": "20",
+    "  leading and trailing  ": "20206c656164696e6720616e6420747261696c696e672020",
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA": "4141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141",
+    "Bun bo Hue dac biet thap cam": "42756e20626f2048756520646163206269657420746861702063616d",
+    "Chi nhánh Hà Nội": "436869206e68616e68204861204e6f69",
+    "Item": "4974656d",
+    "Khong hanh, it cay": "4b686f6e672068616e682c20697420636179",
+    "T1234567890123": "5431323334353637383930313233",
+    "line one\nline two\n\nline four": "6c696e65206f6e650a6c696e652074776f0a0a6c696e6520666f7572",
+    "one two three four five six seven eight nine ten eleven": "6f6e652074776f20746872656520666f757220666976652073697820736576656e206569676874206e696e652074656e20656c6576656e",
+    "phở đặc biệt": "70686f206461632062696574",
+    "¥1,000": "5c312c303030",
+    "—— Them rau mui": "1a1a205468656d20726175206d7569",
+    "※": "81a6",
+    "※軽減税率対象": "81a68c798cb890c597a691ce8fdb",
+    "₫50.000": "6435302e303030",
+    "€100 £50 ₩900 ฿20": "1a313030201a3530201a393030201a3230",
+    "あああああああああああああああああああああああああああああああああ": "82a082a082a082a082a082a082a082a082a082a082a082a082a082a082a082a082a082a082a082a082a082a082a082a082a082a082a082a082a082a082a082a082a0",
+    "ベト屋": "8378836789ae",
+    "商品": "8fa49569",
+    "商品                          金額": "8fa4956920202020202020202020202020202020202020202020202020208be08a7a",
+    "田中": "93639286",
+    "精算（チェーン）": "90b88e5a816983608346815b8393816a",
+    "緑茶": "97ce9283"
+  },
+  "shift_jis_repertoire_sha256": "14a630a0c2418b9a1906b80422f9a42512fd1d7f2a5e57e793016a3b3c0d8c93",
+  "strip_accents": {
+    "": "",
+    "\t\n ": "\t\n ",
+    " ": " ",
+    "  leading and trailing  ": "  leading and trailing  ",
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "Bun bo Hue dac biet thap cam": "Bun bo Hue dac biet thap cam",
+    "Chi nhánh Hà Nội": "Chi nhanh Ha Noi",
+    "Item": "Item",
+    "Khong hanh, it cay": "Khong hanh, it cay",
+    "T1234567890123": "T1234567890123",
+    "line one\nline two\n\nline four": "line one\nline two\n\nline four",
+    "one two three four five six seven eight nine ten eleven": "one two three four five six seven eight nine ten eleven",
+    "phở đặc biệt": "pho dac biet",
+    "¥1,000": "¥1,000",
+    "—— Them rau mui": "—— Them rau mui",
+    "※": "※",
+    "※軽減税率対象": "※軽減税率対象",
+    "₫50.000": "₫50.000",
+    "€100 £50 ₩900 ฿20": "€100 £50 ₩900 ฿20",
+    "あああああああああああああああああああああああああああああああああ": "あああああああああああああああああああああああああああああああああ",
+    "ベト屋": "ベト屋",
+    "商品": "商品",
+    "商品                          金額": "商品                          金額",
+    "田中": "田中",
+    "精算（チェーン）": "精算（チェーン）",
+    "緑茶": "緑茶"
+  },
+  "wrap_name_lines": {
+    "\t\n |10|16": [
+      ""
+    ],
+    "\t\n |10|30": [
+      ""
+    ],
+    "\t\n |10|6": [
+      ""
+    ],
+    "\t\n |20|16": [
+      ""
+    ],
+    "\t\n |20|30": [
+      ""
+    ],
+    "\t\n |20|6": [
+      ""
+    ],
+    "\t\n |4|16": [
+      ""
+    ],
+    "\t\n |4|30": [
+      ""
+    ],
+    "\t\n |4|6": [
+      ""
+    ],
+    "  leading and trailing  |10|16": [
+      "leading",
+      "and trailing"
+    ],
+    "  leading and trailing  |10|30": [
+      "leading",
+      "and trailing"
+    ],
+    "  leading and trailing  |10|6": [
+      "leading",
+      "and",
+      "traili",
+      "ng"
+    ],
+    "  leading and trailing  |20|16": [
+      "leading and trailing"
+    ],
+    "  leading and trailing  |20|30": [
+      "leading and trailing"
+    ],
+    "  leading and trailing  |20|6": [
+      "leading and trailing"
+    ],
+    "  leading and trailing  |4|16": [
+      "lead",
+      "ing and trailing"
+    ],
+    "  leading and trailing  |4|30": [
+      "lead",
+      "ing and trailing"
+    ],
+    "  leading and trailing  |4|6": [
+      "lead",
+      "ing",
+      "and",
+      "traili",
+      "ng"
+    ],
+    " |10|16": [
+      ""
+    ],
+    " |10|30": [
+      ""
+    ],
+    " |10|6": [
+      ""
+    ],
+    " |20|16": [
+      ""
+    ],
+    " |20|30": [
+      ""
+    ],
+    " |20|6": [
+      ""
+    ],
+    " |4|16": [
+      ""
+    ],
+    " |4|30": [
+      ""
+    ],
+    " |4|6": [
+      ""
+    ],
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA|10|16": [
+      "AAAAAAAAAA",
+      "AAAAAAAAAAAAAAAA",
+      "AAAAAAAAAAAAAAAA",
+      "AAAAAAAAAAAAAA"
+    ],
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA|10|30": [
+      "AAAAAAAAAA",
+      "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "AAAAAAAAAAAAAAAA"
+    ],
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA|10|6": [
+      "AAAAAAAAAA",
+      "AAAAAA",
+      "AAAAAA",
+      "AAAAAA",
+      "AAAAAA",
+      "AAAAAA",
+      "AAAAAA",
+      "AAAAAA",
+      "AAAA"
+    ],
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA|20|16": [
+      "AAAAAAAAAAAAAAAAAAAA",
+      "AAAAAAAAAAAAAAAA",
+      "AAAAAAAAAAAAAAAA",
+      "AAAA"
+    ],
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA|20|30": [
+      "AAAAAAAAAAAAAAAAAAAA",
+      "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "AAAAAA"
+    ],
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA|20|6": [
+      "AAAAAAAAAAAAAAAAAAAA",
+      "AAAAAA",
+      "AAAAAA",
+      "AAAAAA",
+      "AAAAAA",
+      "AAAAAA",
+      "AAAAAA"
+    ],
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA|4|16": [
+      "AAAA",
+      "AAAAAAAAAAAAAAAA",
+      "AAAAAAAAAAAAAAAA",
+      "AAAAAAAAAAAAAAAA",
+      "AAAA"
+    ],
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA|4|30": [
+      "AAAA",
+      "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "AAAAAAAAAAAAAAAAAAAAAA"
+    ],
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA|4|6": [
+      "AAAA",
+      "AAAAAA",
+      "AAAAAA",
+      "AAAAAA",
+      "AAAAAA",
+      "AAAAAA",
+      "AAAAAA",
+      "AAAAAA",
+      "AAAAAA",
+      "AAAA"
+    ],
+    "Bun bo Hue dac biet thap cam|10|16": [
+      "Bun bo Hue",
+      "dac biet thap",
+      "cam"
+    ],
+    "Bun bo Hue dac biet thap cam|10|30": [
+      "Bun bo Hue",
+      "dac biet thap cam"
+    ],
+    "Bun bo Hue dac biet thap cam|10|6": [
+      "Bun bo Hue",
+      "dac",
+      "biet",
+      "thap",
+      "cam"
+    ],
+    "Bun bo Hue dac biet thap cam|20|16": [
+      "Bun bo Hue dac biet",
+      "thap cam"
+    ],
+    "Bun bo Hue dac biet thap cam|20|30": [
+      "Bun bo Hue dac biet",
+      "thap cam"
+    ],
+    "Bun bo Hue dac biet thap cam|20|6": [
+      "Bun bo Hue dac biet",
+      "thap",
+      "cam"
+    ],
+    "Bun bo Hue dac biet thap cam|4|16": [
+      "Bun",
+      "bo Hue dac biet",
+      "thap cam"
+    ],
+    "Bun bo Hue dac biet thap cam|4|30": [
+      "Bun",
+      "bo Hue dac biet thap cam"
+    ],
+    "Bun bo Hue dac biet thap cam|4|6": [
+      "Bun",
+      "bo Hue",
+      "dac",
+      "biet",
+      "thap",
+      "cam"
+    ],
+    "Chi nhánh Hà Nội|10|16": [
+      "Chi nhánh",
+      "Hà Nội"
+    ],
+    "Chi nhánh Hà Nội|10|30": [
+      "Chi nhánh",
+      "Hà Nội"
+    ],
+    "Chi nhánh Hà Nội|10|6": [
+      "Chi nhánh",
+      "Hà Nội"
+    ],
+    "Chi nhánh Hà Nội|20|16": [
+      "Chi nhánh Hà Nội"
+    ],
+    "Chi nhánh Hà Nội|20|30": [
+      "Chi nhánh Hà Nội"
+    ],
+    "Chi nhánh Hà Nội|20|6": [
+      "Chi nhánh Hà Nội"
+    ],
+    "Chi nhánh Hà Nội|4|16": [
+      "Chi",
+      "nhánh Hà Nội"
+    ],
+    "Chi nhánh Hà Nội|4|30": [
+      "Chi",
+      "nhánh Hà Nội"
+    ],
+    "Chi nhánh Hà Nội|4|6": [
+      "Chi",
+      "nhánh",
+      "Hà Nội"
+    ],
+    "Item|10|16": [
+      "Item"
+    ],
+    "Item|10|30": [
+      "Item"
+    ],
+    "Item|10|6": [
+      "Item"
+    ],
+    "Item|20|16": [
+      "Item"
+    ],
+    "Item|20|30": [
+      "Item"
+    ],
+    "Item|20|6": [
+      "Item"
+    ],
+    "Item|4|16": [
+      "Item"
+    ],
+    "Item|4|30": [
+      "Item"
+    ],
+    "Item|4|6": [
+      "Item"
+    ],
+    "Khong hanh, it cay|10|16": [
+      "Khong",
+      "hanh, it cay"
+    ],
+    "Khong hanh, it cay|10|30": [
+      "Khong",
+      "hanh, it cay"
+    ],
+    "Khong hanh, it cay|10|6": [
+      "Khong",
+      "hanh,",
+      "it cay"
+    ],
+    "Khong hanh, it cay|20|16": [
+      "Khong hanh, it cay"
+    ],
+    "Khong hanh, it cay|20|30": [
+      "Khong hanh, it cay"
+    ],
+    "Khong hanh, it cay|20|6": [
+      "Khong hanh, it cay"
+    ],
+    "Khong hanh, it cay|4|16": [
+      "Khon",
+      "g hanh, it cay"
+    ],
+    "Khong hanh, it cay|4|30": [
+      "Khon",
+      "g hanh, it cay"
+    ],
+    "Khong hanh, it cay|4|6": [
+      "Khon",
+      "g",
+      "hanh,",
+      "it cay"
+    ],
+    "T1234567890123|10|16": [
+      "T123456789",
+      "0123"
+    ],
+    "T1234567890123|10|30": [
+      "T123456789",
+      "0123"
+    ],
+    "T1234567890123|10|6": [
+      "T123456789",
+      "0123"
+    ],
+    "T1234567890123|20|16": [
+      "T1234567890123"
+    ],
+    "T1234567890123|20|30": [
+      "T1234567890123"
+    ],
+    "T1234567890123|20|6": [
+      "T1234567890123"
+    ],
+    "T1234567890123|4|16": [
+      "T123",
+      "4567890123"
+    ],
+    "T1234567890123|4|30": [
+      "T123",
+      "4567890123"
+    ],
+    "T1234567890123|4|6": [
+      "T123",
+      "456789",
+      "0123"
+    ],
+    "line one\nline two\n\nline four|10|16": [
+      "line one",
+      "line two line",
+      "four"
+    ],
+    "line one\nline two\n\nline four|10|30": [
+      "line one",
+      "line two line four"
+    ],
+    "line one\nline two\n\nline four|10|6": [
+      "line one",
+      "line",
+      "two",
+      "line",
+      "four"
+    ],
+    "line one\nline two\n\nline four|20|16": [
+      "line one line two",
+      "line four"
+    ],
+    "line one\nline two\n\nline four|20|30": [
+      "line one line two",
+      "line four"
+    ],
+    "line one\nline two\n\nline four|20|6": [
+      "line one line two",
+      "line",
+      "four"
+    ],
+    "line one\nline two\n\nline four|4|16": [
+      "line",
+      "one line two",
+      "line four"
+    ],
+    "line one\nline two\n\nline four|4|30": [
+      "line",
+      "one line two line four"
+    ],
+    "line one\nline two\n\nline four|4|6": [
+      "line",
+      "one",
+      "line",
+      "two",
+      "line",
+      "four"
+    ],
+    "one two three four five six seven eight nine ten eleven|10|16": [
+      "one two",
+      "three four five",
+      "six seven eight",
+      "nine ten eleven"
+    ],
+    "one two three four five six seven eight nine ten eleven|10|30": [
+      "one two",
+      "three four five six seven",
+      "eight nine ten eleven"
+    ],
+    "one two three four five six seven eight nine ten eleven|10|6": [
+      "one two",
+      "three",
+      "four",
+      "five",
+      "six",
+      "seven",
+      "eight",
+      "nine",
+      "ten",
+      "eleven"
+    ],
+    "one two three four five six seven eight nine ten eleven|20|16": [
+      "one two three four",
+      "five six seven",
+      "eight nine ten",
+      "eleven"
+    ],
+    "one two three four five six seven eight nine ten eleven|20|30": [
+      "one two three four",
+      "five six seven eight nine ten",
+      "eleven"
+    ],
+    "one two three four five six seven eight nine ten eleven|20|6": [
+      "one two three four",
+      "five",
+      "six",
+      "seven",
+      "eight",
+      "nine",
+      "ten",
+      "eleven"
+    ],
+    "one two three four five six seven eight nine ten eleven|4|16": [
+      "one",
+      "two three four",
+      "five six seven",
+      "eight nine ten",
+      "eleven"
+    ],
+    "one two three four five six seven eight nine ten eleven|4|30": [
+      "one",
+      "two three four five six seven",
+      "eight nine ten eleven"
+    ],
+    "one two three four five six seven eight nine ten eleven|4|6": [
+      "one",
+      "two",
+      "three",
+      "four",
+      "five",
+      "six",
+      "seven",
+      "eight",
+      "nine",
+      "ten",
+      "eleven"
+    ],
+    "phở đặc biệt|10|16": [
+      "phở đặc",
+      "biệt"
+    ],
+    "phở đặc biệt|10|30": [
+      "phở đặc",
+      "biệt"
+    ],
+    "phở đặc biệt|10|6": [
+      "phở đặc",
+      "biệt"
+    ],
+    "phở đặc biệt|20|16": [
+      "phở đặc biệt"
+    ],
+    "phở đặc biệt|20|30": [
+      "phở đặc biệt"
+    ],
+    "phở đặc biệt|20|6": [
+      "phở đặc biệt"
+    ],
+    "phở đặc biệt|4|16": [
+      "phở",
+      "đặc biệt"
+    ],
+    "phở đặc biệt|4|30": [
+      "phở",
+      "đặc biệt"
+    ],
+    "phở đặc biệt|4|6": [
+      "phở",
+      "đặc",
+      "biệt"
+    ],
+    "|10|16": [
+      ""
+    ],
+    "|10|30": [
+      ""
+    ],
+    "|10|6": [
+      ""
+    ],
+    "|20|16": [
+      ""
+    ],
+    "|20|30": [
+      ""
+    ],
+    "|20|6": [
+      ""
+    ],
+    "|4|16": [
+      ""
+    ],
+    "|4|30": [
+      ""
+    ],
+    "|4|6": [
+      ""
+    ],
+    "¥1,000|10|16": [
+      "¥1,000"
+    ],
+    "¥1,000|10|30": [
+      "¥1,000"
+    ],
+    "¥1,000|10|6": [
+      "¥1,000"
+    ],
+    "¥1,000|20|16": [
+      "¥1,000"
+    ],
+    "¥1,000|20|30": [
+      "¥1,000"
+    ],
+    "¥1,000|20|6": [
+      "¥1,000"
+    ],
+    "¥1,000|4|16": [
+      "¥1,0",
+      "00"
+    ],
+    "¥1,000|4|30": [
+      "¥1,0",
+      "00"
+    ],
+    "¥1,000|4|6": [
+      "¥1,0",
+      "00"
+    ],
+    "—— Them rau mui|10|16": [
+      "—— Them",
+      "rau mui"
+    ],
+    "—— Them rau mui|10|30": [
+      "—— Them",
+      "rau mui"
+    ],
+    "—— Them rau mui|10|6": [
+      "—— Them",
+      "rau",
+      "mui"
+    ],
+    "—— Them rau mui|20|16": [
+      "—— Them rau mui"
+    ],
+    "—— Them rau mui|20|30": [
+      "—— Them rau mui"
+    ],
+    "—— Them rau mui|20|6": [
+      "—— Them rau mui"
+    ],
+    "—— Them rau mui|4|16": [
+      "——",
+      "Them rau mui"
+    ],
+    "—— Them rau mui|4|30": [
+      "——",
+      "Them rau mui"
+    ],
+    "—— Them rau mui|4|6": [
+      "——",
+      "Them",
+      "rau",
+      "mui"
+    ],
+    "※|10|16": [
+      "※"
+    ],
+    "※|10|30": [
+      "※"
+    ],
+    "※|10|6": [
+      "※"
+    ],
+    "※|20|16": [
+      "※"
+    ],
+    "※|20|30": [
+      "※"
+    ],
+    "※|20|6": [
+      "※"
+    ],
+    "※|4|16": [
+      "※"
+    ],
+    "※|4|30": [
+      "※"
+    ],
+    "※|4|6": [
+      "※"
+    ],
+    "※軽減税率対象|10|16": [
+      "※軽減税率",
+      "対象"
+    ],
+    "※軽減税率対象|10|30": [
+      "※軽減税率",
+      "対象"
+    ],
+    "※軽減税率対象|10|6": [
+      "※軽減税率",
+      "対象"
+    ],
+    "※軽減税率対象|20|16": [
+      "※軽減税率対象"
+    ],
+    "※軽減税率対象|20|30": [
+      "※軽減税率対象"
+    ],
+    "※軽減税率対象|20|6": [
+      "※軽減税率対象"
+    ],
+    "※軽減税率対象|4|16": [
+      "※軽",
+      "減税率対象"
+    ],
+    "※軽減税率対象|4|30": [
+      "※軽",
+      "減税率対象"
+    ],
+    "※軽減税率対象|4|6": [
+      "※軽",
+      "減税率",
+      "対象"
+    ],
+    "₫50.000|10|16": [
+      "₫50.000"
+    ],
+    "₫50.000|10|30": [
+      "₫50.000"
+    ],
+    "₫50.000|10|6": [
+      "₫50.000"
+    ],
+    "₫50.000|20|16": [
+      "₫50.000"
+    ],
+    "₫50.000|20|30": [
+      "₫50.000"
+    ],
+    "₫50.000|20|6": [
+      "₫50.000"
+    ],
+    "₫50.000|4|16": [
+      "₫50.",
+      "000"
+    ],
+    "₫50.000|4|30": [
+      "₫50.",
+      "000"
+    ],
+    "₫50.000|4|6": [
+      "₫50.",
+      "000"
+    ],
+    "€100 £50 ₩900 ฿20|10|16": [
+      "€100 £50",
+      "₩900 ฿20"
+    ],
+    "€100 £50 ₩900 ฿20|10|30": [
+      "€100 £50",
+      "₩900 ฿20"
+    ],
+    "€100 £50 ₩900 ฿20|10|6": [
+      "€100 £50",
+      "₩900",
+      "฿20"
+    ],
+    "€100 £50 ₩900 ฿20|20|16": [
+      "€100 £50 ₩900 ฿20"
+    ],
+    "€100 £50 ₩900 ฿20|20|30": [
+      "€100 £50 ₩900 ฿20"
+    ],
+    "€100 £50 ₩900 ฿20|20|6": [
+      "€100 £50 ₩900 ฿20"
+    ],
+    "€100 £50 ₩900 ฿20|4|16": [
+      "€100",
+      "£50 ₩900 ฿20"
+    ],
+    "€100 £50 ₩900 ฿20|4|30": [
+      "€100",
+      "£50 ₩900 ฿20"
+    ],
+    "€100 £50 ₩900 ฿20|4|6": [
+      "€100",
+      "£50",
+      "₩900",
+      "฿20"
+    ],
+    "あああああああああああああああああああああああああああああああああ|10|16": [
+      "あああああ",
+      "ああああああああ",
+      "ああああああああ",
+      "ああああああああ",
+      "ああああ"
+    ],
+    "あああああああああああああああああああああああああああああああああ|10|30": [
+      "あああああ",
+      "あああああああああああああああ",
+      "あああああああああああああ"
+    ],
+    "あああああああああああああああああああああああああああああああああ|10|6": [
+      "あああああ",
+      "あああ",
+      "あああ",
+      "あああ",
+      "あああ",
+      "あああ",
+      "あああ",
+      "あああ",
+      "あああ",
+      "あああ",
+      "あ"
+    ],
+    "あああああああああああああああああああああああああああああああああ|20|16": [
+      "ああああああああああ",
+      "ああああああああ",
+      "ああああああああ",
+      "あああああああ"
+    ],
+    "あああああああああああああああああああああああああああああああああ|20|30": [
+      "ああああああああああ",
+      "あああああああああああああああ",
+      "ああああああああ"
+    ],
+    "あああああああああああああああああああああああああああああああああ|20|6": [
+      "ああああああああああ",
+      "あああ",
+      "あああ",
+      "あああ",
+      "あああ",
+      "あああ",
+      "あああ",
+      "あああ",
+      "ああ"
+    ],
+    "あああああああああああああああああああああああああああああああああ|4|16": [
+      "ああ",
+      "ああああああああ",
+      "ああああああああ",
+      "ああああああああ",
+      "あああああああ"
+    ],
+    "あああああああああああああああああああああああああああああああああ|4|30": [
+      "ああ",
+      "あああああああああああああああ",
+      "あああああああああああああああ",
+      "あ"
+    ],
+    "あああああああああああああああああああああああああああああああああ|4|6": [
+      "ああ",
+      "あああ",
+      "あああ",
+      "あああ",
+      "あああ",
+      "あああ",
+      "あああ",
+      "あああ",
+      "あああ",
+      "あああ",
+      "あああ",
+      "あ"
+    ],
+    "ベト屋|10|16": [
+      "ベト屋"
+    ],
+    "ベト屋|10|30": [
+      "ベト屋"
+    ],
+    "ベト屋|10|6": [
+      "ベト屋"
+    ],
+    "ベト屋|20|16": [
+      "ベト屋"
+    ],
+    "ベト屋|20|30": [
+      "ベト屋"
+    ],
+    "ベト屋|20|6": [
+      "ベト屋"
+    ],
+    "ベト屋|4|16": [
+      "ベト",
+      "屋"
+    ],
+    "ベト屋|4|30": [
+      "ベト",
+      "屋"
+    ],
+    "ベト屋|4|6": [
+      "ベト",
+      "屋"
+    ],
+    "商品                          金額|10|16": [
+      "商品 金額"
+    ],
+    "商品                          金額|10|30": [
+      "商品 金額"
+    ],
+    "商品                          金額|10|6": [
+      "商品 金額"
+    ],
+    "商品                          金額|20|16": [
+      "商品 金額"
+    ],
+    "商品                          金額|20|30": [
+      "商品 金額"
+    ],
+    "商品                          金額|20|6": [
+      "商品 金額"
+    ],
+    "商品                          金額|4|16": [
+      "商品",
+      "金額"
+    ],
+    "商品                          金額|4|30": [
+      "商品",
+      "金額"
+    ],
+    "商品                          金額|4|6": [
+      "商品",
+      "金額"
+    ],
+    "商品|10|16": [
+      "商品"
+    ],
+    "商品|10|30": [
+      "商品"
+    ],
+    "商品|10|6": [
+      "商品"
+    ],
+    "商品|20|16": [
+      "商品"
+    ],
+    "商品|20|30": [
+      "商品"
+    ],
+    "商品|20|6": [
+      "商品"
+    ],
+    "商品|4|16": [
+      "商品"
+    ],
+    "商品|4|30": [
+      "商品"
+    ],
+    "商品|4|6": [
+      "商品"
+    ],
+    "田中|10|16": [
+      "田中"
+    ],
+    "田中|10|30": [
+      "田中"
+    ],
+    "田中|10|6": [
+      "田中"
+    ],
+    "田中|20|16": [
+      "田中"
+    ],
+    "田中|20|30": [
+      "田中"
+    ],
+    "田中|20|6": [
+      "田中"
+    ],
+    "田中|4|16": [
+      "田中"
+    ],
+    "田中|4|30": [
+      "田中"
+    ],
+    "田中|4|6": [
+      "田中"
+    ],
+    "精算（チェーン）|10|16": [
+      "精算（チェ",
+      "ーン）"
+    ],
+    "精算（チェーン）|10|30": [
+      "精算（チェ",
+      "ーン）"
+    ],
+    "精算（チェーン）|10|6": [
+      "精算（チェ",
+      "ーン）"
+    ],
+    "精算（チェーン）|20|16": [
+      "精算（チェーン）"
+    ],
+    "精算（チェーン）|20|30": [
+      "精算（チェーン）"
+    ],
+    "精算（チェーン）|20|6": [
+      "精算（チェーン）"
+    ],
+    "精算（チェーン）|4|16": [
+      "精算",
+      "（チェーン）"
+    ],
+    "精算（チェーン）|4|30": [
+      "精算",
+      "（チェーン）"
+    ],
+    "精算（チェーン）|4|6": [
+      "精算",
+      "（チェ",
+      "ーン）"
+    ],
+    "緑茶|10|16": [
+      "緑茶"
+    ],
+    "緑茶|10|30": [
+      "緑茶"
+    ],
+    "緑茶|10|6": [
+      "緑茶"
+    ],
+    "緑茶|20|16": [
+      "緑茶"
+    ],
+    "緑茶|20|30": [
+      "緑茶"
+    ],
+    "緑茶|20|6": [
+      "緑茶"
+    ],
+    "緑茶|4|16": [
+      "緑茶"
+    ],
+    "緑茶|4|30": [
+      "緑茶"
+    ],
+    "緑茶|4|6": [
+      "緑茶"
+    ]
+  },
+  "wrap_text": {
+    "\t\n |1": [
+      "",
+      ""
+    ],
+    "\t\n |16": [
+      "",
+      ""
+    ],
+    "\t\n |2": [
+      "",
+      ""
+    ],
+    "\t\n |32": [
+      "",
+      ""
+    ],
+    "\t\n |42": [
+      "",
+      ""
+    ],
+    "\t\n |48": [
+      "",
+      ""
+    ],
+    "\t\n |8": [
+      "",
+      ""
+    ],
+    "  leading and trailing  |1": [
+      "l",
+      "e",
+      "a",
+      "d",
+      "i",
+      "n",
+      "g",
+      "a",
+      "n",
+      "d",
+      "t",
+      "r",
+      "a",
+      "i",
+      "l",
+      "i",
+      "n",
+      "g"
+    ],
+    "  leading and trailing  |16": [
+      "leading and",
+      "trailing"
+    ],
+    "  leading and trailing  |2": [
+      "le",
+      "ad",
+      "in",
+      "g",
+      "an",
+      "d",
+      "tr",
+      "ai",
+      "li",
+      "ng"
+    ],
+    "  leading and trailing  |32": [
+      "leading and trailing"
+    ],
+    "  leading and trailing  |42": [
+      "leading and trailing"
+    ],
+    "  leading and trailing  |48": [
+      "leading and trailing"
+    ],
+    "  leading and trailing  |8": [
+      "leading",
+      "and",
+      "trailing"
+    ],
+    " |1": [
+      ""
+    ],
+    " |16": [
+      ""
+    ],
+    " |2": [
+      ""
+    ],
+    " |32": [
+      ""
+    ],
+    " |42": [
+      ""
+    ],
+    " |48": [
+      ""
+    ],
+    " |8": [
+      ""
+    ],
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA|1": [
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A"
+    ],
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA|16": [
+      "AAAAAAAAAAAAAAAA",
+      "AAAAAAAAAAAAAAAA",
+      "AAAAAAAAAAAAAAAA",
+      "AAAAAAAA"
+    ],
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA|2": [
+      "AA",
+      "AA",
+      "AA",
+      "AA",
+      "AA",
+      "AA",
+      "AA",
+      "AA",
+      "AA",
+      "AA",
+      "AA",
+      "AA",
+      "AA",
+      "AA",
+      "AA",
+      "AA",
+      "AA",
+      "AA",
+      "AA",
+      "AA",
+      "AA",
+      "AA",
+      "AA",
+      "AA",
+      "AA",
+      "AA",
+      "AA",
+      "AA"
+    ],
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA|32": [
+      "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "AAAAAAAAAAAAAAAAAAAAAAAA"
+    ],
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA|42": [
+      "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "AAAAAAAAAAAAAA"
+    ],
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA|48": [
+      "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "AAAAAAAA"
+    ],
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA|8": [
+      "AAAAAAAA",
+      "AAAAAAAA",
+      "AAAAAAAA",
+      "AAAAAAAA",
+      "AAAAAAAA",
+      "AAAAAAAA",
+      "AAAAAAAA"
+    ],
+    "Bun bo Hue dac biet thap cam|1": [
+      "B",
+      "u",
+      "n",
+      "b",
+      "o",
+      "H",
+      "u",
+      "e",
+      "d",
+      "a",
+      "c",
+      "b",
+      "i",
+      "e",
+      "t",
+      "t",
+      "h",
+      "a",
+      "p",
+      "c",
+      "a",
+      "m"
+    ],
+    "Bun bo Hue dac biet thap cam|16": [
+      "Bun bo Hue dac",
+      "biet thap cam"
+    ],
+    "Bun bo Hue dac biet thap cam|2": [
+      "Bu",
+      "n",
+      "bo",
+      "Hu",
+      "e",
+      "da",
+      "c",
+      "bi",
+      "et",
+      "th",
+      "ap",
+      "ca",
+      "m"
+    ],
+    "Bun bo Hue dac biet thap cam|32": [
+      "Bun bo Hue dac biet thap cam"
+    ],
+    "Bun bo Hue dac biet thap cam|42": [
+      "Bun bo Hue dac biet thap cam"
+    ],
+    "Bun bo Hue dac biet thap cam|48": [
+      "Bun bo Hue dac biet thap cam"
+    ],
+    "Bun bo Hue dac biet thap cam|8": [
+      "Bun bo",
+      "Hue dac",
+      "biet",
+      "thap cam"
+    ],
+    "Chi nhánh Hà Nội|1": [
+      "C",
+      "h",
+      "i",
+      "n",
+      "h",
+      "á",
+      "n",
+      "h",
+      "H",
+      "à",
+      "N",
+      "ộ",
+      "i"
+    ],
+    "Chi nhánh Hà Nội|16": [
+      "Chi nhánh Hà Nội"
+    ],
+    "Chi nhánh Hà Nội|2": [
+      "Ch",
+      "i",
+      "nh",
+      "án",
+      "h",
+      "Hà",
+      "Nộ",
+      "i"
+    ],
+    "Chi nhánh Hà Nội|32": [
+      "Chi nhánh Hà Nội"
+    ],
+    "Chi nhánh Hà Nội|42": [
+      "Chi nhánh Hà Nội"
+    ],
+    "Chi nhánh Hà Nội|48": [
+      "Chi nhánh Hà Nội"
+    ],
+    "Chi nhánh Hà Nội|8": [
+      "Chi",
+      "nhánh Hà",
+      "Nội"
+    ],
+    "Item|1": [
+      "I",
+      "t",
+      "e",
+      "m"
+    ],
+    "Item|16": [
+      "Item"
+    ],
+    "Item|2": [
+      "It",
+      "em"
+    ],
+    "Item|32": [
+      "Item"
+    ],
+    "Item|42": [
+      "Item"
+    ],
+    "Item|48": [
+      "Item"
+    ],
+    "Item|8": [
+      "Item"
+    ],
+    "Khong hanh, it cay|1": [
+      "K",
+      "h",
+      "o",
+      "n",
+      "g",
+      "h",
+      "a",
+      "n",
+      "h",
+      ",",
+      "i",
+      "t",
+      "c",
+      "a",
+      "y"
+    ],
+    "Khong hanh, it cay|16": [
+      "Khong hanh, it",
+      "cay"
+    ],
+    "Khong hanh, it cay|2": [
+      "Kh",
+      "on",
+      "g",
+      "ha",
+      "nh",
+      ",",
+      "it",
+      "ca",
+      "y"
+    ],
+    "Khong hanh, it cay|32": [
+      "Khong hanh, it cay"
+    ],
+    "Khong hanh, it cay|42": [
+      "Khong hanh, it cay"
+    ],
+    "Khong hanh, it cay|48": [
+      "Khong hanh, it cay"
+    ],
+    "Khong hanh, it cay|8": [
+      "Khong",
+      "hanh, it",
+      "cay"
+    ],
+    "T1234567890123|1": [
+      "T",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "T1234567890123|16": [
+      "T1234567890123"
+    ],
+    "T1234567890123|2": [
+      "T1",
+      "23",
+      "45",
+      "67",
+      "89",
+      "01",
+      "23"
+    ],
+    "T1234567890123|32": [
+      "T1234567890123"
+    ],
+    "T1234567890123|42": [
+      "T1234567890123"
+    ],
+    "T1234567890123|48": [
+      "T1234567890123"
+    ],
+    "T1234567890123|8": [
+      "T1234567",
+      "890123"
+    ],
+    "line one\nline two\n\nline four|1": [
+      "l",
+      "i",
+      "n",
+      "e",
+      "o",
+      "n",
+      "e",
+      "l",
+      "i",
+      "n",
+      "e",
+      "t",
+      "w",
+      "o",
+      "",
+      "l",
+      "i",
+      "n",
+      "e",
+      "f",
+      "o",
+      "u",
+      "r"
+    ],
+    "line one\nline two\n\nline four|16": [
+      "line one",
+      "line two",
+      "",
+      "line four"
+    ],
+    "line one\nline two\n\nline four|2": [
+      "li",
+      "ne",
+      "on",
+      "e",
+      "li",
+      "ne",
+      "tw",
+      "o",
+      "",
+      "li",
+      "ne",
+      "fo",
+      "ur"
+    ],
+    "line one\nline two\n\nline four|32": [
+      "line one",
+      "line two",
+      "",
+      "line four"
+    ],
+    "line one\nline two\n\nline four|42": [
+      "line one",
+      "line two",
+      "",
+      "line four"
+    ],
+    "line one\nline two\n\nline four|48": [
+      "line one",
+      "line two",
+      "",
+      "line four"
+    ],
+    "line one\nline two\n\nline four|8": [
+      "line one",
+      "line two",
+      "",
+      "line",
+      "four"
+    ],
+    "one two three four five six seven eight nine ten eleven|1": [
+      "o",
+      "n",
+      "e",
+      "t",
+      "w",
+      "o",
+      "t",
+      "h",
+      "r",
+      "e",
+      "e",
+      "f",
+      "o",
+      "u",
+      "r",
+      "f",
+      "i",
+      "v",
+      "e",
+      "s",
+      "i",
+      "x",
+      "s",
+      "e",
+      "v",
+      "e",
+      "n",
+      "e",
+      "i",
+      "g",
+      "h",
+      "t",
+      "n",
+      "i",
+      "n",
+      "e",
+      "t",
+      "e",
+      "n",
+      "e",
+      "l",
+      "e",
+      "v",
+      "e",
+      "n"
+    ],
+    "one two three four five six seven eight nine ten eleven|16": [
+      "one two three",
+      "four five six",
+      "seven eight nine",
+      "ten eleven"
+    ],
+    "one two three four five six seven eight nine ten eleven|2": [
+      "on",
+      "e",
+      "tw",
+      "o",
+      "th",
+      "re",
+      "e",
+      "fo",
+      "ur",
+      "fi",
+      "ve",
+      "si",
+      "x",
+      "se",
+      "ve",
+      "n",
+      "ei",
+      "gh",
+      "t",
+      "ni",
+      "ne",
+      "te",
+      "n",
+      "el",
+      "ev",
+      "en"
+    ],
+    "one two three four five six seven eight nine ten eleven|32": [
+      "one two three four five six",
+      "seven eight nine ten eleven"
+    ],
+    "one two three four five six seven eight nine ten eleven|42": [
+      "one two three four five six seven eight",
+      "nine ten eleven"
+    ],
+    "one two three four five six seven eight nine ten eleven|48": [
+      "one two three four five six seven eight nine ten",
+      "eleven"
+    ],
+    "one two three four five six seven eight nine ten eleven|8": [
+      "one two",
+      "three",
+      "four",
+      "five six",
+      "seven",
+      "eight",
+      "nine ten",
+      "eleven"
+    ],
+    "phở đặc biệt|1": [
+      "p",
+      "h",
+      "ở",
+      "đ",
+      "ặ",
+      "c",
+      "b",
+      "i",
+      "ệ",
+      "t"
+    ],
+    "phở đặc biệt|16": [
+      "phở đặc biệt"
+    ],
+    "phở đặc biệt|2": [
+      "ph",
+      "ở",
+      "đặ",
+      "c",
+      "bi",
+      "ệt"
+    ],
+    "phở đặc biệt|32": [
+      "phở đặc biệt"
+    ],
+    "phở đặc biệt|42": [
+      "phở đặc biệt"
+    ],
+    "phở đặc biệt|48": [
+      "phở đặc biệt"
+    ],
+    "phở đặc biệt|8": [
+      "phở đặc",
+      "biệt"
+    ],
+    "|1": [
+      ""
+    ],
+    "|16": [
+      ""
+    ],
+    "|2": [
+      ""
+    ],
+    "|32": [
+      ""
+    ],
+    "|42": [
+      ""
+    ],
+    "|48": [
+      ""
+    ],
+    "|8": [
+      ""
+    ],
+    "¥1,000|1": [
+      "¥",
+      "1",
+      ",",
+      "0",
+      "0",
+      "0"
+    ],
+    "¥1,000|16": [
+      "¥1,000"
+    ],
+    "¥1,000|2": [
+      "¥1",
+      ",0",
+      "00"
+    ],
+    "¥1,000|32": [
+      "¥1,000"
+    ],
+    "¥1,000|42": [
+      "¥1,000"
+    ],
+    "¥1,000|48": [
+      "¥1,000"
+    ],
+    "¥1,000|8": [
+      "¥1,000"
+    ],
+    "—— Them rau mui|1": [
+      "—",
+      "—",
+      "T",
+      "h",
+      "e",
+      "m",
+      "r",
+      "a",
+      "u",
+      "m",
+      "u",
+      "i"
+    ],
+    "—— Them rau mui|16": [
+      "—— Them rau mui"
+    ],
+    "—— Them rau mui|2": [
+      "——",
+      "Th",
+      "em",
+      "ra",
+      "u",
+      "mu",
+      "i"
+    ],
+    "—— Them rau mui|32": [
+      "—— Them rau mui"
+    ],
+    "—— Them rau mui|42": [
+      "—— Them rau mui"
+    ],
+    "—— Them rau mui|48": [
+      "—— Them rau mui"
+    ],
+    "—— Them rau mui|8": [
+      "—— Them",
+      "rau mui"
+    ],
+    "※|1": [
+      "※"
+    ],
+    "※|16": [
+      "※"
+    ],
+    "※|2": [
+      "※"
+    ],
+    "※|32": [
+      "※"
+    ],
+    "※|42": [
+      "※"
+    ],
+    "※|48": [
+      "※"
+    ],
+    "※|8": [
+      "※"
+    ],
+    "※軽減税率対象|1": [
+      "※",
+      "軽",
+      "減",
+      "税",
+      "率",
+      "対",
+      "象"
+    ],
+    "※軽減税率対象|16": [
+      "※軽減税率対象"
+    ],
+    "※軽減税率対象|2": [
+      "※",
+      "軽",
+      "減",
+      "税",
+      "率",
+      "対",
+      "象"
+    ],
+    "※軽減税率対象|32": [
+      "※軽減税率対象"
+    ],
+    "※軽減税率対象|42": [
+      "※軽減税率対象"
+    ],
+    "※軽減税率対象|48": [
+      "※軽減税率対象"
+    ],
+    "※軽減税率対象|8": [
+      "※軽減税",
+      "率対象"
+    ],
+    "₫50.000|1": [
+      "₫",
+      "5",
+      "0",
+      ".",
+      "0",
+      "0",
+      "0"
+    ],
+    "₫50.000|16": [
+      "₫50.000"
+    ],
+    "₫50.000|2": [
+      "₫5",
+      "0.",
+      "00",
+      "0"
+    ],
+    "₫50.000|32": [
+      "₫50.000"
+    ],
+    "₫50.000|42": [
+      "₫50.000"
+    ],
+    "₫50.000|48": [
+      "₫50.000"
+    ],
+    "₫50.000|8": [
+      "₫50.000"
+    ],
+    "€100 £50 ₩900 ฿20|1": [
+      "€",
+      "1",
+      "0",
+      "0",
+      "£",
+      "5",
+      "0",
+      "₩",
+      "9",
+      "0",
+      "0",
+      "฿",
+      "2",
+      "0"
+    ],
+    "€100 £50 ₩900 ฿20|16": [
+      "€100 £50 ₩900",
+      "฿20"
+    ],
+    "€100 £50 ₩900 ฿20|2": [
+      "€1",
+      "00",
+      "£5",
+      "0",
+      "₩9",
+      "00",
+      "฿2",
+      "0"
+    ],
+    "€100 £50 ₩900 ฿20|32": [
+      "€100 £50 ₩900 ฿20"
+    ],
+    "€100 £50 ₩900 ฿20|42": [
+      "€100 £50 ₩900 ฿20"
+    ],
+    "€100 £50 ₩900 ฿20|48": [
+      "€100 £50 ₩900 ฿20"
+    ],
+    "€100 £50 ₩900 ฿20|8": [
+      "€100 £50",
+      "₩900 ฿20"
+    ],
+    "あああああああああああああああああああああああああああああああああ|1": [
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ"
+    ],
+    "あああああああああああああああああああああああああああああああああ|16": [
+      "ああああああああ",
+      "ああああああああ",
+      "ああああああああ",
+      "ああああああああ",
+      "あ"
+    ],
+    "あああああああああああああああああああああああああああああああああ|2": [
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ",
+      "あ"
+    ],
+    "あああああああああああああああああああああああああああああああああ|32": [
+      "ああああああああああああああああ",
+      "ああああああああああああああああ",
+      "あ"
+    ],
+    "あああああああああああああああああああああああああああああああああ|42": [
+      "あああああああああああああああああああああ",
+      "ああああああああああああ"
+    ],
+    "あああああああああああああああああああああああああああああああああ|48": [
+      "ああああああああああああああああああああああああ",
+      "あああああああああ"
+    ],
+    "あああああああああああああああああああああああああああああああああ|8": [
+      "ああああ",
+      "ああああ",
+      "ああああ",
+      "ああああ",
+      "ああああ",
+      "ああああ",
+      "ああああ",
+      "ああああ",
+      "あ"
+    ],
+    "ベト屋|1": [
+      "ベ",
+      "ト",
+      "屋"
+    ],
+    "ベト屋|16": [
+      "ベト屋"
+    ],
+    "ベト屋|2": [
+      "ベ",
+      "ト",
+      "屋"
+    ],
+    "ベト屋|32": [
+      "ベト屋"
+    ],
+    "ベト屋|42": [
+      "ベト屋"
+    ],
+    "ベト屋|48": [
+      "ベト屋"
+    ],
+    "ベト屋|8": [
+      "ベト屋"
+    ],
+    "商品                          金額|1": [
+      "商",
+      "品",
+      "金",
+      "額"
+    ],
+    "商品                          金額|16": [
+      "商品 金額"
+    ],
+    "商品                          金額|2": [
+      "商",
+      "品",
+      "金",
+      "額"
+    ],
+    "商品                          金額|32": [
+      "商品 金額"
+    ],
+    "商品                          金額|42": [
+      "商品 金額"
+    ],
+    "商品                          金額|48": [
+      "商品 金額"
+    ],
+    "商品                          金額|8": [
+      "商品",
+      "金額"
+    ],
+    "商品|1": [
+      "商",
+      "品"
+    ],
+    "商品|16": [
+      "商品"
+    ],
+    "商品|2": [
+      "商",
+      "品"
+    ],
+    "商品|32": [
+      "商品"
+    ],
+    "商品|42": [
+      "商品"
+    ],
+    "商品|48": [
+      "商品"
+    ],
+    "商品|8": [
+      "商品"
+    ],
+    "田中|1": [
+      "田",
+      "中"
+    ],
+    "田中|16": [
+      "田中"
+    ],
+    "田中|2": [
+      "田",
+      "中"
+    ],
+    "田中|32": [
+      "田中"
+    ],
+    "田中|42": [
+      "田中"
+    ],
+    "田中|48": [
+      "田中"
+    ],
+    "田中|8": [
+      "田中"
+    ],
+    "精算（チェーン）|1": [
+      "精",
+      "算",
+      "（",
+      "チ",
+      "ェ",
+      "ー",
+      "ン",
+      "）"
+    ],
+    "精算（チェーン）|16": [
+      "精算（チェーン）"
+    ],
+    "精算（チェーン）|2": [
+      "精",
+      "算",
+      "（",
+      "チ",
+      "ェ",
+      "ー",
+      "ン",
+      "）"
+    ],
+    "精算（チェーン）|32": [
+      "精算（チェーン）"
+    ],
+    "精算（チェーン）|42": [
+      "精算（チェーン）"
+    ],
+    "精算（チェーン）|48": [
+      "精算（チェーン）"
+    ],
+    "精算（チェーン）|8": [
+      "精算（チ",
+      "ェーン）"
+    ],
+    "緑茶|1": [
+      "緑",
+      "茶"
+    ],
+    "緑茶|16": [
+      "緑茶"
+    ],
+    "緑茶|2": [
+      "緑",
+      "茶"
+    ],
+    "緑茶|32": [
+      "緑茶"
+    ],
+    "緑茶|42": [
+      "緑茶"
+    ],
+    "緑茶|48": [
+      "緑茶"
+    ],
+    "緑茶|8": [
+      "緑茶"
+    ]
+  }
+}

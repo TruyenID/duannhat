@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(npx prettier *)",
+      "Bash(xargs cat)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" \"http://localhost:5490/tempo/gallery-fixtures/banh-cuon.jpg\")",
+      "Bash(.claude/tools/agent-loop/tal *)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/tools/agent-loop/tal\" hook-guard",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

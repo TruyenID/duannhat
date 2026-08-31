@@ -1,0 +1,77 @@
+# ==============================================================================
+# Tax Classification (課税区分 / Phân loại thuế) — #1367
+# ==============================================================================
+#
+# TRỤC PHÂN LOẠI của một loại thuế, tách khỏi THUẾ SUẤT.
+#
+# ## Vấn đề nó giải quyết
+#
+# Trước #1367, 非課税 / 不課税 / 免税 đều là "một tax type có rate 0", phân biệt
+# duy nhất bằng chuỗi `code` do admin TỰ NHẬP. Mọi báo cáo hay tờ khai phân nhóm
+# theo loại đều phải ĐOÁN từ một chuỗi tự do — và chuỗi đó không có gì ràng buộc.
+#
+# Thuế suất KHÔNG suy ra được phân loại: 免税 và 非課税 đều là 0%, nhưng khác
+# nhau ở quyền khấu trừ thuế đầu vào, và khác nhau trên tờ khai.
+#
+# ## Vì sao MỘT trục dùng chung cho cả Nhật và Việt Nam
+#
+# Đây là quyết định kiến trúc mà #1367 để treo. Chốt: một trục.
+#
+# Bốn giá trị dưới đây là phân loại VAT/GST tiêu chuẩn (OECD), và cả hai nước
+# đều ánh xạ vào được — không nước nào cần một giá trị thứ năm:
+#
+#   | Trục            | Nhật     | Việt Nam                              |
+#   |-----------------|----------|---------------------------------------|
+#   | taxable         | 課税     | chịu thuế GTGT (5% / 8% / 10%)        |
+#   | exempt          | 非課税   | không chịu thuế GTGT                  |
+#   | out_of_scope    | 不課税   | không phải kê khai, tính nộp GTGT     |
+#   | zero_rated      | 免税     | thuế suất 0% (xuất khẩu)              |
+#
+# Hai trục theo nước sẽ chẻ đôi MỌI nơi tiêu thụ — mỗi báo cáo, mỗi bộ lọc, mỗi
+# lần xuất tờ khai phải rẽ nhánh theo quốc gia. Cái giá đó trả mãi, để đổi lấy
+# một khác biệt về TỪ NGỮ chứ không phải về ngữ nghĩa. Từ ngữ thì ánh xạ ở tầng
+# hiển thị, và bảng trên là bản dịch đó.
+#
+# ## Vì sao NULLABLE
+#
+# Quyết định thứ ba mà #1367 để treo: dòng cũ có rate 0 thì backfill về đâu?
+#
+# Không suy được. `rate > 0` chắc chắn là `taxable`, nhưng `rate = 0` có thể là
+# bất kỳ giá trị nào trong ba cái còn lại, và chỉ người vận hành từng brand mới
+# biết. Nên cột này NULLABLE, và NULL nghĩa là **chưa phân loại** — không phải
+# một giá trị thứ năm, và không phải một mặc định đoán bừa.
+#
+# Đoán bừa ở đây tệ hơn để trống: một tờ khai xếp 不課税 vào nhóm 非課税 vẫn in
+# ra bình thường, vẫn cân, và sai. Để NULL thì chỗ tiêu thụ buộc phải nói "chưa
+# phân loại" thay vì lặng lẽ xếp nhầm nhóm.
+#
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: 課税区分
+  en: Tax Classification
+  vi: Phân loại thuế
+
+values:
+  - value: taxable
+    label:
+      ja: 課税
+      en: Taxable
+      vi: Chịu thuế
+  - value: exempt
+    label:
+      ja: 非課税
+      en: Exempt
+      vi: Không chịu thuế
+  - value: out_of_scope
+    label:
+      ja: 不課税
+      en: Out of Scope
+      vi: Không phải kê khai
+  - value: zero_rated
+    label:
+      ja: 免税
+      en: Zero-rated
+      vi: Thuế suất 0%

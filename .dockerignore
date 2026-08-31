@@ -1,0 +1,26 @@
+# Build context = umbrella root. For dev stack (compose.yml) only the
+# composer / package files seed named volumes; source bind-mounts at
+# runtime. For local-server stack (compose.local-server.yml) the web
+# apps are baked into prod images, so their full source must pass
+# through. We default to "include full source" — daemon transfer is
+# still fast on modern Docker.
+
+# Heavy build artefacts (regenerated on every build anyway)
+**/node_modules
+**/.next
+**/dist
+**/.turbo
+**/.cache
+
+# Local-only files
+**/.env.local
+**/.env.*.local
+
+# Editor + OS noise
+.git
+.idea
+.vscode
+.DS_Store
+
+# Docker exclusions specific to the dev composer-only path
+docker/php/opcache.ini.bak

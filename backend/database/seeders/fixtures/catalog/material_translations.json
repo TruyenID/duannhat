@@ -1,0 +1,254 @@
+[
+    {
+        "id": 55,
+        "material_id": "019f408b-05c9-72f2-992f-0a08bbe3c60f",
+        "locale": "ja",
+        "name": "小麦粉",
+        "description": "多目的小麦粉。生地やソースのベースに使用。"
+    },
+    {
+        "id": 56,
+        "material_id": "019f408b-05c9-72f2-992f-0a08bbe3c60f",
+        "locale": "en",
+        "name": "Wheat Flour",
+        "description": "All-purpose wheat flour. Used as base for doughs and sauces."
+    },
+    {
+        "id": 57,
+        "material_id": "019f408b-05c9-72f2-992f-0a08bbe3c60f",
+        "locale": "vi",
+        "name": "Bột mì",
+        "description": "Bột mì đa dụng. Dùng làm nền cho bột và sốt."
+    },
+    {
+        "id": 58,
+        "material_id": "019f408b-05cc-707f-8343-a21af00fadd9",
+        "locale": "ja",
+        "name": "全卵",
+        "description": "新鮮な鶏卵。製菓・料理に広く使用。"
+    },
+    {
+        "id": 59,
+        "material_id": "019f408b-05cc-707f-8343-a21af00fadd9",
+        "locale": "en",
+        "name": "Whole Egg",
+        "description": "Fresh hen egg. Widely used in baking and cooking."
+    },
+    {
+        "id": 60,
+        "material_id": "019f408b-05cc-707f-8343-a21af00fadd9",
+        "locale": "vi",
+        "name": "Trứng nguyên quả",
+        "description": "Trứng gà tươi. Dùng rộng rãi trong làm bánh và nấu ăn."
+    },
+    {
+        "id": 61,
+        "material_id": "019f408b-05d0-7248-b4cf-cb4bf4670906",
+        "locale": "ja",
+        "name": "全乳",
+        "description": "牛乳（全脂肪）。飲料・製菓ベースに使用。"
+    },
+    {
+        "id": 62,
+        "material_id": "019f408b-05d0-7248-b4cf-cb4bf4670906",
+        "locale": "en",
+        "name": "Whole Milk",
+        "description": "Full-fat cow milk. Used for beverages and baking base."
+    },
+    {
+        "id": 63,
+        "material_id": "019f408b-05d0-7248-b4cf-cb4bf4670906",
+        "locale": "vi",
+        "name": "Sữa nguyên kem",
+        "description": "Sữa bò nguyên kem. Dùng cho đồ uống và làm nền bánh."
+    },
+    {
+        "id": 64,
+        "material_id": "019f408b-05d4-7055-a8ab-3c3dd6f7f121",
+        "locale": "ja",
+        "name": "醤油",
+        "description": "日本式醤油。調味・マリネに使用。"
+    },
+    {
+        "id": 65,
+        "material_id": "019f408b-05d4-7055-a8ab-3c3dd6f7f121",
+        "locale": "en",
+        "name": "Soy Sauce",
+        "description": "Japanese-style soy sauce. Used for seasoning and marinades."
+    },
+    {
+        "id": 66,
+        "material_id": "019f408b-05d4-7055-a8ab-3c3dd6f7f121",
+        "locale": "vi",
+        "name": "Nước tương",
+        "description": "Nước tương kiểu Nhật. Dùng để nêm nếm và ướp."
+    },
+    {
+        "id": 67,
+        "material_id": "019f408b-05d9-715e-b16b-29d2978ea83b",
+        "locale": "ja",
+        "name": "無塩バター",
+        "description": "無塩バター。製菓・ソース仕上げに使用。"
+    },
+    {
+        "id": 68,
+        "material_id": "019f408b-05d9-715e-b16b-29d2978ea83b",
+        "locale": "en",
+        "name": "Unsalted Butter",
+        "description": "Unsalted butter. Used for baking and finishing sauces."
+    },
+    {
+        "id": 69,
+        "material_id": "019f408b-05d9-715e-b16b-29d2978ea83b",
+        "locale": "vi",
+        "name": "Bơ không muối",
+        "description": "Bơ không muối. Dùng để làm bánh và hoàn thiện sốt."
+    },
+    {
+        "id": 70,
+        "material_id": "019f408b-05dd-7102-ba2d-7ad82dfc4c44",
+        "locale": "ja",
+        "name": "生えび",
+        "description": "殻付き生えび。炒め物・スープに使用。"
+    },
+    {
+        "id": 71,
+        "material_id": "019f408b-05dd-7102-ba2d-7ad82dfc4c44",
+        "locale": "en",
+        "name": "Raw Shrimp",
+        "description": "Shell-on raw shrimp. Used for stir-fries and soups."
+    },
+    {
+        "id": 72,
+        "material_id": "019f408b-05dd-7102-ba2d-7ad82dfc4c44",
+        "locale": "vi",
+        "name": "Tôm sống",
+        "description": "Tôm sống còn vỏ. Dùng cho món xào và canh."
+    },
+    {
+        "id": 73,
+        "material_id": "019f408b-05e1-710c-ba08-7c4a9494bec3",
+        "locale": "ja",
+        "name": "上白糖",
+        "description": "日本式上白糖。製菓・調味に使用。"
+    },
+    {
+        "id": 74,
+        "material_id": "019f408b-05e1-710c-ba08-7c4a9494bec3",
+        "locale": "en",
+        "name": "White Sugar",
+        "description": "Japanese-style white sugar. Used in baking and seasoning."
+    },
+    {
+        "id": 75,
+        "material_id": "019f408b-05e1-710c-ba08-7c4a9494bec3",
+        "locale": "vi",
+        "name": "Đường trắng",
+        "description": "Đường trắng kiểu Nhật. Dùng trong làm bánh và nêm nếm."
+    },
+    {
+        "id": 76,
+        "material_id": "019f408b-05e4-71c4-92fc-a32fce1fb89d",
+        "locale": "ja",
+        "name": "パッションフルーツ",
+        "description": "新鮮なパッションフルーツ。ソース・デザートに使用。"
+    },
+    {
+        "id": 77,
+        "material_id": "019f408b-05e4-71c4-92fc-a32fce1fb89d",
+        "locale": "en",
+        "name": "Passion Fruit",
+        "description": "Fresh passion fruit. Used for sauces and desserts."
+    },
+    {
+        "id": 78,
+        "material_id": "019f408b-05e4-71c4-92fc-a32fce1fb89d",
+        "locale": "vi",
+        "name": "Chanh leo",
+        "description": "Chanh leo tươi. Dùng làm sốt và món tráng miệng."
+    },
+    {
+        "id": 79,
+        "material_id": "019f408b-05e7-720e-a4d7-268af2308854",
+        "locale": "ja",
+        "name": "日本米",
+        "description": "国産うるち米。ご飯・リゾットに使用。"
+    },
+    {
+        "id": 80,
+        "material_id": "019f408b-05e7-720e-a4d7-268af2308854",
+        "locale": "en",
+        "name": "Japanese Short-Grain Rice",
+        "description": "Domestic Japanese short-grain rice. Used for steamed rice and risotto."
+    },
+    {
+        "id": 81,
+        "material_id": "019f408b-05e7-720e-a4d7-268af2308854",
+        "locale": "vi",
+        "name": "Gạo Nhật hạt ngắn",
+        "description": "Gạo hạt ngắn Nhật nội địa. Dùng để nấu cơm và risotto."
+    },
+    {
+        "id": 94,
+        "material_id": "019f408b-12b9-72b0-9c73-51d0a8b6fef1",
+        "locale": "ja",
+        "name": "パンケーキミックス",
+        "description": "小麦粉・卵・牛乳のミックス。1000g/バッチ。"
+    },
+    {
+        "id": 95,
+        "material_id": "019f408b-12b9-72b0-9c73-51d0a8b6fef1",
+        "locale": "en",
+        "name": "Pancake Mix",
+        "description": "Wheat flour, egg and milk blend. 1000g per batch."
+    },
+    {
+        "id": 96,
+        "material_id": "019f408b-12b9-72b0-9c73-51d0a8b6fef1",
+        "locale": "vi",
+        "name": "Bột pha bánh pancake",
+        "description": "Hỗn hợp bột mì, trứng, sữa. 1000g mỗi mẻ."
+    },
+    {
+        "id": 97,
+        "material_id": "019f408b-12d2-7100-b520-bae449ab9d5f",
+        "locale": "ja",
+        "name": "ソースベース",
+        "description": null
+    },
+    {
+        "id": 98,
+        "material_id": "019f408b-12d2-7100-b520-bae449ab9d5f",
+        "locale": "en",
+        "name": "Sauce Base",
+        "description": null
+    },
+    {
+        "id": 99,
+        "material_id": "019f408b-12d2-7100-b520-bae449ab9d5f",
+        "locale": "vi",
+        "name": "Nền sốt",
+        "description": null
+    },
+    {
+        "id": 100,
+        "material_id": "019f408b-12f0-7363-8516-63093897fb22",
+        "locale": "ja",
+        "name": "パッションフルーツソース",
+        "description": "パッションフルーツと砂糖で作るソース。デザートのトッピング。"
+    },
+    {
+        "id": 101,
+        "material_id": "019f408b-12f0-7363-8516-63093897fb22",
+        "locale": "en",
+        "name": "Passion Fruit Sauce",
+        "description": "Sauce made from passion fruit and sugar. Dessert topping."
+    },
+    {
+        "id": 102,
+        "material_id": "019f408b-12f0-7363-8516-63093897fb22",
+        "locale": "vi",
+        "name": "Sốt chanh leo",
+        "description": "Sốt làm từ chanh leo và đường. Dùng kèm món tráng miệng."
+    }
+]

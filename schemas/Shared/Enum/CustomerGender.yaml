@@ -1,0 +1,12 @@
+kind: enum
+
+displayName:
+  ja: 性別
+  en: Gender
+  vi: Giới tính
+
+values:
+  - value: female
+    label: { ja: 女性, en: Female, vi: Nữ }
+  - value: male
+    label: { ja: 男性, en: Male, vi: Nam }

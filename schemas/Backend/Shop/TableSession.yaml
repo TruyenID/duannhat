@@ -1,0 +1,59 @@
+# Một lượt khách ngồi tại bàn: mở khi khách vào, đóng khi thanh toán xong.
+# Tách khỏi `Table` vì một bàn có nhiều lượt nối tiếp nhau.
+kind: object
+
+options:
+  id: Uuid
+  timestamps: true
+  softDelete: false
+  indexes:
+    - columns: [table_id, status]
+
+properties:
+  organization_id:
+    type: Uuid
+    displayName:
+      ja: 組織ID
+      en: Organization ID
+      vi: ID tổ chức
+
+  branch_id:
+    type: Uuid
+    displayName:
+      ja: 支店ID
+      en: Branch ID
+      vi: ID chi nhánh
+
+  table:
+    type: Association
+    relation: ManyToOne
+    target: Table
+    onDelete: CASCADE
+    displayName:
+      ja: テーブル
+      en: Table
+      vi: Bàn
+
+  status:
+    type: String
+    length: 16
+    default: open
+    displayName:
+      ja: 状態
+      en: Status
+      vi: Trạng thái
+
+  opened_at:
+    type: Timestamp
+    displayName:
+      ja: 開始日時
+      en: Opened At
+      vi: Mở lúc
+
+  closed_at:
+    type: Timestamp
+    nullable: true
+    displayName:
+      ja: 終了日時
+      en: Closed At
+      vi: Đóng lúc

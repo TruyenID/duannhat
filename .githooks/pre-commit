@@ -1,0 +1,267 @@
+#!/usr/bin/env bash
+# Pre-commit hook — two guards:
+#
+#   1. ESLint + Prettier (lint-staged) on staged admin-web TS/TSX files.
+#      Runs only when admin-web/ files are staged; skips silently otherwise.
+#
+#   2. Block hand-written migrations outside the blessed whitelist.
+#      Every migration must go through Omnify YAML codegen.
+#
+# Activated via: git config core.hooksPath .githooks
+# (npm install runs this automatically via the "prepare" script in package.json)
+
+set -euo pipefail
+
+# ─── Guard 1: ESLint + Prettier via lint-staged ──────────────────────────────
+# Only run if there are staged admin-web TS/TSX/JS files.
+STAGED_FRONTEND=$(git diff --cached --name-only --diff-filter=ACMR \
+  | grep '^admin-web/src/.*\.\(ts\|tsx\|js\|mjs\|json\|css\)$' || true)
+
+if [[ -n "$STAGED_FRONTEND" ]]; then
+  echo "  Running lint-staged on admin-web…"
+  (cd admin-web && npx lint-staged) || {
+    echo ""
+    echo "  ESLint/Prettier check failed. Fix the errors above then re-commit."
+    echo "  Quick fix:  cd admin-web && npm run lint:fix && npm run format"
+    echo ""
+    exit 1
+  }
+fi
+
+# =============================================================================
+# BLESSED list — the ONLY hand-written migrations allowed in this repo.
+# =============================================================================
+# Every other table / column / index change MUST flow through Omnify YAML
+# codegen. The three files listed here are Laravel-framework infrastructure
+# whose schema is owned by the framework itself (shipped via `php artisan
+# cache:table` / `queue:table` / `session:table`). Tying them to Omnify
+# would couple our app schemas to Laravel's internal driver layout — a
+# fragile bind we don't want.
+#
+# Everything else — including app-domain tables, auth tables (Sanctum,
+# personal_access_tokens), brand-extension columns, kiosk hardening etc. —
+# has already been folded into Omnify schemas. See commits f7d23312 and
+# 6c93f754 for the conversion history.
+#
+# Even cross-package alters (e.g. adding a column to dxs-sso's `branches`)
+# go through Omnify: edit the field in the OWNING package's schema
+# (e.g. backend/packages/dxs-sso/database/schemas/Sso/Branch.yaml) and
+# `npm run omnify:gen` will produce the alter migration in that package's
+# migrations/omnify/ directory.
+#
+# Adding to BLESSED is a review-block. Reviewers MUST refuse extensions
+# whose only justification is "easier than touching the schema". The
+# whitelist is reserved for Laravel framework driver tables only — every
+# domain migration belongs in Omnify. DO NOT bypass.
+# =============================================================================
+BLESSED=(
+  # ── The ONLY hand-written schema migrations in this repo ──────────────
+  #
+  # All four ship with Laravel itself (`php artisan cache:table`, `queue:table`,
+  # `session:table`, and the auth scaffold). They describe framework
+  # infrastructure, not this product's domain, and the framework may change
+  # their shape on an upgrade — claiming them in Omnify YAML would mean owning
+  # a structure we do not define.
+  #
+  # Nothing else belongs here. Every business table is generated: as of the
+  # 2026-07-30 conversion the repo has 172 generated CREATEs and zero ALTERs,
+  # so `omnify reset` is a complete rebuild. Adding a name below re-opens that
+  # hole — a table outside the schema is invisible to reset and drifts silently.
+  # Reviewers MUST refuse an extension unless the table genuinely cannot be
+  # expressed; the answer to "Omnify can't do X" is to fix Omnify, which is how
+  # granular timestamps (omnify-go#143) and the rest got added.
+  "backend/database/migrations/0001_01_01_000001_create_cache_table.php"
+  "backend/database/migrations/0001_01_01_000002_create_jobs_table.php"
+  "backend/database/migrations/0001_01_01_000003_create_password_reset_tokens_table.php"
+  "backend/database/migrations/2026_04_03_075853_create_sessions_table.php"
+)
+
+OFFENDERS=()
+
+while IFS= read -r file; do
+  [[ -z "$file" ]] && continue
+  # omnify-managed migrations are always allowed (any package)
+  [[ "$file" == backend/database/migrations/omnify/* ]] && continue
+  [[ "$file" =~ ^backend/packages/[^/]+/database/migrations/omnify/.+$ ]] && continue
+  # check whitelist
+  allowed=false
+  for blessed in "${BLESSED[@]}"; do
+    [[ "$file" == "$blessed" ]] && allowed=true && break
+  done
+  $allowed || OFFENDERS+=("  $file")
+done < <(
+  # Only SCHEMA migrations are the concern. A migration that touches no
+  # Schema:: builder — a seed, a backfill, a data repair — cannot be expressed
+  # in YAML at all, so blocking it taught people to reach for --no-verify, and
+  # a guard that is routinely bypassed guards nothing. Those pass; anything
+  # that creates, alters or drops structure still has to come from a schema.
+  git diff --cached --name-only --diff-filter=A \
+    | grep -E '^backend/(packages/[^/]+/)?database/migrations/[^/]+\.php$' \
+    | while IFS= read -r candidate; do
+        # Two ways to write DDL by hand, and the guard has to see both. The
+        # Schema builder is the obvious one. Raw SQL through DB::statement /
+        # DB::unprepared is the quiet one — it is how the role_permissions key
+        # convergence was written, which proves the route is reachable and
+        # would otherwise walk straight past this check.
+        if git show ":$candidate" 2>/dev/null \
+            | grep -qiE 'Schema::(create|table|drop|dropIfExists|rename)\(|(ALTER|CREATE|DROP|TRUNCATE|RENAME)[[:space:]]+(TABLE|INDEX|VIEW)'; then
+          printf '%s\n' "$candidate"
+        fi
+      done \
+    || true
+)
+
+# ─── Guard 3: data migration PHẢI mang khuôn `<Y_m_d_His>_manual_migration_*` ─
+# Migration KHÔNG khai schema (seed / backfill / repair) là hợp lệ — guard 2 cho
+# qua vì YAML không diễn đạt được chúng. Nhưng nhìn tên phải biết ngay đó không
+# phải schema, nếu không thư mục migrations trộn hai loại và người đọc phải mở
+# từng file. Khuôn giữ đúng dạng Laravel (`Y_m_d_His`), chỉ phần mô tả đổi:
+#   2026_08_09_120000_manual_migration_backfill_gi_do.php
+#
+# BLESSED (bảng driver của Laravel) miễn trừ — tên do framework sinh.
+NAMING_OFFENDERS=()
+
+while IFS= read -r file; do
+  [[ -z "$file" ]] && continue
+  base=$(basename "$file")
+  [[ "$base" =~ ^[0-9]{4}_[0-9]{2}_[0-9]{2}_[0-9]{6}_manual_migration_[a-z0-9_]+\.php$ ]] && continue
+  allowed=false
+  for blessed in "${BLESSED[@]}"; do
+    [[ "$file" == "$blessed" ]] && allowed=true && break
+  done
+  $allowed || NAMING_OFFENDERS+=("  $file")
+done < <(
+  git diff --cached --name-only --diff-filter=A \
+    | grep -E '^backend/(packages/[^/]+/)?database/migrations/[^/]+\.php$' \
+    | while IFS= read -r candidate; do
+        # Ngược với guard 2: chỉ xét file KHÔNG có DDL — file có DDL đã bị guard
+        # 2 chặn rồi, báo nó hai lần chỉ làm loãng thông điệp.
+        if ! git show ":$candidate" 2>/dev/null \
+            | grep -qiE 'Schema::(create|table|drop|dropIfExists|rename)\(|(ALTER|CREATE|DROP|TRUNCATE|RENAME)[[:space:]]+(TABLE|INDEX|VIEW)'; then
+          printf '%s\n' "$candidate"
+        fi
+      done \
+    || true
+)
+
+if [[ ${#NAMING_OFFENDERS[@]} -gt 0 ]]; then
+  echo ""
+  echo "  ╔══════════════════════════════════════════════════════════════════╗"
+  echo "  ║  ❌  DATA MIGRATION SAI TÊN — <Y_m_d_His>_manual_migration_*       ║"
+  echo "  ╚══════════════════════════════════════════════════════════════════╝"
+  echo ""
+  echo "  File sai khuôn:"
+  for f in "${NAMING_OFFENDERS[@]}"; do echo "$f"; done
+  echo ""
+  echo "  Migration không khai schema (seed/backfill/repair) là HỢP LỆ, nhưng"
+  echo "  tên phải nói ra điều đó. Giữ nguyên timestamp Laravel, đổi phần mô tả:"
+  echo ""
+  echo "      2026_08_09_120000_backfill_abc.php            ❌"
+  echo "      2026_08_09_120000_manual_migration_abc.php  ✅"
+  echo ""
+  echo "  Đổi tên file rồi commit lại."
+  echo ""
+  echo "  Lưu ý cho DB ĐANG SỐNG: bảng \`migrations\` lưu TÊN FILE, nên đổi tên"
+  echo "  một migration đã chạy sẽ khiến nó chạy LẠI. Sửa sổ bằng một migration"
+  echo "  khác KHÔNG cứu được — Laravel nạp danh sách đã-chạy MỘT LẦN ở đầu lượt"
+  echo "  (đo trong docker, #2318). Đổi tên file cũ chỉ an toàn khi DB được dựng"
+  echo "  lại (migrate:fresh) hoặc khi migration đó idempotent."
+  echo ""
+  exit 1
+fi
+
+if [[ ${#OFFENDERS[@]} -gt 0 ]]; then
+  echo ""
+  echo "  ╔══════════════════════════════════════════════════════════════════╗"
+  echo "  ║  ❌  HAND-WRITTEN MIGRATION BLOCKED — schema-driven only         ║"
+  echo "  ║      Migration viết tay bị chặn — chỉ chấp nhận schema YAML      ║"
+  echo "  ╚══════════════════════════════════════════════════════════════════╝"
+  echo ""
+  echo "  The following file(s) are NOT allowed:"
+  for f in "${OFFENDERS[@]}"; do
+    echo "$f"
+  done
+  echo ""
+  echo "  Every schema change in this repo MUST go through Omnify YAML codegen."
+  echo "  Mọi thay đổi schema BẮT BUỘC phải đi qua Omnify YAML codegen."
+  echo ""
+  echo "  ┌─ How to fix ────────────────────────────────────────────────────┐"
+  echo "  │  1. Edit (or create) the relevant schema YAML:                  │"
+  echo "  │       schemas/Backend/<Domain>/<Entity>.yaml                    │"
+  echo "  │       backend/packages/dxs-sso/database/schemas/Sso/*.yaml      │"
+  echo "  │                                                                 │"
+  echo "  │  2. Run codegen:                                                │"
+  echo "  │       npm run omnify:gen                                        │"
+  echo "  │                                                                 │"
+  echo "  │  3. Stage the generated migration from:                         │"
+  echo "  │       backend/database/migrations/omnify/                       │"
+  echo "  │       backend/packages/dxs-sso/database/migrations/omnify/      │"
+  echo "  │                                                                 │"
+  echo "  │  4. Delete your hand-written file and commit again.             │"
+  echo "  └─────────────────────────────────────────────────────────────────┘"
+  echo ""
+  echo "  Why we enforce this:"
+  echo "    • Schema YAML is the single source of truth — also drives TS"
+  echo "      types in admin-web, Go domain in workstation-app, model"
+  echo "      stubs, factories, requests, resources, services."
+  echo "    • Hand-written migrations drift from the schema and silently"
+  echo "      break codegen-derived consumers (typecheck failures, runtime"
+  echo "      mismatch in seeders, etc.)."
+  echo "    • The conversion has already been done for every domain table —"
+  echo "      see git log on commits f7d23312 and 6c93f754. There is no"
+  echo "      legitimate reason left to add a new hand-written migration."
+  echo ""
+  echo "  The whitelist (.githooks/pre-commit BLESSED list) is reserved for"
+  echo "  Laravel framework driver tables only (cache/queue/session). Adding"
+  echo "  to it without code-review approval is itself a review block."
+  echo ""
+  exit 1
+fi
+
+# =============================================================================
+# 3. Dangling submodule pointers (#1147) — a gitlink you commit must EXIST on
+#    the submodule's remote, or every fresh clone breaks on `submodule update`.
+#    (Bit us on 2026-07-27: PR #1133 recorded admin-web/customer-web commits
+#    that lived only in the author's workspace; origin/dev broke for clones.)
+#    Push the submodule FIRST, bump the pointer SECOND — CLAUDE.md
+#    "Submodule Bump Ritual".
+# =============================================================================
+DANGLING=()
+while IFS= read -r entry; do
+  [[ -z "$entry" ]] && continue
+  path="${entry#* }"
+  sha="${entry%% *}"
+  [[ -d "$path/.git" || -f "$path/.git" ]] || continue
+  # `git -C <sub>` is NOT enough: git exports GIT_DIR to hooks, and GIT_DIR WINS
+  # over -C. In the main worktree GIT_DIR is the relative ".git", so -C happens to
+  # resolve it inside the submodule and the check works by luck. In a LINKED
+  # worktree GIT_DIR is absolute, every lookup below hits the umbrella instead, and
+  # an honestly-pushed pointer is reported dangling — blocking every legitimate bump
+  # made from `.claude/worktrees/issue-N` (the agent loop always works there).
+  sub_git=(env -u GIT_DIR -u GIT_WORK_TREE -u GIT_INDEX_FILE git -C "$path")
+  # Reachable from any remote branch? (cheap, no network)
+  if "${sub_git[@]}" branch -r --contains "$sha" 2>/dev/null | grep -q .; then
+    continue
+  fi
+  # Not in the local remote-tracking refs — ask the remote itself. `fetch <sha>`
+  # succeeds only when the server can serve that object (uploadpack.allow* or
+  # reachable); "not our ref" = dangling.
+  if "${sub_git[@]}" fetch --quiet origin "$sha" 2>/dev/null; then
+    continue
+  fi
+  DANGLING+=("$path @ $sha")
+done < <(git diff --cached --raw --abbrev=40 | awk '$2 == "160000" || $3 ~ /^160000/ {print}' \
+          | sed -E 's/^:[0-9]+ 160000 [0-9a-f]+ ([0-9a-f]+) .*\t(.*)$/\1 \2/' \
+          | grep -v '^0\{40\}')
+
+if ((${#DANGLING[@]})); then
+  echo ""
+  echo "  ✗ COMMIT BLOCKED — submodule pointer(s) not on their remote:"
+  for d in "${DANGLING[@]}"; do echo "      $d"; done
+  echo ""
+  echo "  Push the submodule branch FIRST, then bump the pointer:"
+  echo "      cd <submodule> && git push origin <branch>"
+  echo "  (CLAUDE.md → Submodule Bump Ritual)"
+  echo ""
+  exit 1
+fi

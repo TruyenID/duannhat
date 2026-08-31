@@ -1,0 +1,2 @@
+import -> HTTP 200
+{"success":true,"message":"Successfully processed 1 rows. Created: 1","data":{"success_count":1,"error_count":0,"created_count":1,"updated_count":0,"errors":[]}}

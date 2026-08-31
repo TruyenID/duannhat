@@ -1,0 +1,37 @@
+# ==============================================================================
+# Printer Connection Type Enum (接続方式 / Kiểu kết nối máy in)
+# ==============================================================================
+#
+# Cách workstation kết nối tới máy in ESC/POS.
+#
+# Giá trị:
+#   - network: Kết nối TCP qua LAN. `address` = "IP:port" (cổng ESC/POS mặc
+#              định là 9100). Đây là kiểu phổ biến nhất và là kiểu DUY NHẤT
+#              cấu hình được từ Cloud — vì Cloud không thể biết đường dẫn
+#              thiết bị USB trên máy tính cụ thể trong quán.
+#   - usb:     Kết nối trực tiếp qua USB/serial. `address` là đường dẫn thiết
+#              bị (/dev/usb/lp0, COM3…) — phụ thuộc máy tính, nên chỉ cấu hình
+#              được tại chỗ trên app workstation.
+#
+# Nguồn: workstation-app/internal/printer/manager.go (ConnUSB / ConnNetwork).
+#
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: 接続方式
+  en: Connection Type
+  vi: Kiểu kết nối
+
+values:
+  - value: network
+    label:
+      ja: ネットワーク（TCP）
+      en: Network (TCP)
+      vi: Mạng LAN (TCP)
+  - value: usb
+    label:
+      ja: USB
+      en: USB
+      vi: USB

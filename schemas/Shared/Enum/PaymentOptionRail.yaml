@@ -1,0 +1,22 @@
+# Provider-neutral value-transfer rail. Provider product/method/brand remains separate so
+# PayPay, Visa, terminal card-present, and future subtypes do not leak into orchestration.
+kind: enum
+
+displayName:
+  en: Payment Option Rail
+  ja: 決済レール
+  vi: Kênh giá trị thanh toán
+
+values:
+  - value: cash
+    label: { en: Cash, ja: 現金, vi: Tiền mặt }
+  - value: card
+    label: { en: Card, ja: カード, vi: Thẻ }
+  - value: wallet
+    label: { en: Wallet, ja: ウォレット, vi: Ví điện tử }
+  - value: qr
+    label: { en: QR Payment, ja: QR決済, vi: Thanh toán QR }
+  - value: e_money
+    label: { en: E-Money, ja: 電子マネー, vi: Tiền điện tử }
+  - value: bank_transfer
+    label: { en: Bank Transfer, ja: 銀行振込, vi: Chuyển khoản }

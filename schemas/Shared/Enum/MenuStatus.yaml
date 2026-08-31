@@ -1,0 +1,77 @@
+# ==============================================================================
+# Menu Status Enum (メニューステータス / Trạng thái Menu)
+# ==============================================================================
+#
+# Trạng thái của menu theo workflow phê duyệt.
+#
+# Giá trị (Values):
+#   - Draft: Bản nháp, đang được tạo/chỉnh sửa
+#     Cho phép: Chỉnh sửa tất cả thông tin
+#     Transition: → Pending (khi submit)
+#
+#   - Pending: Chờ phê duyệt
+#     Cho phép: Xem, không chỉnh sửa
+#     Transition: → Approved (khi approve)
+#                 → Rejected (khi reject)
+#
+#   - Approved: Đã được phê duyệt, chờ kích hoạt
+#     Cho phép: Kích hoạt
+#     Transition: → Active (khi activate)
+#
+#   - Active: Đang hoạt động, hiển thị cho khách hàng
+#     Cho phép: Xem, cập nhật availability items
+#     Transition: → Inactive (khi deactivate)
+#
+#   - Inactive: Tạm dừng
+#     Cho phép: Chỉnh sửa, kích hoạt lại
+#     Transition: → Active (khi reactivate)
+#
+#   - Rejected: Bị từ chối
+#     Cho phép: Chỉnh sửa và submit lại
+#     Transition: → Pending (khi resubmit)
+#
+# Business Rules:
+#   - Manager tạo menu sẽ bypass Pending, thẳng tới Approved
+#   - Chỉ Manager mới có quyền Approve/Reject/Activate/Deactivate
+#   - Trong cùng branch+thời điểm chỉ có 1 menu Active được hiển thị
+#
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: メニューステータス
+  en: Menu Status
+  vi: Trạng thái Menu
+
+values:
+  - value: Draft
+    label:
+      ja: 下書き
+      en: Draft
+      vi: Bản nháp
+  - value: Pending
+    label:
+      ja: 承認待ち
+      en: Pending
+      vi: Chờ duyệt
+  - value: Approved
+    label:
+      ja: 承認済み
+      en: Approved
+      vi: Đã duyệt
+  - value: Active
+    label:
+      ja: 有効
+      en: Active
+      vi: Đang hoạt động
+  - value: Inactive
+    label:
+      ja: 無効
+      en: Inactive
+      vi: Tạm dừng
+  - value: Rejected
+    label:
+      ja: 却下
+      en: Rejected
+      vi: Từ chối

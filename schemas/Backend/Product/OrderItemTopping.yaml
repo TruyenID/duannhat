@@ -1,0 +1,137 @@
+# =============================================================================
+# OrderItemTopping (注文アイテムトッピング / Topping trong Order Item)
+# =============================================================================
+#
+# Phase 1: generates migration only. No service, no API, no controller.
+# Phase 2: CustomerOrderService uses this to store topping snapshots when
+#          creating/adding order items with toppings payload.
+#
+# Snapshot: giá topping tại thời điểm order — không đổi khi admin thay đổi
+# ToppingGroupItemSku.extra_price sau đó.
+#
+# Written by: CustomerOrderService::addItem() (Phase 2 only).
+# Read by: POS receipt, order history, stock deduction on close (Phase 2).
+#
+# product_sku_id constraint (Phase 2):
+#   - KHÔNG được NULL trong bảng này — khác với ToppingGroupItemSku.
+#   - Mọi topping đều có ít nhất 1 default SKU (ProductService::create() auto-tạo).
+#   - Phase 2 service PHẢI resolve ra actual SKU ID trước khi insert.
+#     Simple topping: $product->skus->first()->id (default SKU, KHÔNG null).
+#   - RESTRICT: không xoá ProductSku khi còn order history reference nó.
+#
+# Append-only: không update sau khi tạo (snapshot bất biến).
+# No timestamps — created_at không cần (order item có timestamp của nó).
+# =============================================================================
+
+displayName:
+  en: Order Item Topping
+  ja: 注文アイテムトッピング
+  vi: Topping trong Order Item
+
+kind: object
+
+options:
+  # Append-only log, no updated_at needed
+  timestamps: false
+  # No soft delete — snapshot bất biến, cascade xoá từ CustomerOrderItem
+  softDelete: false
+  id: Uuid
+  indexes:
+    # Query tất cả toppings của 1 order item
+    - columns: [customer_order_item_id]
+
+properties:
+  # Order item cha. CASCADE — khi order item bị xoá thì topping snapshots đi theo.
+  customerOrderItem:
+    type: Association
+    relation: ManyToOne
+    target: CustomerOrderItem
+    onDelete: CASCADE
+    displayName:
+      en: Customer Order Item
+      ja: 注文明細
+      vi: Chi tiết đơn hàng
+
+  # Topping item tại thời điểm order (for display/history).
+  # RESTRICT — không xoá ToppingGroupItem khi còn order history reference nó.
+  toppingGroupItem:
+    type: Association
+    relation: ManyToOne
+    target: ToppingGroupItem
+    onDelete: RESTRICT
+    displayName:
+      en: Topping Group Item
+      ja: トッピング項目
+      vi: Mục Topping
+
+  # SKU của topping — NOT NULL. CustomerOrderService::addItem() (Phase 2)
+  # PHẢI resolve ra actual SKU ID trước khi insert. Simple topping: dùng
+  # default SKU `$product->skus->first()->id` (auto-tạo bởi ProductService::create).
+  # RESTRICT — không xoá ProductSku khi còn order history reference nó.
+  productSku:
+    type: Association
+    relation: ManyToOne
+    target: ProductSku
+    onDelete: RESTRICT
+    displayName:
+      en: Product SKU
+      ja: 商品SKU
+      vi: SKU sản phẩm
+
+  # Số lượng topping khách chọn (VD: 2 phần nước chấm).
+  quantity:
+    type: Int
+    default: 1
+    displayName:
+      en: Quantity
+      ja: 数量
+      vi: Số lượng
+
+  # #2619 (ruling #2132 §B) — số đơn vị của HÀNG NÀY được miễn bởi
+  # free_up_to_n của nhóm topping. 0 ≤ waived_quantity ≤ quantity.
+  # unit_price vẫn snapshot GIÁ ĐẦY ĐỦ (Decision 6, plan-015); phần miễn
+  # sống ở topping_subtotal của dòng cha — cột này là dấu vết CÁI NÀO miễn.
+  # Bất biến trên dòng cha:
+  #   Σ(unit_price × quantity) − topping_subtotal == Σ(waived_quantity × unit_price).
+  # ToppingPricingService::priceFreeUpToN miễn N đơn vị ĐẮT NHẤT; nhóm không
+  # có free_quantity (flat) thì mọi hàng giữ 0.
+  waived_quantity:
+    type: Int
+    default: 0
+    displayName:
+      en: Waived Quantity
+      ja: 無料数量
+      vi: Số lượng được miễn
+
+  # Plan-028 — Kitchen status cho từng topping. KdsItemResource dùng để
+  # compute is_blocked_by_toppings: true khi parent đang preparing mà
+  # còn topping chưa ready. Dùng cùng OrderItemStatusEnum với parent item.
+  status:
+    type: EnumRef
+    enum: OrderItemStatus
+    default: pending
+    displayName:
+      en: Status
+      ja: ステータス
+      vi: Trạng thái
+
+  # Giá snapshot tại thời điểm order — copy từ ToppingGroupItemSku.extra_price.
+  # Bất biến sau khi tạo (thay đổi giá admin không ảnh hưởng order cũ).
+  unit_price:
+    type: Decimal
+    precision: 15
+    scale: 2
+    displayName:
+      en: Unit Price
+      ja: 単価
+      vi: Đơn giá
+
+  # Ghi chú riêng của topping (VD: "không cay"). Optional.
+  note:
+    type: String
+    length: 500
+    nullable: true
+    displayName:
+      en: Note
+      ja: 備考
+      vi: Ghi chú

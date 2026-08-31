@@ -1,0 +1,136 @@
+# ZoneTemplate schema (issue #890)
+# Khu vực MẶC ĐỊNH ở cấp brand (HQ) — template để các shop "nhận bàn mặc định".
+# Không phải khu vực vật lý: khi shop apply-defaults, template được COPY thành
+# Zone thật của shop (match theo code, idempotent). Sửa template sau đó KHÔNG
+# tự động sync xuống shop.
+#
+# Scope: Brand (HQ). Code unique theo brand.
+#
+# Business Rules:
+#   - BR-ZT01: code unique trong scope của một brand
+#   - BR-ZT02: Soft-delete zone template sẽ cascade soft-delete các table
+#              template thuộc nó (service layer, DB::transaction — giống BR-Z02)
+#   - BR-ZT03: Restore zone template KHÔNG auto-restore table templates
+
+displayName:
+  en: Zone Template
+  ja: エリアテンプレート
+  vi: Mẫu khu vực
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  indexes:
+    - columns: [brand_id, code]
+      unique: true
+    - columns: [brand_id, is_active]
+    - columns: [brand_id, display_order]
+
+properties:
+  code:
+    type: String
+    length: 50
+    searchable: true
+    lookupable: true
+    displayName:
+      en: Zone Code
+      ja: エリアコード
+      vi: Mã khu vực
+    description:
+      en: "Unique code per brand (BR-ZT01). Alphanumeric and hyphens only. Copied to the shop zone on apply-defaults."
+      ja: "ブランド内で一意のコード（BR-ZT01）。英数字とハイフンのみ。既定適用時に店舗エリアへコピー。"
+      vi: "Mã unique trong brand (BR-ZT01). Chỉ chữ, số, gạch ngang. Copy sang zone của shop khi nhận mặc định."
+
+  name:
+    type: String
+    length: 255
+    searchable: true
+    lookupable: true
+    displayName:
+      en: Zone Name
+      ja: エリア名
+      vi: Tên khu vực
+
+  description:
+    type: Text
+    nullable: true
+    displayName:
+      en: Description
+      ja: 説明
+      vi: Mô tả
+
+  display_order:
+    type: Int
+    default: 0
+    defaultSort: asc
+    lookupable: true
+    displayName:
+      en: Display Order
+      ja: 表示順
+      vi: Thứ tự hiển thị
+    description:
+      en: "Lower number appears first in the template grid."
+      ja: "数値が小さいほど先頭に表示。"
+      vi: "Số nhỏ hơn hiển thị trước."
+
+  is_active:
+    type: Boolean
+    default: true
+    filterable: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+    description:
+      en: "Inactive templates are skipped when a shop applies brand defaults."
+      ja: "無効なテンプレートは既定適用時にスキップされます。"
+      vi: "Template vô hiệu sẽ bị bỏ qua khi shop nhận mặc định."
+
+  # Relationships
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  # Brand scope. CASCADE — deleting the brand removes its templates.
+  brand:
+    type: Association
+    relation: ManyToOne
+    target: Brand
+    onDelete: CASCADE
+    displayName:
+      en: Brand
+      ja: ブランド
+      vi: Thương hiệu
+
+  # Target branch (issue #890 follow-up). NULL = brand-wide default — every
+  # shop receives it on apply-defaults. Set = only that branch receives it.
+  # CASCADE: deleting the branch removes templates that only targeted it.
+  branch:
+    type: Association
+    relation: ManyToOne
+    target: Branch
+    nullable: true
+    onDelete: CASCADE
+    displayName:
+      en: Target Branch
+      ja: 対象店舗
+      vi: Chi nhánh áp dụng
+
+  tableTemplates:
+    type: Association
+    relation: OneToMany
+    target: TableTemplate
+    mappedBy: zoneTemplate
+    displayName:
+      en: Table Templates
+      ja: テーブルテンプレート
+      vi: Mẫu bàn

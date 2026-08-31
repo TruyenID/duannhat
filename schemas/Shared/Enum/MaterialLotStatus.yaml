@@ -1,0 +1,80 @@
+# ==============================================================================
+# Material Lot Status Enum (材料ロットステータス / Trạng thái lô nguyên liệu)
+# ==============================================================================
+#
+# Lifecycle status for a MaterialLot — supplier inbound lot OR production output lot.
+# Drives FEFO eligibility, recall blast radius, and disposal compliance.
+#
+# Values:
+#   - active: Còn dùng (有効)
+#     Allowed: FEFO consumption, manual override pick, transfer
+#     Quantity: qty_on_hand > 0 (typical) — newly received OR newly produced
+#     Transition: → quarantined (recall/temp deviation), → depleted (stock-out), → expired (cron), → disposed (manual)
+#
+#   - quarantined: Cách ly (隔離)
+#     Allowed: View only — server-side rejects FEFO + manual pick
+#     Quantity: qty_on_hand unchanged (frozen)
+#     Transition: → active (release after QC pass), → disposed (force dispose)
+#
+#   - depleted: Đã hết (払底)
+#     Allowed: View only — historical reference for trace tree
+#     Quantity: qty_on_hand = 0
+#     Transition: Final state (lot kept for genealogy + audit)
+#
+#   - expired: Hết hạn (期限切れ)
+#     Allowed: View only — daily expiry sweeper sets this when expiry_date < today
+#     Quantity: qty_on_hand may be > 0 (pending physical disposal)
+#     Transition: → disposed (after physical dispose) — never returns to active
+#
+#   - disposed: Đã hủy (廃棄済み)
+#     Allowed: View only — DisposalRecord links here
+#     Quantity: qty_on_hand = 0 (forced to zero on dispose)
+#     Transition: Final state
+#
+# Workflow:
+#   active → quarantined → active     (QC release)
+#                       ↘ disposed    (force dispose)
+#         → depleted                  (normal stock-out drains lot)
+#         → expired → disposed        (sweeper + manual dispose)
+#         → disposed                  (manual dispose, force=true)
+#
+# Used in:
+#   - MaterialLot.status: lot lifecycle
+#   - StockTransactionService::pickLotsForConsumption: only `active` lots are FEFO-eligible
+#   - RecallService::initiate: walks genealogy and flips downstream lots to `quarantined`
+#
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: 材料ロットステータス
+  en: Material Lot Status
+  vi: Trạng thái lô nguyên liệu
+
+values:
+  - value: active
+    label:
+      ja: 有効
+      en: Active
+      vi: Còn dùng
+  - value: quarantined
+    label:
+      ja: 隔離
+      en: Quarantined
+      vi: Cách ly
+  - value: depleted
+    label:
+      ja: 払底
+      en: Depleted
+      vi: Đã hết
+  - value: expired
+    label:
+      ja: 期限切れ
+      en: Expired
+      vi: Hết hạn
+  - value: disposed
+    label:
+      ja: 廃棄済み
+      en: Disposed
+      vi: Đã hủy

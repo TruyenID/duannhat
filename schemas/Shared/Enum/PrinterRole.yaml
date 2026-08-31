@@ -1,0 +1,61 @@
+# ==============================================================================
+# Printer Role Enum (プリンター役割 / Vai trò máy in)
+# ==============================================================================
+#
+# Vai trò của một máy in ESC/POS trong quán. MỘT máy in có thể giữ NHIỀU vai
+# trò cùng lúc (quán nhỏ dùng 1 máy cho cả bếp lẫn hoá đơn) — xem
+# `Printer.roles` (kiểu Json, là một MẢNG các giá trị enum này).
+#
+# NGUỒN SỰ THẬT: biến `PrinterRoles` trong
+# workstation-app/internal/printer/manager.go — "the canonical set of roles a
+# physical printer can be assigned". Enum này PHẢI khớp đúng danh sách đó;
+# thêm giá trị Cloud không phân phối được sẽ tạo ra máy in không bao giờ nhận
+# lệnh in.
+#
+# CỐ Ý KHÔNG CÓ `label_printer`: hằng `TypeLabelPrinter` có tồn tại trong
+# manager.go (#253, tem nguyên liệu) nhưng KHÔNG nằm trong `PrinterRoles`, và
+# UI workstation (frontend/src/pages/Devices.tsx `allRoles`) cũng không liệt
+# kê nó. Đó là loại thiết bị riêng, không phải vai trò gán được cho máy in
+# hoá đơn/bếp. Tương tự, `staff_caller` và `pos` là DeviceType chứ không phải
+# vai trò máy in.
+#
+# Migration 013 của workstation đã chuyển từ "1 máy = 1 vai trò" sang
+# "1 máy = nhiều vai trò"; enum này giữ đúng ngữ nghĩa đó.
+#
+# Định tuyến món ăn → máy in đi qua `printer_group` trên MenuProduct:
+#   kitchen → kitchen_printer
+#   bar     → bar_printer
+#   hall    → hall_printer  ("hold" vẫn được chấp nhận: cách viết cũ)
+#   (rỗng/không rõ) → kitchen_printer (mặc định, có ghi log cảnh báo)
+# Xem workstation-app/internal/printer/dispatcher.go
+#
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: プリンター役割
+  en: Printer Role
+  vi: Vai trò máy in
+
+values:
+  - value: kitchen_printer
+    label:
+      ja: キッチンプリンター
+      en: Kitchen Printer
+      vi: Máy in bếp
+  - value: bar_printer
+    label:
+      ja: バープリンター
+      en: Bar Printer
+      vi: Máy in quầy bar
+  - value: hall_printer
+    label:
+      ja: ホール（配膳）
+      en: Hall (Runner) Printer
+      vi: Máy in chạy bàn
+  - value: receipt_printer
+    label:
+      ja: レシートプリンター
+      en: Receipt Printer
+      vi: Máy in hoá đơn

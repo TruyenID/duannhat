@@ -1,0 +1,51 @@
+# ==============================================================================
+# Till Cash Event Type Enum (現金イベント種別 / Loại giao dịch tiền mặt giữa ca)
+# ==============================================================================
+#
+# Plan 030 — Cashier Shift.
+#
+# Phân loại các giao dịch tiền mặt PHÁT SINH GIỮA CA (không phải payment cho
+# đơn hàng). Bám theo ARTS `TenderControlTransaction`. Mỗi event tác động tới
+# công thức expected_cash khi kết ca:
+#
+#   expected_cash = opening_float + cash_sales + Σ paid_in − Σ paid_out
+#
+# Values:
+#   - paid_in:  入金 — bổ sung tiền mặt vào két (ví dụ: trả lại quỹ tạp vụ,
+#               nhận tiền ứng từ khách trả nợ). CỘNG vào expected_cash.
+#               Bắt buộc nhập `reason`.
+#
+#   - paid_out: 出金 — rút tiền mặt khỏi két (ví dụ: mua vật phẩm gấp,
+#               hoàn tiền không qua refund flow, paid-out cho supplier).
+#               TRỪ khỏi expected_cash. Bắt buộc nhập `reason`.
+#
+#   - loan_from_safe: Mượn tiền từ két chính (safe) sang till. Reserved cho
+#                     v2 (safe flow chưa implement). CỘNG vào expected_cash.
+#                     v1 KHÔNG expose value này trên UI.
+#
+#   - pickup_to_safe: Chuyển tiền từ till sang két chính (cuối ca hoặc giữa
+#                     ca khi két quá đầy). Reserved cho v2. TRỪ khỏi
+#                     expected_cash. v1 KHÔNG expose.
+#
+# Used in:
+#   - TillCashEvent.event_type
+#   - TillSessionService::recordCashEvent() validation + expected_cash math.
+#   - UI: chỉ render paid_in / paid_out trong v1 (xem out-of-scope ở README).
+# ==============================================================================
+
+kind: enum
+
+displayName:
+  ja: 現金イベント種別
+  en: Till Cash Event Type
+  vi: Loại giao dịch tiền mặt
+
+values:
+  - value: paid_in
+    label: { ja: 入金, en: Paid In, vi: Nộp két }
+  - value: paid_out
+    label: { ja: 出金, en: Paid Out, vi: Rút két }
+  - value: loan_from_safe
+    label: { ja: 金庫から借入, en: Loan From Safe, vi: Mượn từ két chính }
+  - value: pickup_to_safe
+    label: { ja: 金庫へ移送, en: Pickup To Safe, vi: Chuyển về két chính }

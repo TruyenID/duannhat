@@ -1,0 +1,20 @@
+kind: enum
+
+displayName:
+  ja: 商品ステータス
+  en: Product Status
+  vi: Trạng thái sản phẩm
+
+values:
+  - value: draft
+    label: { ja: 下書き, en: Draft, vi: Bản nháp }
+  - value: pending
+    label: { ja: 承認待ち, en: Pending Approval, vi: Chờ duyệt }
+  - value: approved
+    label: { ja: 承認済み, en: Approved, vi: Đã duyệt }
+  - value: active
+    label: { ja: 有効, en: Active, vi: Đang hoạt động }
+  - value: inactive
+    label: { ja: 無効, en: Inactive, vi: Tạm dừng }
+  - value: rejected
+    label: { ja: 却下, en: Rejected, vi: Từ chối }

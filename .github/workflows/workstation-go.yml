@@ -1,0 +1,163 @@
+name: workstation-go
+
+# #2339 — CỔNG BIÊN DỊCH cho `workstation/`.
+#
+# Sau khi gộp monorepo (#2306) không còn thứ gì trong đường merge biên dịch Go:
+# workflow cũ của repo con nằm ở `.github/workflows-parked/` (GitHub không chạy),
+# `fullSuite` không có lệnh Go nào, và cổng cục bộ của `tal` luôn trả rỗng vì nó
+# quy `git diff --name-only` (đường dẫn FILE) qua `is_dir()`.
+#
+# Hệ quả không phải "thiếu một cổng lint": `workstation/` giữ NỬA GO của mọi cặp
+# parity tiền/thuế/in ấn, và test parity phía backend chỉ đọc file JSON golden —
+# nó không build Go. Một thay đổi Go không biên dịch được vẫn vào được `dev` mà
+# phía Cloud không hay biết.
+#
+# Bằng chứng cổng này cần thiết: ngay lượt đầu bật lên nó bắt được
+# `internal/service/discount_weights_golden_test.go` lệch gofmt trên `dev`.
+#
+# **Đây là cổng MERGE, không phải cổng RELEASE.** Ma trận build 5 nền tảng +
+# publish downloads chạy ở `.github/workflows/workstation-release.yml` (tag `v*`):
+# gắn chúng vào mọi PR là trả giá hàng chục phút cho mỗi lượt sửa một dòng. Cái
+# rẻ mà bắt được gần hết — compile, vet, gofmt, test không -race — chạy ở đây.
+
+on:
+  push:
+    branches: [dev, main]
+    paths: ['workstation/**', 'web/pos/**', '.github/workflows/workstation-go.yml']
+  pull_request:
+    branches: [dev, main]
+    paths: ['workstation/**', 'web/pos/**', '.github/workflows/workstation-go.yml']
+
+# Một runner self-hosted phục vụ cả org. Ba lần push liên tiếp mà không có cái
+# này thì xếp hàng ba lượt, và lượt cuối báo cáo về code đã cũ hai commit —
+# cùng hình dạng với cổng backend (#1182).
+concurrency:
+  group: workstation-go-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: workstation
+
+jobs:
+  go:
+    name: build · vet · gofmt · test
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: workstation/go.mod
+          cache-dependency-path: workstation/go.sum
+
+      # #1197 — `frontend.go` mang `//go:embed all:frontend/dist`, và
+      # `frontend/dist` là ARTIFACT BUILD bị .gitignore loại. Trên một checkout
+      # sạch, pattern không khớp gì và package không biên dịch được, nên `vet`
+      # và `test` chết trước khi chạy dòng nào — 24/25 lượt đỏ vì đúng lý do
+      # này ở repo cũ.
+      #
+      # Các bước dưới cần embed PHÂN GIẢI ĐƯỢC, không cần nó chứa app thật:
+      # không thứ gì trong phạm vi test đọc `FrontendAssets`. Bản dựng frontend
+      # thật thuộc về cổng release (workflows-parked).
+      - name: Stub the embedded frontend
+        run: |
+          mkdir -p frontend/dist
+          echo '<!doctype html><title>ci stub</title>' > frontend/dist/index.html
+
+      # #1197 — `cmd/workstation` là vỏ GUI Wails v3, link GTK/WebKit qua cgo.
+      # Runner Linux không có gói dev `gtk+-3.0` / `webkit2gtk-4.1` nên mọi thứ
+      # kéo package đó vào sẽ chết ở pkg-config trước khi Go kịp lên tiếng. Cài
+      # thư viện hệ thống lên một runner DÙNG CHUNG không phải việc của workflow
+      # này.
+      #
+      # Đó là package DUY NHẤT import Wails: toàn bộ logic nằm ở `internal/*` và
+      # `cmd/ws-server`, đều Go thuần và vẫn được cổng đầy đủ.
+      - name: go build
+        run: go build $(go list ./... | grep -v '/cmd/workstation$')
+
+      - name: go vet
+        run: go vet $(go list ./... | grep -v '/cmd/workstation$')
+
+      - name: gofmt
+        run: |
+          # Loại output codegen — chúng được sinh lại từ YAML.
+          unformatted=$(find . -name '*.go' \
+            -not -path './internal/domain/generated/*' \
+            -not -path './internal/generated/*' \
+            -not -path './vendor/*' \
+            -not -path './frontend/*' | xargs gofmt -l)
+          if [ -n "$unformatted" ]; then
+            echo "Files need gofmt:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+      # `-count=1` tắt cache test của Go. Không có nó thì một lượt XANH không
+      # chứng minh gì: lượt trước #1186 xong trong 62s với MỌI package báo
+      # `(cached)`, tức không test nào chạy. Một cổng có quyền từ chối chạy thì
+      # không phải cổng.
+      #
+      # KHÔNG `-race` ở đây: `-race` nhân thời gian lên ~30 lần (internal/service
+      # đo 560-710s), và đó là cổng release. `timeout=20m` vẫn rộng hơn mức đo
+      # được cho lượt không -race, chừa chỗ cho runner chậm.
+      - name: go test
+        run: go test -count=1 -timeout=20m $(go list ./... | grep -v '/cmd/workstation$')
+
+      # #3066 — miễn trừ bump VERSION cho `testdata/` + `*_test.go` chỉ đúng
+      # chừng nào không có `//go:embed` trỏ vào chúng. Đo được: `go:embed` VỚI
+      # TỚI `testdata/` (build rc=0, `go list` liệt kê nó trong EmbedFiles), nên
+      # đây KHÔNG phải bảo đảm của ngôn ngữ mà là tính chất của cây — phải có
+      # người canh. Bài này ở đây chứ không ở `omnify-gate` vì nó cần `go`, và
+      # nó ĐỎ khi thiếu `go` thay vì tự skip.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Miễn trừ bump VERSION vẫn còn đúng (#3066)
+        working-directory: ${{ github.workspace }}
+        run: npm run test:ws-exempt-not-in-binary
+
+  # #2494 — NỬA TYPESCRIPT của cặp parity pos-web ↔ workstation.
+  #
+  # `TestPosApiManifestParity` ở job trên đối chiếu `testdata/pos-api-manifest.json`
+  # với route Go. Nó KHÔNG bao giờ đọc mã nguồn pos-web — nên nó xanh y hệt khi
+  # file JSON đó đã cũ hàng tháng so với thứ pos-web thật sự gọi. Cái sinh ra file
+  # đó là `web/pos/scripts/gen-api-manifest.mjs`, và **không workflow nào từng
+  # chạy nó**: nó nằm hỏng trên `dev` (một `fetch()` thô chưa đăng ký ở
+  # `pairing/page.tsx`) cho tới khi có người tình cờ gõ tay.
+  #
+  # Hỏng theo kiểu im lặng nhất có thể: manifest vẫn khớp Go, cổng vẫn xanh, chỉ
+  # có nguồn sự thật là ngừng được sinh lại. Job này bắt cả hai nửa — generator
+  # phải CHẠY được, và output của nó phải khớp cả bản commit lẫn bản vendor.
+  pos-manifest:
+    name: pos-web api manifest (parity source of truth)
+    runs-on: [self-hosted, Linux, X64]
+    defaults: { run: { working-directory: web/pos } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          dest: ${{ runner.temp }}/pnpm
+          version: 10.29.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # pos-web KHÔNG phải workspace member (`pnpm-workspace.yaml` chỉ liệt kê
+      # `packages/*`) — nó mang lockfile riêng, nên cài tại chỗ.
+      - name: pnpm install
+        run: pnpm install --frozen-lockfile
+
+      # `--check` sinh manifest trong bộ nhớ rồi so với bản trên đĩa; nó chết cả
+      # khi generator không chạy được LẪN khi bản commit đã lệch.
+      - name: Generator runs, and pos-api-manifest.json is up to date
+        run: pnpm check:api-manifest
+
+      # Bản vendor là thứ test Go thật sự đọc. Sinh lại mà quên copy sang thì
+      # cổng Go vẫn gác một bản manifest đã chết.
+      - name: Vendored copy matches
+        working-directory: .
+        run: |
+          if ! diff -u web/pos/pos-api-manifest.json workstation/internal/handler/testdata/pos-api-manifest.json; then
+            echo "::error::workstation/internal/handler/testdata/pos-api-manifest.json is stale — copy web/pos/pos-api-manifest.json over it"
+            exit 1
+          fi

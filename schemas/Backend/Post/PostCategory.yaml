@@ -1,0 +1,135 @@
+# =============================================================================
+# PostCategory (投稿カテゴリー / Danh mục Bài viết)
+# =============================================================================
+#
+# Nested taxonomy cho Post. 1 post thuộc tối đa 1 category (hierarchical).
+# Khác với PostTag (flat, ManyToMany, bài nào cũng có thể có nhiều tag).
+#
+# Written by: HQ admin qua `/hq/{brand}/post-categories` CRUD.
+# Read by:    Customer-web post listing (filter by category), admin list view,
+#             breadcrumb rendering.
+#
+# Scope: multi-tenant (organization). Cùng org thì slug unique — category
+# dùng chung cho toàn organization, không gắn brand.
+#
+# Soft-delete: bật để preserve SEO history (URL cũ vẫn resolve về cat archived).
+# =============================================================================
+
+displayName:
+  en: Post Category
+  ja: 投稿カテゴリー
+  vi: Danh mục Bài viết
+
+kind: object
+
+options:
+  timestamps: true
+  softDelete: true
+  id: Uuid
+  audit:
+    createdBy: true
+    updatedBy: true
+  indexes:
+    - columns: [organization_id]
+    - columns: [organization_id, slug]
+      unique: true
+    - columns: [parent_id]
+
+properties:
+  organization:
+    type: Association
+    relation: ManyToOne
+    target: Organization
+    onDelete: CASCADE
+    displayName:
+      en: Organization
+      ja: 組織
+      vi: Tổ chức
+
+  name:
+    type: String
+    length: 120
+    translatable: true
+    searchable: true
+    displayName:
+      en: Name
+      ja: 名前
+      vi: Tên
+
+  slug:
+    type: String
+    length: 140
+    displayName:
+      en: Slug
+      ja: スラッグ
+      vi: Slug
+    description:
+      en: URL-safe identifier. Unique per organization.
+      ja: URLセーフな識別子。組織内で一意。
+      vi: Mã định danh URL-safe. Duy nhất trong phạm vi tổ chức.
+
+  description:
+    type: Text
+    nullable: true
+    translatable: true
+    displayName:
+      en: Description
+      ja: 説明
+      vi: Mô tả
+
+  image_url:
+    type: String
+    length: 500
+    nullable: true
+    displayName:
+      en: Image URL
+      ja: 画像URL
+      vi: URL hình ảnh
+
+  sort_order:
+    type: Int
+    default: 0
+    displayName:
+      en: Sort Order
+      ja: 並び順
+      vi: Thứ tự sắp xếp
+
+  is_active:
+    type: Boolean
+    default: true
+    filterable: true
+    displayName:
+      en: Active
+      ja: 有効
+      vi: Hoạt động
+
+  parent:
+    type: Association
+    relation: ManyToOne
+    target: PostCategory
+    nullable: true
+    onDelete: CASCADE
+    displayName:
+      en: Parent Category
+      ja: 親カテゴリー
+      vi: Danh mục cha
+
+  children:
+    type: Association
+    relation: OneToMany
+    target: PostCategory
+    mappedBy: parent
+    displayName:
+      en: Child Categories
+      ja: 子カテゴリー
+      vi: Danh mục con
+
+  posts:
+    type: Association
+    relation: OneToMany
+    target: Post
+    mappedBy: category
+    displayName:
+      en: Posts
+      ja: 投稿
+      vi: Bài viết

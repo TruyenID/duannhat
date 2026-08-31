@@ -1,0 +1,22 @@
+{
+  "all_voided|debt_slip|vi|42": "3901e3ed61206446f3514ece82a24d701479ce09fe84f24a32898bac331cca99",
+  "all_voided|receipt|vi|42": "5ccee6488d6e48f789f2d25b250d264e3966c2ff9e721bb993cd80459c04e482",
+  "all_voided|red_invoice|vi|42": "c160b358980701389c597ac9a66cad7a09a97a4b755261aa82f217511c86b0d5",
+  "all_voided|remaining|vi|42": "2ba976a1305a8a84435053e56b66489b5985ccaf3e101710ffc9857aff777a43",
+  "all_voided|runner|vi|42": "f2e97a3ed0d6ef17cff3c860412bc3d2c928cbc0d67565f86553a131af40f74b",
+  "coupon_zero_total|debt_slip|vi|42": "e6beda0fdaba5970295de324eefbf6570e6d7cccba2dfd7f11c4ea8e2781b655",
+  "coupon_zero_total|receipt|vi|42": "4a622bc27d5bb56d0ace925d7e3eb27585e1b3fe6d7789d48c622911c199f0d1",
+  "coupon_zero_total|red_invoice|vi|42": "35e03862d1d16b63c99adefe2556388bc37c9612bdab2696a09f7f194925b09f",
+  "coupon_zero_total|remaining|vi|42": "8207ce4ce793359b4f81abc76f33d5e8a5acdf3620dc69aa4c0351e21457b453",
+  "coupon_zero_total|runner|vi|42": "4cf277c632135a104d035783993a2b0972f45b75ac3a8bbc4c13699dddd6da8d",
+  "no_tax_fact|debt_slip|vi|42": "95c8e58613f31f4df91daf345beea92ec78c4e1be15a3b46890902f53784f02f",
+  "no_tax_fact|receipt|vi|42": "81ebbb88e5d322e042bb65d97f9136d60f87ab3fd0532fd44b01f611a25ed397",
+  "no_tax_fact|red_invoice|vi|42": "2dff7aeae71743bf4a126cf185117ed10a3203407853ecd4b1faabf88bf63140",
+  "no_tax_fact|remaining|vi|42": "d10be71d8c951ffb58e7f98f1dce952a19eea4a54197367ca3e34767e334e37c",
+  "no_tax_fact|runner|vi|42": "d8382d9adcb3005f8e0e72d5a2959ddf43d69d11891d0e469b6c9487640136c3",
+  "stamped_tax_amount|debt_slip|vi|42": "95c8e58613f31f4df91daf345beea92ec78c4e1be15a3b46890902f53784f02f",
+  "stamped_tax_amount|receipt|vi|42": "0e8224ebe7e92f3d89995e525cb0fbc6fe2b9adcdda44aca766887966493ccdf",
+  "stamped_tax_amount|red_invoice|vi|42": "ed428b8e36475a66beea2842150b1f308d04c55a8430d02cf6278af04d2cb282",
+  "stamped_tax_amount|remaining|vi|42": "a366fb6b2cca824fa91363a81d84ae4963f2873803b0cf99a46ee97b0c8bd84a",
+  "stamped_tax_amount|runner|vi|42": "dac27347e4c359cb56c3aa0cb7217ca123852df6c72989f7da2b40dcbfca5f84"
+}
